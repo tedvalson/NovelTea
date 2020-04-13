@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>wave.vert</file>
+        <file>pixelate.frag</file>
+    </qresource>
+</RCC>

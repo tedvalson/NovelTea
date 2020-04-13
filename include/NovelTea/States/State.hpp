@@ -1,0 +1,67 @@
+#ifndef NOVELTEA_STATE_HPP
+#define NOVELTEA_STATE_HPP
+
+#include "StateIdentifiers.hpp"
+//#include <NovelTea/Engine.hpp>
+#include <SFML/System/Time.hpp>
+#include <SFML/Window/Event.hpp>
+#include <memory>
+#include <vector>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/System/String.hpp>
+
+
+namespace sf
+{
+	class RenderTarget;
+//	class TcpSocket;
+}
+
+namespace NovelTea {
+
+struct EngineConfig;
+class StateStack;
+
+typedef std::function<bool(void*)> StateCallback;
+
+class State
+{
+public:
+	typedef std::unique_ptr<State> Ptr;
+
+	struct Context
+	{
+		Context(EngineConfig& config, sf::String& text, std::vector<char*>& data);
+		EngineConfig& config;
+		sf::String& text;
+		std::vector<char*>& data;
+	};
+
+	State(StateStack& stack, Context& context, StateCallback callback);
+	virtual ~State();
+
+//	virtual void renderTopScreen(cpp3ds::Window& window) = 0;
+//	virtual void renderBottomScreen(cpp3ds::Window& window) = 0;
+	virtual void render(sf::RenderTarget &target) = 0;
+	virtual bool update(float delta) = 0;
+	virtual bool processEvent(const sf::Event& event) = 0;
+
+	virtual void *processData(void *data);
+
+	void requestStackPush(StateID stateID, bool renderAlone = false, StateCallback callback = nullptr);
+	void requestStackPop();
+	void requestStackClear();
+	void requestStackClearUnder();
+	bool runCallback(void *data);
+
+	Context getContext() const;
+
+private:
+	StateStack*  m_stack;
+	Context      m_context;
+	StateCallback m_callback;
+};
+
+} // namespace NovelTea
+
+#endif // NOVELTEA_STATE_HPP

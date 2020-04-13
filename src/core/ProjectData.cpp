@@ -1,0 +1,168 @@
+#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Cutscene.hpp>
+#include <fstream>
+
+namespace NovelTea
+{
+
+ProjectData::ProjectData()
+{
+}
+
+ProjectData &ProjectData::instance()
+{
+	static ProjectData obj;
+	return obj;
+}
+
+void ProjectData::newProject()
+{
+	Cutscene cutscene;
+
+	_json = json::object({
+		{NT_ENGINE_VERSION, m_engineVersion},
+		{NT_PROJECT_NAME, "Project Name"},
+		{NT_PROJECT_VERSION, "1.0"},
+		{NT_PROJECT_AUTHOR, "Author Name"},
+		{NT_PROJECT_WEBSITE, ""},
+		{NT_TEXTFORMATS, json::array({{
+			false, false, false, 12, {0,0,0,255}
+		}})},
+//		{NT_CUTSCENES,
+//			{"New", cutscene}
+//			{"0", json::array({"Test scene",{0,"Text"}})},
+//		},
+		{"startpoint", {
+			{"type", "cutscene"},
+			{"id", 0}
+		}}
+	});
+
+	_json[NT_CUTSCENES]["New Cutscene"] = cutscene;
+}
+
+void ProjectData::closeProject()
+{
+	_json = json::array();
+	_loaded = false;
+}
+
+bool ProjectData::isLoaded() const
+{
+	return _loaded;
+}
+
+TextFormat ProjectData::textFormat(size_t index) const
+{
+	if (index >= _textFormats.size())
+	{
+		// TODO: throw error? Return const ref?
+		return TextFormat();
+	}
+
+	return _textFormats[index];
+}
+
+size_t ProjectData::addTextFormat(const TextFormat &textFormat)
+{
+	for (size_t i = 0; i < _textFormats.size(); ++i)
+		if (textFormat == _textFormats[i])
+			return i;
+	_textFormats.push_back(textFormat);
+	return _textFormats.size() - 1;
+}
+
+bool ProjectData::removeTextFormat(size_t index)
+{
+	return true;
+}
+
+std::shared_ptr<Cutscene> ProjectData::cutscene(const std::string &idName)
+{
+	if (!_json[NT_CUTSCENES].contains(idName))
+		return nullptr;
+	return std::make_shared<Cutscene>(_json[NT_CUTSCENES][idName].get<Cutscene>());
+}
+
+void ProjectData::saveToFile(const std::string &filename)
+{
+	if (filename.empty() && _filename.empty())
+		return;
+	std::ofstream file(filename.empty() ? _filename : filename);
+	auto j = toJson();
+//	json::to_msgpack(j, file);
+	file << j;
+}
+
+bool ProjectData::loadFromFile(const std::string &filename)
+{
+	std::ifstream file(filename);
+//	auto j = json::from_msgpack(file);
+	auto j = json::parse(file);
+	auto success = fromJson(j);
+	if (success)
+		_filename = filename;
+	return success;
+}
+
+const std::string &ProjectData::filename() const
+{
+	return _filename;
+}
+
+json ProjectData::toJson() const
+{
+	json jconfig = json::object({
+		{"engine", m_engineVersion},
+		{"author", "Tom2"},
+		{"startpoint", {
+			{"type", "cutscene"},
+			{"id", 0}
+		}}
+	});
+
+	// TextFormat list
+	json jtextformats = json::array();
+	for (auto &format : _textFormats)
+		jtextformats.push_back(format);
+
+	// Cutscene list
+	json jcutscenes = json::array();
+
+	// Project components all together
+	auto jproject = json::object({
+		{"config", jconfig},
+		{"textformats", jtextformats}
+	});
+
+	_json[NT_TEXTFORMATS] = jtextformats;
+
+	return _json;
+//	return jproject;
+}
+
+bool ProjectData::fromJson(const json &j)
+{
+	_loaded = false;
+	_filename.clear();
+	_textFormats.clear();
+
+	for (auto &jformat : j[NT_TEXTFORMATS])
+		_textFormats.push_back(jformat);
+
+	_json = j;
+	_loaded = true;
+	return true;
+}
+
+const json &ProjectData::data() const
+{
+	return _json;
+}
+
+json &ProjectData::data()
+{
+	return _json;
+}
+
+} // namespace NovelTea

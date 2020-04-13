@@ -1,0 +1,41 @@
+language: cpp
+
+addons:
+  apt_packages:
+    - cmake
+    - doxygen
+    - libgtest-dev
+    - libsfml-dev
+    - qt5-default
+    - g++
+
+before_script:
+- mkdir build && cd build
+- cmake .. $CMAKE_FLAGS
+
+script:
+- cmake --build .
+
+matrix:
+  include:
+
+  - name: "Linux gcc"
+    os: linux
+    dist: xenial
+    compiler: gcc
+    env:
+      - CMAKE_FLAGS="-DBUILD_TEST=ON"
+
+  - name: "macOS Xcode 10"
+    os: osx
+    osx_image: xcode10
+    env:
+     - CMAKE_FLAGS="-DBUILD_TEST=ON"
+
+  - name: "Visual studio 15 2017"
+    os: windows
+    env:
+      - CMAKE_FLAGS="-DBUILD_TEST=ON"
+
+notifications:
+  email: false
