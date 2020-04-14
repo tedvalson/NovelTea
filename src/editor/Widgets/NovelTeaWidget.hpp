@@ -37,8 +37,6 @@ protected:
 
 private:
 	NovelTea::Engine *_engine;
-	sf::View _view;
-	sf::RectangleShape _bg;
 //	NovelTea::InputManager *_inputManager;
 
 //	QBasicTimer timer;

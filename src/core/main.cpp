@@ -8,6 +8,7 @@ int main(int argc, char **argv)
 	NovelTea::EngineConfig config;
 	config.width = 480;
 	config.height = 700;
+	config.fps = 30;
 	config.initialState = NovelTea::StateID::Main;
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
@@ -18,11 +19,13 @@ int main(int argc, char **argv)
 		{
 			if (event.type == sf::Event::Closed)
 				window.close();
+			else if (event.type == sf::Event::Resized)
+				engine->resize(event.size.width, event.size.height);
+
 			engine->processEvent(event);
 		}
 		
-		window.clear(sf::Color::White);
-		engine->update(0.05f);
+		engine->update();
 		engine->render(window);
 		window.display();
 		
