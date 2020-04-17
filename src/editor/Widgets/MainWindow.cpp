@@ -152,6 +152,7 @@ void MainWindow::readSettings()
 	settings.beginGroup("window");
 	restoreGeometry(settings.value("geometry").toByteArray());
 	restoreState(settings.value("state").toByteArray());
+	ui->splitter->restoreState(settings.value("splitter").toByteArray());
 	settings.endGroup();
 }
 
@@ -161,6 +162,7 @@ void MainWindow::writeSettings()
 	settings.beginGroup("window");
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("state", saveState());
+	settings.setValue("splitter", ui->splitter->saveState());
 	settings.endGroup();
 }
 
