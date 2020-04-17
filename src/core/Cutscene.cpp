@@ -37,6 +37,11 @@ bool Cutscene::fromJson(const json &j)
 	return true;
 }
 
+void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
+{
+	m_segments.push_back(segment);
+}
+
 const std::vector<std::shared_ptr<CutsceneSegment>> &Cutscene::segments() const
 {
 	return m_segments;

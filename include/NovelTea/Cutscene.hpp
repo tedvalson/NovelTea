@@ -9,13 +9,15 @@ namespace NovelTea
 
 class CutsceneSegment;
 
-class Cutscene: public JsonSerializable
+class Cutscene : public JsonSerializable
 {
 public:
 	Cutscene();
 	~Cutscene();
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
+	json toJson() const override;
+	bool fromJson(const json &j) override;
+
+	void addSegment(std::shared_ptr<CutsceneSegment> segment);
 
 	const std::vector<std::shared_ptr<CutsceneSegment>> &segments() const;
 
