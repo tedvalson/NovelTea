@@ -4,6 +4,7 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/TextFormat.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/System/String.hpp>
 
 #define Proj NovelTea::ProjectData::instance()
@@ -32,6 +33,8 @@ public:
 	size_t addTextFormat(const TextFormat &textFormat);
 	bool removeTextFormat(size_t index);
 
+	std::shared_ptr<sf::Font> getFont(size_t index) const;
+
 	std::shared_ptr<Cutscene> cutscene(const std::string &idName);
 
 	void saveToFile(const std::string &filename = std::string());
@@ -49,6 +52,7 @@ public:
 
 protected:
 	ProjectData();
+	~ProjectData();
 
 private:
 	bool _loaded = false;
@@ -62,6 +66,7 @@ private:
 	int m_startEntityId;
 
 	std::vector<TextFormat> _textFormats;
+	std::vector<std::shared_ptr<sf::Font>> m_fonts;
 };
 
 } // namespace NovelTea

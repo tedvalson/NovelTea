@@ -1,12 +1,18 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <fstream>
+#include <iostream>
 
 namespace NovelTea
 {
 
 ProjectData::ProjectData()
 {
+}
+
+ProjectData::~ProjectData()
+{
+
 }
 
 ProjectData &ProjectData::instance()
@@ -39,6 +45,7 @@ void ProjectData::newProject()
 	});
 
 	_json[NT_CUTSCENES]["New Cutscene"] = cutscene;
+	_json[NT_PROJECT_FONTS] = json::array({0});
 }
 
 void ProjectData::closeProject()
@@ -75,6 +82,13 @@ size_t ProjectData::addTextFormat(const TextFormat &textFormat)
 bool ProjectData::removeTextFormat(size_t index)
 {
 	return true;
+}
+
+std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
+{
+	if (index >= m_fonts.size())
+		return nullptr;
+	return m_fonts[index];
 }
 
 std::shared_ptr<Cutscene> ProjectData::cutscene(const std::string &idName)
@@ -146,9 +160,18 @@ bool ProjectData::fromJson(const json &j)
 	_loaded = false;
 	_filename.clear();
 	_textFormats.clear();
+	m_fonts.clear();
 
 	for (auto &jformat : j[NT_TEXTFORMATS])
 		_textFormats.push_back(jformat);
+
+	for (auto &jfont : j[NT_PROJECT_FONTS])
+	{
+		auto font = std::make_shared<sf::Font>();
+		std::cout << "Loading font: " << jfont << std::endl;
+		if (font->loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf"))
+			m_fonts.push_back(font);
+	}
 
 	_json = j;
 	_loaded = true;
