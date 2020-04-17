@@ -5,6 +5,7 @@ namespace NovelTea
 
 CutsceneTextSegment::CutsceneTextSegment()
 {
+	m_activeText = std::make_shared<ActiveText>();
 }
 
 json CutsceneTextSegment::toJson() const
@@ -16,7 +17,7 @@ json CutsceneTextSegment::toJson() const
 		m_transition,
 		m_transitionDuration,
 		m_beginWithNewline,
-		m_activeText
+		*m_activeText
 	});
 	return j;
 }
@@ -28,7 +29,7 @@ bool CutsceneTextSegment::fromJson(const json &j)
 	m_transition = j[3];
 	m_transitionDuration = j[4];
 	m_beginWithNewline = j[5];
-	m_activeText = j[6];
+	m_activeText = std::make_shared<ActiveText>(j[6]);
 	return true;
 }
 
@@ -37,12 +38,12 @@ CutsceneSegment::Type CutsceneTextSegment::type() const
 	return CutsceneSegment::Text;
 }
 
-void CutsceneTextSegment::setActiveText(const ActiveText &activeText)
+void CutsceneTextSegment::setActiveText(const std::shared_ptr<ActiveText> &activeText)
 {
 	m_activeText = activeText;
 }
 
-const ActiveText &CutsceneTextSegment::getActiveText() const
+const std::shared_ptr<ActiveText> &CutsceneTextSegment::getActiveText() const
 {
 	return m_activeText;
 }

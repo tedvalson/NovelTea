@@ -147,7 +147,7 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QRectF &))
     Q_PRIVATE_SLOT(d_func(), void slotConstraintChanged(QtProperty *, const QRectF &))
     Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QColor &))
-	Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const NovelTea::ActiveText &))
+	Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const std::shared_ptr<NovelTea::ActiveText> &))
 	Q_PRIVATE_SLOT(d_func(), void slotEnumNamesChanged(QtProperty *, const QStringList &))
     Q_PRIVATE_SLOT(d_func(), void slotEnumIconsChanged(QtProperty *, const QMap<int, QIcon> &))
     Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QSizePolicy &))

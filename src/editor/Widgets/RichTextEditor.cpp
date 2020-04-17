@@ -35,18 +35,18 @@ void RichTextEditor::invoke()
 	emit invoked();
 }
 
-void RichTextEditor::setValue(const NovelTea::ActiveText &text)
+void RichTextEditor::setValue(const std::shared_ptr<NovelTea::ActiveText> &text)
 {
 	auto doc = activeTextToDocument(text);
 	ui->textEdit->setDocument(doc);
 }
 
-NovelTea::ActiveText RichTextEditor::getValue() const
+std::shared_ptr<NovelTea::ActiveText> RichTextEditor::getValue() const
 {
 	return documentToActiveText(ui->textEdit->document());
 }
 
-QTextDocument *RichTextEditor::activeTextToDocument(const NovelTea::ActiveText &activeText)
+QTextDocument *RichTextEditor::activeTextToDocument(const std::shared_ptr<NovelTea::ActiveText> &activeText)
 {
 	auto doc = new QTextDocument;
 	auto cursor = QTextCursor{doc};
@@ -56,7 +56,7 @@ QTextDocument *RichTextEditor::activeTextToDocument(const NovelTea::ActiveText &
 
 	doc->setDefaultFont(defaultFont);
 
-	for (auto &block : activeText.blocks())
+	for (auto &block : activeText->blocks())
 	{
 		blockFormat.setAlignment(Qt::AlignLeft);
 		if (firstBlock)
@@ -78,9 +78,9 @@ QTextDocument *RichTextEditor::activeTextToDocument(const NovelTea::ActiveText &
 	return doc;
 }
 
-NovelTea::ActiveText RichTextEditor::documentToActiveText(const QTextDocument *doc)
+std::shared_ptr<NovelTea::ActiveText> RichTextEditor::documentToActiveText(const QTextDocument *doc)
 {
-	NovelTea::ActiveText activeText;
+	auto activeText = std::make_shared<NovelTea::ActiveText>();
 	int fmtIndexLast = -1;
 
 	for (auto qblock = doc->begin(); qblock != doc->end(); qblock = qblock.next())
@@ -128,7 +128,7 @@ NovelTea::ActiveText RichTextEditor::documentToActiveText(const QTextDocument *d
 
 			fragment.setText(sfrag);
 			block->addFragment(std::make_shared<NovelTea::TextFragment>(fragment));
-			activeText.addBlock(block);
+			activeText->addBlock(block);
 //			jfrag[1] = sfrag;
 //			jblock[1].push_back(jfrag);
 //			j.push_back(jblock);

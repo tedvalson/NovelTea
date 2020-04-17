@@ -8,7 +8,7 @@
 #include <QToolButton>
 #include <QDebug>
 
-Q_DECLARE_METATYPE(NovelTea::ActiveText)
+Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::CutsceneSegment>)
 
 #define TEXT_TEXT "Text"
@@ -184,7 +184,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	{
 		auto seg = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
 		item = new QStandardItem(QIcon::fromTheme("font"), "Text");
-		text = QString::fromStdString(seg->getActiveText().toPlainText());
+		text = QString::fromStdString(seg->getActiveText()->toPlainText());
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
 	{
@@ -255,9 +255,9 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 
 		if (propertyName == TEXT_TEXT)
 		{
-			auto activeText = value.value<NovelTea::ActiveText>();
+			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
 			ui->richTextEditor->setValue(activeText);
-			itemModel->setData(itemModel->index(selectedIndex, 1), QString::fromStdString(activeText.toPlainText()));
+			itemModel->setData(itemModel->index(selectedIndex, 1), QString::fromStdString(activeText->toPlainText()));
 			textSegment->setActiveText(activeText);
 		}
 		else if (propertyName == TEXT_NEWLINE)

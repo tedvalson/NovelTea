@@ -15,8 +15,8 @@ public:
 	virtual bool fromJson(const json &j);
 	virtual Type type() const;
 
-	void setActiveText(const ActiveText &activeText);
-	const ActiveText &getActiveText() const;
+	void setActiveText(const std::shared_ptr<ActiveText> &activeText);
+	const std::shared_ptr<ActiveText> &getActiveText() const;
 
 	void setTransition(int transition);
 	int getTransition() const;
@@ -31,7 +31,7 @@ private:
 	bool m_beginWithNewline = false;
 	int m_transition = 0;
 	int m_transitionDuration = 100;
-	ActiveText m_activeText;
+	std::shared_ptr<ActiveText> m_activeText;
 };
 
 } // namespace NovelTea

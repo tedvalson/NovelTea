@@ -78,7 +78,7 @@ QT_END_NAMESPACE
 Q_DECLARE_METATYPE(QtEnumPropertyType)
 Q_DECLARE_METATYPE(QtFlagPropertyType)
 Q_DECLARE_METATYPE(QtGroupPropertyType)
-Q_DECLARE_METATYPE(NovelTea::ActiveText)
+Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -133,7 +133,7 @@ int QtVariantPropertyManager::groupTypeId()
 */
 int QtVariantPropertyManager::richTextTypeId()
 {
-	return qMetaTypeId<NovelTea::ActiveText>();
+	return qMetaTypeId<std::shared_ptr<NovelTea::ActiveText>>();
 }
 
 /*!
@@ -353,7 +353,7 @@ public:
     void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &enumIcons);
     void slotValueChanged(QtProperty *property, const QSizePolicy &val);
     void slotValueChanged(QtProperty *property, const QFont &val);
-	void slotValueChanged(QtProperty *property, const NovelTea::ActiveText &val);
+	void slotValueChanged(QtProperty *property, const std::shared_ptr<NovelTea::ActiveText> &val);
 	void slotValueChanged(QtProperty *property, const QCursor &val);
     void slotFlagChanged(QtProperty *property, int val);
     void slotFlagNamesChanged(QtProperty *property, const QStringList &flagNames);
@@ -422,7 +422,7 @@ int QtVariantPropertyManagerPrivate::internalPropertyToType(QtProperty *property
     else if (qobject_cast<QtBoolPropertyManager *>(internPropertyManager))
         type = QVariant::Bool;
 	else if (qobject_cast<QtRichTextPropertyManager *>(internPropertyManager))
-		type = qMetaTypeId<NovelTea::ActiveText>();
+		type = qMetaTypeId<std::shared_ptr<NovelTea::ActiveText>>();
 	else if (qobject_cast<QtDoublePropertyManager *>(internPropertyManager))
         type = QVariant::Double;
     return type;
@@ -711,7 +711,7 @@ void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, con
     valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const NovelTea::ActiveText &val)
+void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const std::shared_ptr<NovelTea::ActiveText> &val)
 {
 	valueChanged(property, QVariant::fromValue(val));
 }
@@ -1237,8 +1237,8 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
 	d_ptr->m_typeToValueType[richTextId] = richTextId;
 	d_ptr->m_typeToAttributeToAttributeType[richTextId][d_ptr->m_richTextEditorAttribute] =
 			QMetaType::VoidStar;
-	connect(richTextPropertyManager, SIGNAL(valueChanged(QtProperty *, const NovelTea::ActiveText &)),
-				this, SLOT(slotValueChanged(QtProperty *, const NovelTea::ActiveText &)));
+	connect(richTextPropertyManager, SIGNAL(valueChanged(QtProperty *, const std::shared_ptr<NovelTea::ActiveText> &)),
+				this, SLOT(slotValueChanged(QtProperty *, const std::shared_ptr<NovelTea::ActiveText> &)));
 	connect(richTextPropertyManager, SIGNAL(propertyInserted(QtProperty *, QtProperty *, QtProperty *)),
 				this, SLOT(slotPropertyInserted(QtProperty *, QtProperty *, QtProperty *)));
 	connect(richTextPropertyManager, SIGNAL(propertyRemoved(QtProperty *, QtProperty *)),
@@ -1745,7 +1745,7 @@ void QtVariantPropertyManager::setValue(QtProperty *property, const QVariant &va
 		colorManager->setValue(internProp, qvariant_cast<QColor>(val));
         return;
 	} else if (QtRichTextPropertyManager *richTextManager = qobject_cast<QtRichTextPropertyManager *>(manager)) {
-		richTextManager->setValue(internProp, qvariant_cast<NovelTea::ActiveText>(val));
+		richTextManager->setValue(internProp, qvariant_cast<std::shared_ptr<NovelTea::ActiveText>>(val));
 		return;
 	} else if (QtEnumPropertyManager *enumManager = qobject_cast<QtEnumPropertyManager *>(manager)) {
 		enumManager->setValue(internProp, qvariant_cast<int>(val));

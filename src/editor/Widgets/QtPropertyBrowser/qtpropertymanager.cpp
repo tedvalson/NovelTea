@@ -6497,7 +6497,7 @@ public:
 
 	void slotPropertyDestroyed(QtProperty *property);
 
-	typedef QMap<const QtProperty *, NovelTea::ActiveText> PropertyValueMap;
+	typedef QMap<const QtProperty *, std::shared_ptr<NovelTea::ActiveText>> PropertyValueMap;
 	PropertyValueMap m_values;
 };
 
@@ -6566,9 +6566,9 @@ QtRichTextPropertyManager::~QtRichTextPropertyManager()
 
 	\sa setValue()
 */
-NovelTea::ActiveText QtRichTextPropertyManager::value(const QtProperty *property) const
+std::shared_ptr<NovelTea::ActiveText> QtRichTextPropertyManager::value(const QtProperty *property) const
 {
-	return d_ptr->m_values.value(property, NovelTea::ActiveText());
+	return d_ptr->m_values.value(property, nullptr);
 }
 
 RichTextEditor *QtRichTextPropertyManager::editor() const
@@ -6591,7 +6591,11 @@ QString QtRichTextPropertyManager::valueText(const QtProperty *property) const
 	if (it == d_ptr->m_values.constEnd())
 		return QString();
 
-	return QString::fromStdString(it.value().toPlainText());
+	auto activeText = it.value();
+	if (!activeText)
+		return QString();
+
+	return QString::fromStdString(activeText->toPlainText());
 }
 
 /*!
@@ -6615,7 +6619,7 @@ QIcon QtRichTextPropertyManager::valueIcon(const QtProperty *property) const
 
 	\sa value(), valueChanged()
 */
-void QtRichTextPropertyManager::setValue(QtProperty *property, const NovelTea::ActiveText &val)
+void QtRichTextPropertyManager::setValue(QtProperty *property, const std::shared_ptr<NovelTea::ActiveText> &val)
 {
 	const QtRichTextPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
 	if (it == d_ptr->m_values.end())
@@ -6635,7 +6639,7 @@ void QtRichTextPropertyManager::setValue(QtProperty *property, const NovelTea::A
 */
 void QtRichTextPropertyManager::initializeProperty(QtProperty *property)
 {
-	d_ptr->m_values[property] = NovelTea::ActiveText();
+	d_ptr->m_values[property] = std::make_shared<NovelTea::ActiveText>();
 }
 
 /*!
