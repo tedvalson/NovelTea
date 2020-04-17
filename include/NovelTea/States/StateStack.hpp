@@ -30,8 +30,6 @@ public:
 	void registerState(StateID stateID);
 
 	void update(float delta);
-//	void renderTopScreen(cpp3ds::Window& window);
-//	void renderBottomScreen(cpp3ds::Window& window);
 	void render(sf::RenderTarget &target);
 	void processEvent(const sf::Event& event);
 

@@ -2,7 +2,6 @@
 #define NOVELTEA_STATE_HPP
 
 #include "StateIdentifiers.hpp"
-//#include <NovelTea/Engine.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/Window/Event.hpp>
 #include <memory>
@@ -14,7 +13,6 @@
 namespace sf
 {
 	class RenderTarget;
-//	class TcpSocket;
 }
 
 namespace NovelTea {
@@ -40,8 +38,6 @@ public:
 	State(StateStack& stack, Context& context, StateCallback callback);
 	virtual ~State();
 
-//	virtual void renderTopScreen(cpp3ds::Window& window) = 0;
-//	virtual void renderBottomScreen(cpp3ds::Window& window) = 0;
 	virtual void render(sf::RenderTarget &target) = 0;
 	virtual bool update(float delta) = 0;
 	virtual bool processEvent(const sf::Event& event) = 0;

@@ -43,7 +43,6 @@
 #define QTEDITORFACTORY_H
 
 #include "qtpropertymanager.h"
-#include <NovelTea/ActiveText.hpp>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

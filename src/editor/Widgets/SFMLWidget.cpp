@@ -100,7 +100,6 @@ void SFMLWidget::paintEvent(QPaintEvent *)
 	auto delta = 0.001f * (curTime - _lastTime);
 	_lastTime = curTime;
 
-	clear(sf::Color::Black);
 	onUpdate(delta);
 	display();
 }

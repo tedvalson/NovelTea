@@ -36,6 +36,7 @@ bool TextFormat::fromJson(const json &j)
 	underline(j[2]);
 	size(j[3]);
 	color(j[4]);
+	return true;
 }
 
 void TextFormat::bold(bool val)

@@ -407,4 +407,4 @@ sf::Uint8 RichText::Line::getOpacity() const
 	return m_texts.front().getFillColor().a;
 }
 
-} // namespace util3ds
+} // namespace NovelTea
