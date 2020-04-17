@@ -1,7 +1,6 @@
 #include "MainWindow.hpp"
 #include "ui_MainWindow.h"
 #include "TreeItem.hpp"
-#include "RoomWidget.hpp"
 #include "CutsceneWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"

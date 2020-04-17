@@ -13,7 +13,6 @@ set(UIFILES
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
 	${UIROOT}/ProjectSettingsWidget.ui
-	${UIROOT}/RoomWidget.ui
 	${UIROOT}/WizardPageStart.ui
 	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageCutscene.ui
@@ -32,7 +31,6 @@ set(SRC
 	${SRCROOT}/Widgets/NovelTeaWidget.cpp
 	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
-	${SRCROOT}/Widgets/RoomWidget.cpp
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/MainWindow.cpp
 	${SRCROOT}/Wizard/Wizard.cpp
