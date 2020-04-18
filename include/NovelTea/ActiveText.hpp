@@ -16,8 +16,8 @@ class ActiveText : public JsonSerializable, public sf::Drawable, public TweenTra
 {
 public:
 	ActiveText();
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
+	json toJson() const override;
+	bool fromJson(const json &j) override;
 
 	std::string toPlainText() const;
 

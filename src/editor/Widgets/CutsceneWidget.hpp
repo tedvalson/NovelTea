@@ -27,8 +27,8 @@ public:
 	explicit CutsceneWidget(const std::string &idName, QWidget *parent = 0);
 	virtual ~CutsceneWidget();
 
-	virtual QString tabText() const;
-	virtual Type getType() const;
+	QString tabText() const override;
+	Type getType() const override;
 
 private slots:
 	void on_actionAddText_triggered();
@@ -45,8 +45,8 @@ private:
 	void checkIndexChange();
 	void addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, int index = -1);
 
-	virtual void saveData() const;
-	virtual void loadData();
+	void saveData() const override;
+	void loadData() override;
 
 	void propertyChanged(QtProperty *property, const QVariant &value);
 

@@ -11,9 +11,9 @@ class CutsceneTextSegment : public CutsceneSegment
 {
 public:
 	CutsceneTextSegment();
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
-	virtual Type type() const;
+	json toJson() const override;
+	bool fromJson(const json &j) override;
+	Type type() const override;
 
 	void setActiveText(const std::shared_ptr<ActiveText> &activeText);
 	const std::shared_ptr<ActiveText> &getActiveText() const;

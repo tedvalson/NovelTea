@@ -12,8 +12,8 @@ class TextFragment : public JsonSerializable
 {
 public:
 	TextFragment();
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
+	json toJson() const override;
+	bool fromJson(const json &j) override;
 
 	void setTextFormat(const TextFormat &textFormat);
 	const TextFormat &getTextFormat() const;

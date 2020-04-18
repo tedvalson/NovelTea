@@ -19,8 +19,8 @@ public:
 	};
 
 	TextBlock();
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
+	json toJson() const override;
+	bool fromJson(const json &j) override;
 
 	const std::vector<std::shared_ptr<TextFragment>> &fragments() const;
 	void addFragment(std::shared_ptr<TextFragment> fragment, int index = -1);

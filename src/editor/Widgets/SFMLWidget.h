@@ -19,14 +19,14 @@ public:
 protected:
 	virtual void onInit() = 0;
 	virtual void onUpdate(float delta) = 0;
-	virtual void onResize();
-	virtual void showEvent(QShowEvent*);
-	virtual void hideEvent(QHideEvent*);
+	void onResize() override;
+	void showEvent(QShowEvent*) override;
+	void hideEvent(QHideEvent*) override;
+	void paintEvent(QPaintEvent*) override;
 	void resizeEvent(QResizeEvent*);
-	virtual void paintEvent(QPaintEvent*);
 
 private:
-	virtual QPaintEngine *paintEngine() const;
+	QPaintEngine *paintEngine() const override;
 
 	QTimer _timer;
 	bool _initialized;

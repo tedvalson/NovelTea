@@ -34,9 +34,6 @@ public:
 	void rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName);
 	void update();
 
-protected:
-	virtual void contextMenuEvent(QContextMenuEvent* event);
-
 	TreeItem *rootItem;
 	TreeItem *cutsceneRoot;
 	TreeItem *roomRoot;

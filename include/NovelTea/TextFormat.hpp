@@ -13,8 +13,8 @@ public:
 	TextFormat();
 	bool operator==(const TextFormat &format) const;
 
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
+	json toJson() const override;
+	bool fromJson(const json &j) override;
 
 	void bold(bool val);
 	bool bold() const;

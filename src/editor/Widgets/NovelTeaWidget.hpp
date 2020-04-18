@@ -17,7 +17,7 @@ class NovelTeaWidget : public SFMLWidget
 {
 public:
 	explicit NovelTeaWidget(QWidget *parent = 0);
-	~NovelTeaWidget();
+	virtual ~NovelTeaWidget();
 
 	json processData(json jsonData);
 
@@ -31,9 +31,9 @@ protected:
 //	void resizeGL(int w, int h);
 //	void paintGL();
 
-	virtual void onInit();
-	virtual void onResize();
-	virtual void onUpdate(float delta);
+	void onInit() override;
+	void onResize() override;
+	void onUpdate(float delta) override;
 
 private:
 	NovelTea::Engine *_engine;

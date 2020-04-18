@@ -89,11 +89,6 @@ void TreeModel::update()
 
 }
 
-void TreeModel::contextMenuEvent(QContextMenuEvent *event)
-{
-
-}
-
 QVariant TreeModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())

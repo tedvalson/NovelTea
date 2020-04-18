@@ -10,9 +10,9 @@ class CutscenePageBreakSegment : public CutsceneSegment
 {
 public:
 	CutscenePageBreakSegment();
-	virtual json toJson() const;
-	virtual bool fromJson(const json &j);
-	virtual Type type() const;
+	json toJson() const override;
+	bool fromJson(const json &j) override;
+	Type type() const override;
 
 	void setTransition(int transition);
 	int getTransition() const;

@@ -27,11 +27,11 @@ class StateMain : public State
 {
 public:
 	StateMain(StateStack& stack, Context& context, StateCallback callback);
-	virtual bool processEvent(const sf::Event &event);
-	virtual bool update(float deltaSeconds);
-	virtual void render(sf::RenderTarget &target);
+	bool processEvent(const sf::Event &event) override;
+	bool update(float deltaSeconds) override;
+	void render(sf::RenderTarget &target) override;
 
-	virtual void *processData(void *data);
+	void *processData(void *data) override;
 
 private:
 	sf::Font font;

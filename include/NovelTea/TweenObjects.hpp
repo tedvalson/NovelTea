@@ -28,7 +28,7 @@ public:
 	static const int ORIGIN_XY   = 10;
 
 protected:
-	virtual int getValues(int tweenType, float *returnValues)
+	int getValues(int tweenType, float *returnValues) override
 	{
 		switch (tweenType) {
 			case POSITION_X: returnValues[0] = T::getPosition().x; return 1;
@@ -54,7 +54,7 @@ protected:
 		}
 	}
 
-	virtual void setValues(int tweenType, float *newValues)
+	void setValues(int tweenType, float *newValues) override
 	{
 		switch (tweenType) {
 			case POSITION_X: T::setPosition(newValues[0], T::getPosition().y); break;
@@ -85,7 +85,7 @@ public:
 	static const int OUTLINE_THICKNESS   = 15;
 
 protected:
-	virtual int getValues(int tweenType, float *returnValues)
+	int getValues(int tweenType, float *returnValues) override
 	{
 		switch (tweenType) {
 			case FILL_COLOR_RGB: {
@@ -110,7 +110,7 @@ protected:
 		}
 	}
 
-	virtual void setValues(int tweenType, float *newValues)
+	void setValues(int tweenType, float *newValues) override
 	{
 		switch (tweenType) {
 			case FILL_COLOR_RGB: {
@@ -159,7 +159,8 @@ public:
 	static const int COLOR_ALPHA = 12;
 
 protected:
-	virtual int getValues(int tweenType, float *returnValues)
+
+	int getValues(int tweenType, float *returnValues) override
 	{
 		switch (tweenType) {
 			case COLOR_RGB: {
@@ -175,7 +176,7 @@ protected:
 		}
 	}
 
-	virtual void setValues(int tweenType, float *newValues)
+	void setValues(int tweenType, float *newValues) override
 	{
 		switch (tweenType) {
 			case COLOR_RGB: {
