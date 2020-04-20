@@ -12,6 +12,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/TextFormat.cpp
+	${SRCROOT}/CutsceneRenderer.cpp
 	${SRCROOT}/CutsceneSegment.cpp
 	${SRCROOT}/CutsceneTextSegment.cpp
 	${SRCROOT}/ActiveText.cpp
