@@ -696,6 +696,9 @@ namespace TweenEngine
     
 	void Tween::initializeOverride()
     {
+		if (!targetObj)
+			return;
+
         targetObj->getValues(type, startValues);
         
 		for (int i=0; i<combinedAttrsCnt; i++) {
