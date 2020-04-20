@@ -138,11 +138,20 @@ void CutsceneWidget::fillPropertyEditor()
 	}
 	else if (type == NT_CUTSCENE_BREAK)
 	{
+		auto pageBreakSegment = static_cast<NovelTea::CutscenePageBreakSegment*>(segment.get());
+
 		prop = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
 		QStringList enumNames;
 		enumNames << "Fade" << "Scroll Up" << "Scroll Down" << "Nothing";
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
-		prop->setValue(0);
+		prop->setValue(pageBreakSegment->getTransition());
+		ui->propertyBrowser->addProperty(prop);
+
+		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
+		prop->setValue(pageBreakSegment->getTransitionDuration());
+		prop->setAttribute(QLatin1String("minimum"), 0);
+		prop->setAttribute(QLatin1String("maximum"), 10000);
+		prop->setAttribute(QLatin1String("singleStep"), 10);
 		ui->propertyBrowser->addProperty(prop);
 	}
 
@@ -271,6 +280,10 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 	{
 		auto pageBreakSegment = static_cast<NovelTea::CutscenePageBreakSegment*>(segment.get());
 
+		if (propertyName == TRANSITION_EFFECT)
+			pageBreakSegment->setTransition(value.toInt());
+		else if (propertyName == TRANSITION_DURATION)
+			pageBreakSegment->setTransitionDuration(value.toInt());
 	}
 
 	if (propertyName == SCRIPT_OVERRIDE)
