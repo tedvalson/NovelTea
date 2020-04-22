@@ -35,6 +35,7 @@ private slots:
 	void on_actionAddPageBreak_triggered();
 	void on_treeView_pressed(const QModelIndex &index);
 	void on_actionRemoveSegment_triggered();
+	void on_horizontalSlider_valueChanged(int value);
 
 protected:
 	void timerEvent(QTimerEvent *event);

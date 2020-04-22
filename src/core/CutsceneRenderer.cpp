@@ -17,6 +17,11 @@ CutsceneRenderer::CutsceneRenderer()
 void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 {
 	m_cutscene = cutscene;
+	reset();
+}
+
+void CutsceneRenderer::reset()
+{
 	m_segmentIndex = 0;
 	m_callbacksQueued = 0;
 	m_timePassed = sf::Time::Zero;
@@ -91,6 +96,7 @@ void CutsceneRenderer::addSegmentToQueue(unsigned int segmentIndex)
 		{
 			auto activeText = seg->getActiveText();
 			activeText->setCursorStart(m_cursorPos);
+			activeText->setPosition(0.f, 0.f);
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getTransitionDuration());
 			m_texts.push_back(activeText);

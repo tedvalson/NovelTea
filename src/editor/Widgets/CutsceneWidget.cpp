@@ -325,3 +325,11 @@ void CutsceneWidget::on_actionRemoveSegment_triggered()
 	selectedIndex = -2;
 	checkIndexChange();
 }
+
+void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
+{
+	json data = json::object();
+	data["event"] = "setPlaybackTime";
+	data["value"] = value;
+	auto resp = ui->preview->processData(data);
+}

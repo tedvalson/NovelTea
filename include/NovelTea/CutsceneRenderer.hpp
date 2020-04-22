@@ -19,6 +19,7 @@ public:
 	CutsceneRenderer();
 
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
+	void reset();
 	void update(float delta);
 
 protected:
