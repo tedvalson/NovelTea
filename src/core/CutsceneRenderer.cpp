@@ -47,7 +47,7 @@ void CutsceneRenderer::update(float delta)
 		if (m_segmentIndex >= segments.size())
 			break;
 
-		unsigned int segmentIndex;
+		size_t segmentIndex;
 		timeDelta -= m_timeToNext;
 		m_tweenManager.update(m_timeToNext.asSeconds());
 
@@ -74,7 +74,7 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	}
 }
 
-void CutsceneRenderer::addSegmentToQueue(unsigned int segmentIndex)
+void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 {
 	m_segmentIndex = segmentIndex;
 	auto segments = m_cutscene->segments();

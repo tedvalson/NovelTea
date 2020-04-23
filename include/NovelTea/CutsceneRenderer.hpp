@@ -25,12 +25,12 @@ public:
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-	void addSegmentToQueue(unsigned int segmentIndex);
+	void addSegmentToQueue(size_t segmentIndex);
 
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
-	unsigned int m_segmentIndex;
-	unsigned int m_callbacksQueued;
+	size_t m_segmentIndex;
+	size_t m_callbacksQueued;
 
 	std::vector<std::shared_ptr<ActiveText>> m_texts;
 	sf::Vector2f m_cursorPos;

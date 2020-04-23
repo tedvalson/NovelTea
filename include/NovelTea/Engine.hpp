@@ -13,8 +13,8 @@ namespace NovelTea
 
 struct EngineConfig
 {
-	unsigned int width = 1024;
-	unsigned int height = 720;
+	size_t width = 1024;
+	size_t height = 720;
 	unsigned short fps = 30;
 	StateID initialState;
 };
@@ -25,14 +25,14 @@ public:
 	Engine(EngineConfig config);
 	void run();
 	bool isRunning() const;
-	void resize(unsigned int width, unsigned int height);
+	void resize(size_t width, size_t height);
 	void render(sf::RenderTarget &target);
 	void update();
 	void update(float deltaSeconds);
 	void processEvent(const sf::Event &event);
 	void *processData(void *data);
 
-	static unsigned int getSystemTimeMs();
+	static size_t getSystemTimeMs();
 
 //protected:
 	void initialize();
@@ -47,10 +47,10 @@ private:
 	sf::View _view;
 	sf::RectangleShape _bg;
 	float _internalRatio;
-	unsigned int _width;
-	unsigned int _height;
+	size_t _width;
+	size_t _height;
 
-	unsigned int _lastTime;
+	size_t _lastTime;
 
 	// Shared State context variables
 	std::vector<char*> _data;

@@ -25,7 +25,7 @@ bool Engine::isRunning() const
 	return true;
 }
 
-void Engine::resize(unsigned int width, unsigned int height)
+void Engine::resize(size_t width, size_t height)
 {
 	sf::FloatRect viewport;
 	sf::Vector2f widgetSize(width, height);
@@ -129,7 +129,7 @@ void *Engine::processData(void *data)
 	return _stateStack.processData(data);
 }
 
-unsigned int Engine::getSystemTimeMs()
+size_t Engine::getSystemTimeMs()
 {
 	auto t = steady_clock::now().time_since_epoch();
 	auto ts = duration_cast<milliseconds>(t);

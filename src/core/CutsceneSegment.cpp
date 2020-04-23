@@ -29,12 +29,12 @@ std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)
 	return segment;
 }
 
-void CutsceneSegment::setDuration(unsigned int duration)
+void CutsceneSegment::setDuration(size_t duration)
 {
 	m_duration = duration;
 }
 
-unsigned int CutsceneSegment::getDuration() const
+size_t CutsceneSegment::getDuration() const
 {
 	return m_duration;
 }
