@@ -17,12 +17,8 @@ public:
 	void setTransition(int transition);
 	int getTransition() const;
 
-	void setTransitionDuration(int duration);
-	int getTransitionDuration() const;
-
 private:
 	int m_transition = 0;
-	int m_transitionDuration = 100;
 };
 
 } // namespace NovelTea

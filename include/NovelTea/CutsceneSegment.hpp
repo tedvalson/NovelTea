@@ -21,6 +21,9 @@ public:
 
 	static std::shared_ptr<CutsceneSegment> createSegment(const json &j);
 
+	virtual void setDuration(unsigned int duration);
+	virtual unsigned int getDuration() const;
+
 	void setScriptOverride(bool override);
 	bool getScriptOverride() const;
 
@@ -28,6 +31,7 @@ public:
 	const std::string &getScriptOverrideName() const;
 
 private:
+	unsigned int m_duration = 1000;
 	bool m_scriptOverride = false;
 	std::string m_scriptOverrideName;
 };

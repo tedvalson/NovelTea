@@ -14,7 +14,7 @@ json CutscenePageBreakSegment::toJson() const
 		getScriptOverride(),
 		getScriptOverrideName(),
 		m_transition,
-		m_transitionDuration
+		getDuration()
 	});
 	return j;
 }
@@ -24,7 +24,7 @@ bool CutscenePageBreakSegment::fromJson(const json &j)
 	setScriptOverride(j[1]);
 	setScriptOverrideName(j[2]);
 	m_transition = j[3];
-	m_transitionDuration = j[4];
+	setDuration(j[4]);
 	return true;
 }
 
@@ -41,16 +41,6 @@ void CutscenePageBreakSegment::setTransition(int transition)
 int CutscenePageBreakSegment::getTransition() const
 {
 	return m_transition;
-}
-
-void CutscenePageBreakSegment::setTransitionDuration(int duration)
-{
-	m_transitionDuration = duration;
-}
-
-int CutscenePageBreakSegment::getTransitionDuration() const
-{
-	return m_transitionDuration;
 }
 
 } // namespace NovelTea

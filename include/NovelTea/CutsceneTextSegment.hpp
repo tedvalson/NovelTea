@@ -21,16 +21,12 @@ public:
 	void setTransition(int transition);
 	int getTransition() const;
 
-	void setTransitionDuration(int duration);
-	int getTransitionDuration() const;
-
 	void setBeginWithNewLine(bool beginWithNewLine);
 	bool getBeginWithNewLine() const;
 
 private:
 	bool m_beginWithNewline = false;
 	int m_transition = 0;
-	int m_transitionDuration = 100;
 	std::shared_ptr<ActiveText> m_activeText;
 };
 

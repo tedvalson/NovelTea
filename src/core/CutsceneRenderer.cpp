@@ -90,7 +90,7 @@ void CutsceneRenderer::addSegmentToQueue(unsigned int segmentIndex)
 	if (type == CutsceneSegment::Text)
 	{
 		auto seg = static_cast<CutsceneTextSegment*>(segment.get());
-		timeToNext = 0.001f * seg->getTransitionDuration();
+		timeToNext = 0.001f * seg->getDuration();
 
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
@@ -98,7 +98,7 @@ void CutsceneRenderer::addSegmentToQueue(unsigned int segmentIndex)
 			activeText->setCursorStart(m_cursorPos);
 			activeText->setPosition(0.f, 0.f);
 			m_cursorPos = activeText->getCursorEnd();
-			m_timeToNext = sf::milliseconds(seg->getTransitionDuration());
+			m_timeToNext = sf::milliseconds(seg->getDuration());
 			m_texts.push_back(activeText);
 		};
 		endCallback = [this, segmentIndex](TweenEngine::BaseTween*)
@@ -109,11 +109,11 @@ void CutsceneRenderer::addSegmentToQueue(unsigned int segmentIndex)
 	else if (type == CutsceneSegment::PageBreak)
 	{
 		auto seg = static_cast<CutscenePageBreakSegment*>(segment.get());
-		timeToNext = 0.001f * seg->getTransitionDuration();
+		timeToNext = 0.001f * seg->getDuration();
 
 		beginCallback = [this, seg, timeToNext](TweenEngine::BaseTween*)
 		{
-			m_timeToNext = sf::milliseconds(seg->getTransitionDuration());
+			m_timeToNext = sf::milliseconds(seg->getDuration());
 
 			for (auto &text : m_texts)
 			{

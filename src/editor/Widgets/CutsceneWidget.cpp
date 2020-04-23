@@ -115,7 +115,7 @@ void CutsceneWidget::fillPropertyEditor()
 		ui->propertyBrowser->addProperty(prop);
 
 		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
-		prop->setValue(textSegment->getTransitionDuration());
+		prop->setValue(textSegment->getDuration());
 		prop->setAttribute(QLatin1String("minimum"), 0);
 		prop->setAttribute(QLatin1String("maximum"), 10000);
 		prop->setAttribute(QLatin1String("singleStep"), 10);
@@ -148,7 +148,7 @@ void CutsceneWidget::fillPropertyEditor()
 		ui->propertyBrowser->addProperty(prop);
 
 		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
-		prop->setValue(pageBreakSegment->getTransitionDuration());
+		prop->setValue(pageBreakSegment->getDuration());
 		prop->setAttribute(QLatin1String("minimum"), 0);
 		prop->setAttribute(QLatin1String("maximum"), 10000);
 		prop->setAttribute(QLatin1String("singleStep"), 10);
@@ -274,7 +274,7 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 		else if (propertyName == TRANSITION_EFFECT)
 			textSegment->setTransition(value.toInt());
 		else if (propertyName == TRANSITION_DURATION)
-			textSegment->setTransitionDuration(value.toInt());
+			textSegment->setDuration(value.toInt());
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
 	{
@@ -283,7 +283,7 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 		if (propertyName == TRANSITION_EFFECT)
 			pageBreakSegment->setTransition(value.toInt());
 		else if (propertyName == TRANSITION_DURATION)
-			pageBreakSegment->setTransitionDuration(value.toInt());
+			pageBreakSegment->setDuration(value.toInt());
 	}
 
 	if (propertyName == SCRIPT_OVERRIDE)

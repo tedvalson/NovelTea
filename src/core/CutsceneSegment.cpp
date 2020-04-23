@@ -29,6 +29,16 @@ std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)
 	return segment;
 }
 
+void CutsceneSegment::setDuration(unsigned int duration)
+{
+	m_duration = duration;
+}
+
+unsigned int CutsceneSegment::getDuration() const
+{
+	return m_duration;
+}
+
 void CutsceneSegment::setScriptOverride(bool override)
 {
 	m_scriptOverride = override;
