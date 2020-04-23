@@ -9,7 +9,6 @@
 #include <QDebug>
 
 Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
-Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::CutsceneSegment>)
 
 #define TEXT_TEXT "Text"
 #define TEXT_NEWLINE "Start New Line"
@@ -22,7 +21,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	EditorTabWidget(parent),
 	ui(new Ui::CutsceneWidget),
 	menuAdd(nullptr),
-	itemModel(new QStandardItemModel(0, 3, parent)),
+	itemModel(new QStandardItemModel(0, 2, parent)),
 	selectedIndex(-1),
 	variantManager(new QtVariantPropertyManager),
 	variantFactory(new QtVariantEditorFactory)
@@ -96,7 +95,7 @@ void CutsceneWidget::fillPropertyEditor()
 		return;
 
 	QtVariantProperty *prop, *subProp;
-	auto segment = itemModel->index(selectedIndex, 2).data().value<std::shared_ptr<NovelTea::CutsceneSegment>>();
+	auto segment = m_cutscene->segments()[selectedIndex];
 	auto type = segment->type();
 
 	if (type == NT_CUTSCENE_TEXT)
@@ -207,29 +206,26 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	{
 		index = itemModel->rowCount();
 		itemModel->appendRow(item);
+		m_cutscene->segments().push_back(segment);
 	}
 	else
+	{
 		itemModel->insertRow(index, item);
+		m_cutscene->segments().insert(m_cutscene->segments().begin() + index, segment);
+	}
 
 	itemModel->setData(itemModel->index(index, 1), text);
-	itemModel->setData(itemModel->index(index, 2), QVariant::fromValue(segment));
 }
 
 void CutsceneWidget::saveData() const
 {
-	auto &j = Proj.data()[NT_CUTSCENES][idName()];
-	auto a = json::array();
-	for (int i = 0; i < itemModel->rowCount(); ++i)
-	{
-		auto d = itemModel->index(i, 2).data().value<std::shared_ptr<NovelTea::CutsceneSegment>>();
-		a.push_back(*d);
-	}
-	std::cout << "saveData()" << std::endl << a << std::endl;
-	j = a;
+	if (m_cutscene)
+		Proj.data()[NT_CUTSCENES][idName()] = *m_cutscene;
 }
 
 void CutsceneWidget::loadData()
 {
+	m_cutscene = std::make_shared<NovelTea::Cutscene>();
 	itemModel->disconnect();
 	itemModel->removeRows(0, itemModel->rowCount());
 
@@ -239,7 +235,7 @@ void CutsceneWidget::loadData()
 		for (auto &seg : cutscene->segments())
 			addItem(seg);
 	else
-		setModified();
+		setModified(); // Cutscene is new, so show it as modified
 
 	MODIFIER(itemModel, &QStandardItemModel::dataChanged);
 	MODIFIER(itemModel, &QStandardItemModel::rowsRemoved);
@@ -254,7 +250,7 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 	setModified();
 
 	auto propertyName = property->propertyName();
-	auto segment = itemModel->index(selectedIndex, 2).data().value<std::shared_ptr<NovelTea::CutsceneSegment>>();
+	auto segment = m_cutscene->segments()[selectedIndex];
 	auto type = segment->type();
 	qDebug() << "propChanged " << propertyName;
 
@@ -320,6 +316,8 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 
 void CutsceneWidget::on_actionRemoveSegment_triggered()
 {
+	auto &segments = m_cutscene->segments();
+	segments.erase(segments.begin() + selectedIndex);
 	itemModel->removeRow(selectedIndex);
 	// Trigger change even for unselected index (-1)
 	selectedIndex = -2;

@@ -42,9 +42,25 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 	m_segments.push_back(segment);
 }
 
-const std::vector<std::shared_ptr<CutsceneSegment>> &Cutscene::segments() const
+std::vector<std::shared_ptr<CutsceneSegment>> &Cutscene::segments()
 {
 	return m_segments;
+}
+
+size_t Cutscene::getDurationMs() const
+{
+	if (m_segments.empty())
+		return 0;
+	else
+		return getDurationMs(m_segments.size() - 1);
+}
+
+size_t Cutscene::getDurationMs(size_t indexEnd) const
+{
+	auto duration = 0u;
+	for (auto i = 0u; i < indexEnd; ++i)
+		duration += m_segments[i]->getDuration();
+	return duration;
 }
 
 } // namespace NovelTea

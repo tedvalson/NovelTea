@@ -16,6 +16,7 @@ namespace Ui {
 class CutsceneWidget;
 }
 namespace NovelTea {
+class Cutscene;
 class CutsceneSegment;
 }
 
@@ -59,6 +60,8 @@ private:
 
 	QtVariantPropertyManager *variantManager;
 	QtVariantEditorFactory *variantFactory;
+
+	std::shared_ptr<NovelTea::Cutscene> m_cutscene;
 };
 
 #endif // CUTSCENEWIDGET_HPP
