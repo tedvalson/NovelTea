@@ -19,6 +19,7 @@ NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
 	config.initialState = NovelTea::StateID::Main;
 	_engine = new NovelTea::Engine(config);
 	_engine->initialize();
+	_engine->update(0.f); // This triggers update of state stack
 }
 
 NovelTeaWidget::~NovelTeaWidget()
