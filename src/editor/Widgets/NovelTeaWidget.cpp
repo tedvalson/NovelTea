@@ -12,6 +12,13 @@ NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
 	_internalSize(480, 700)
 {
 	_internalRatio = _internalSize.x / _internalSize.y;
+
+	NovelTea::EngineConfig config;
+	config.width = _internalSize.x;
+	config.height = _internalSize.y;
+	config.initialState = NovelTea::StateID::Main;
+	_engine = new NovelTea::Engine(config);
+	_engine->initialize();
 }
 
 NovelTeaWidget::~NovelTeaWidget()
@@ -59,12 +66,6 @@ void NovelTeaWidget::mouseMoveEvent(QMouseEvent *e)
 
 void NovelTeaWidget::onInit()
 {
-	NovelTea::EngineConfig config;
-	config.width = _internalSize.x;
-	config.height = _internalSize.y;
-	config.initialState = NovelTea::StateID::Main;
-	_engine = new NovelTea::Engine(config);
-	_engine->initialize();
 }
 
 void NovelTeaWidget::onResize()

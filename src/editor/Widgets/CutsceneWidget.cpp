@@ -1,6 +1,7 @@
 #include "CutsceneWidget.hpp"
 #include "ui_CutsceneWidget.h"
 #include "Utils.hpp"
+#include <NovelTea/Engine.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
@@ -24,7 +25,8 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	itemModel(new QStandardItemModel(0, 2, parent)),
 	selectedIndex(-1),
 	variantManager(new QtVariantPropertyManager),
-	variantFactory(new QtVariantEditorFactory)
+	variantFactory(new QtVariantEditorFactory),
+	m_cutscenePlaying(false)
 {
 	_idName = idName;
 	ui->setupUi(this);
@@ -45,7 +47,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 
 	ui->richTextEditor->hide();
 
-	startTimer(200);
+	startTimer(50);
 }
 
 CutsceneWidget::~CutsceneWidget()
@@ -166,6 +168,9 @@ void CutsceneWidget::fillPropertyEditor()
 
 void CutsceneWidget::checkIndexChange()
 {
+	if (m_cutscenePlaying)
+		return;
+
 	int index = ui->treeView->currentIndex().row();
 	if (selectedIndex != index)
 	{
@@ -175,6 +180,8 @@ void CutsceneWidget::checkIndexChange()
 		data["type"] = "test";
 		data["str"] = "hello! " + std::to_string(index);
 		auto resp = ui->preview->processData(data);
+
+		ui->horizontalSlider->setValue(m_cutscene->getDurationMs(index));
 
 		fillPropertyEditor();
 	}
@@ -215,6 +222,10 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	}
 
 	itemModel->setData(itemModel->index(index, 1), text);
+	ui->horizontalSlider->setMaximum(m_cutscene->getDurationMs());
+
+	auto jdata = json::object({{"event","cutscene"}, {"cutscene",*m_cutscene}});
+	auto resp = ui->preview->processData(jdata);
 }
 
 void CutsceneWidget::saveData() const
@@ -289,9 +300,6 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 
 //	itemModel->setData(itemModel->index(selectedIndex, 2), QVariant::fromValue(data));
 
-	auto d = json::object({{"event", "update"}});
-	d["data"] = d;
-	auto resp = ui->preview->processData(d);
 }
 
 void CutsceneWidget::on_actionAddText_triggered()
@@ -311,7 +319,26 @@ void CutsceneWidget::on_treeView_pressed(const QModelIndex &index)
 
 void CutsceneWidget::timerEvent(QTimerEvent *event)
 {
-	checkIndexChange();
+	if (!m_cutscenePlaying)
+	{
+		checkIndexChange();
+		return;
+	}
+
+	auto currentValue = ui->horizontalSlider->value();
+	if (currentValue == ui->horizontalSlider->maximum())
+	{
+		ui->actionStop->trigger();
+		return;
+	}
+
+	auto timeMs = NovelTea::Engine::getSystemTimeMs();
+	auto deltaMs = timeMs - m_lastTimeMs;
+	auto jdata = json::object({{"event","update"}, {"delta",deltaMs}});
+	auto resp = ui->preview->processData(jdata);
+
+	ui->horizontalSlider->setValue(currentValue + deltaMs);
+	m_lastTimeMs = timeMs;
 }
 
 void CutsceneWidget::on_actionRemoveSegment_triggered()
@@ -326,8 +353,46 @@ void CutsceneWidget::on_actionRemoveSegment_triggered()
 
 void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 {
-	json data = json::object();
-	data["event"] = "setPlaybackTime";
-	data["value"] = value;
+	int duration = 0;
+	for (int i = 0; i < m_cutscene->segments().size(); ++i)
+	{
+		auto segment = m_cutscene->segments()[i];
+		duration += segment->getDuration();
+		if (duration > value)
+		{
+			ui->treeView->setCurrentIndex(itemModel->index(i,0));
+			break;
+		}
+	}
+
+	if (m_cutscenePlaying)
+		return;
+
+	json data = json::object({{"event","setPlaybackTime"}, {"value",value}});
 	auto resp = ui->preview->processData(data);
+}
+
+void CutsceneWidget::on_actionPlayPause_toggled(bool checked)
+{
+	if (checked)
+	{
+		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
+		ui->actionPlayPause->setIcon(QIcon::fromTheme("media-playback-pause"));
+	}
+	else
+	{
+		ui->actionPlayPause->setIcon(QIcon::fromTheme("media-playback-start"));
+	}
+
+	ui->horizontalSlider->setEnabled(!checked);
+	m_cutscenePlaying = checked;
+}
+
+void CutsceneWidget::on_actionStop_triggered()
+{
+	if (!m_cutscenePlaying)
+		return;
+	ui->actionPlayPause->setChecked(false);
+	ui->horizontalSlider->setValue(0);
+	ui->treeView->setCurrentIndex(itemModel->index(0,0));
 }

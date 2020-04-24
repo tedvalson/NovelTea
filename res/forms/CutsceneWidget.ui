@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>325</height>
+    <height>327</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,7 +22,7 @@
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -101,6 +101,8 @@
           </property>
           <addaction name="actionAddSegment"/>
           <addaction name="actionRemoveSegment"/>
+          <addaction name="actionPlayPause"/>
+          <addaction name="actionStop"/>
          </widget>
         </item>
         <item>
@@ -205,12 +207,12 @@
   </layout>
   <action name="actionAddSegment">
    <property name="icon">
-    <iconset theme="add">
+    <iconset theme="list-add">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>Add Segment</string>
+    <string>Add</string>
    </property>
   </action>
   <action name="actionRemoveSegment">
@@ -218,12 +220,12 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="remove">
+    <iconset theme="list-remove">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>Remove Segment</string>
+    <string>Remove</string>
    </property>
   </action>
   <action name="actionAddText">
@@ -234,6 +236,33 @@
   <action name="actionAddPageBreak">
    <property name="text">
     <string>Page Break</string>
+   </property>
+  </action>
+  <action name="actionPlayPause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="media-playback-start">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Play / Pause</string>
+   </property>
+   <property name="toolTip">
+    <string>Play / Pause</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset theme="media-playback-stop"/>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop</string>
    </property>
   </action>
  </widget>

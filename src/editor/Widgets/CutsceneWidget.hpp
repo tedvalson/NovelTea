@@ -37,6 +37,8 @@ private slots:
 	void on_treeView_pressed(const QModelIndex &index);
 	void on_actionRemoveSegment_triggered();
 	void on_horizontalSlider_valueChanged(int value);
+	void on_actionPlayPause_toggled(bool checked);
+	void on_actionStop_triggered();
 
 protected:
 	void timerEvent(QTimerEvent *event);
@@ -62,6 +64,8 @@ private:
 	QtVariantEditorFactory *variantFactory;
 
 	std::shared_ptr<NovelTea::Cutscene> m_cutscene;
+	bool m_cutscenePlaying;
+	size_t m_lastTimeMs;
 };
 
 #endif // CUTSCENEWIDGET_HPP
