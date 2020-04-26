@@ -39,6 +39,7 @@ private slots:
 	void on_horizontalSlider_valueChanged(int value);
 	void on_actionPlayPause_toggled(bool checked);
 	void on_actionStop_triggered();
+	void on_actionLoop_toggled(bool checked);
 
 protected:
 	void timerEvent(QTimerEvent *event);
@@ -64,7 +65,10 @@ private:
 	QtVariantEditorFactory *variantFactory;
 
 	std::shared_ptr<NovelTea::Cutscene> m_cutscene;
-	bool m_cutscenePlaying;
+	bool m_cutscenePlaying = false;
+	bool m_segmentLooping = false;
+	size_t m_loopStartMs = 0;
+	size_t m_loopEndMs = 0;
 	size_t m_lastTimeMs;
 };
 

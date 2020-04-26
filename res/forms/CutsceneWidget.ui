@@ -103,6 +103,7 @@
           <addaction name="actionRemoveSegment"/>
           <addaction name="actionPlayPause"/>
           <addaction name="actionStop"/>
+          <addaction name="actionLoop"/>
          </widget>
         </item>
         <item>
@@ -263,6 +264,20 @@
    </property>
    <property name="toolTip">
     <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionLoop">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="view-refresh"/>
+   </property>
+   <property name="text">
+    <string>Loop</string>
+   </property>
+   <property name="toolTip">
+    <string>Loop</string>
    </property>
   </action>
  </widget>

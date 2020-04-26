@@ -180,8 +180,10 @@ void CutsceneWidget::checkIndexChange()
 		data["type"] = "test";
 		data["str"] = "hello! " + std::to_string(index);
 		auto resp = ui->preview->processData(data);
+		m_loopStartMs = m_cutscene->getDurationMs(index);
+		m_loopEndMs = m_loopStartMs + seg->getDuration();
 
-		ui->horizontalSlider->setValue(m_cutscene->getDurationMs(index));
+		ui->horizontalSlider->setValue(m_loopStartMs);
 
 		fillPropertyEditor();
 	}
@@ -319,16 +321,23 @@ void CutsceneWidget::on_treeView_pressed(const QModelIndex &index)
 
 void CutsceneWidget::timerEvent(QTimerEvent *event)
 {
-	if (!m_cutscenePlaying)
+	auto currentValue = ui->horizontalSlider->value();
+
+	if (m_cutscenePlaying)
+	{
+		if (currentValue >= ui->horizontalSlider->maximum())
+		{
+			ui->actionStop->trigger();
+			return;
+		}
+	}
+	else if (m_segmentLooping)
+	{
+
+	}
+	else
 	{
 		checkIndexChange();
-		return;
-	}
-
-	auto currentValue = ui->horizontalSlider->value();
-	if (currentValue == ui->horizontalSlider->maximum())
-	{
-		ui->actionStop->trigger();
 		return;
 	}
 
@@ -353,15 +362,26 @@ void CutsceneWidget::on_actionRemoveSegment_triggered()
 
 void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 {
-	int duration = 0;
-	for (int i = 0; i < m_cutscene->segments().size(); ++i)
+	if (m_segmentLooping)
 	{
-		auto segment = m_cutscene->segments()[i];
-		duration += segment->getDuration();
-		if (duration > value)
+		if (value >= m_loopEndMs)
 		{
-			ui->treeView->setCurrentIndex(itemModel->index(i,0));
-			break;
+			ui->horizontalSlider->setValue(m_loopStartMs);
+			return;
+		}
+	}
+	else
+	{
+		int duration = 0;
+		for (size_t i = 0; i < m_cutscene->segments().size(); ++i)
+		{
+			auto segment = m_cutscene->segments()[i];
+			duration += segment->getDuration();
+			if (duration > value)
+			{
+				ui->treeView->setCurrentIndex(itemModel->index(i,0));
+				break;
+			}
 		}
 	}
 
@@ -376,6 +396,8 @@ void CutsceneWidget::on_actionPlayPause_toggled(bool checked)
 {
 	if (checked)
 	{
+		if (m_segmentLooping)
+			ui->actionLoop->setChecked(false);
 		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
 		ui->actionPlayPause->setIcon(QIcon::fromTheme("media-playback-pause"));
 	}
@@ -395,4 +417,15 @@ void CutsceneWidget::on_actionStop_triggered()
 	ui->actionPlayPause->setChecked(false);
 	ui->horizontalSlider->setValue(0);
 	ui->treeView->setCurrentIndex(itemModel->index(0,0));
+}
+
+void CutsceneWidget::on_actionLoop_toggled(bool checked)
+{
+	if (m_cutscenePlaying)
+		ui->actionPlayPause->setChecked(false);
+	if (checked)
+		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
+	checkIndexChange();
+	ui->horizontalSlider->setEnabled(!checked);
+	m_segmentLooping = checked;
 }
