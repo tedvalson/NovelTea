@@ -118,8 +118,8 @@ void CutsceneWidget::fillPropertyEditor()
 		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
 		prop->setValue(textSegment->getDuration());
 		prop->setAttribute(QLatin1String("minimum"), 0);
-		prop->setAttribute(QLatin1String("maximum"), 10000);
-		prop->setAttribute(QLatin1String("singleStep"), 10);
+		prop->setAttribute(QLatin1String("maximum"), 100000);
+		prop->setAttribute(QLatin1String("singleStep"), 100);
 		ui->propertyBrowser->addProperty(prop);
 
 		prop = variantManager->addProperty(QVariant::Bool, TEXT_NEWLINE);
@@ -151,8 +151,8 @@ void CutsceneWidget::fillPropertyEditor()
 		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
 		prop->setValue(pageBreakSegment->getDuration());
 		prop->setAttribute(QLatin1String("minimum"), 0);
-		prop->setAttribute(QLatin1String("maximum"), 10000);
-		prop->setAttribute(QLatin1String("singleStep"), 10);
+		prop->setAttribute(QLatin1String("maximum"), 100000);
+		prop->setAttribute(QLatin1String("singleStep"), 100);
 		ui->propertyBrowser->addProperty(prop);
 	}
 
