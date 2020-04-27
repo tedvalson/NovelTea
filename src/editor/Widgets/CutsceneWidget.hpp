@@ -42,7 +42,9 @@ private slots:
 	void on_actionLoop_toggled(bool checked);
 
 protected:
-	void timerEvent(QTimerEvent *event);
+	void timerEvent(QTimerEvent*) override;
+	void showEvent(QShowEvent*) override;
+	void hideEvent(QHideEvent*) override;
 
 private:
 	void createMenus();
@@ -60,6 +62,7 @@ private:
 	QMenu *menuAdd;
 	QStandardItemModel *itemModel;
 	int selectedIndex;
+	int timerId;
 
 	QtVariantPropertyManager *variantManager;
 	QtVariantEditorFactory *variantFactory;

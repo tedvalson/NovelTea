@@ -47,7 +47,6 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 
 	ui->richTextEditor->hide();
 
-	startTimer(50);
 }
 
 CutsceneWidget::~CutsceneWidget()
@@ -348,6 +347,17 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 
 	ui->horizontalSlider->setValue(currentValue + deltaMs);
 	m_lastTimeMs = timeMs;
+}
+
+void CutsceneWidget::showEvent(QShowEvent *)
+{
+	m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
+	timerId = startTimer(50);
+}
+
+void CutsceneWidget::hideEvent(QHideEvent *)
+{
+	killTimer(timerId);
 }
 
 void CutsceneWidget::on_actionRemoveSegment_triggered()
