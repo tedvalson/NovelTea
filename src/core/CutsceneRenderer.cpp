@@ -82,11 +82,13 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 	auto effect = segment->getTransition();
 	auto duration = 0.001f * segment->getDuration();
 
+	// Push activeText in callback so it doesn't show before update()
+	TweenEngine::Tween::mark()
+		.setCallback(TweenEngine::TweenCallback::BEGIN, [this, activeText](TweenEngine::BaseTween*){
+			m_texts.push_back(activeText);
+		}).start(m_tweenManager);
+
 	activeText->setPosition(0.f, 0.f);
-	activeText->setScale(0.f, 0.f);
-	TweenEngine::Tween::to(*activeText, ActiveText::SCALE_XY, duration)
-		.target(1.f, 1.f)
-		.start(m_tweenManager);
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *segment)
@@ -127,7 +129,6 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getDelay());
 			startTransitionEffect(seg);
-			m_texts.push_back(activeText);
 		};
 	}
 	else if (type == CutsceneSegment::PageBreak)
