@@ -24,6 +24,9 @@ public:
 	virtual void setDuration(size_t duration);
 	virtual size_t getDuration() const;
 
+	virtual void setDelay(size_t delay);
+	virtual size_t getDelay() const;
+
 	void setScriptOverride(bool override);
 	bool getScriptOverride() const;
 
@@ -32,6 +35,7 @@ public:
 
 private:
 	size_t m_duration = 1000;
+	size_t m_delay = 1000;
 	bool m_scriptOverride = false;
 	std::string m_scriptOverrideName;
 };

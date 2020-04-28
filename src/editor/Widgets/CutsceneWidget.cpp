@@ -15,6 +15,7 @@ Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 #define TEXT_NEWLINE "Start New Line"
 #define TRANSITION_EFFECT "Transition Effect"
 #define TRANSITION_DURATION "Transition Duration"
+#define SEGMENT_DELAY "Delay"
 #define SCRIPT_OVERRIDE "Script Override"
 #define SCRIPT_OVERRIDE_NAME "Variable or Function"
 
@@ -46,7 +47,6 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
 
 	ui->richTextEditor->hide();
-
 }
 
 CutsceneWidget::~CutsceneWidget()
@@ -114,13 +114,6 @@ void CutsceneWidget::fillPropertyEditor()
 		prop->setValue(textSegment->getTransition());
 		ui->propertyBrowser->addProperty(prop);
 
-		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
-		prop->setValue(textSegment->getDuration());
-		prop->setAttribute(QLatin1String("minimum"), 0);
-		prop->setAttribute(QLatin1String("maximum"), 100000);
-		prop->setAttribute(QLatin1String("singleStep"), 100);
-		ui->propertyBrowser->addProperty(prop);
-
 		prop = variantManager->addProperty(QVariant::Bool, TEXT_NEWLINE);
 		prop->setValue(textSegment->getBeginWithNewLine());
 		ui->propertyBrowser->addProperty(prop);
@@ -146,14 +139,21 @@ void CutsceneWidget::fillPropertyEditor()
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
 		prop->setValue(pageBreakSegment->getTransition());
 		ui->propertyBrowser->addProperty(prop);
-
-		prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
-		prop->setValue(pageBreakSegment->getDuration());
-		prop->setAttribute(QLatin1String("minimum"), 0);
-		prop->setAttribute(QLatin1String("maximum"), 100000);
-		prop->setAttribute(QLatin1String("singleStep"), 100);
-		ui->propertyBrowser->addProperty(prop);
 	}
+
+	prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
+	prop->setValue(segment->getDuration());
+	prop->setAttribute(QLatin1String("minimum"), 0);
+	prop->setAttribute(QLatin1String("maximum"), 100000);
+	prop->setAttribute(QLatin1String("singleStep"), 100);
+	ui->propertyBrowser->addProperty(prop);
+
+	prop = variantManager->addProperty(QVariant::Int, SEGMENT_DELAY);
+	prop->setValue(segment->getDelay());
+	prop->setAttribute(QLatin1String("minimum"), 0);
+	prop->setAttribute(QLatin1String("maximum"), 100000);
+	prop->setAttribute(QLatin1String("singleStep"), 100);
+	ui->propertyBrowser->addProperty(prop);
 
 	prop = variantManager->addProperty(QVariant::Bool, SCRIPT_OVERRIDE);
 	prop->setValue(segment->getScriptOverride());
@@ -167,22 +167,16 @@ void CutsceneWidget::fillPropertyEditor()
 
 void CutsceneWidget::checkIndexChange()
 {
-	if (m_cutscenePlaying)
-		return;
 
 	int index = ui->treeView->currentIndex().row();
 	if (selectedIndex != index)
 	{
 		selectedIndex = index;
 
-		json data = json::object();
-		data["type"] = "test";
-		data["str"] = "hello! " + std::to_string(index);
-		auto resp = ui->preview->processData(data);
-		m_loopStartMs = m_cutscene->getDurationMs(index);
-		m_loopEndMs = m_loopStartMs + seg->getDuration();
+		updateLoopValues();
 
-		ui->horizontalSlider->setValue(m_loopStartMs);
+		if (!m_cutscenePlaying && !m_segmentLooping)
+			ui->horizontalSlider->setValue(m_loopStartMs);
 
 		fillPropertyEditor();
 	}
@@ -223,10 +217,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	}
 
 	itemModel->setData(itemModel->index(index, 1), text);
-	ui->horizontalSlider->setMaximum(m_cutscene->getDurationMs());
-
-	auto jdata = json::object({{"event","cutscene"}, {"cutscene",*m_cutscene}});
-	auto resp = ui->preview->processData(jdata);
+	updateCutscene();
 }
 
 void CutsceneWidget::saveData() const
@@ -281,8 +272,6 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 			textSegment->setBeginWithNewLine(value.toBool());
 		else if (propertyName == TRANSITION_EFFECT)
 			textSegment->setTransition(value.toInt());
-		else if (propertyName == TRANSITION_DURATION)
-			textSegment->setDuration(value.toInt());
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
 	{
@@ -290,17 +279,18 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 
 		if (propertyName == TRANSITION_EFFECT)
 			pageBreakSegment->setTransition(value.toInt());
-		else if (propertyName == TRANSITION_DURATION)
-			pageBreakSegment->setDuration(value.toInt());
 	}
 
-	if (propertyName == SCRIPT_OVERRIDE)
+	if (propertyName == TRANSITION_DURATION)
+		segment->setDuration(value.toInt());
+	else if (propertyName == SEGMENT_DELAY)
+		segment->setDelay(value.toInt());
+	else if (propertyName == SCRIPT_OVERRIDE)
 		segment->setScriptOverride(value.toBool());
 	else if (propertyName == SCRIPT_OVERRIDE_NAME)
 		segment->setScriptOverrideName(value.toString().toStdString());
 
-//	itemModel->setData(itemModel->index(selectedIndex, 2), QVariant::fromValue(data));
-
+	updateCutscene();
 }
 
 void CutsceneWidget::on_actionAddText_triggered()
@@ -332,7 +322,14 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 	}
 	else if (m_segmentLooping)
 	{
-
+		checkIndexChange();
+		if (currentValue >= m_loopEndMs || currentValue < m_loopStartMs)
+		{
+			ui->horizontalSlider->setValue(m_loopStartMs);
+			return;
+		}
+		if (m_loopStartMs == m_loopEndMs)
+			return;
 	}
 	else
 	{
@@ -343,7 +340,7 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 	auto timeMs = NovelTea::Engine::getSystemTimeMs();
 	auto deltaMs = timeMs - m_lastTimeMs;
 	auto jdata = json::object({{"event","update"}, {"delta",deltaMs}});
-	auto resp = ui->preview->processData(jdata);
+	ui->preview->processData(jdata);
 
 	ui->horizontalSlider->setValue(currentValue + deltaMs);
 	m_lastTimeMs = timeMs;
@@ -360,6 +357,37 @@ void CutsceneWidget::hideEvent(QHideEvent *)
 	killTimer(timerId);
 }
 
+void CutsceneWidget::updateCutscene()
+{
+	ui->horizontalSlider->setMaximum(m_cutscene->getDelayMs());
+	auto value = ui->horizontalSlider->value();
+
+	auto jdata = json::object({{"event","cutscene"}, {"cutscene",*m_cutscene}});
+	ui->preview->processData(jdata);
+
+	if (value > 0)
+	{
+		jdata = json::object({{"event","setPlaybackTime"}, {"value",value}});
+		ui->preview->processData(jdata);
+	}
+
+	updateLoopValues();
+}
+
+void CutsceneWidget::updateLoopValues()
+{
+	if (selectedIndex < 0)
+		return;
+
+	auto segment = m_cutscene->segments()[selectedIndex];
+	auto max = ui->horizontalSlider->maximum();
+
+	m_loopStartMs = m_cutscene->getDelayMs(selectedIndex);
+	m_loopEndMs = m_loopStartMs + segment->getDuration();
+	if (m_loopEndMs > max)
+		m_loopEndMs = max;
+}
+
 void CutsceneWidget::on_actionRemoveSegment_triggered()
 {
 	auto &segments = m_cutscene->segments();
@@ -372,24 +400,22 @@ void CutsceneWidget::on_actionRemoveSegment_triggered()
 
 void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 {
-	if (m_segmentLooping)
-	{
-		if (value >= m_loopEndMs)
-		{
-			ui->horizontalSlider->setValue(m_loopStartMs);
-			return;
-		}
-	}
-	else
+	if (!m_segmentLooping)
 	{
 		int duration = 0;
 		for (size_t i = 0; i < m_cutscene->segments().size(); ++i)
 		{
 			auto segment = m_cutscene->segments()[i];
-			duration += segment->getDuration();
+			duration += segment->getDelay();
 			if (duration > value)
 			{
-				ui->treeView->setCurrentIndex(itemModel->index(i,0));
+				if (selectedIndex != i)
+				{
+					ui->treeView->setCurrentIndex(itemModel->index(i,0));
+					selectedIndex = i;
+					updateLoopValues();
+					fillPropertyEditor();
+				}
 				break;
 			}
 		}
@@ -399,7 +425,7 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 		return;
 
 	json data = json::object({{"event","setPlaybackTime"}, {"value",value}});
-	auto resp = ui->preview->processData(data);
+	ui->preview->processData(data);
 }
 
 void CutsceneWidget::on_actionPlayPause_toggled(bool checked)
@@ -408,6 +434,8 @@ void CutsceneWidget::on_actionPlayPause_toggled(bool checked)
 	{
 		if (m_segmentLooping)
 			ui->actionLoop->setChecked(false);
+		if (ui->horizontalSlider->value() == ui->horizontalSlider->maximum())
+			ui->horizontalSlider->setValue(0);
 		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
 		ui->actionPlayPause->setIcon(QIcon::fromTheme("media-playback-pause"));
 	}
@@ -425,8 +453,6 @@ void CutsceneWidget::on_actionStop_triggered()
 	if (!m_cutscenePlaying)
 		return;
 	ui->actionPlayPause->setChecked(false);
-	ui->horizontalSlider->setValue(0);
-	ui->treeView->setCurrentIndex(itemModel->index(0,0));
 }
 
 void CutsceneWidget::on_actionLoop_toggled(bool checked)

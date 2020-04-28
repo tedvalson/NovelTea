@@ -14,7 +14,8 @@ json CutscenePageBreakSegment::toJson() const
 		getScriptOverride(),
 		getScriptOverrideName(),
 		m_transition,
-		getDuration()
+		getDuration(),
+		getDelay()
 	});
 	return j;
 }
@@ -25,6 +26,7 @@ bool CutscenePageBreakSegment::fromJson(const json &j)
 	setScriptOverrideName(j[2]);
 	m_transition = j[3];
 	setDuration(j[4]);
+	setDelay(j[5]);
 	return true;
 }
 

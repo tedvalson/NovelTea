@@ -11,6 +11,8 @@ namespace NovelTea
 {
 
 class Cutscene;
+class CutsceneTextSegment;
+class CutscenePageBreakSegment;
 class ActiveText;
 
 class CutsceneRenderer : public sf::Drawable, public TweenTransformable<sf::Transformable>
@@ -25,14 +27,16 @@ public:
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
+	void startTransitionEffect(const CutsceneTextSegment *segment);
+	void startTransitionEffect(const CutscenePageBreakSegment *segment);
 	void addSegmentToQueue(size_t segmentIndex);
 
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	size_t m_segmentIndex;
-	size_t m_callbacksQueued;
 
 	std::vector<std::shared_ptr<ActiveText>> m_texts;
+	std::vector<std::shared_ptr<ActiveText>> m_textsOld;
 	sf::Vector2f m_cursorPos;
 
 	sf::Time m_timePassed;

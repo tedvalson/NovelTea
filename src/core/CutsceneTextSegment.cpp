@@ -16,6 +16,7 @@ json CutsceneTextSegment::toJson() const
 		getScriptOverrideName(),
 		m_transition,
 		getDuration(),
+		getDelay(),
 		m_beginWithNewline,
 		*m_activeText
 	});
@@ -28,8 +29,9 @@ bool CutsceneTextSegment::fromJson(const json &j)
 	setScriptOverrideName(j[2]);
 	m_transition = j[3];
 	setDuration(j[4]);
-	m_beginWithNewline = j[5];
-	m_activeText = std::make_shared<ActiveText>(j[6]);
+	setDelay(j[5]);
+	m_beginWithNewline = j[6];
+	m_activeText = std::make_shared<ActiveText>(j[7]);
 	return true;
 }
 

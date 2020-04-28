@@ -23,12 +23,12 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 void CutsceneRenderer::reset()
 {
 	m_segmentIndex = 0;
-	m_callbacksQueued = 0;
 	m_timePassed = sf::Time::Zero;
 	m_timeToNext = sf::Time::Zero;
 	m_cursorPos = sf::Vector2f();
 
 	m_texts.clear();
+	m_textsOld.clear();
 	m_tweenManager.killAll();
 
 	addSegmentToQueue(0);
@@ -54,13 +54,13 @@ void CutsceneRenderer::update(float delta)
 		do
 		{
 			segmentIndex = m_segmentIndex;
-			m_tweenManager.update(0.f);
+			m_tweenManager.update(0.001f); // Trigger next segment if delay is 0
+			m_tweenManager.update(0.001f); // Trigger possible 0 delay tween in above segment
 		}
 		while (segmentIndex != m_segmentIndex);
 	}
 
 	m_timePassed += timeDelta;
-	m_timeToNext -= timeDelta;
 	m_tweenManager.update(timeDelta.asSeconds());
 }
 
@@ -71,6 +71,34 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	for (auto &text : m_texts)
 	{
 		target.draw(*text, states);
+	}
+	for (auto &text : m_textsOld)
+		target.draw(*text, states);
+}
+
+void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
+{
+	auto activeText = segment->getActiveText();
+	auto effect = segment->getTransition();
+	auto duration = 0.001f * segment->getDuration();
+
+	activeText->setPosition(0.f, 0.f);
+	activeText->setScale(0.f, 0.f);
+	TweenEngine::Tween::to(*activeText, ActiveText::SCALE_XY, duration)
+		.target(1.f, 1.f)
+		.start(m_tweenManager);
+}
+
+void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *segment)
+{
+	auto effect = segment->getTransition();
+	auto duration = 0.001f * segment->getDuration();
+
+	for (auto &text : m_textsOld)
+	{
+		TweenEngine::Tween::to(*text, ActiveText::POSITION_X, duration)
+			.target(0.f - text->getSize().x)
+			.start(m_tweenManager);
 	}
 }
 
@@ -90,49 +118,41 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	if (type == CutsceneSegment::Text)
 	{
 		auto seg = static_cast<CutsceneTextSegment*>(segment.get());
-		timeToNext = 0.001f * seg->getDuration();
+		timeToNext = 0.001f * seg->getDelay();
 
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
 			auto activeText = seg->getActiveText();
 			activeText->setCursorStart(m_cursorPos);
-			activeText->setPosition(0.f, 0.f);
 			m_cursorPos = activeText->getCursorEnd();
-			m_timeToNext = sf::milliseconds(seg->getDuration());
+			m_timeToNext = sf::milliseconds(seg->getDelay());
+			startTransitionEffect(seg);
 			m_texts.push_back(activeText);
-		};
-		endCallback = [this, segmentIndex](TweenEngine::BaseTween*)
-		{
-			addSegmentToQueue(segmentIndex + 1);
 		};
 	}
 	else if (type == CutsceneSegment::PageBreak)
 	{
 		auto seg = static_cast<CutscenePageBreakSegment*>(segment.get());
-		timeToNext = 0.001f * seg->getDuration();
+		timeToNext = 0.001f * seg->getDelay();
 
-		beginCallback = [this, seg, timeToNext](TweenEngine::BaseTween*)
+		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
-			m_timeToNext = sf::milliseconds(seg->getDuration());
-
-			for (auto &text : m_texts)
-			{
-				TweenEngine::Tween::to(*text, ActiveText::POSITION_X, timeToNext)
-					.target(0.f - text->getSize().x)
-					.start(m_tweenManager);
-			}
-		};
-
-		endCallback = [this, segmentIndex](TweenEngine::BaseTween*) {
+			m_textsOld = m_texts;
 			m_texts.clear();
+			m_timeToNext = sf::milliseconds(seg->getDelay());
 			m_cursorPos = sf::Vector2f();
-			addSegmentToQueue(segmentIndex + 1);
+			startTransitionEffect(seg);
 		};
 	}
 	else
 	{
 		// TODO: Throw error
 	}
+
+	endCallback = [this, segmentIndex](TweenEngine::BaseTween*)
+	{
+		addSegmentToQueue(segmentIndex + 1);
+	};
 
 	TweenEngine::Tween::mark()
 		.setCallback(TweenEngine::TweenCallback::BEGIN, beginCallback)

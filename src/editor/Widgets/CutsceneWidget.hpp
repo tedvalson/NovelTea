@@ -46,6 +46,9 @@ protected:
 	void showEvent(QShowEvent*) override;
 	void hideEvent(QHideEvent*) override;
 
+	void updateCutscene();
+	void updateLoopValues();
+
 private:
 	void createMenus();
 	void fillPropertyEditor();

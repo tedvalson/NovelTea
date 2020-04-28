@@ -25,6 +25,9 @@ public:
 	size_t getDurationMs() const;
 	size_t getDurationMs(size_t indexEnd) const;
 
+	size_t getDelayMs() const;
+	size_t getDelayMs(size_t indexEnd) const;
+
 	Cutscene(Cutscene&&) = default;
 	Cutscene& operator=(Cutscene&&) = default;
 	Cutscene(const Cutscene&) = delete;

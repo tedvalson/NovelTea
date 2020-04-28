@@ -52,7 +52,7 @@ size_t Cutscene::getDurationMs() const
 	if (m_segments.empty())
 		return 0;
 	else
-		return getDurationMs(m_segments.size() - 1);
+		return getDurationMs(m_segments.size());
 }
 
 size_t Cutscene::getDurationMs(size_t indexEnd) const
@@ -61,6 +61,22 @@ size_t Cutscene::getDurationMs(size_t indexEnd) const
 	for (auto i = 0u; i < indexEnd; ++i)
 		duration += m_segments[i]->getDuration();
 	return duration;
+}
+
+size_t Cutscene::getDelayMs() const
+{
+	if (m_segments.empty())
+		return 0;
+	else
+		return getDelayMs(m_segments.size());
+}
+
+size_t Cutscene::getDelayMs(size_t indexEnd) const
+{
+	auto delay = 0u;
+	for (auto i = 0u; i < indexEnd; ++i)
+		delay += m_segments[i]->getDelay();
+	return delay;
 }
 
 } // namespace NovelTea

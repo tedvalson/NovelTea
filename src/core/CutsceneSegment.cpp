@@ -39,6 +39,16 @@ size_t CutsceneSegment::getDuration() const
 	return m_duration;
 }
 
+void CutsceneSegment::setDelay(size_t delay)
+{
+	m_delay = delay;
+}
+
+size_t CutsceneSegment::getDelay() const
+{
+	return m_delay;
+}
+
 void CutsceneSegment::setScriptOverride(bool override)
 {
 	m_scriptOverride = override;
