@@ -27,6 +27,30 @@ int TreeModel::columnCount(const QModelIndex &parent) const
 		return rootItem->columnCount();
 }
 
+bool TreeModel::insertRows(int position, int rows, const QModelIndex &parent)
+{
+	TreeItem *parentItem = getItem(parent);
+	bool success;
+
+	beginInsertRows(parent, position, position + rows - 1);
+	success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+	endInsertRows();
+
+	return success;
+}
+
+bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent)
+{
+	TreeItem *parentItem = getItem(parent);
+	bool success = true;
+
+	beginRemoveRows(parent, position, position + rows - 1);
+	success = parentItem->removeChildren(position, rows);
+	endRemoveRows();
+
+	return success;
+}
+
 void TreeModel::loadProject(const NovelTea::ProjectData &project)
 {
 	beginResetModel();
@@ -87,6 +111,16 @@ void TreeModel::update()
 	if (!setData(i, "Kool test"))
 		std::cout << "failed to update" << std::endl;
 
+}
+
+TreeItem *TreeModel::getItem(const QModelIndex &index) const
+{
+	if (index.isValid()) {
+		TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+		if (item)
+			return item;
+	}
+	return rootItem;
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const

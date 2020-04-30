@@ -21,6 +21,9 @@ public:
 	int row() const;
 	TreeItem *parent();
 
+	bool insertChildren(int position, int count, int columns);
+	bool removeChildren(int position, int count);
+
 private:
 	QList<TreeItem*> childItems;
 	QList<QVariant> itemData;

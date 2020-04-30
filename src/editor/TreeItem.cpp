@@ -54,6 +54,32 @@ TreeItem *TreeItem::parent()
 	return parentItem;
 }
 
+bool TreeItem::insertChildren(int position, int count, int columns)
+{
+	if (position < 0 || position > childItems.size())
+		return false;
+
+	for (int row = 0; row < count; ++row) {
+		QList<QVariant> data;
+		data << "[empty]" << -1;
+		TreeItem *item = new TreeItem(data, this);
+		childItems.insert(position, item);
+	}
+
+	return true;
+}
+
+bool TreeItem::removeChildren(int position, int count)
+{
+	if (position < 0 || position + count > childItems.size())
+		return false;
+
+	for (int row = 0; row < count; ++row)
+		delete childItems.takeAt(position);
+
+	return true;
+}
+
 int TreeItem::row() const
 {
 	if (parentItem)

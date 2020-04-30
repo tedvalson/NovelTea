@@ -30,9 +30,17 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+	bool insertRows(int position, int rows,
+					const QModelIndex &parent = QModelIndex());
+	bool removeRows(int position, int rows,
+					const QModelIndex &parent = QModelIndex());
+
 	void loadProject(const NovelTea::ProjectData &project);
 	void rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName);
 	void update();
+
+private:
+	TreeItem *getItem(const QModelIndex &index) const;
 
 	TreeItem *rootItem;
 	TreeItem *cutsceneRoot;

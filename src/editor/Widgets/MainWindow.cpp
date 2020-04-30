@@ -81,6 +81,24 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 		}
 	}
 
+	// If added widget is modified when added, then it's new
+	if (widget->isModified())
+	{
+		auto type = widget->getType();
+		int row = 0;
+		if (type == EditorTabWidget::Cutscene)
+			row = 1;
+
+		auto parent = treeModel->index(row, 0);
+		if (treeModel->insertRow(0, parent))
+		{
+			treeModel->setData(treeModel->index(0, 0, parent), QString::fromStdString(widget->idName()));
+			treeModel->setData(treeModel->index(0, 1, parent), type);
+		}
+		widget->save();
+		Proj.saveToFile();
+	}
+
 	auto index = ui->tabWidget->addTab(widget, widget->tabText());
 	ui->tabWidget->setCurrentIndex(index);
 	refreshTabs();
@@ -188,7 +206,8 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
 
 void MainWindow::on_treeView_activated(const QModelIndex &index)
 {
-	auto item = static_cast<TreeItem*>(index.internalPointer());
+	auto proxyIndex = proxyModel->mapToSource(index);
+	auto item = static_cast<TreeItem*>(proxyIndex.internalPointer());
 	auto type = item->data(1);
 	if (!type.isValid())
 		return;
@@ -201,10 +220,10 @@ void MainWindow::on_treeView_activated(const QModelIndex &index)
 void MainWindow::on_treeView_pressed(const QModelIndex &index)
 {
 	qDebug() << "index:" << index.column() << index.row();
-	auto t = proxyModel->mapToSource(index);
+	auto proxyIndex = proxyModel->mapToSource(index);
 	if (QApplication::mouseButtons() != Qt::RightButton)
 		return;
-	auto item = static_cast<TreeItem*>(t.internalPointer());
+	auto item = static_cast<TreeItem*>(proxyIndex.internalPointer());
 	auto type = item->data(1);
 	if (!type.isValid())
 		return;
