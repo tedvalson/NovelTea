@@ -69,9 +69,7 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	states.transform *= getTransform();
 
 	for (auto &text : m_texts)
-	{
 		target.draw(*text, states);
-	}
 	for (auto &text : m_textsOld)
 		target.draw(*text, states);
 }
@@ -89,6 +87,12 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 		}).start(m_tweenManager);
 
 	activeText->setPosition(0.f, 0.f);
+	for (auto &text : activeText->m_texts)
+	{
+		TweenEngine::Tween::from(text, TweenText::FILL_COLOR_ALPHA, duration)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *segment)

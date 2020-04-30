@@ -12,6 +12,33 @@ ActiveText::ActiveText()
 {
 }
 
+std::vector<sf::String> explode(const sf::String &string, sf::Uint32 delimiter)
+{
+	if (string.isEmpty())
+		return std::vector<sf::String>();
+
+	// For each character in the string
+	std::vector<sf::String> result;
+	sf::String buffer;
+	for (sf::Uint32 character : string) {
+		// If we've hit the delimiter character
+		if (character == delimiter) {
+			// Add them to the result vector
+			result.push_back(buffer);
+			buffer.clear();
+		} else {
+			// Accumulate the next character into the sequence
+			buffer += character;
+		}
+	}
+
+	// Add to the result if buffer still has contents or if the last character is a delimiter
+	if (!buffer.isEmpty() || string[string.getSize() - 1] == delimiter)
+		result.push_back(buffer);
+
+	return result;
+}
+
 json ActiveText::toJson() const
 {
 	json j = json::array();
@@ -104,11 +131,20 @@ void ActiveText::ensureUpdate() const
 	if (!m_needsUpdate)
 		return;
 
+	auto processedFirstBlock = false;
 	m_cursorPos = m_cursorStart;
 	m_texts.clear();
 
 	for (auto &block : blocks())
 	{
+		if (processedFirstBlock)
+		{
+			m_cursorPos.x = 0.f;
+			m_cursorPos.y += 30.f; // TODO: don't used fixed line height
+		}
+		else
+			processedFirstBlock = true;
+
 		for (auto &frag : block->fragments())
 		{
 			auto font = Proj.getFont(0);
@@ -122,22 +158,42 @@ void ActiveText::ensureUpdate() const
 			if (format.underline())
 				style |= sf::Text::Underlined;
 
+
+			auto words = explode(frag->getText(), ' ');
+
 			TweenText text;
 			text.setFont(*font);
-			text.setString(frag->getText());
-			text.setPosition(m_cursorPos);
 			text.setFillColor(sf::Color::Black);
 			text.setStyle(style);
 			text.setCharacterSize(format.size()*3);
-			m_texts.push_back(text);
 
-			m_cursorPos.x += text.getLocalBounds().width;
-			if (m_cursorPos.x > m_size.x)
+			text.setString(" ");
+			auto spaceWidth = text.getLocalBounds().width;
+
+			for (auto &word : words)
 			{
-				m_cursorPos.x = 0;
-				m_cursorPos.y += text.getLocalBounds().height;
-				m_cursorPos.y += 5.f * text.getLineSpacing();
+				// Don't start line with a space
+				if (word.isEmpty() && m_cursorPos.x == 0)
+					continue;
+
+				text.setString(word);
+
+				auto newX = m_cursorPos.x + text.getLocalBounds().width + spaceWidth;
+
+				if (newX > m_size.x && m_cursorPos.x > 0.f)
+				{
+					m_cursorPos.x = 0.f;
+					m_cursorPos.y += text.getLocalBounds().height;
+					m_cursorPos.y += 5.f * text.getLineSpacing();
+				}
+
+				text.setPosition(m_cursorPos);
+				m_cursorPos.x += text.getLocalBounds().width + spaceWidth;
+				m_texts.push_back(text);
 			}
+
+			// No trailing spaces
+			m_cursorPos.x -= spaceWidth;
 		}
 	}
 

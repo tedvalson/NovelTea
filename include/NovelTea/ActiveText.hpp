@@ -14,6 +14,7 @@ class TextBlock;
 
 class ActiveText : public JsonSerializable, public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
+	friend class CutsceneRenderer;
 public:
 	ActiveText();
 	json toJson() const override;
