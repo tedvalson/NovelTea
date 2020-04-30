@@ -4,7 +4,6 @@ FILE(GLOB_RECURSE TWEEN_ENGINE_SOURCE ${PROJECT_SOURCE_DIR}/external/TweenEngine
 
 set(SOURCE_FILES
 	${SRCROOT}/Engine.cpp
-	${SRCROOT}/RichText.cpp
 	${SRCROOT}/States/StateStack.cpp
 	${SRCROOT}/States/State.cpp
 	${SRCROOT}/States/StateMain.cpp
