@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/TweenObjects.hpp>
-#include <NovelTea/RichText.hpp>
 #include <json.hpp>
 
 using json = nlohmann::json;
@@ -37,7 +36,6 @@ private:
 	sf::Font font;
 	TweenText text;
 	TweenRectangleShape shape;
-	RichText richText;
 	sf::Texture texture;
 	TweenEngine::TweenManager tweenManager;
 };

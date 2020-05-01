@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.11)
 project("NovelTea")
 
 option(BUILD_DOCS "Build doxygen documentation" OFF)
-option(BUILD_TESTS "Build unit tests" ON)
+option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EDITOR "Build NovelTea Qt5 editor" ON)
 option(BUILD_ANDROID "Build Android app" OFF)
 

@@ -8,7 +8,6 @@ namespace NovelTea
 
 StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
-, richText(sf::Vector2f(0.7f * getContext().config.width, 600.f))
 {
 	font.loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf");
 
@@ -27,30 +26,19 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	shape.setTexture(&texture);
 	shape.setOutlineColor(sf::Color::Red);
 
-	richText.setCharacterSize(30);
-//	richText.setSize(sf::Vector2f(0.7f * getContext().config.width, 600.f));
-	richText.setPosition(50.f, 50.f);
 
-	richText.setFont(font);
-	richText << sf::Color::Black;
-	richText << "\tThis is a " << sf::Text::Bold << "test" << sf::Text::Regular << " sentence.\nAnd here's another!";
 
 //	TweenEngine::Tween::to(text, TweenText::OUTLINE_THICKNESS, 0.5f)
 //		.target(5.f)
 //		.repeatYoyo(-1, 0.f)
 //		.start(tweenManager);
 
-	TweenEngine::Tween::to(richText.getLines()[0].getTexts()[2], TweenText::FILL_COLOR_RGB, 0.5f)
-		.target(255.f, 0.f, 0.f)
-		.repeatYoyo(-1, 0.f)
-		.start(tweenManager);
 }
 
 void StateMain::render(sf::RenderTarget &target)
 {
 //	target.draw(shape);
 	target.draw(text);
-	target.draw(richText);
 }
 
 void *StateMain::processData(void *data)

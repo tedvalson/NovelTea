@@ -11,7 +11,7 @@ addons:
 
 before_script:
 - mkdir build && cd build
-- cmake .. $CMAKE_FLAGS
+- cmake $CMAKE_FLAGS ..
 
 script:
 - cmake --build .
@@ -24,18 +24,18 @@ matrix:
     dist: xenial
     compiler: gcc
     env:
-      - CMAKE_FLAGS="-DBUILD_TEST=ON"
+      - CMAKE_FLAGS="-DBUILD_TEST=OFF -DBUILD_DOCS=ON"
 
   - name: "macOS Xcode 10"
     os: osx
     osx_image: xcode10
     env:
-     - CMAKE_FLAGS="-DBUILD_TEST=ON"
+     - CMAKE_FLAGS="-DBUILD_TEST=OFF"
 
   - name: "Visual studio 15 2017"
     os: windows
     env:
-      - CMAKE_FLAGS="-DBUILD_TEST=ON"
+      - CMAKE_FLAGS="-DBUILD_TEST=OFF"
 
 notifications:
   email: false
