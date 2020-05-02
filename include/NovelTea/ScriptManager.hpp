@@ -13,7 +13,10 @@ class ScriptManager
 public:
 	static ScriptManager &instance();
 
-	void run(const std::string& script);
+	inline void run(const std::string& script)
+	{
+		run<void>(script);
+	}
 
 	template <typename T>
 	inline T run(const std::string &script)
@@ -26,6 +29,7 @@ protected:
 	ScriptManager();
 	~ScriptManager();
 
+	void registerFunctions();
 	void registerClasses();
 
 private:

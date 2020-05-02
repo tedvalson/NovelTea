@@ -7,12 +7,25 @@
 #include <fstream>
 #include <iostream>
 
+#define REGISTER_CONSTRUCTOR(class) \
+	dukglue_register_function(m_context, std::make_shared<class>, "make"#class)
+
+namespace
+{
+	void print(const std::string &str)
+	{
+		std::cout << str << std::endl;
+	}
+}
+
 namespace NovelTea
 {
 
 ScriptManager::ScriptManager()
 {
 	m_context = duk_create_heap_default();
+
+	registerFunctions();
 	registerClasses();
 }
 
@@ -21,22 +34,25 @@ ScriptManager::~ScriptManager()
 	duk_destroy_heap(m_context);
 }
 
+void ScriptManager::registerFunctions()
+{
+	dukglue_register_function(m_context, print, "print");
+}
+
 void ScriptManager::registerClasses()
 {
 	// ActiveText
-	dukglue_register_constructor<ActiveText>(m_context, "ActiveText");
+	REGISTER_CONSTRUCTOR(ActiveText);
 	dukglue_register_method(m_context, &ActiveText::addBlock, "addBlock");
-	// TextBlock
-	dukglue_register_constructor<TextBlock>(m_context, "TextBlock");
-	dukglue_register_method(m_context, &TextBlock::addFragment, "addFragment");
-	// TextFragment
-	dukglue_register_constructor<TextFragment>(m_context, "TextFragment");
-	dukglue_register_method(m_context, &TextFragment::setText, "setText");
-}
+	dukglue_register_method(m_context, &ActiveText::refresh, "refresh");
 
-void ScriptManager::run(const std::string &script)
-{
-	run<void>(script);
+	// TextBlock
+	REGISTER_CONSTRUCTOR(TextBlock);
+	dukglue_register_method(m_context, &TextBlock::addFragment, "addFragment");
+
+	// TextFragment
+	REGISTER_CONSTRUCTOR(TextFragment);
+	dukglue_register_property(m_context, &TextFragment::getText, &TextFragment::setText, "text");
 }
 
 ScriptManager &ScriptManager::instance()

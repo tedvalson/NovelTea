@@ -12,14 +12,14 @@ json TextFragment::toJson() const
 {
 	return json::array({
 		Proj.addTextFormat(m_textFormat),
-		m_text.toAnsiString()
+		m_text
 	});
 }
 
 bool TextFragment::fromJson(const json &j)
 {
 	m_textFormat = Proj.textFormat(j[0]);
-	m_text = j[1].get<std::string>();
+	m_text = j[1];
 	return true;
 }
 
@@ -33,12 +33,12 @@ const TextFormat &TextFragment::getTextFormat() const
 	return m_textFormat;
 }
 
-void TextFragment::setText(const sf::String &text)
+void TextFragment::setText(const std::string &text)
 {
 	m_text = text;
 }
 
-const sf::String &TextFragment::getText() const
+const std::string &TextFragment::getText() const
 {
 	return m_text;
 }

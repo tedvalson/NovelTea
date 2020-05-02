@@ -3,7 +3,6 @@
 
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/TextFormat.hpp>
-#include <SFML/System/String.hpp>
 
 namespace NovelTea
 {
@@ -18,12 +17,12 @@ public:
 	void setTextFormat(const TextFormat &textFormat);
 	const TextFormat &getTextFormat() const;
 
-	void setText(const sf::String &text);
-	const sf::String &getText() const;
+	void setText(const std::string &text);
+	const std::string &getText() const;
 
 private:
 	TextFormat m_textFormat;
-	sf::String m_text;
+	std::string m_text;
 };
 
 } // namespace NovelTea
