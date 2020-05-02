@@ -11,6 +11,7 @@ option(BUILD_ANDROID "Build Android app" OFF)
 include_directories(
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/external/TweenEngine/include
+	${PROJECT_SOURCE_DIR}/external
 )
 
 # C++11 support
