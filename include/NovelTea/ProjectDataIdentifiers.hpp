@@ -18,4 +18,7 @@
 #define NT_CUTSCENE_BREAK  1
 #define NT_TEXTFORMATS     "textformats"
 
+// Actually for SaveData
+#define NT_VARIABLES       "variables"
+
 #endif // NOVELTEA_PROJECTDATAIDENTIFIERS_HPP

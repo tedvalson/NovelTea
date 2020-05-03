@@ -1,5 +1,6 @@
 #include <NovelTea/ScriptManager.hpp>
 
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
@@ -37,6 +38,9 @@ ScriptManager::~ScriptManager()
 void ScriptManager::registerFunctions()
 {
 	dukglue_register_function(m_context, print, "print");
+	dukglue_register_function(m_context, SaveData::setVariables, "setVariables");
+	dukglue_register_function(m_context, SaveData::getVariables, "getVariables");
+
 }
 
 void ScriptManager::registerClasses()

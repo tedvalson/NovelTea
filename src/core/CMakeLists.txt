@@ -10,6 +10,7 @@ set(SOURCE_FILES
 	${SRCROOT}/JsonSerializable.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/ProjectData.cpp
+	${SRCROOT}/SaveData.cpp
 	${SRCROOT}/ScriptManager.cpp
 	${SRCROOT}/TextFormat.cpp
 	${SRCROOT}/CutsceneRenderer.cpp
