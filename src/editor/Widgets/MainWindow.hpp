@@ -22,6 +22,7 @@ public:
 
 	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = false);
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
+	void warnIfInvalid() const;
 
 protected:
 	void closeEvent(QCloseEvent *event);

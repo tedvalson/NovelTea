@@ -28,6 +28,7 @@ public:
 	void closeProject();
 
 	bool isLoaded() const;
+	bool isValid(std::string &errorMessage) const;
 
 	TextFormat textFormat(size_t index) const;
 	size_t addTextFormat(const TextFormat &textFormat);

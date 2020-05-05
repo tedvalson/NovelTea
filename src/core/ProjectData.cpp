@@ -59,6 +59,19 @@ bool ProjectData::isLoaded() const
 	return _loaded;
 }
 
+bool ProjectData::isValid(std::string &errorMessage) const
+{
+	auto entryPoint = data().value(NT_PROJECT_ENTRYPOINT, json::object());
+	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
+	if (entryIdName.empty())
+	{
+		errorMessage = "No valid entry point defined in project settings.";
+		return false;
+	}
+
+	return true;
+}
+
 TextFormat ProjectData::textFormat(size_t index) const
 {
 	if (index >= _textFormats.size())

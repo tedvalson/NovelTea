@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	// Load testing project
 	Proj.loadFromFile("/home/android/test.ntp");
 	treeModel->loadProject(Proj);
+	warnIfInvalid();
 
 	auto w = new CutsceneWidget("New Cutscene");
 	addEditorTab(w);
@@ -117,6 +118,13 @@ int MainWindow::getEditorTabIndex(EditorTabWidget::Type type, const std::string 
 	return -1;
 }
 
+void MainWindow::warnIfInvalid() const
+{
+	std::string error;
+	if (!Proj.isValid(error))
+		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	if (closeProject())
@@ -130,6 +138,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 bool MainWindow::reallyWantToClose()
 {
+	warnIfInvalid();
+
 	std::vector<EditorTabWidget*> modifiedWidgets;
 	QString detailedText = "The following have been modified:";
 	for (int i = 0; i < ui->tabWidget->count(); ++i)
@@ -285,6 +295,7 @@ void MainWindow::on_actionOpenProject_triggered()
 		if (Proj.loadFromFile(fileName.toStdString()))
 		{
 			treeModel->loadProject(Proj);
+			warnIfInvalid();
 		}
 		else
 			qDebug() << "Project load failed: " << fileName;
@@ -305,11 +316,13 @@ void MainWindow::on_actionSave_triggered()
 	{
 		editorWidget->save();
 		Proj.saveToFile();
+		warnIfInvalid();
 	}
 }
 
 void MainWindow::on_actionSaveAs_triggered()
 {
+	warnIfInvalid();
 	auto fileName = QFileDialog::getSaveFileName(this,
 			tr("Save Project"),
 			QString(),
@@ -354,7 +367,7 @@ void MainWindow::on_actionRename_triggered()
 		auto newName = text.toStdString();
 		auto existingOldIndex = getEditorTabIndex(selectedType, selectedIdName);
 		auto existingNewIndex = getEditorTabIndex(selectedType, newName);
-		auto &j = Proj.data()[NT_CUTSCENES];
+		auto &j = ProjData[NT_CUTSCENES];
 
 		if (existingNewIndex >= 0 || j.contains(newName))
 		{
