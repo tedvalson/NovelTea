@@ -28,6 +28,8 @@ public:
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
 
+	void refresh();
+
 	void setCursorStart(const sf::Vector2f &cursorPos);
 	const sf::Vector2f &getCursorEnd() const;
 

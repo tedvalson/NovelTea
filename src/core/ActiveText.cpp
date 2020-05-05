@@ -101,6 +101,11 @@ sf::Vector2f ActiveText::getSize() const
 	return m_size;
 }
 
+void ActiveText::refresh()
+{
+	m_needsUpdate = true;
+}
+
 void ActiveText::setCursorStart(const sf::Vector2f &cursorPos)
 {
 	m_needsUpdate = true;
