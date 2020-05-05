@@ -9,6 +9,7 @@
 #define NT_PROJECT_AUTHOR  "author"
 #define NT_PROJECT_WEBSITE "website"
 #define NT_PROJECT_FONTS   "fonts"
+#define NT_PROJECT_ENTRYPOINT "entrypoint"
 #define NT_FONT_DEFAULT    "fontDefault"
 #define NT_ENTITY_TYPE     "type"
 #define NT_ENTITY_ID       "id"

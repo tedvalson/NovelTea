@@ -2,6 +2,7 @@
 #define PROJECTSETTINGSWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <QAbstractItemModel>
 
 namespace Ui {
 class ProjectSettingsWidget;
@@ -11,7 +12,7 @@ class ProjectSettingsWidget : public EditorTabWidget
 {
 	Q_OBJECT
 public:
-	explicit ProjectSettingsWidget(QWidget *parent = 0);
+	explicit ProjectSettingsWidget(QAbstractItemModel *model, QWidget *parent = 0);
 	virtual ~ProjectSettingsWidget();
 
 	QString tabText() const override;
@@ -22,7 +23,6 @@ public:
 	void makeFontDefault(int index);
 
 protected:
-	void loadStartingEntities(int actionIndex);
 
 private:
 	void saveData() const override;
@@ -37,6 +37,7 @@ private slots:
 
 private:
 	Ui::ProjectSettingsWidget *ui;
+	QAbstractItemModel *itemModel;
 	int defaultFontIndex;
 };
 

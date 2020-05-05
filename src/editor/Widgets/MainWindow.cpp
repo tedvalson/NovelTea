@@ -270,7 +270,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionProjectSettings_triggered()
 {
-	auto w = new ProjectSettingsWidget();
+	auto w = new ProjectSettingsWidget(proxyModel);
 	addEditorTab(w);
 }
 

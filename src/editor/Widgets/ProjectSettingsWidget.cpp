@@ -6,12 +6,14 @@
 #include <QRawFont>
 #include <QDebug>
 
-ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
+ProjectSettingsWidget::ProjectSettingsWidget(QAbstractItemModel *model, QWidget *parent) :
 	EditorTabWidget(parent),
 	ui(new Ui::ProjectSettingsWidget),
+	itemModel(model),
 	defaultFontIndex(-1)
 {
 	ui->setupUi(this);
+	ui->comboStartingEntity->setModel(itemModel);
 	load();
 
 	// Set default font preview
@@ -25,6 +27,8 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	MODIFIER(ui->lineEditAuthor, &QLineEdit::textChanged);
 	MODIFIER(ui->lineEditWebsite, &QLineEdit::textChanged);
 	MODIFIER(ui->buttonSetDefaultFont, &QPushButton::clicked);
+	MODIFIER(ui->comboStartingAction, &QComboBox::currentTextChanged);
+	MODIFIER(ui->comboStartingEntity, &QComboBox::currentTextChanged);
 }
 
 ProjectSettingsWidget::~ProjectSettingsWidget()
@@ -72,31 +76,29 @@ void ProjectSettingsWidget::makeFontDefault(int index)
 	defaultFontIndex = index;
 }
 
-void ProjectSettingsWidget::loadStartingEntities(int actionIndex)
-{
-	if (actionIndex == 0)
-	{
-
-	}
-}
-
 void ProjectSettingsWidget::saveData() const
 {
-	auto &j = Proj.data();
+	auto &j = ProjData;
 	j[NT_PROJECT_NAME] = ui->lineEditName->text().toStdString();
 	j[NT_PROJECT_VERSION] = ui->lineEditVersion->text().toStdString();
 	j[NT_PROJECT_AUTHOR] = ui->lineEditAuthor->text().toStdString();
 	j[NT_PROJECT_WEBSITE] = ui->lineEditWebsite->text().toStdString();
+	j[NT_PROJECT_ENTRYPOINT][NT_ENTITY_TYPE] = ui->comboStartingAction->currentIndex();
+	j[NT_PROJECT_ENTRYPOINT][NT_ENTITY_ID] = ui->comboStartingEntity->currentText().toStdString();
 	j[NT_FONT_DEFAULT] = defaultFontIndex;
 }
 
 void ProjectSettingsWidget::loadData()
 {
-	auto j = Proj.data();
+	auto &j = ProjData;
 	ui->lineEditName->setText(QString::fromStdString(j.value(NT_PROJECT_NAME, "Project Name")));
 	ui->lineEditVersion->setText(QString::fromStdString(j.value(NT_PROJECT_VERSION, "1.0")));
 	ui->lineEditAuthor->setText(QString::fromStdString(j.value(NT_PROJECT_AUTHOR, "Project Author")));
 	ui->lineEditWebsite->setText(QString::fromStdString(j.value(NT_PROJECT_WEBSITE, "")));
+
+	auto entryPoint = j.value(NT_PROJECT_ENTRYPOINT, json::object());
+	ui->comboStartingAction->setCurrentIndex(entryPoint.value(NT_ENTITY_TYPE, 0));
+	ui->comboStartingEntity->setCurrentText(QString::fromStdString(entryPoint.value(NT_ENTITY_ID, "")));
 
 	ui->listFonts->clear();
 	ui->listFonts->addItem("DejaVu Serif");
@@ -128,7 +130,16 @@ void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &ar
 void ProjectSettingsWidget::on_comboStartingAction_currentIndexChanged(int index)
 {
 	qDebug() << "action changed: " << index;
-	loadStartingEntities(index);
+	if (index == 0)
+	{
+		ui->comboStartingEntity->setRootModelIndex(itemModel->index(0,0));
+	}
+	else if (index == 1)
+	{
+		ui->comboStartingEntity->setRootModelIndex(itemModel->index(1,0));
+	}
+
+	ui->comboStartingEntity->setCurrentIndex(-1);
 }
 
 void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
