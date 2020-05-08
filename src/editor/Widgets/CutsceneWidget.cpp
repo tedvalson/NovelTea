@@ -18,6 +18,9 @@ Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 #define SEGMENT_DELAY "Delay"
 #define SCRIPT_OVERRIDE "Script Override"
 #define SCRIPT_OVERRIDE_NAME "Variable or Function"
+#define FULLSCREEN "Full Screen"
+#define CAN_FAST_FORWARD "Can Fast-Forward"
+#define SPEED_FACTOR "Speed Factor"
 
 CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	EditorTabWidget(parent),
@@ -42,9 +45,6 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	ui->treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 	ui->treeView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 	ui->treeView->header()->setSectionResizeMode(2, QHeaderView::Fixed);
-
-	ui->propertyBrowser->setFactoryForManager(variantManager, variantFactory);
-	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
 
 	ui->richTextEditor->hide();
 }
@@ -85,15 +85,19 @@ void CutsceneWidget::createMenus()
 
 void CutsceneWidget::fillPropertyEditor()
 {
-	variantManager->disconnect();
 	ui->propertyBrowser->clear();
 	ui->propertyBrowser->show();
 	ui->richTextEditor->hide();
 	ui->richTextEditor->disconnect();
 
+	ui->propertyBrowser->setFactoryForManager(variantManager, variantFactory);
+	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
+
 	// If no item is selected, there is nothing to load
 	if (selectedIndex < 0)
 		return;
+
+	variantManager->disconnect();
 
 	QtVariantProperty *prop, *subProp;
 	auto segment = m_cutscene->segments()[selectedIndex];
@@ -161,6 +165,30 @@ void CutsceneWidget::fillPropertyEditor()
 	subProp->setValue(QString::fromStdString(segment->getScriptOverrideName()));
 	prop->addSubProperty(subProp);
 	ui->propertyBrowser->addProperty(prop);
+
+	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::propertyChanged);
+}
+
+void CutsceneWidget::fillSettingsPropertyEditor(std::shared_ptr<NovelTea::Cutscene> cutscene)
+{
+	variantManager->disconnect();
+	ui->propertyBrowserSettings->clear();
+	ui->propertyBrowserSettings->setFactoryForManager(variantManager, variantFactory);
+	ui->propertyBrowserSettings->setPropertiesWithoutValueMarked(true);
+
+	QtVariantProperty *prop;
+
+	prop = variantManager->addProperty(QVariant::Bool, FULLSCREEN);
+	prop->setValue(cutscene->getFullScreen());
+	ui->propertyBrowserSettings->addProperty(prop);
+
+	prop = variantManager->addProperty(QVariant::Bool, CAN_FAST_FORWARD);
+	prop->setValue(cutscene->getCanFastForward());
+	ui->propertyBrowserSettings->addProperty(prop);
+
+	prop = variantManager->addProperty(QVariant::Double, SPEED_FACTOR);
+	prop->setValue(cutscene->getSpeedFactor());
+	ui->propertyBrowserSettings->addProperty(prop);
 
 	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::propertyChanged);
 }
@@ -234,11 +262,14 @@ void CutsceneWidget::loadData()
 
 	qDebug() << "Loading cutscene data... " << QString::fromStdString(idName());
 
-	if (auto cutscene = Proj.cutscene(idName()))
+	auto cutscene = Proj.cutscene(idName());
+	if (cutscene)
 		for (auto &seg : cutscene->segments())
 			addItem(seg);
 	else
 		setModified(); // Cutscene is new, so show it as modified
+
+	fillSettingsPropertyEditor(cutscene);
 
 	MODIFIER(itemModel, &QStandardItemModel::dataChanged);
 	MODIFIER(itemModel, &QStandardItemModel::rowsRemoved);

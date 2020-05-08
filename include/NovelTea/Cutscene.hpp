@@ -34,9 +34,17 @@ public:
 	Cutscene(const Cutscene&) = delete;
 	Cutscene& operator=(const Cutscene&) = delete;
 
+	ADD_ACCESSOR(bool, FullScreen, m_fullScreen)
+	ADD_ACCESSOR(bool, CanFastForward, m_canFastForward)
+	ADD_ACCESSOR(float, SpeedFactor, m_speedFactor)
+
 private:
 	std::string m_name;
 	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
+
+	bool m_fullScreen;
+	bool m_canFastForward;
+	float m_speedFactor;
 };
 
 } // namespace NovelTea

@@ -73,59 +73,18 @@
      <property name="bottomMargin" stdset="0">
       <number>2</number>
      </property>
-     <widget class="QSplitter" name="splitterLeft">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="tabPosition">
+       <enum>QTabWidget::South</enum>
       </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+      <property name="currentIndex">
+       <number>1</number>
       </property>
-      <property name="handleWidth">
-       <number>4</number>
-      </property>
-      <property name="childrenCollapsible">
-       <bool>false</bool>
-      </property>
-      <widget class="QWidget" name="verticalLayoutWidgetBottom">
-       <layout class="QVBoxLayout" name="verticalLayoutBottom">
-        <property name="spacing">
-         <number>1</number>
-        </property>
-        <item>
-         <widget class="QToolBar" name="toolBarEntities">
-          <property name="floatable">
-           <bool>false</bool>
-          </property>
-          <addaction name="actionAddSegment"/>
-          <addaction name="actionRemoveSegment"/>
-          <addaction name="actionPlayPause"/>
-          <addaction name="actionStop"/>
-          <addaction name="actionLoop"/>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTreeView" name="treeView">
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="rootIsDecorated">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="container" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+      <widget class="QWidget" name="tabSegments">
+       <attribute name="title">
+        <string>Segments</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -139,7 +98,116 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
+         <widget class="QSplitter" name="splitterLeft">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="handleWidth">
+           <number>4</number>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <widget class="QWidget" name="verticalLayoutWidgetBottom">
+           <layout class="QVBoxLayout" name="verticalLayoutBottom">
+            <property name="spacing">
+             <number>1</number>
+            </property>
+            <item>
+             <widget class="QToolBar" name="toolBarEntities">
+              <property name="floatable">
+               <bool>false</bool>
+              </property>
+              <addaction name="actionAddSegment"/>
+              <addaction name="actionRemoveSegment"/>
+              <addaction name="actionPlayPause"/>
+              <addaction name="actionStop"/>
+              <addaction name="actionLoop"/>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTreeView" name="treeView">
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="rootIsDecorated">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="container" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="RichTextEditor" name="richTextEditor" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabSettings">
+       <attribute name="title">
+        <string>Settings</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QtTreePropertyBrowser" name="propertyBrowserSettings" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -149,14 +217,7 @@
          </widget>
         </item>
         <item>
-         <widget class="RichTextEditor" name="richTextEditor" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
+         <widget class="ActionSelectWidget" name="actionSelect" native="true"/>
         </item>
        </layout>
       </widget>
@@ -257,7 +318,9 @@
   </action>
   <action name="actionStop">
    <property name="icon">
-    <iconset theme="media-playback-stop"/>
+    <iconset theme="media-playback-stop">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -271,7 +334,9 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="view-refresh"/>
+    <iconset theme="view-refresh">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Loop</string>
@@ -298,6 +363,12 @@
    <class>RichTextEditor</class>
    <extends>QWidget</extends>
    <header>Widgets/RichTextEditor.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ActionSelectWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/ActionSelectWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

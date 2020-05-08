@@ -52,6 +52,7 @@ protected:
 private:
 	void createMenus();
 	void fillPropertyEditor();
+	void fillSettingsPropertyEditor(std::shared_ptr<NovelTea::Cutscene> cutscene);
 	void checkIndexChange();
 	void addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, int index = -1);
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ActionSelectWidget</class>
+ <widget class="QWidget" name="ActionSelectWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QComboBox" name="comboAction">
+     <property name="currentIndex">
+      <number>-1</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>Play Cutscene</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Enter Room</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Start Dialogue</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="comboEntity"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -41,7 +41,6 @@
 
 #include "qtpropertymanager.h"
 #include "qtpropertybrowserutils_p.h"
-#include "Utils.hpp"
 #include <QDateTime>
 #include <QLocale>
 #include <QMap>

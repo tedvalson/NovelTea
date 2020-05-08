@@ -9,6 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(UIFILES
+	${UIROOT}/ActionSelectWidget.ui
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
@@ -26,6 +27,7 @@ set(SRC
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertymanager.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qttreepropertybrowser.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtvariantproperty.cpp
+	${SRCROOT}/Widgets/ActionSelectWidget.cpp
 	${SRCROOT}/Widgets/EditorTabWidget.cpp
 	${SRCROOT}/Widgets/CutsceneWidget.cpp
 	${SRCROOT}/Widgets/NovelTeaWidget.cpp
