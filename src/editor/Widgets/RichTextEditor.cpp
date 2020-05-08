@@ -1,6 +1,6 @@
 #include "RichTextEditor.hpp"
 #include "ui_RichTextEditor.h"
-#include "Utils.hpp"
+#include "EditorUtils.hpp"
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <NovelTea/ProjectData.hpp>
@@ -71,7 +71,7 @@ QTextDocument *RichTextEditor::activeTextToDocument(const std::shared_ptr<NovelT
 		{
 //			auto textformat = toQTextCharFormat(Proj.textFormat(jfrag[0]));
 //			cursor.insertText(QString::fromStdString(jfrag[1]), textformat);
-			auto textformat = Utils::toQTextCharFormat(fragment->getTextFormat());
+			auto textformat = EditorUtils::toQTextCharFormat(fragment->getTextFormat());
 			cursor.insertText(QString::fromStdString(fragment->getText()), textformat);
 		}
 	}
@@ -97,7 +97,7 @@ std::shared_ptr<NovelTea::ActiveText> RichTextEditor::documentToActiveText(const
 				QTextFragment qfragment = it.fragment();
 				if (qfragment.isValid())
 				{
-					auto format = Utils::toTextFormat(qfragment.charFormat());
+					auto format = EditorUtils::toTextFormat(qfragment.charFormat());
 					auto fmtIndex = NovelTea::ProjectData::instance().addTextFormat(format);
 
 					if (fmtIndex != fmtIndexLast)

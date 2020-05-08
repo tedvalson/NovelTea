@@ -39,7 +39,7 @@ set(SRC
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp
-	${SRCROOT}/Utils.cpp
+	${SRCROOT}/EditorUtils.cpp
 )
 
 qt5_wrap_ui(UIOUT ${UIFILES})

@@ -1,15 +1,15 @@
-#include "Utils.hpp"
+#include "EditorUtils.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <QTextBlock>
 #include <iostream>
 
-Utils::Utils()
+EditorUtils::EditorUtils()
 {
 }
 
-json Utils::documentToJson(const QTextDocument *doc)
+json EditorUtils::documentToJson(const QTextDocument *doc)
 {
 	json j = json::array();
 	int fmtIndexLast = -1;
@@ -58,7 +58,7 @@ json Utils::documentToJson(const QTextDocument *doc)
 	return j;
 }
 
-QTextDocument *Utils::jsonToDocument(const json &j)
+QTextDocument *EditorUtils::jsonToDocument(const json &j)
 {
 	auto doc = new QTextDocument;
 	auto cursor = QTextCursor{doc};
@@ -88,7 +88,7 @@ QTextDocument *Utils::jsonToDocument(const json &j)
 	return doc;
 }
 
-QString Utils::activeTextToString(const NovelTea::ActiveText &activeText)
+QString EditorUtils::activeTextToString(const NovelTea::ActiveText &activeText)
 {
 	QString result;
 	bool processedFirstBlock = false;
@@ -103,7 +103,7 @@ QString Utils::activeTextToString(const NovelTea::ActiveText &activeText)
 	return result;
 }
 
-NovelTea::TextFormat Utils::toTextFormat(const QTextCharFormat &format)
+NovelTea::TextFormat EditorUtils::toTextFormat(const QTextCharFormat &format)
 {
 	NovelTea::TextFormat fmt;
 	int size = format.fontPointSize();
@@ -119,7 +119,7 @@ NovelTea::TextFormat Utils::toTextFormat(const QTextCharFormat &format)
 	return fmt;
 }
 
-QTextCharFormat Utils::toQTextCharFormat(const NovelTea::TextFormat &format)
+QTextCharFormat EditorUtils::toQTextCharFormat(const NovelTea::TextFormat &format)
 {
 	QTextCharFormat fmt;
 

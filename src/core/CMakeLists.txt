@@ -19,6 +19,7 @@ set(SOURCE_FILES
 	${SRCROOT}/ActiveText.cpp
 	${SRCROOT}/TextFragment.cpp
 	${SRCROOT}/TextBlock.cpp
+	${SRCROOT}/Utils.cpp
 	${SRCROOT}/CutscenePageBreakSegment.cpp	
 	${PROJECT_SOURCE_DIR}/external/duktape.c
 	${TWEEN_ENGINE_SOURCE}

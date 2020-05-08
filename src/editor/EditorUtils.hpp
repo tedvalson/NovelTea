@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef EDITORUTILS_HPP
+#define EDITORUTILS_HPP
 
 #include <QTextDocument>
 #include <QTextCharFormat>
@@ -11,10 +11,10 @@
 
 using json = nlohmann::json;
 
-class Utils
+class EditorUtils
 {
 public:
-	Utils();
+	EditorUtils();
 
 	static json documentToJson(const QTextDocument *doc);
 	static QTextDocument *jsonToDocument(const json &j);
@@ -24,4 +24,4 @@ public:
 	static QTextCharFormat toQTextCharFormat(const NovelTea::TextFormat &format);
 };
 
-#endif // UTILS_HPP
+#endif // EDITORUTILS_HPP

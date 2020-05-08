@@ -1,6 +1,6 @@
 #include "CutsceneWidget.hpp"
 #include "ui_CutsceneWidget.h"
-#include "Utils.hpp"
+#include "EditorUtils.hpp"
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Cutscene.hpp>

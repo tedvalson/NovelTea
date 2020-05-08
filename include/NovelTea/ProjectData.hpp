@@ -4,15 +4,12 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/TextFormat.hpp>
+#include <NovelTea/Utils.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/System/String.hpp>
 
 #define Proj NovelTea::ProjectData::instance()
 #define ProjData NovelTea::ProjectData::instance().data()
-
-#define ADD_ACCESSOR(type, name, var) \
-	void set##name(const type & arg){var = arg;} \
-	const type & get##name() const {return var;}
 
 namespace NovelTea
 {
