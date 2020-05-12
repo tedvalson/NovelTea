@@ -13,7 +13,6 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	defaultFontIndex(-1)
 {
 	ui->setupUi(this);
-	ui->comboStartingEntity->setModel(MainWindow::instance().getItemModel());
 	load();
 
 	// Set default font preview
@@ -27,8 +26,7 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	MODIFIER(ui->lineEditAuthor, &QLineEdit::textChanged);
 	MODIFIER(ui->lineEditWebsite, &QLineEdit::textChanged);
 	MODIFIER(ui->buttonSetDefaultFont, &QPushButton::clicked);
-	MODIFIER(ui->comboStartingAction, &QComboBox::currentTextChanged);
-	MODIFIER(ui->comboStartingEntity, &QComboBox::currentTextChanged);
+	MODIFIER(ui->actionSelect, &ActionSelectWidget::valueChanged);
 }
 
 ProjectSettingsWidget::~ProjectSettingsWidget()
@@ -83,8 +81,7 @@ void ProjectSettingsWidget::saveData() const
 	j[NT_PROJECT_VERSION] = ui->lineEditVersion->text().toStdString();
 	j[NT_PROJECT_AUTHOR] = ui->lineEditAuthor->text().toStdString();
 	j[NT_PROJECT_WEBSITE] = ui->lineEditWebsite->text().toStdString();
-	j[NT_PROJECT_ENTRYPOINT][NT_ENTITY_TYPE] = ui->comboStartingAction->currentIndex();
-	j[NT_PROJECT_ENTRYPOINT][NT_ENTITY_ID] = ui->comboStartingEntity->currentText().toStdString();
+	j[NT_PROJECT_ENTRYPOINT] = ui->actionSelect->getValue();
 	j[NT_FONT_DEFAULT] = defaultFontIndex;
 }
 
@@ -96,9 +93,8 @@ void ProjectSettingsWidget::loadData()
 	ui->lineEditAuthor->setText(QString::fromStdString(j.value(NT_PROJECT_AUTHOR, "Project Author")));
 	ui->lineEditWebsite->setText(QString::fromStdString(j.value(NT_PROJECT_WEBSITE, "")));
 
-	auto entryPoint = j.value(NT_PROJECT_ENTRYPOINT, json::object());
-	ui->comboStartingAction->setCurrentIndex(entryPoint.value(NT_ENTITY_TYPE, 0));
-	ui->comboStartingEntity->setCurrentText(QString::fromStdString(entryPoint.value(NT_ENTITY_ID, "")));
+	auto entryPoint = j.value(NT_PROJECT_ENTRYPOINT, json::array());
+	ui->actionSelect->setValue(entryPoint);
 
 	ui->listFonts->clear();
 	ui->listFonts->addItem("DejaVu Serif");
@@ -125,12 +121,6 @@ void ProjectSettingsWidget::loadData()
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)
 {
 	ui->labelFontPreview->setText(arg1);
-}
-
-void ProjectSettingsWidget::on_comboStartingAction_currentIndexChanged(int index)
-{
-	qDebug() << "action changed: " << index;
-	ui->comboStartingEntity->setCurrentIndex(-1);
 }
 
 void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)

@@ -37,6 +37,7 @@ public:
 	ADD_ACCESSOR(bool, FullScreen, m_fullScreen)
 	ADD_ACCESSOR(bool, CanFastForward, m_canFastForward)
 	ADD_ACCESSOR(float, SpeedFactor, m_speedFactor)
+	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
 
 private:
 	std::string m_name;
@@ -45,6 +46,7 @@ private:
 	bool m_fullScreen;
 	bool m_canFastForward;
 	float m_speedFactor;
+	json m_nextEntity;
 };
 
 } // namespace NovelTea

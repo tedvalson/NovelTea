@@ -10,6 +10,7 @@ Cutscene::Cutscene()
 	, m_fullScreen(true)
 	, m_canFastForward(true)
 	, m_speedFactor(1.f)
+	, m_nextEntity(json::array({-1,""}))
 {
 }
 
@@ -20,16 +21,28 @@ Cutscene::~Cutscene()
 
 json Cutscene::toJson() const
 {
-	json j = json::array();
+	auto jsegments = json::array();
 	for (auto &seg : m_segments)
-		j.push_back(*seg);
+		jsegments.push_back(*seg);
+
+	auto j = json::array({
+		m_fullScreen,
+		m_canFastForward,
+		m_speedFactor,
+		m_nextEntity,
+		jsegments,
+	});
 	return j;
 }
 
 bool Cutscene::fromJson(const json &j)
 {
 	m_segments.clear();
-	for (auto &jsegment : j)
+	m_fullScreen = j[0];
+	m_canFastForward = j[1];
+	m_speedFactor = j[2];
+	m_nextEntity = j[3];
+	for (auto &jsegment : j[4])
 	{
 		auto segment = CutsceneSegment::createSegment(jsegment);
 		if (segment)

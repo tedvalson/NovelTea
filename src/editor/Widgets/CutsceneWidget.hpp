@@ -52,14 +52,15 @@ protected:
 private:
 	void createMenus();
 	void fillPropertyEditor();
-	void fillSettingsPropertyEditor(std::shared_ptr<NovelTea::Cutscene> cutscene);
+	void fillSettingsPropertyEditor();
 	void checkIndexChange();
-	void addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, int index = -1);
+	void addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, bool addToInternalObject = true, int index = -1);
 
 	void saveData() const override;
 	void loadData() override;
 
-	void propertyChanged(QtProperty *property, const QVariant &value);
+	void segmentPropertyChanged(QtProperty *property, const QVariant &value);
+	void settingPropertyChanged(QtProperty *property, const QVariant &value);
 
 	Ui::CutsceneWidget *ui;
 
@@ -68,7 +69,8 @@ private:
 	int selectedIndex;
 	int timerId;
 
-	QtVariantPropertyManager *variantManager;
+	QtVariantPropertyManager *segmentsVariantManager;
+	QtVariantPropertyManager *settingsVariantManager;
 	QtVariantEditorFactory *variantFactory;
 
 	std::shared_ptr<NovelTea::Cutscene> m_cutscene;

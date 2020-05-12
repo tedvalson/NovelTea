@@ -28,7 +28,8 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	menuAdd(nullptr),
 	itemModel(new QStandardItemModel(0, 2, parent)),
 	selectedIndex(-1),
-	variantManager(new QtVariantPropertyManager),
+	segmentsVariantManager(new QtVariantPropertyManager),
+	settingsVariantManager(new QtVariantPropertyManager),
 	variantFactory(new QtVariantEditorFactory),
 	m_cutscenePlaying(false)
 {
@@ -52,7 +53,8 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 CutsceneWidget::~CutsceneWidget()
 {
 	delete variantFactory;
-	delete variantManager;
+	delete settingsVariantManager;
+	delete segmentsVariantManager;
 	delete menuAdd;
 	delete itemModel;
 	delete ui;
@@ -90,14 +92,14 @@ void CutsceneWidget::fillPropertyEditor()
 	ui->richTextEditor->hide();
 	ui->richTextEditor->disconnect();
 
-	ui->propertyBrowser->setFactoryForManager(variantManager, variantFactory);
+	ui->propertyBrowser->setFactoryForManager(segmentsVariantManager, variantFactory);
 	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
 
 	// If no item is selected, there is nothing to load
 	if (selectedIndex < 0)
 		return;
 
-	variantManager->disconnect();
+	segmentsVariantManager->disconnect();
 
 	QtVariantProperty *prop, *subProp;
 	auto segment = m_cutscene->segments()[selectedIndex];
@@ -106,19 +108,19 @@ void CutsceneWidget::fillPropertyEditor()
 	if (type == NT_CUTSCENE_TEXT)
 	{
 		auto textSegment = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
-		prop = variantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), TEXT_TEXT);
+		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), TEXT_TEXT);
 		prop->setAttribute("richTextEditor", QVariant::fromValue(ui->richTextEditor));
 		prop->setValue(QVariant::fromValue(textSegment->getActiveText()));
 		ui->propertyBrowser->addProperty(prop);
 
-		prop = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
+		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
 		QStringList enumNames;
 		enumNames << "Fade" << "Scroll Up" << "Scroll Down" << "Nothing";
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
 		prop->setValue(textSegment->getTransition());
 		ui->propertyBrowser->addProperty(prop);
 
-		prop = variantManager->addProperty(QVariant::Bool, TEXT_NEWLINE);
+		prop = segmentsVariantManager->addProperty(QVariant::Bool, TEXT_NEWLINE);
 		prop->setValue(textSegment->getBeginWithNewLine());
 		ui->propertyBrowser->addProperty(prop);
 
@@ -137,7 +139,7 @@ void CutsceneWidget::fillPropertyEditor()
 	{
 		auto pageBreakSegment = static_cast<NovelTea::CutscenePageBreakSegment*>(segment.get());
 
-		prop = variantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
+		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
 		QStringList enumNames;
 		enumNames << "Fade" << "Scroll Up" << "Scroll Down" << "Nothing";
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
@@ -145,52 +147,59 @@ void CutsceneWidget::fillPropertyEditor()
 		ui->propertyBrowser->addProperty(prop);
 	}
 
-	prop = variantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
+	prop = segmentsVariantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
 	prop->setValue(segment->getDuration());
 	prop->setAttribute(QLatin1String("minimum"), 0);
 	prop->setAttribute(QLatin1String("maximum"), 100000);
 	prop->setAttribute(QLatin1String("singleStep"), 100);
 	ui->propertyBrowser->addProperty(prop);
 
-	prop = variantManager->addProperty(QVariant::Int, SEGMENT_DELAY);
+	prop = segmentsVariantManager->addProperty(QVariant::Int, SEGMENT_DELAY);
 	prop->setValue(segment->getDelay());
 	prop->setAttribute(QLatin1String("minimum"), 0);
 	prop->setAttribute(QLatin1String("maximum"), 100000);
 	prop->setAttribute(QLatin1String("singleStep"), 100);
 	ui->propertyBrowser->addProperty(prop);
 
-	prop = variantManager->addProperty(QVariant::Bool, SCRIPT_OVERRIDE);
+	prop = segmentsVariantManager->addProperty(QVariant::Bool, SCRIPT_OVERRIDE);
 	prop->setValue(segment->getScriptOverride());
-	subProp = variantManager->addProperty(QVariant::String, SCRIPT_OVERRIDE_NAME);
+	subProp = segmentsVariantManager->addProperty(QVariant::String, SCRIPT_OVERRIDE_NAME);
 	subProp->setValue(QString::fromStdString(segment->getScriptOverrideName()));
 	prop->addSubProperty(subProp);
 	ui->propertyBrowser->addProperty(prop);
 
-	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::propertyChanged);
+	connect(segmentsVariantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::segmentPropertyChanged);
 }
 
-void CutsceneWidget::fillSettingsPropertyEditor(std::shared_ptr<NovelTea::Cutscene> cutscene)
+void CutsceneWidget::fillSettingsPropertyEditor()
 {
-	variantManager->disconnect();
+	ui->actionSelect->disconnect();
+	settingsVariantManager->disconnect();
 	ui->propertyBrowserSettings->clear();
-	ui->propertyBrowserSettings->setFactoryForManager(variantManager, variantFactory);
+	ui->propertyBrowserSettings->setFactoryForManager(settingsVariantManager, variantFactory);
 	ui->propertyBrowserSettings->setPropertiesWithoutValueMarked(true);
 
 	QtVariantProperty *prop;
 
-	prop = variantManager->addProperty(QVariant::Bool, FULLSCREEN);
-	prop->setValue(cutscene->getFullScreen());
+	prop = settingsVariantManager->addProperty(QVariant::Bool, FULLSCREEN);
+	prop->setValue(m_cutscene->getFullScreen());
 	ui->propertyBrowserSettings->addProperty(prop);
 
-	prop = variantManager->addProperty(QVariant::Bool, CAN_FAST_FORWARD);
-	prop->setValue(cutscene->getCanFastForward());
+	prop = settingsVariantManager->addProperty(QVariant::Bool, CAN_FAST_FORWARD);
+	prop->setValue(m_cutscene->getCanFastForward());
 	ui->propertyBrowserSettings->addProperty(prop);
 
-	prop = variantManager->addProperty(QVariant::Double, SPEED_FACTOR);
-	prop->setValue(cutscene->getSpeedFactor());
+	prop = settingsVariantManager->addProperty(QVariant::Double, SPEED_FACTOR);
+	prop->setValue(m_cutscene->getSpeedFactor());
 	ui->propertyBrowserSettings->addProperty(prop);
 
-	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::propertyChanged);
+	ui->actionSelect->setValue(m_cutscene->getNextEntity());
+
+	connect(settingsVariantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::settingPropertyChanged);
+	connect(ui->actionSelect, &ActionSelectWidget::valueChanged, [this](){
+		setModified();
+		m_cutscene->setNextEntity(ui->actionSelect->getValue());
+	});
 }
 
 void CutsceneWidget::checkIndexChange()
@@ -212,7 +221,7 @@ void CutsceneWidget::checkIndexChange()
 	ui->actionRemoveSegment->setEnabled(index >= 0);
 }
 
-void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, int index)
+void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, bool addToInternalObject, int index)
 {
 	auto type = segment->type();
 	QStandardItem *item = nullptr;
@@ -236,47 +245,50 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	{
 		index = itemModel->rowCount();
 		itemModel->appendRow(item);
-		m_cutscene->segments().push_back(segment);
+		if (addToInternalObject)
+			m_cutscene->segments().push_back(segment);
 	}
 	else
 	{
 		itemModel->insertRow(index, item);
-		m_cutscene->segments().insert(m_cutscene->segments().begin() + index, segment);
+		if (addToInternalObject)
+			m_cutscene->segments().insert(m_cutscene->segments().begin() + index, segment);
 	}
 
 	itemModel->setData(itemModel->index(index, 1), text);
-	updateCutscene();
+	if (addToInternalObject)
+		updateCutscene();
 }
 
 void CutsceneWidget::saveData() const
 {
 	if (m_cutscene)
-		Proj.data()[NT_CUTSCENES][idName()] = *m_cutscene;
+		ProjData[NT_CUTSCENES][idName()] = *m_cutscene;
 }
 
 void CutsceneWidget::loadData()
 {
-	m_cutscene = std::make_shared<NovelTea::Cutscene>();
+	m_cutscene = Proj.cutscene(idName());
 	itemModel->disconnect();
 	itemModel->removeRows(0, itemModel->rowCount());
 
 	qDebug() << "Loading cutscene data... " << QString::fromStdString(idName());
 
-	auto cutscene = Proj.cutscene(idName());
-	if (cutscene)
-		for (auto &seg : cutscene->segments())
-			addItem(seg);
+	if (m_cutscene)
+		for (auto &seg : m_cutscene->segments())
+			addItem(seg, false);
 	else
 		setModified(); // Cutscene is new, so show it as modified
 
-	fillSettingsPropertyEditor(cutscene);
+	fillSettingsPropertyEditor();
+	updateCutscene();
 
 	MODIFIER(itemModel, &QStandardItemModel::dataChanged);
 	MODIFIER(itemModel, &QStandardItemModel::rowsRemoved);
 	MODIFIER(itemModel, &QStandardItemModel::rowsInserted);
 }
 
-void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value)
+void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant &value)
 {
 	if (selectedIndex < 0)
 		return;
@@ -321,6 +333,20 @@ void CutsceneWidget::propertyChanged(QtProperty *property, const QVariant &value
 	else if (propertyName == SCRIPT_OVERRIDE_NAME)
 		segment->setScriptOverrideName(value.toString().toStdString());
 
+	updateCutscene();
+}
+
+void CutsceneWidget::settingPropertyChanged(QtProperty *property, const QVariant &value)
+{
+	auto propertyName = property->propertyName();
+	if (propertyName == FULLSCREEN)
+		m_cutscene->setFullScreen(value.toBool());
+	else if (propertyName == CAN_FAST_FORWARD)
+		m_cutscene->setCanFastForward(value.toBool());
+	else if (propertyName == SPEED_FACTOR)
+		m_cutscene->setSpeedFactor(value.toFloat());
+
+	setModified();
 	updateCutscene();
 }
 
@@ -369,7 +395,7 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 	}
 
 	auto timeMs = NovelTea::Engine::getSystemTimeMs();
-	auto deltaMs = timeMs - m_lastTimeMs;
+	auto deltaMs = (timeMs - m_lastTimeMs) * m_cutscene->getSpeedFactor();
 	auto jdata = json::object({{"event","update"}, {"delta",deltaMs}});
 	ui->preview->processData(jdata);
 

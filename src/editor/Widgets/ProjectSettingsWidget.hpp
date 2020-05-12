@@ -30,7 +30,6 @@ private:
 
 private slots:
 	void on_lineEditFontPreview_textChanged(const QString &arg1);
-	void on_comboStartingAction_currentIndexChanged(int index);
 	void on_listFonts_currentRowChanged(int currentRow);
 	void on_buttonImportFont_clicked();
 	void on_buttonSetDefaultFont_clicked();

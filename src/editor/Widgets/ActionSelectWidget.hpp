@@ -22,6 +22,9 @@ public:
 private slots:
 	void on_comboAction_currentIndexChanged(int index);
 
+signals:
+	void valueChanged();
+
 private:
 	Ui::ActionSelectWidget *ui;
 };

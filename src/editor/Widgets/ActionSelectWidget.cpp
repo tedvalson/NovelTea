@@ -9,6 +9,8 @@ ActionSelectWidget::ActionSelectWidget(QWidget *parent) :
 	ui->setupUi(this);
 	ui->comboEntity->setModel(MainWindow::instance().getItemModel());
 	ui->comboAction->setCurrentIndex(-1);
+	connect(ui->comboAction, &QComboBox::currentTextChanged, this, &ActionSelectWidget::valueChanged);
+	connect(ui->comboEntity, &QComboBox::currentTextChanged, this, &ActionSelectWidget::valueChanged);
 }
 
 ActionSelectWidget::~ActionSelectWidget()
