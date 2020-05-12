@@ -1,4 +1,5 @@
 #include "ProjectSettingsWidget.hpp"
+#include "MainWindow.hpp"
 #include "ui_ProjectSettingsWidget.h"
 #include <NovelTea/ProjectData.hpp>
 #include <QStandardPaths>
@@ -6,14 +7,13 @@
 #include <QRawFont>
 #include <QDebug>
 
-ProjectSettingsWidget::ProjectSettingsWidget(QAbstractItemModel *model, QWidget *parent) :
+ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	EditorTabWidget(parent),
 	ui(new Ui::ProjectSettingsWidget),
-	itemModel(model),
 	defaultFontIndex(-1)
 {
 	ui->setupUi(this);
-	ui->comboStartingEntity->setModel(itemModel);
+	ui->comboStartingEntity->setModel(MainWindow::instance().getItemModel());
 	load();
 
 	// Set default font preview
@@ -130,15 +130,6 @@ void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &ar
 void ProjectSettingsWidget::on_comboStartingAction_currentIndexChanged(int index)
 {
 	qDebug() << "action changed: " << index;
-	if (index == 0)
-	{
-		ui->comboStartingEntity->setRootModelIndex(itemModel->index(0,0));
-	}
-	else if (index == 1)
-	{
-		ui->comboStartingEntity->setRootModelIndex(itemModel->index(1,0));
-	}
-
 	ui->comboStartingEntity->setCurrentIndex(-1);
 }
 

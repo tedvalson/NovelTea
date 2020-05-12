@@ -1,4 +1,5 @@
 #include "Widgets/MainWindow.hpp"
+#include "Widgets/CutsceneWidget.hpp"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -10,8 +11,8 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("NovelTea Editor");
 
 	QApplication a(argc, argv);
-	MainWindow w;
-	w.show();
+	auto &window = MainWindow::instance();
+	window.show();
 
 	return a.exec();
 }

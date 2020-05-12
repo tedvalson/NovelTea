@@ -12,7 +12,7 @@ class ProjectSettingsWidget : public EditorTabWidget
 {
 	Q_OBJECT
 public:
-	explicit ProjectSettingsWidget(QAbstractItemModel *model, QWidget *parent = 0);
+	explicit ProjectSettingsWidget(QWidget *parent = 0);
 	virtual ~ProjectSettingsWidget();
 
 	QString tabText() const override;
@@ -37,7 +37,6 @@ private slots:
 
 private:
 	Ui::ProjectSettingsWidget *ui;
-	QAbstractItemModel *itemModel;
 	int defaultFontIndex;
 };
 

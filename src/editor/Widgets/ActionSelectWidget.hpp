@@ -2,7 +2,6 @@
 #define ACTIONSELECTWIDGET_HPP
 
 #include <QWidget>
-#include <QAbstractItemModel>
 #include <json.hpp>
 
 namespace Ui {
@@ -17,14 +16,14 @@ public:
 	explicit ActionSelectWidget(QWidget *parent = 0);
 	~ActionSelectWidget();
 
-	void setModel(QAbstractItemModel *model);
-
 	void setValue(nlohmann::json value);
 	nlohmann::json getValue() const;
 
+private slots:
+	void on_comboAction_currentIndexChanged(int index);
+
 private:
 	Ui::ActionSelectWidget *ui;
-	QAbstractItemModel *itemModel;
 };
 
 #endif // ACTIONSELECTWIDGET_HPP

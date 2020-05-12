@@ -41,9 +41,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	Proj.loadFromFile("/home/android/test.ntp");
 	treeModel->loadProject(Proj);
 	warnIfInvalid();
-
-	auto w = new CutsceneWidget("New Cutscene");
-	addEditorTab(w);
 }
 
 MainWindow::~MainWindow()
@@ -52,6 +49,15 @@ MainWindow::~MainWindow()
 	delete proxyModel;
 	delete treeModel;
 	delete ui;
+}
+
+MainWindow *MainWindow::_instance = nullptr;
+
+MainWindow &MainWindow::instance()
+{
+	if (!_instance)
+		_instance = new MainWindow;
+	return *_instance;
 }
 
 bool MainWindow::closeProject()
@@ -123,6 +129,11 @@ void MainWindow::warnIfInvalid() const
 	std::string error;
 	if (!Proj.isValid(error))
 		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
+}
+
+QAbstractItemModel *MainWindow::getItemModel() const
+{
+	return proxyModel;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -280,7 +291,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionProjectSettings_triggered()
 {
-	auto w = new ProjectSettingsWidget(proxyModel);
+	auto w = new ProjectSettingsWidget;
 	addEditorTab(w);
 }
 

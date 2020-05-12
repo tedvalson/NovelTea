@@ -15,8 +15,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+	static MainWindow &instance();
 
 	bool closeProject();
 
@@ -24,7 +23,12 @@ public:
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
 
+	QAbstractItemModel *getItemModel() const;
+
 protected:
+	explicit MainWindow(QWidget *parent = 0);
+	~MainWindow();
+
 	void closeEvent(QCloseEvent *event);
 	bool reallyWantToClose();
 	void readSettings();
@@ -51,6 +55,7 @@ private slots:
 	void on_actionCloseProject_triggered();
 
 private:
+	static MainWindow *_instance;
     Ui::MainWindow *ui;
 	TreeModel *treeModel;
 	QSortFilterProxyModel *proxyModel;

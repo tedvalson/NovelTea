@@ -17,16 +17,21 @@
    <item>
     <widget class="QComboBox" name="comboAction">
      <property name="currentIndex">
-      <number>-1</number>
+      <number>0</number>
      </property>
      <item>
       <property name="text">
-       <string>Play Cutscene</string>
+       <string>Enter Room</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Enter Room</string>
+       <string>Execute Script</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Play Cutscene</string>
       </property>
      </item>
      <item>
