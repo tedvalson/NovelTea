@@ -1,25 +1,46 @@
-language: cpp
-
+notifications:
+  email: false
+language:
+- cpp
 addons:
-  apt_packages:
-    - cmake
+  apt:
+    packages:
     - doxygen
     - libgtest-dev
-    - libsfml-dev
     - qt5-default
-    - g++
+    - libgl1-mesa-dev
+    - libopenal-dev
+    - libjpeg-dev
+    - libudev-dev
+    - libxrandr-dev
+    - libfreetype6-dev
+    - libvorbis-dev
+    - libflac-dev
+  homebrew:
+    packages:
+     - cmake
+    update: true
 
 before_script:
-- mkdir build && cd build
-- cmake $CMAKE_FLAGS ..
+- git clone --depth 1 https://github.com/SFML/SFML.git
+- cd SFML
+- mkdir install
+- mkdir build
+- cd build
+- cmake $CMAKE_SFML_FLAGS -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install -DSFML_BUILD_FRAMEWORKS=FALSE -DBUILD_SHARED_LIBS=TRUE ..
+- cmake --build . --config Release --target install
+- cd ../../
 
 script:
-- cmake --build .
+- mkdir -p install/NovelTea
+- mkdir -p doc/github.io/docs
+- cmake $CMAKE_FLAGS -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML .
+- cmake --build . --config Release --target install
 
 matrix:
   include:
 
-  - name: "Linux gcc"
+  - name: "Ubuntu Xenial GCC"
     os: linux
     dist: xenial
     compiler: gcc
@@ -32,10 +53,28 @@ matrix:
     env:
      - CMAKE_FLAGS="-DBUILD_TEST=OFF"
 
-  - name: "Visual studio 15 2017"
+  - name: "Windows GCC"
     os: windows
+    compiler: gcc
     env:
       - CMAKE_FLAGS="-DBUILD_TEST=OFF"
+
+  - name: "Android armeabi-v7a"
+    language: android
+    android: &androidComponents
+      components:
+        - tools
+        - platform-tools
+        - build-tools-26.0.1
+    env:
+      - CMAKE_FLAGS="-DBUILD_EDITOR=OFF"
+      - CMAKE_SFML_FLAGS="-DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=$TRAVIS_BUILD_DIR/android-ndk-r18b -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26"
+    
+    install: &androidInstall
+      - echo y | sdkmanager "cmake;3.10.2.4988404" 
+      - sudo ln -sf /usr/local/android-sdk/cmake/3.10.2.4988404/bin/cmake /usr/bin/cmake
+      - wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
+      - unzip -qq android-ndk-r18b-linux-x86_64.zip
 
 notifications:
   email: false

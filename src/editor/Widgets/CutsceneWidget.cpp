@@ -148,14 +148,14 @@ void CutsceneWidget::fillPropertyEditor()
 	}
 
 	prop = segmentsVariantManager->addProperty(QVariant::Int, TRANSITION_DURATION);
-	prop->setValue(segment->getDuration());
+	prop->setValue(static_cast<unsigned int>(segment->getDuration()));
 	prop->setAttribute(QLatin1String("minimum"), 0);
 	prop->setAttribute(QLatin1String("maximum"), 100000);
 	prop->setAttribute(QLatin1String("singleStep"), 100);
 	ui->propertyBrowser->addProperty(prop);
 
 	prop = segmentsVariantManager->addProperty(QVariant::Int, SEGMENT_DELAY);
-	prop->setValue(segment->getDelay());
+	prop->setValue(static_cast<unsigned int>(segment->getDelay()));
 	prop->setAttribute(QLatin1String("minimum"), 0);
 	prop->setAttribute(QLatin1String("maximum"), 100000);
 	prop->setAttribute(QLatin1String("singleStep"), 100);

@@ -49,4 +49,8 @@ qt5_add_resources(RESOURCES ${PROJECT_SOURCE_DIR}/res/NovelTeaEditor.qrc)
 
 add_executable(NovelTeaEditor ${SRC} ${UIOUT} ${RESOURCES})
 
-target_link_libraries(NovelTeaEditor Qt5::Core Qt5::Gui Qt5::Widgets NovelTea sfml-graphics sfml-window sfml-system sfml-audio)
+target_link_libraries(NovelTeaEditor Qt5::Core Qt5::Gui Qt5::Widgets NovelTea)
+
+# Install executable
+install(TARGETS NovelTeaEditor
+		RUNTIME DESTINATION .)

@@ -36,8 +36,8 @@ add_custom_target(doc ALL
                   WORKING_DIRECTORY ${DOXYGEN_INPUT_DIR})
 
 # setup install rules
-install(DIRECTORY ${DOXYGEN_OUTPUT_DIR}/html
-        DESTINATION ${INSTALL_MISC_DIR}/doc
+install(DIRECTORY ${DOXYGEN_OUTPUT_DIR}
+        DESTINATION ./doc
         COMPONENT doc)
 if(DOXYGEN_HHC_PROGRAM)
     install(FILES ${DOXYGEN_OUTPUT_DIR}/NovelTea.chm

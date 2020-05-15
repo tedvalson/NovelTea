@@ -26,6 +26,7 @@ set(SOURCE_FILES
 )
 
 add_library(NovelTea ${SOURCE_FILES})
+target_link_libraries(NovelTea sfml-graphics)
 
 add_executable(NovelTeaLauncher ${SRCROOT}/main.cpp)
-target_link_libraries(NovelTeaLauncher NovelTea sfml-graphics sfml-window sfml-system sfml-audio)
+target_link_libraries(NovelTeaLauncher NovelTea)
