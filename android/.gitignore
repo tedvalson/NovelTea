@@ -1,8 +1,11 @@
 local.properties
+project.properties
 .idea
 .gradle
 build
+build.xml
 android.iml
 app/build
 app/.externalNativeBuild
 app/src/main/obj
+libs
