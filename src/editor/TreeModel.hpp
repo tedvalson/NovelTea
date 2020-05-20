@@ -36,7 +36,7 @@ public:
 					const QModelIndex &parent = QModelIndex());
 
 	void loadProject(const NovelTea::ProjectData &project);
-	void rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName);
+	void rename(NovelTea::EntityType type, const QString &oldName, const QString &newName);
 	void update();
 
 private:

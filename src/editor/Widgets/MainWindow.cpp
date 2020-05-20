@@ -233,7 +233,7 @@ void MainWindow::on_treeView_activated(const QModelIndex &index)
 	if (!type.isValid())
 		return;
 
-	selectedType = static_cast<EditorTabWidget::Type>(type.toInt());
+	selectedType = EditorTabWidget::entityTypeToTabType(static_cast<NovelTea::EntityType>(type.toInt()));
 	selectedIdName = item->data(0).toString().toStdString();
 	ui->actionOpen->trigger();
 }
@@ -249,7 +249,7 @@ void MainWindow::on_treeView_pressed(const QModelIndex &index)
 	if (!type.isValid())
 		return;
 
-	selectedType = static_cast<EditorTabWidget::Type>(type.toInt());
+	selectedType = EditorTabWidget::entityTypeToTabType(static_cast<NovelTea::EntityType>(type.toInt()));
 	selectedIdName = item->data(0).toString().toStdString();
 
 	menuTreeView->popup(QCursor::pos());	
@@ -400,7 +400,7 @@ void MainWindow::on_actionRename_triggered()
 		j.erase(selectedIdName);
 		Proj.saveToFile();
 
-		treeModel->rename(selectedType, QString::fromStdString(selectedIdName), QString::fromStdString(newName));
+		treeModel->rename(EditorTabWidget::tabTypeToEntityType(selectedType), QString::fromStdString(selectedIdName), QString::fromStdString(newName));
 	}
 }
 

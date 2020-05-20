@@ -10,6 +10,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(UIFILES
 	${UIROOT}/ActionSelectWidget.ui
+	${UIROOT}/WizardPageActionSelect.ui
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
@@ -36,6 +37,7 @@ set(SRC
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/MainWindow.cpp
 	${SRCROOT}/Wizard/Wizard.cpp
+	${SRCROOT}/Wizard/WizardPageActionSelect.cpp
 	${SRCROOT}/Wizard/WizardPageStart.cpp
 	${SRCROOT}/Wizard/WizardPageProject.cpp
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp

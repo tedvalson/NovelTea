@@ -2,6 +2,7 @@
 #define EDITORTABWIDGET_HPP
 
 #include <QWidget>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 
 #define MODIFIER(sender, signal) connect(sender, signal, this, &EditorTabWidget::setModified)
 
@@ -22,6 +23,10 @@ public:
 	virtual Type getType() const = 0;
 	const std::string &idName() const;
 	void rename(const std::string &newIdName);
+
+	static Type entityTypeToTabType(NovelTea::EntityType entityType);
+	static NovelTea::EntityType tabTypeToEntityType(Type tabType);
+
 private:
 	virtual void saveData() const = 0;
 	virtual void loadData() = 0;

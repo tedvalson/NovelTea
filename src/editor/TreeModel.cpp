@@ -1,6 +1,5 @@
 #include "TreeModel.hpp"
 #include "TreeItem.hpp"
-#include "Widgets/EditorTabWidget.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <QStringList>
 #include <QContextMenuEvent>
@@ -64,32 +63,31 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	rootItem->appendChild(roomRoot);
 	rootItem->appendChild(cutsceneRoot);
 
-	cutsceneRoot->appendChild(new TreeItem("Apple", cutsceneRoot));
-	cutsceneRoot->appendChild(new TreeItem("Dog", cutsceneRoot));
-	cutsceneRoot->appendChild(new TreeItem("Banana", cutsceneRoot));
-	cutsceneRoot->appendChild(new TreeItem("Zombie", cutsceneRoot));
-
 	if (project.isLoaded())
 	{
 		auto j = project.data();
 		for (auto &item : j[NT_CUTSCENES].items())
 		{
 			QList<QVariant> columnData;
-			columnData << QString::fromStdString(item.key()) << EditorTabWidget::Cutscene;
+			columnData << QString::fromStdString(item.key());
+			columnData << static_cast<int>(NovelTea::EntityType::Cutscene);
 			cutsceneRoot->appendChild(new TreeItem(columnData, cutsceneRoot));
-
-			std::cout << item.key() << std::endl;
 		}
 	}
 
 	endResetModel();
 }
 
-void TreeModel::rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName)
+void TreeModel::rename(NovelTea::EntityType type, const QString &oldName, const QString &newName)
 {
 	TreeItem *parent = nullptr;
-	if (type == EditorTabWidget::Cutscene)
+	if (type == NovelTea::EntityType::Cutscene)
+	{
 		parent = cutsceneRoot;
+		// TODO: rename all references to this cutscene in the project
+		// NovelTea::Cutscene::rename (?) or more generic
+	}
+
 	if (!parent)
 		return;
 	for (int i = 0; i < parent->childCount(); ++i)

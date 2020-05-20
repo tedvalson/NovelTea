@@ -11,8 +11,8 @@
 #define NT_PROJECT_FONTS   "fonts"
 #define NT_PROJECT_ENTRYPOINT "entrypoint"
 #define NT_FONT_DEFAULT    "fontDefault"
-#define NT_ENTITY_TYPE     "type"
-#define NT_ENTITY_ID       "id"
+#define NT_ENTITY_TYPE     0
+#define NT_ENTITY_ID       1
 #define NT_CUTSCENES       "cutscenes"
 #define NT_CUTSCENE_TYPE   0
 #define NT_CUTSCENE_TEXT   0
@@ -21,5 +21,16 @@
 
 // Actually for SaveData
 #define NT_VARIABLES       "variables"
+
+namespace NovelTea
+{
+
+enum class EntityType : int {
+	Invalid      = -1,
+	CustomScript = 0,
+	Cutscene     = 1,
+};
+
+} // namespace NovelTea
 
 #endif // NOVELTEA_PROJECTDATAIDENTIFIERS_HPP

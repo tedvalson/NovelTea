@@ -1,16 +1,15 @@
 #include "ActionSelectWidget.hpp"
 #include "MainWindow.hpp"
 #include "ui_ActionSelectWidget.h"
+#include "Wizard/WizardPageActionSelect.hpp"
+#include <QWizard>
 
 ActionSelectWidget::ActionSelectWidget(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::ActionSelectWidget)
+	ui(new Ui::ActionSelectWidget),
+	m_value(nlohmann::json::array({-1,""}))
 {
 	ui->setupUi(this);
-	ui->comboEntity->setModel(MainWindow::instance().getItemModel());
-	ui->comboAction->setCurrentIndex(-1);
-	connect(ui->comboAction, &QComboBox::currentTextChanged, this, &ActionSelectWidget::valueChanged);
-	connect(ui->comboEntity, &QComboBox::currentTextChanged, this, &ActionSelectWidget::valueChanged);
 }
 
 ActionSelectWidget::~ActionSelectWidget()
@@ -20,28 +19,42 @@ ActionSelectWidget::~ActionSelectWidget()
 
 void ActionSelectWidget::setValue(nlohmann::json value)
 {
-	ui->comboAction->setCurrentIndex(value[0]);
-	ui->comboEntity->setCurrentText(QString::fromStdString(value[1]));
+	if (getValue() != value)
+	{
+		m_value = value;
+		emit valueChanged(value);
+
+		auto type = static_cast<NovelTea::EntityType>(value[NT_ENTITY_TYPE]);
+		auto idText = QString::fromStdString(value[NT_ENTITY_ID]).simplified();
+		if (idText.length() > 30)
+		{
+			idText.truncate(28);
+			idText += "...";
+		}
+		idText = idText.toHtmlEscaped();
+
+		if (type == NovelTea::EntityType::Cutscene)
+			idText = "<b>Cutscene:</b> " + idText;
+		else if (type == NovelTea::EntityType::CustomScript)
+			idText = "<b>Custom:</b> " + idText;
+
+		ui->label->setText(idText);
+	}
 }
 
 nlohmann::json ActionSelectWidget::getValue() const
 {
-	return nlohmann::json::array({
-		ui->comboAction->currentIndex(),
-		ui->comboEntity->currentText().toStdString()
-	});
+	return m_value;
 }
 
-void ActionSelectWidget::on_comboAction_currentIndexChanged(int index)
+void ActionSelectWidget::on_pushButton_clicked()
 {
-	const int mapToModelIndex[] {1, 1, 0, 1};
-	ui->comboEntity->setCurrentIndex(-1);
-	if (index < 0)
-	{
-		ui->comboEntity->setEnabled(false);
-		return;
-	}
+	QWizard wizard;
+	auto wizardPageActionSelect = new WizardPageActionSelect;
+	wizardPageActionSelect->setValue(getValue());
+	wizard.addPage(wizardPageActionSelect);
+	auto result = wizard.exec();
 
-	ui->comboEntity->setEnabled(true);
-	ui->comboEntity->setRootModelIndex(MainWindow::instance().getItemModel()->index(mapToModelIndex[index],0));
+	if (result == QDialog::Accepted)
+		setValue(wizardPageActionSelect->getValue());
 }

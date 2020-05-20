@@ -27,6 +27,28 @@ void EditorTabWidget::rename(const std::string &newIdName)
 	_idName = newIdName;
 }
 
+EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType entityType)
+{
+	switch (entityType)
+	{
+		case NovelTea::EntityType::Cutscene:
+			return Type::Cutscene;
+		default:
+			return Type::Invalid;
+	}
+}
+
+NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type tabType)
+{
+	switch (tabType)
+	{
+		case Type::Cutscene:
+			return NovelTea::EntityType::Cutscene;
+		default:
+			return NovelTea::EntityType::Invalid;
+	}
+}
+
 void EditorTabWidget::save()
 {
 	if (_modified)

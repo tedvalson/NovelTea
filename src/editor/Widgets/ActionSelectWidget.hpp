@@ -20,13 +20,14 @@ public:
 	nlohmann::json getValue() const;
 
 private slots:
-	void on_comboAction_currentIndexChanged(int index);
+	void on_pushButton_clicked();
 
 signals:
-	void valueChanged();
+	void valueChanged(nlohmann::json value);
 
 private:
 	Ui::ActionSelectWidget *ui;
+	nlohmann::json m_value;
 };
 
 #endif // ACTIONSELECTWIDGET_HPP
