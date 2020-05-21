@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Network.hpp>
+#include <NovelTea/ActiveText.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -10,12 +11,14 @@ int main(int argc, char *argv[])
 
     sf::RenderWindow window(screen, "");
     window.setFramerateLimit(30);
+    
+    NovelTea::ActiveText t;
 
     sf::Font font;
     if (!font.loadFromFile("DejaVuSerif.ttf"))
         return EXIT_FAILURE;
 
-    sf::Text text("Tap anywhere to move the text.", font, 64);
+    sf::Text text("Tap anywhere to move the text." + std::to_string(3.4f), font, 64);
     text.setFillColor(sf::Color::Black);
     text.setPosition(10, 10);
 

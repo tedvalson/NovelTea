@@ -9,13 +9,34 @@ option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EDITOR "Build NovelTea Qt5 editor" ON)
 option(BUILD_ANDROID "Build Android app" OFF)
 
-# Find SFML
-find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
+if (NOT ANDROID)
+	# Find SFML
+	find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
 
-# Output an error if SFML wasn't found
-if(NOT SFML_FOUND)
-	message("\n-> SFML libraries were not found. Set SFML_DIR to SFML's CMake Config path (generally located in \"lib/cmake/SFML\").")
-	message("-> Make sure the SFML libraries with the same configuration (Release/Debug, Static/Dynamic) exist.\n")
+	# Output an error if SFML wasn't found
+	if(NOT SFML_FOUND)
+		message("\n-> SFML libraries were not found. Set SFML_DIR to SFML's CMake Config path (generally located in \"lib/cmake/SFML\").")
+		message("-> Make sure the SFML libraries with the same configuration (Release/Debug, Static/Dynamic) exist.\n")
+	endif()
+else()
+    # we install libs in a subdirectory named after the ABI (lib/mips/*.so)
+    set(LIB_SUFFIX "/${ANDROID_ABI}")
+	set(CMAKE_INSTALL_PREFIX ${ANDROID_NDK}/sources/noveltea)
+	add_definitions("-D_GLIBCXX_USE_C99 -D_GLIBCXX_HAVE_WCSTOF")
+	include_directories(
+		${ANDROID_NDK}/sources/third-party/sfml/include
+	)
+	install(DIRECTORY include
+		DESTINATION .
+		COMPONENT devel
+		FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl")
+	
+	# install Android.mk so the NDK knows how to set up SFML
+	install(FILES src/Android.mk DESTINATION .)
+	install(FILES external/duktape.h DESTINATION ./include)
+	install(FILES external/duk_config.h DESTINATION ./include)
+	install(DIRECTORY external/dukglue DESTINATION ./include)
+	install(DIRECTORY external/TweenEngine/include/TweenEngine DESTINATION ./include)
 endif()
 
 include_directories(

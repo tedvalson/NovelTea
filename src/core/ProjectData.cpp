@@ -24,6 +24,7 @@ ProjectData &ProjectData::instance()
 void ProjectData::newProject()
 {
 	Cutscene cutscene;
+	TextFormat textFormat;
 
 	_json = json::object({
 		{NT_ENGINE_VERSION, m_engineVersion},
@@ -31,13 +32,7 @@ void ProjectData::newProject()
 		{NT_PROJECT_VERSION, "1.0"},
 		{NT_PROJECT_AUTHOR, "Author Name"},
 		{NT_PROJECT_WEBSITE, ""},
-		{NT_TEXTFORMATS, json::array({{
-			false, false, false, 12, {0,0,0,255}
-		}})},
-//		{NT_CUTSCENES,
-//			{"New", cutscene}
-//			{"0", json::array({"Test scene",{0,"Text"}})},
-//		},
+		{NT_TEXTFORMATS, json::array({textFormat})},
 		{"startpoint", {
 			{"type", "cutscene"},
 			{"id", 0}
@@ -46,6 +41,7 @@ void ProjectData::newProject()
 
 	_json[NT_CUTSCENES]["New Cutscene"] = cutscene;
 	_json[NT_PROJECT_FONTS] = json::array({0});
+	fromJson(_json);
 }
 
 void ProjectData::closeProject()
@@ -61,9 +57,9 @@ bool ProjectData::isLoaded() const
 
 bool ProjectData::isValid(std::string &errorMessage) const
 {
-	auto entryPoint = data().value(NT_PROJECT_ENTRYPOINT, json::object());
-	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
-	if (entryIdName.empty())
+	auto entryPoint = data().value(NT_PROJECT_ENTRYPOINT, json::array({-1,""}));
+//	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
+	if (entryPoint[1].empty())
 	{
 		errorMessage = "No valid entry point defined in project settings.";
 		return false;
@@ -150,14 +146,14 @@ const std::string &ProjectData::filename() const
 
 json ProjectData::toJson() const
 {
-	json jconfig = json::object({
-		{"engine", m_engineVersion},
-		{"author", "Tom2"},
-		{"startpoint", {
-			{"type", "cutscene"},
-			{"id", 0}
-		}}
-	});
+//	json jconfig = json::object({
+//		{"engine", m_engineVersion},
+//		{"author", "Tom2"},
+//		{"startpoint", {
+//			{"type", "cutscene"},
+//			{"id", 0}
+//		}}
+//	});
 
 	// TextFormat list
 	json jtextformats = json::array();
@@ -165,14 +161,15 @@ json ProjectData::toJson() const
 		jtextformats.push_back(format);
 
 	// Cutscene list
-	json jcutscenes = json::array();
+//	json jcutscenes = json::array();
 
 	// Project components all together
-	auto jproject = json::object({
-		{"config", jconfig},
-		{"textformats", jtextformats}
-	});
+//	auto jproject = json::object({
+//		{"config", jconfig},
+//		{"textformats", jtextformats}
+//	});
 
+	_json[NT_ENGINE_VERSION] = m_engineVersion;
 	_json[NT_TEXTFORMATS] = jtextformats;
 
 	return _json;

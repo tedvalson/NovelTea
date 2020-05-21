@@ -28,5 +28,12 @@ set(SOURCE_FILES
 add_library(NovelTea ${SOURCE_FILES})
 target_link_libraries(NovelTea sfml-graphics)
 
-add_executable(NovelTeaLauncher ${SRCROOT}/main.cpp)
-target_link_libraries(NovelTeaLauncher NovelTea)
+install(TARGETS NovelTea
+	RUNTIME DESTINATION bin COMPONENT bin
+	LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT bin
+	ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel)
+
+if (NOT ANDROID)
+	add_executable(NovelTeaLauncher ${SRCROOT}/main.cpp)
+	target_link_libraries(NovelTeaLauncher NovelTea)
+endif()
