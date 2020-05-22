@@ -21,10 +21,9 @@ if (NOT ANDROID)
 else()
     # we install libs in a subdirectory named after the ABI (lib/mips/*.so)
     set(LIB_SUFFIX "/${ANDROID_ABI}")
-	set(CMAKE_INSTALL_PREFIX ${ANDROID_NDK}/sources/noveltea)
-	add_definitions("-D_GLIBCXX_USE_C99 -D_GLIBCXX_HAVE_WCSTOF")
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_ANDROID_NDK}/sources/noveltea)
 	include_directories(
-		${ANDROID_NDK}/sources/third-party/sfml/include
+		${CMAKE_ANDROID_NDK}/sources/third_party/sfml/include
 	)
 	install(DIRECTORY include
 		DESTINATION .
