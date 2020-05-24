@@ -81,7 +81,7 @@ matrix:
       - cd android
       - echo "sdk.dir=/usr/local/android-sdk" > local.properties
       - echo "ndk.dir=$TRAVIS_BUILD_DIR/android-ndk-r18b" >> local.properties
-      - gradle build
+      - ./gradlew build
 
 notifications:
   email: false
