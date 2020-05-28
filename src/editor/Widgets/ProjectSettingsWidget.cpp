@@ -7,6 +7,8 @@
 #include <QRawFont>
 #include <QDebug>
 
+using namespace NovelTea;
+
 ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	EditorTabWidget(parent),
 	ui(new Ui::ProjectSettingsWidget),
@@ -77,23 +79,23 @@ void ProjectSettingsWidget::makeFontDefault(int index)
 void ProjectSettingsWidget::saveData() const
 {
 	auto &j = ProjData;
-	j[NT_PROJECT_NAME] = ui->lineEditName->text().toStdString();
-	j[NT_PROJECT_VERSION] = ui->lineEditVersion->text().toStdString();
-	j[NT_PROJECT_AUTHOR] = ui->lineEditAuthor->text().toStdString();
-	j[NT_PROJECT_WEBSITE] = ui->lineEditWebsite->text().toStdString();
-	j[NT_PROJECT_ENTRYPOINT] = ui->actionSelect->getValue();
-	j[NT_FONT_DEFAULT] = defaultFontIndex;
+	j[ID::projectName] = ui->lineEditName->text().toStdString();
+	j[ID::projectVersion] = ui->lineEditVersion->text().toStdString();
+	j[ID::projectAuthor] = ui->lineEditAuthor->text().toStdString();
+	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
+	j[ID::projectEntrypoint] = ui->actionSelect->getValue();
+	j[ID::projectFontDefault] = defaultFontIndex;
 }
 
 void ProjectSettingsWidget::loadData()
 {
 	auto &j = ProjData;
-	ui->lineEditName->setText(QString::fromStdString(j.value(NT_PROJECT_NAME, "Project Name")));
-	ui->lineEditVersion->setText(QString::fromStdString(j.value(NT_PROJECT_VERSION, "1.0")));
-	ui->lineEditAuthor->setText(QString::fromStdString(j.value(NT_PROJECT_AUTHOR, "Project Author")));
-	ui->lineEditWebsite->setText(QString::fromStdString(j.value(NT_PROJECT_WEBSITE, "")));
+	ui->lineEditName->setText(QString::fromStdString(j.value(ID::projectName, "Project Name")));
+	ui->lineEditVersion->setText(QString::fromStdString(j.value(ID::projectVersion, "1.0")));
+	ui->lineEditAuthor->setText(QString::fromStdString(j.value(ID::projectAuthor, "Project Author")));
+	ui->lineEditWebsite->setText(QString::fromStdString(j.value(ID::projectWebsite, "")));
 
-	auto entryPoint = j.value(NT_PROJECT_ENTRYPOINT, json::array());
+	auto entryPoint = j.value(ID::projectEntrypoint, json::array());
 	ui->actionSelect->setValue(entryPoint);
 
 	ui->listFonts->clear();
@@ -115,7 +117,7 @@ void ProjectSettingsWidget::loadData()
 		addFont(font.familyName());
 	}
 
-	makeFontDefault(j.value(NT_FONT_DEFAULT, 0));
+	makeFontDefault(j.value(ID::projectFontDefault, 0));
 }
 
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)

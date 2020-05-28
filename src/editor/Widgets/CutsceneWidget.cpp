@@ -103,9 +103,10 @@ void CutsceneWidget::fillPropertyEditor()
 
 	QtVariantProperty *prop, *subProp;
 	auto segment = m_cutscene->segments()[selectedIndex];
+//	auto segment = itemModel->index(selectedIndex, 2).data().value<std::shared_ptr<NovelTea::CutsceneSegment>>();
 	auto type = segment->type();
 
-	if (type == NT_CUTSCENE_TEXT)
+	if (type == NovelTea::ID::cutsceneSegText)
 	{
 		auto textSegment = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), TEXT_TEXT);
@@ -135,7 +136,7 @@ void CutsceneWidget::fillPropertyEditor()
 		connect(ui->richTextEditor, &RichTextEditor::saved, showBrowser);
 		connect(ui->richTextEditor, &RichTextEditor::canceled, showBrowser);
 	}
-	else if (type == NT_CUTSCENE_BREAK)
+	else if (type == NovelTea::ID::cutsceneSegBreak)
 	{
 		auto pageBreakSegment = static_cast<NovelTea::CutscenePageBreakSegment*>(segment.get());
 
@@ -263,7 +264,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 void CutsceneWidget::saveData() const
 {
 	if (m_cutscene)
-		ProjData[NT_CUTSCENES][idName()] = *m_cutscene;
+		ProjData[NovelTea::ID::cutscenes][idName()] = *m_cutscene;
 }
 
 void CutsceneWidget::loadData()
@@ -278,7 +279,11 @@ void CutsceneWidget::loadData()
 		for (auto &seg : m_cutscene->segments())
 			addItem(seg, false);
 	else
-		setModified(); // Cutscene is new, so show it as modified
+	{
+		// Cutscene is new, so show it as modified
+		setModified();
+		m_cutscene = std::make_shared<NovelTea::Cutscene>();
+	}
 
 	fillSettingsPropertyEditor();
 	updateCutscene();

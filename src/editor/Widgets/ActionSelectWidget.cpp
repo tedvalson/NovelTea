@@ -24,8 +24,8 @@ void ActionSelectWidget::setValue(nlohmann::json value)
 		m_value = value;
 		emit valueChanged(value);
 
-		auto type = static_cast<NovelTea::EntityType>(value[NT_ENTITY_TYPE]);
-		auto idText = QString::fromStdString(value[NT_ENTITY_ID]).simplified();
+		auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::entityType]);
+		auto idText = QString::fromStdString(value[NovelTea::ID::entityId]).simplified();
 		if (idText.length() > 30)
 		{
 			idText.truncate(28);

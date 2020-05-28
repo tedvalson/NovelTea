@@ -3,25 +3,6 @@
 
 #define NOVELTEA_VERSION 1.0f
 
-#define NT_ENGINE_VERSION  "engine"
-#define NT_PROJECT_NAME    "name"
-#define NT_PROJECT_VERSION "version"
-#define NT_PROJECT_AUTHOR  "author"
-#define NT_PROJECT_WEBSITE "website"
-#define NT_PROJECT_FONTS   "fonts"
-#define NT_PROJECT_ENTRYPOINT "entrypoint"
-#define NT_FONT_DEFAULT    "fontDefault"
-#define NT_ENTITY_TYPE     0
-#define NT_ENTITY_ID       1
-#define NT_CUTSCENES       "cutscenes"
-#define NT_CUTSCENE_TYPE   0
-#define NT_CUTSCENE_TEXT   0
-#define NT_CUTSCENE_BREAK  1
-#define NT_TEXTFORMATS     "textformats"
-
-// Actually for SaveData
-#define NT_VARIABLES       "variables"
-
 namespace NovelTea
 {
 
@@ -29,7 +10,36 @@ enum class EntityType : int {
 	Invalid      = -1,
 	CustomScript = 0,
 	Cutscene     = 1,
+	Room,
+	Object,
+	Dialogue,
 };
+
+namespace ID
+{
+	const auto engineVersion      = "engine";
+	const auto projectName        = "name";
+	const auto projectVersion     = "version";
+	const auto projectAuthor      = "author";
+	const auto projectWebsite     = "website";
+	const auto projectEntrypoint  = "entrypoint";
+	const auto projectFonts       = "fonts";
+	const auto projectFontDefault = "fontDefault";
+	const auto entityType         = 0;
+	const auto entityId           = 1;
+	const auto cutscenes          = "cutscenes";
+	const auto cutsceneSegType    = 0;
+	const auto cutsceneSegText    = 0;
+	const auto cutsceneSegBreak   = 1;
+	const auto rooms              = "rooms";
+	const auto textFormats        = "textformats";
+	const auto objects            = "objects";
+	const auto dialogues          = "dialogues";
+
+	// For SaveData
+	const auto variables          = "variabes";
+
+} // namespace ID
 
 } // namespace NovelTea
 

@@ -41,8 +41,8 @@ public:
 
 private:
 	TreeItem *getItem(const QModelIndex &index) const;
-
 	TreeItem *rootItem;
+
 	TreeItem *cutsceneRoot;
 	TreeItem *roomRoot;
 };

@@ -28,11 +28,11 @@ WizardPageActionSelect::~WizardPageActionSelect()
 
 void WizardPageActionSelect::setValue(nlohmann::json value)
 {
-	auto type = static_cast<NovelTea::EntityType>(value[NT_ENTITY_TYPE]);
+	auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::entityType]);
 	if (type == NovelTea::EntityType::CustomScript)
 	{
 		ui->radioCustom->setChecked(true);
-		ui->scriptEdit->setText(QString::fromStdString(value[NT_ENTITY_ID]));
+		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::entityId]));
 	}
 	else if (type != NovelTea::EntityType::Invalid)
 	{

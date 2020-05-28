@@ -66,7 +66,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	if (project.isLoaded())
 	{
 		auto j = project.data();
-		for (auto &item : j[NT_CUTSCENES].items())
+		for (auto &item : j[NovelTea::ID::cutscenes].items())
 		{
 			QList<QVariant> columnData;
 			columnData << QString::fromStdString(item.key());

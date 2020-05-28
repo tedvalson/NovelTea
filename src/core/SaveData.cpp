@@ -94,7 +94,7 @@ void SaveData::setVariables(const std::string &jsonData)
 	auto j = json::parse(jsonData);
 	for (auto &item : j.items())
 	{
-		Save.data()[NT_VARIABLES][item.key()] = item.value();
+		Save.data()[ID::variables][item.key()] = item.value();
 	}
 }
 
@@ -105,7 +105,7 @@ std::string SaveData::getVariables(const std::string &jsonData)
 	for (auto &v : j)
 	{
 		std::string varName = v;
-		auto d = Save.data()[NT_VARIABLES];
+		auto d = Save.data()[ID::variables];
 		if (d.contains(varName))
 			result[varName] = d[varName];
 		else

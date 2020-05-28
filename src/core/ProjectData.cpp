@@ -27,20 +27,16 @@ void ProjectData::newProject()
 	TextFormat textFormat;
 
 	_json = json::object({
-		{NT_ENGINE_VERSION, m_engineVersion},
-		{NT_PROJECT_NAME, "Project Name"},
-		{NT_PROJECT_VERSION, "1.0"},
-		{NT_PROJECT_AUTHOR, "Author Name"},
-		{NT_PROJECT_WEBSITE, ""},
-		{NT_TEXTFORMATS, json::array({textFormat})},
-		{"startpoint", {
-			{"type", "cutscene"},
-			{"id", 0}
-		}}
+		{ID::engineVersion, m_engineVersion},
+		{ID::projectName, "Project Name"},
+		{ID::projectVersion, "1.0"},
+		{ID::projectAuthor, "Author Name"},
+		{ID::projectWebsite, ""},
+		{ID::textFormats, json::array({textFormat})},
 	});
 
-	_json[NT_CUTSCENES]["New Cutscene"] = cutscene;
-	_json[NT_PROJECT_FONTS] = json::array({0});
+	_json[ID::cutscenes]["New Cutscene"] = cutscene;
+	_json[ID::projectFonts] = json::array({0});
 	fromJson(_json);
 }
 
@@ -57,7 +53,7 @@ bool ProjectData::isLoaded() const
 
 bool ProjectData::isValid(std::string &errorMessage) const
 {
-	auto entryPoint = data().value(NT_PROJECT_ENTRYPOINT, json::array({-1,""}));
+	auto entryPoint = data().value(ID::projectEntrypoint, json::array({-1,""}));
 //	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
 	if (entryPoint[1].empty())
 	{
@@ -102,9 +98,9 @@ std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
 
 std::shared_ptr<Cutscene> ProjectData::cutscene(const std::string &idName)
 {
-	if (!_json[NT_CUTSCENES].contains(idName))
+	if (!_json[ID::cutscenes].contains(idName))
 		return nullptr;
-	return std::make_shared<Cutscene>(_json[NT_CUTSCENES][idName].get<Cutscene>());
+	return std::make_shared<Cutscene>(_json[ID::cutscenes][idName].get<Cutscene>());
 }
 
 void ProjectData::saveToFile(const std::string &filename)
@@ -169,8 +165,8 @@ json ProjectData::toJson() const
 //		{"textformats", jtextformats}
 //	});
 
-	_json[NT_ENGINE_VERSION] = m_engineVersion;
-	_json[NT_TEXTFORMATS] = jtextformats;
+	_json[ID::engineVersion] = m_engineVersion;
+	_json[ID::textFormats] = jtextformats;
 
 	return _json;
 //	return jproject;
@@ -183,10 +179,10 @@ bool ProjectData::fromJson(const json &j)
 	_textFormats.clear();
 	m_fonts.clear();
 
-	for (auto &jformat : j[NT_TEXTFORMATS])
+	for (auto &jformat : j[ID::textFormats])
 		_textFormats.push_back(jformat);
 
-	for (auto &jfont : j[NT_PROJECT_FONTS])
+	for (auto &jfont : j[ID::projectFonts])
 	{
 		auto font = std::make_shared<sf::Font>();
 		std::cout << "Loading font: " << jfont << std::endl;

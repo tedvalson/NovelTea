@@ -378,7 +378,7 @@ void MainWindow::on_actionRename_triggered()
 		auto newName = text.toStdString();
 		auto existingOldIndex = getEditorTabIndex(selectedType, selectedIdName);
 		auto existingNewIndex = getEditorTabIndex(selectedType, newName);
-		auto &j = ProjData[NT_CUTSCENES];
+		auto &j = ProjData[NovelTea::ID::cutscenes];
 
 		if (existingNewIndex >= 0 || j.contains(newName))
 		{
