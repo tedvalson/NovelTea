@@ -14,6 +14,7 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 
 	newSelectionGroup->addButton(ui->radioNewProject, cNewProject);
 	newSelectionGroup->addButton(ui->radioNewCutscene, cNewCutscene);
+	newSelectionGroup->addButton(ui->radioNewRoom, cNewRoom);
 	newSelectionGroup->addButton(ui->radioNewScript, cNewScript);
 
 	if (!Proj.isLoaded())
@@ -37,6 +38,8 @@ int WizardPageStart::nextId() const
 	auto selection = newSelectionGroup->checkedId();
 	if (selection == cNewCutscene)
 		return Wizard::Cutscene;
+	if (selection == cNewRoom)
+		return Wizard::Room;
 	if (selection == cNewScript)
 		return Wizard::Script;
 	return Wizard::Project;

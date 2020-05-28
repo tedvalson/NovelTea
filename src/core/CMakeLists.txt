@@ -9,6 +9,8 @@ set(SOURCE_FILES
 	${SRCROOT}/States/StateMain.cpp
 	${SRCROOT}/JsonSerializable.cpp
 	${SRCROOT}/Cutscene.cpp
+	${SRCROOT}/Room.cpp
+	${SRCROOT}/Object.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/SaveData.cpp
 	${SRCROOT}/ScriptManager.cpp

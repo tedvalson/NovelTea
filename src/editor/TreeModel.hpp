@@ -44,6 +44,7 @@ private:
 	TreeItem *rootItem;
 
 	TreeItem *cutsceneRoot;
+	TreeItem *objectRoot;
 	TreeItem *roomRoot;
 };
 

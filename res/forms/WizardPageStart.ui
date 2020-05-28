@@ -22,13 +22,19 @@
      <property name="text">
       <string>Project</string>
      </property>
-
     </widget>
    </item>
    <item>
     <widget class="QRadioButton" name="radioNewCutscene">
      <property name="text">
       <string>Cutscene</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="radioNewRoom">
+     <property name="text">
+      <string>Room</string>
      </property>
     </widget>
    </item>

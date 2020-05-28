@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 #include "TreeItem.hpp"
 #include "CutsceneWidget.hpp"
+#include "RoomWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
 #include <NovelTea/ProjectData.hpp>
@@ -93,8 +94,8 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 	{
 		auto type = widget->getType();
 		int row = 0;
-		if (type == EditorTabWidget::Cutscene)
-			row = 1;
+		if (type == EditorTabWidget::Room)
+			row = 3;
 
 		auto parent = treeModel->index(row, 0);
 		if (treeModel->insertRow(0, parent))
@@ -411,6 +412,8 @@ void MainWindow::on_actionOpen_triggered()
 		ui->tabWidget->setCurrentIndex(existingIndex);
 	else if (selectedType == EditorTabWidget::Cutscene)
 		addEditorTab(new CutsceneWidget(selectedIdName));
+	else if (selectedType == EditorTabWidget::Room)
+		addEditorTab(new RoomWidget(selectedIdName));
 }
 
 void MainWindow::on_actionTest_2_triggered()

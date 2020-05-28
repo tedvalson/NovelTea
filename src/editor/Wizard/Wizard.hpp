@@ -6,7 +6,8 @@
 constexpr int cNewStart = 0;
 constexpr int cNewProject = 1;
 constexpr int cNewCutscene = 2;
-constexpr int cNewScript = 3;
+constexpr int cNewRoom = 3;
+constexpr int cNewScript = 4;
 
 namespace Ui {
 class Wizard;
@@ -20,6 +21,7 @@ public:
 		Start = 0,
 		Project = 1,
 		Cutscene,
+		Room,
 		Script,
 	};
 

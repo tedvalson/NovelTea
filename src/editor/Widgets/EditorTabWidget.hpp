@@ -13,7 +13,9 @@ public:
 	enum Type : int {
 		Invalid = -1,
 		Cutscene = 0,
-		Settings = 1,
+		Room     = 1,
+		Object   = 2,
+		Settings,
 	};
 
 	explicit EditorTabWidget(QWidget *parent = 0);

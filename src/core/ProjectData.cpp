@@ -1,5 +1,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Object.hpp>
+#include <NovelTea/Room.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -101,6 +103,20 @@ std::shared_ptr<Cutscene> ProjectData::cutscene(const std::string &idName)
 	if (!_json[ID::cutscenes].contains(idName))
 		return nullptr;
 	return std::make_shared<Cutscene>(_json[ID::cutscenes][idName].get<Cutscene>());
+}
+
+std::shared_ptr<Room> ProjectData::room(const std::string &idName)
+{
+	if (!_json[ID::rooms].contains(idName))
+		return nullptr;
+	return std::make_shared<Room>(_json[ID::rooms][idName].get<Room>());
+}
+
+std::shared_ptr<Object> ProjectData::object(const std::string &idName)
+{
+	if (!_json[ID::objects].contains(idName))
+		return nullptr;
+	return std::make_shared<Object>(_json[ID::objects][idName].get<Object>());
 }
 
 void ProjectData::saveToFile(const std::string &filename)

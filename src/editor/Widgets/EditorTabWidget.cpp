@@ -33,6 +33,10 @@ EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType 
 	{
 		case NovelTea::EntityType::Cutscene:
 			return Type::Cutscene;
+		case NovelTea::EntityType::Room:
+			return Type::Room;
+		case NovelTea::EntityType::Object:
+			return Type::Object;
 		default:
 			return Type::Invalid;
 	}
@@ -44,6 +48,10 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 	{
 		case Type::Cutscene:
 			return NovelTea::EntityType::Cutscene;
+		case Type::Room:
+			return NovelTea::EntityType::Room;
+		case Type::Object:
+			return NovelTea::EntityType::Object;
 		default:
 			return NovelTea::EntityType::Invalid;
 	}

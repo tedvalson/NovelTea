@@ -2,6 +2,7 @@
 #include "WizardPageStart.hpp"
 #include "WizardPageProject.hpp"
 #include "WizardPageCutscene.hpp"
+#include "WizardPageRoom.hpp"
 #include <iostream>
 
 
@@ -11,6 +12,7 @@ Wizard::Wizard(QWidget *parent) :
 	setPage(cNewStart, new WizardPageStart(this));
 	setPage(cNewProject, new WizardPageProject(this));
 	setPage(cNewCutscene, new WizardPageCutscene(this));
+	setPage(cNewRoom, new WizardPageRoom(this));
 
 	setStartId(cNewStart);
 	setWindowTitle("Create New");

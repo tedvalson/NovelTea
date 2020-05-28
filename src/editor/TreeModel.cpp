@@ -57,11 +57,13 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	delete rootItem;
 	rootItem = new TreeItem("Project");
 
-	roomRoot = new TreeItem("Rooms", rootItem);
 	cutsceneRoot = new TreeItem("Cutscenes", rootItem);
+	objectRoot   = new TreeItem("Objects", rootItem);
+	roomRoot     = new TreeItem("Rooms", rootItem);
 
-	rootItem->appendChild(roomRoot);
 	rootItem->appendChild(cutsceneRoot);
+	rootItem->appendChild(objectRoot);
+	rootItem->appendChild(roomRoot);
 
 	if (project.isLoaded())
 	{
@@ -72,6 +74,20 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 			columnData << QString::fromStdString(item.key());
 			columnData << static_cast<int>(NovelTea::EntityType::Cutscene);
 			cutsceneRoot->appendChild(new TreeItem(columnData, cutsceneRoot));
+		}
+		for (auto &item : j[NovelTea::ID::rooms].items())
+		{
+			QList<QVariant> columnData;
+			columnData << QString::fromStdString(item.key());
+			columnData << static_cast<int>(NovelTea::EntityType::Room);
+			roomRoot->appendChild(new TreeItem(columnData, roomRoot));
+		}
+		for (auto &item : j[NovelTea::ID::objects].items())
+		{
+			QList<QVariant> columnData;
+			columnData << QString::fromStdString(item.key());
+			columnData << static_cast<int>(NovelTea::EntityType::Object);
+			objectRoot->appendChild(new TreeItem(columnData, objectRoot));
 		}
 	}
 
