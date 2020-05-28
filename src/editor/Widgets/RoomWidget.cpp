@@ -79,11 +79,6 @@ void RoomWidget::propertyChanged(QtProperty *property, const QVariant &value)
 	setModified();
 }
 
-void RoomWidget::timerEvent(QTimerEvent *event)
-{
-
-}
-
 void RoomWidget::on_actionRemoveObject_triggered()
 {
 }

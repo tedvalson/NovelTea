@@ -32,11 +32,6 @@ public:
 private slots:
 	void on_actionRemoveObject_triggered();
 
-protected:
-	void timerEvent(QTimerEvent*) override;
-	void showEvent(QShowEvent*) override;
-	void hideEvent(QHideEvent*) override;
-
 private:
 	void fillPropertyEditor();
 
@@ -48,7 +43,6 @@ private:
 	Ui::RoomWidget *ui;
 
 	QStandardItemModel *itemModel;
-	int timerId;
 
 	QtVariantPropertyManager *variantManager;
 	QtVariantEditorFactory *variantFactory;
