@@ -25,6 +25,10 @@ public:
 protected:
 	void timerEvent(QTimerEvent*) override;
 
+private slots:
+	void on_radioExisting_toggled(bool checked);
+	void on_radioCustom_toggled(bool checked);
+
 private:
 	Ui::WizardPageActionSelect *ui;
 	QModelIndex currentIndex;

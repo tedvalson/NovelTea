@@ -10,6 +10,9 @@ WizardPageActionSelect::WizardPageActionSelect(QWidget *parent) :
 	ui->setupUi(this);
 	ui->treeView->setModel(MainWindow::instance().getItemModel());
 
+	ui->scriptEdit->hide();
+	ui->treeView->hide();
+
 	connect(ui->radioExisting, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->radioCustom, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->treeView, &QTreeView::clicked, this, &QWizardPage::completeChanged);
@@ -76,5 +79,23 @@ void WizardPageActionSelect::timerEvent(QTimerEvent *)
 	{
 		currentIndex = ui->treeView->currentIndex();
 		emit completeChanged();
+	}
+}
+
+void WizardPageActionSelect::on_radioExisting_toggled(bool checked)
+{
+	if (checked)
+	{
+		ui->treeView->show();
+		ui->scriptEdit->hide();
+	}
+}
+
+void WizardPageActionSelect::on_radioCustom_toggled(bool checked)
+{
+	if (checked)
+	{
+		ui->treeView->hide();
+		ui->scriptEdit->show();
 	}
 }
