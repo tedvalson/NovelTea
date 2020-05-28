@@ -23,6 +23,7 @@ int WizardPageCutscene::nextId() const
 
 bool WizardPageCutscene::validatePage()
 {
+	// TODO: check for cutscene name collision
 	auto mainWindow = qobject_cast<MainWindow*>(wizard()->parent());
 	if (mainWindow)
 	{

@@ -400,7 +400,7 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 	}
 
 	auto timeMs = NovelTea::Engine::getSystemTimeMs();
-	auto deltaMs = (timeMs - m_lastTimeMs) * m_cutscene->getSpeedFactor();
+	auto deltaMs = timeMs - m_lastTimeMs;
 	auto jdata = json::object({{"event","update"}, {"delta",deltaMs}});
 	ui->preview->processData(jdata);
 
@@ -421,16 +421,27 @@ void CutsceneWidget::hideEvent(QHideEvent *)
 
 void CutsceneWidget::updateCutscene()
 {
-	ui->horizontalSlider->setMaximum(m_cutscene->getDelayMs());
-	auto value = ui->horizontalSlider->value();
+	auto oldValue = ui->horizontalSlider->value();
+	auto oldMax = ui->horizontalSlider->maximum();
+	auto newMax = m_cutscene->getDelayMs() / m_cutscene->getSpeedFactor();
+	auto newValue = static_cast<float>(oldValue) / oldMax * newMax;
+	ui->horizontalSlider->setMaximum(newMax);
 
 	auto jdata = json::object({{"event","cutscene"}, {"cutscene",*m_cutscene}});
 	ui->preview->processData(jdata);
 
-	if (value > 0)
+	if (oldValue > 0)
 	{
-		jdata = json::object({{"event","setPlaybackTime"}, {"value",value}});
-		ui->preview->processData(jdata);
+		if (oldMax != newMax)
+		{
+			std::cout << "oldMax: " << oldMax << " newMax: " << newMax << std::endl;
+			ui->horizontalSlider->setValue(newValue);
+		}
+		else
+		{
+			jdata = json::object({{"event","setPlaybackTime"}, {"value",oldValue}});
+			ui->preview->processData(jdata);
+		}
 	}
 
 	updateLoopValues();
@@ -444,8 +455,8 @@ void CutsceneWidget::updateLoopValues()
 	auto segment = m_cutscene->segments()[selectedIndex];
 	auto max = ui->horizontalSlider->maximum();
 
-	m_loopStartMs = m_cutscene->getDelayMs(selectedIndex);
-	m_loopEndMs = m_loopStartMs + segment->getDuration();
+	m_loopStartMs = m_cutscene->getDelayMs(selectedIndex) / m_cutscene->getSpeedFactor();
+	m_loopEndMs = m_loopStartMs + segment->getDuration() / m_cutscene->getSpeedFactor();
 	if (m_loopEndMs > max)
 		m_loopEndMs = max;
 }
@@ -469,7 +480,7 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 		{
 			auto segment = m_cutscene->segments()[i];
 			duration += segment->getDelay();
-			if (duration > value)
+			if (duration / m_cutscene->getSpeedFactor() > value)
 			{
 				if (selectedIndex != i)
 				{
