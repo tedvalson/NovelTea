@@ -12,14 +12,17 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	newSelectionGroup->addButton(ui->radioNewProject, cNewProject);
-	newSelectionGroup->addButton(ui->radioNewCutscene, cNewCutscene);
-	newSelectionGroup->addButton(ui->radioNewRoom, cNewRoom);
-	newSelectionGroup->addButton(ui->radioNewScript, cNewScript);
+	newSelectionGroup->addButton(ui->radioNewProject, Wizard::Page::Project);
+	newSelectionGroup->addButton(ui->radioNewCutscene, Wizard::Page::Cutscene);
+	newSelectionGroup->addButton(ui->radioNewRoom, Wizard::Page::Room);
+	newSelectionGroup->addButton(ui->radioNewObject, Wizard::Page::Object);
+	newSelectionGroup->addButton(ui->radioNewScript, Wizard::Page::Script);
 
 	if (!Proj.isLoaded())
 	{
 		ui->radioNewCutscene->setEnabled(false);
+		ui->radioNewRoom->setEnabled(false);
+		ui->radioNewObject->setEnabled(false);
 		ui->radioNewScript->setEnabled(false);
 	}
 
@@ -35,14 +38,9 @@ WizardPageStart::~WizardPageStart()
 
 int WizardPageStart::nextId() const
 {
-	auto selection = newSelectionGroup->checkedId();
-	if (selection == cNewCutscene)
-		return Wizard::Cutscene;
-	if (selection == cNewRoom)
-		return Wizard::Room;
-	if (selection == cNewScript)
-		return Wizard::Script;
-	return Wizard::Project;
+	// Returning -1 at launch will lock the page as final?
+	auto id = newSelectionGroup->checkedId();
+	return (id < 0) ? 0 : id;
 }
 
 void WizardPageStart::setTypeId(int id)

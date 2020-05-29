@@ -3,12 +3,6 @@
 
 #include <QWizard>
 
-constexpr int cNewStart = 0;
-constexpr int cNewProject = 1;
-constexpr int cNewCutscene = 2;
-constexpr int cNewRoom = 3;
-constexpr int cNewScript = 4;
-
 namespace Ui {
 class Wizard;
 }
@@ -22,6 +16,7 @@ public:
 		Project = 1,
 		Cutscene,
 		Room,
+		Object,
 		Script,
 	};
 

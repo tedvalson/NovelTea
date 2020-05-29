@@ -13,6 +13,7 @@ set(UIFILES
 	${UIROOT}/WizardPageActionSelect.ui
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/RoomWidget.ui
+	${UIROOT}/ObjectWidget.ui
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
 	${UIROOT}/ProjectSettingsWidget.ui
@@ -20,6 +21,7 @@ set(UIFILES
 	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageCutscene.ui
 	${UIROOT}/WizardPageRoom.ui
+	${UIROOT}/WizardPageObject.ui
 )
 
 set(SRC
@@ -34,6 +36,7 @@ set(SRC
 	${SRCROOT}/Widgets/EditorTabWidget.cpp
 	${SRCROOT}/Widgets/CutsceneWidget.cpp
 	${SRCROOT}/Widgets/RoomWidget.cpp
+	${SRCROOT}/Widgets/ObjectWidget.cpp
 	${SRCROOT}/Widgets/NovelTeaWidget.cpp
 	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
@@ -45,6 +48,7 @@ set(SRC
 	${SRCROOT}/Wizard/WizardPageProject.cpp
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp
 	${SRCROOT}/Wizard/WizardPageRoom.cpp
+	${SRCROOT}/Wizard/WizardPageObject.cpp
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp
 	${SRCROOT}/EditorUtils.cpp

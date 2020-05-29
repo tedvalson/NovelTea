@@ -3,18 +3,20 @@
 #include "WizardPageProject.hpp"
 #include "WizardPageCutscene.hpp"
 #include "WizardPageRoom.hpp"
+#include "WizardPageObject.hpp"
 #include <iostream>
 
 
 Wizard::Wizard(QWidget *parent) :
 	QWizard(parent)
 {
-	setPage(cNewStart, new WizardPageStart(this));
-	setPage(cNewProject, new WizardPageProject(this));
-	setPage(cNewCutscene, new WizardPageCutscene(this));
-	setPage(cNewRoom, new WizardPageRoom(this));
+	setPage(Page::Start, new WizardPageStart(this));
+	setPage(Page::Project, new WizardPageProject(this));
+	setPage(Page::Cutscene, new WizardPageCutscene(this));
+	setPage(Page::Room, new WizardPageRoom(this));
+	setPage(Page::Object, new WizardPageObject(this));
 
-	setStartId(cNewStart);
+	setStartId(Page::Start);
 	setWindowTitle("Create New");
 }
 

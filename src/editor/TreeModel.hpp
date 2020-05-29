@@ -44,8 +44,10 @@ private:
 	TreeItem *rootItem;
 
 	TreeItem *cutsceneRoot;
+	TreeItem *dialogueRoot;
 	TreeItem *objectRoot;
 	TreeItem *roomRoot;
+	TreeItem *scriptRoot;
 };
 
 #endif // TREEMODEL_H

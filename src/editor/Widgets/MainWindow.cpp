@@ -3,6 +3,7 @@
 #include "TreeItem.hpp"
 #include "CutsceneWidget.hpp"
 #include "RoomWidget.hpp"
+#include "ObjectWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
 #include <NovelTea/ProjectData.hpp>
@@ -96,6 +97,8 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 		int row = 0;
 		if (type == EditorTabWidget::Room)
 			row = 3;
+		else if (type == EditorTabWidget::Object)
+			row = 2;
 
 		auto parent = treeModel->index(row, 0);
 		if (treeModel->insertRow(0, parent))
@@ -414,6 +417,8 @@ void MainWindow::on_actionOpen_triggered()
 		addEditorTab(new CutsceneWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Room)
 		addEditorTab(new RoomWidget(selectedIdName));
+	else if (selectedType == EditorTabWidget::Object)
+		addEditorTab(new ObjectWidget(selectedIdName));
 }
 
 void MainWindow::on_actionTest_2_triggered()

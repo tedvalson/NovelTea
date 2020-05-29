@@ -58,12 +58,16 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	rootItem = new TreeItem("Project");
 
 	cutsceneRoot = new TreeItem("Cutscenes", rootItem);
+	dialogueRoot = new TreeItem("Dialogues", rootItem);
 	objectRoot   = new TreeItem("Objects", rootItem);
 	roomRoot     = new TreeItem("Rooms", rootItem);
+	scriptRoot   = new TreeItem("Scripts", rootItem);
 
 	rootItem->appendChild(cutsceneRoot);
+	rootItem->appendChild(dialogueRoot);
 	rootItem->appendChild(objectRoot);
 	rootItem->appendChild(roomRoot);
+	rootItem->appendChild(scriptRoot);
 
 	if (project.isLoaded())
 	{
