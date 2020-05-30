@@ -38,8 +38,12 @@ void CutsceneRenderer::update(float delta)
 {
 	auto segments = m_cutscene->segments();
 	if (m_segmentIndex >= segments.size())
+	{
+		m_tweenManager.update(delta);
 		return;
+	}
 
+	delta *= m_cutscene->getSpeedFactor();
 	auto timeDelta = sf::seconds(delta);
 
 	while (timeDelta >= m_timeToNext)
@@ -61,6 +65,7 @@ void CutsceneRenderer::update(float delta)
 	}
 
 	m_timePassed += timeDelta;
+	m_timeToNext -= timeDelta;
 	m_tweenManager.update(timeDelta.asSeconds());
 }
 
