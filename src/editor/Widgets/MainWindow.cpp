@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	menuTreeView->addAction(ui->actionOpen);
 	menuTreeView->addAction(ui->actionRename);
-	menuTreeView->addAction(ui->actionTest_2);
+	menuTreeView->addAction(ui->actionDelete);
 
 	readSettings();
 
@@ -421,11 +421,27 @@ void MainWindow::on_actionOpen_triggered()
 		addEditorTab(new ObjectWidget(selectedIdName));
 }
 
-void MainWindow::on_actionTest_2_triggered()
+void MainWindow::on_actionDelete_triggered()
 {
-	qDebug() << "test clicked";
-	treeModel->update();
-	proxyModel->sort(0);
+	// TODO: You sure you want to remove this?
+	QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+
+	json *j;
+	if (selectedType == EditorTabWidget::Cutscene)
+		j = &ProjData[NovelTea::ID::cutscenes];
+	else if (selectedType == EditorTabWidget::Room)
+		j = &ProjData[NovelTea::ID::rooms];
+	else if (selectedType == EditorTabWidget::Object)
+		j = &ProjData[NovelTea::ID::objects];
+	else if (selectedType == EditorTabWidget::Dialogue)
+		j = &ProjData[NovelTea::ID::dialogues];
+	else
+		return;
+
+	j->erase(selectedIdName);
+	Proj.saveToFile();
+
+	proxyModel->removeRow(index.row(), index.parent());
 }
 
 void MainWindow::on_actionCloseProject_triggered()

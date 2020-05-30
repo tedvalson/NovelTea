@@ -51,7 +51,7 @@ private slots:
 	void on_tabWidget_tabBarClicked(int index);
 	void on_actionRename_triggered();
 	void on_actionOpen_triggered();
-	void on_actionTest_2_triggered();
+	void on_actionDelete_triggered();
 	void on_actionCloseProject_triggered();
 
 private:

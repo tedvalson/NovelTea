@@ -262,9 +262,9 @@
     <string>Open</string>
    </property>
   </action>
-  <action name="actionTest_2">
+  <action name="actionDelete">
    <property name="text">
-    <string>Test</string>
+    <string>Delete</string>
    </property>
   </action>
   <action name="actionCloseProject">
