@@ -40,9 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	readSettings();
 
 	// Load testing project
-	Proj.loadFromFile("/home/android/test.ntp");
-	treeModel->loadProject(Proj);
-	warnIfInvalid();
+	loadProject("/home/android/test.ntp");
 }
 
 MainWindow::~MainWindow()
@@ -62,8 +60,27 @@ MainWindow &MainWindow::instance()
 	return *_instance;
 }
 
+bool MainWindow::loadProject(const QString &filename)
+{
+	if (closeProject() && !filename.isEmpty())
+	{
+		if (Proj.loadFromFile(filename.toStdString()))
+		{
+			treeModel->loadProject(Proj);
+			warnIfInvalid();
+			setWindowTitle(QString::fromStdString(ProjData[NovelTea::ID::projectName]) + " - NovelTea Editor");
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool MainWindow::closeProject()
 {
+	if (!Proj.isLoaded())
+		return true;
+
 	if (!reallyWantToClose())
 		return false;
 
@@ -73,6 +90,7 @@ bool MainWindow::closeProject()
 
 	Proj.closeProject();
 	treeModel->loadProject(Proj);
+	setWindowTitle("NovelTea Editor");
 
 	return true;
 }
@@ -305,16 +323,7 @@ void MainWindow::on_actionOpenProject_triggered()
 			tr("Open Project"),
 			QString(),
 			tr("NovelTea Projects (*.ntp);;All Files (*)"));
-	if (!fileName.isEmpty() && closeProject())
-	{
-		if (Proj.loadFromFile(fileName.toStdString()))
-		{
-			treeModel->loadProject(Proj);
-			warnIfInvalid();
-		}
-		else
-			qDebug() << "Project load failed: " << fileName;
-	}
+	loadProject(fileName);
 }
 
 void MainWindow::on_actionSave_triggered()

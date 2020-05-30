@@ -17,6 +17,7 @@ class MainWindow : public QMainWindow
 public:
 	static MainWindow &instance();
 
+	bool loadProject(const QString &filename);
 	bool closeProject();
 
 	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = false);
