@@ -6,6 +6,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageBreakSegment.hpp>
+#include <NovelTea/States/StateEditor.hpp>
 #include <QToolButton>
 #include <QDebug>
 
@@ -35,6 +36,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 {
 	_idName = idName;
 	ui->setupUi(this);
+	ui->preview->setMode(NovelTea::StateEditorMode::Cutscene);
 	createMenus();
 	load();
 

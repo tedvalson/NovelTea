@@ -5,6 +5,7 @@ namespace NovelTea {
 
 enum class StateID {
 	None,
+	Editor,
 	Main,
 };
 

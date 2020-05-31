@@ -1,5 +1,6 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/States/StateMain.hpp>
+#include <NovelTea/States/StateEditor.hpp>
 #include <SFML/System/Time.hpp>
 #include <chrono>
 
@@ -12,6 +13,7 @@ Engine::Engine(EngineConfig config)
 : _config(config)
 , _stateStack(State::Context(_config, _text, _data))
 {
+	_stateStack.registerState<StateEditor>(StateID::Editor);
 	_stateStack.registerState<StateMain>(StateID::Main);
 }
 

@@ -2,6 +2,7 @@
 #include "ui_RoomWidget.h"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/States/StateEditor.hpp>
 #include <QDebug>
 
 RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
@@ -12,6 +13,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 {
 	_idName = idName;
 	ui->setupUi(this);
+	ui->preview->setMode(NovelTea::StateEditorMode::Room);
 	load();
 }
 

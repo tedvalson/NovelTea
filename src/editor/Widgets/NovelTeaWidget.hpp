@@ -9,7 +9,7 @@ using json = nlohmann::json;
 
 namespace NovelTea {
 class Engine;
-//class InputManager;
+enum class StateEditorMode;
 }
 
 
@@ -20,6 +20,7 @@ public:
 	virtual ~NovelTeaWidget();
 
 	json processData(json jsonData);
+	void setMode(NovelTea::StateEditorMode mode);
 
 protected:
 	void mousePressEvent(QMouseEvent *e);

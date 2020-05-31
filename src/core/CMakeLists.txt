@@ -6,6 +6,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Engine.cpp
 	${SRCROOT}/States/StateStack.cpp
 	${SRCROOT}/States/State.cpp
+	${SRCROOT}/States/StateEditor.cpp
 	${SRCROOT}/States/StateMain.cpp
 	${SRCROOT}/JsonSerializable.cpp
 	${SRCROOT}/Cutscene.cpp

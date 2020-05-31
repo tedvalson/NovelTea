@@ -1,6 +1,6 @@
 #include "NovelTeaWidget.hpp"
 #include <NovelTea/Engine.hpp>
-#include <NovelTea/States/StateIdentifiers.hpp>
+#include <NovelTea/States/StateEditor.hpp>
 #include <QMouseEvent>
 #include <iostream>
 
@@ -16,7 +16,7 @@ NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
 	NovelTea::EngineConfig config;
 	config.width = _internalSize.x;
 	config.height = _internalSize.y;
-	config.initialState = NovelTea::StateID::Main;
+	config.initialState = NovelTea::StateID::Editor;
 	_engine = new NovelTea::Engine(config);
 	_engine->initialize();
 	_engine->update(0.f); // This triggers update of state stack
@@ -24,7 +24,6 @@ NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
 
 NovelTeaWidget::~NovelTeaWidget()
 {
-//	deleteTexture(texture);
 	if (_engine)
 		delete _engine;
 }
@@ -39,6 +38,14 @@ json NovelTeaWidget::processData(json jsonData)
 		delete ptr;
 	}
 	return resp;
+}
+
+void NovelTeaWidget::setMode(NovelTea::StateEditorMode mode)
+{
+	json jdata;
+	jdata["event"] = "mode";
+	jdata["mode"] = mode;
+	processData(jdata);
 }
 
 void NovelTeaWidget::mousePressEvent(QMouseEvent *e)
