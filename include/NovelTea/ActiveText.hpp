@@ -22,6 +22,8 @@ public:
 
 	std::string toPlainText() const;
 
+	void setText(const std::string &text);
+
 	const std::vector<std::shared_ptr<TextBlock>> &blocks() const;
 	void addBlock(std::shared_ptr<TextBlock> block, int index = -1);
 

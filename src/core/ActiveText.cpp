@@ -76,6 +76,18 @@ std::string ActiveText::toPlainText() const
 	return result;
 }
 
+void ActiveText::setText(const std::string &text)
+{
+	auto block = std::make_shared<TextBlock>();
+	auto fragment = std::make_shared<TextFragment>();
+
+	fragment->setText(text);
+	block->addFragment(fragment);
+
+	m_textBlocks.clear();
+	addBlock(block);
+}
+
 const std::vector<std::shared_ptr<TextBlock>> &ActiveText::blocks() const
 {
 	return m_textBlocks;
