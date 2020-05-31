@@ -18,6 +18,7 @@ public:
 	static MainWindow &instance();
 
 	bool loadProject(const QString &filename);
+	bool reloadProject();
 	bool closeProject();
 
 	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = false);

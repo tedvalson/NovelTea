@@ -76,6 +76,11 @@ bool MainWindow::loadProject(const QString &filename)
 	return false;
 }
 
+bool MainWindow::reloadProject()
+{
+	loadProject(QString::fromStdString(Proj.filename()));
+}
+
 bool MainWindow::closeProject()
 {
 	if (!Proj.isLoaded())

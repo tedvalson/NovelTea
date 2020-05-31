@@ -85,6 +85,7 @@ void ProjectSettingsWidget::saveData() const
 	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
 	j[ID::projectEntrypoint] = ui->actionSelect->getValue();
 	j[ID::projectFontDefault] = defaultFontIndex;
+	MainWindow::instance().reloadProject();
 }
 
 void ProjectSettingsWidget::loadData()
