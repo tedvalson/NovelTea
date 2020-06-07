@@ -15,6 +15,7 @@ public:
 		Cutscene = 0,
 		Room     = 1,
 		Object   = 2,
+		Dialogue,
 		Settings,
 	};
 

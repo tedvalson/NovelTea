@@ -19,6 +19,8 @@ if (NOT ANDROID)
 		message("-> Make sure the SFML libraries with the same configuration (Release/Debug, Static/Dynamic) exist.\n")
 	endif()
 else()
+    # let the user switch ABIs
+    set(ANDROID_ABI "armeabi-v7a" CACHE STRING "Look at the NDK docs for currently supported ABIs")
     # we install libs in a subdirectory named after the ABI (lib/mips/*.so)
     set(LIB_SUFFIX "/${ANDROID_ABI}")
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_ANDROID_NDK}/sources/noveltea)
@@ -45,16 +47,7 @@ include_directories(
 )
 
 # C++11 support
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-	message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # disable the rpath stuff
 set(CMAKE_SKIP_BUILD_RPATH TRUE)

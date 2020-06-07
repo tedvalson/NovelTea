@@ -19,16 +19,19 @@ addons:
     - libflac-dev
   homebrew:
     packages:
-     - cmake
+    - cmake
+    - qt5
     update: true
 
 before_script:
+- echo $CMAKE_FLAGS
 - git clone --depth 1 https://github.com/SFML/SFML.git
 - cd SFML
 - mkdir install
 - mkdir build
 - cd build
-- cmake $CMAKE_SFML_FLAGS -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install -DSFML_BUILD_FRAMEWORKS=FALSE -DBUILD_SHARED_LIBS=TRUE ..
+- cmake $CMAKE_SFML_FLAGS -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install
+  -DSFML_BUILD_FRAMEWORKS=FALSE -DBUILD_SHARED_LIBS=TRUE ..
 - cmake --build . --config Release --target install
 - cd ../../
 
@@ -41,47 +44,85 @@ script:
 matrix:
   include:
 
-  - name: "Ubuntu Xenial GCC"
+  - name: Ubuntu Xenial GCC
     os: linux
     dist: xenial
     compiler: gcc
     env:
-      - CMAKE_FLAGS="-DBUILD_TEST=OFF -DBUILD_DOCS=ON"
+    - RELEASE_FILENAME="NovelTea-$TRAVIS_TAG-linux.zip"
+    - CMAKE_FLAGS="-DBUILD_TEST=OFF -DBUILD_DOCS=ON"
 
-  - name: "macOS Xcode 10"
+  - name: macOS Xcode 10
     os: osx
     osx_image: xcode10
     env:
-     - CMAKE_FLAGS="-DBUILD_TEST=OFF"
+    - RELEASE_FILENAME="NovelTea-$TRAVIS_TAG-osx.zip"
+    - CMAKE_FLAGS="-DBUILD_TEST=OFF -DCMAKE_PREFIX_PATH=$(brew --prefix)/opt/qt5"
+    before_install:
+    - brew install qt5
+    #- brew link qt5 --force
+    - export Qt5_DIR=$(brew --prefix)/opt/qt5
 
-  - name: "Windows GCC"
+  - name: Windows GCC
     os: windows
     compiler: gcc
     env:
-      - CMAKE_FLAGS="-DBUILD_TEST=OFF"
+    - RELEASE_FILENAME="NovelTea-$TRAVIS_TAG-windows.zip"
+    - CMAKE_FLAGS="-DBUILD_TEST=OFF -DCMAKE_PREFIX_PATH=/c/Qt/5.14.2/msvc2017"
+    - PATH=/c/Python38:/c/Python38/Scripts:$PATH
+    before_install:
+    - choco install python --version 3.8.0
+    - python -m pip install --upgrade pip
+    - python -m pip install aqtinstall
+    - python -m aqt install --outputdir /c/Qt 5.14.2 windows desktop win32_msvc2017
+    #- choco install python3 --params "/InstallDir:C:\\Python"
+    #- export PATH="/c/Python:/c/Python/Scripts:$PATH"
+    #- python -m pip install --upgrade pip wheel
+    #- pip install aqtinstall
+    #- python -m aqt install 5.13.1 windows desktop win64_msvc2017_64
 
-  - name: "Android armeabi-v7a"
+  - name: Android armeabi-v7a
     language: android
+    dist: trusty
     android: &androidComponents
       components:
-        - tools
-        - platform-tools
-        - build-tools-26.0.1
+      #- tools
+      #- platform-tools
+      - build-tools-26.0.1
+      - android-22
+      - sys-img-armeabi-v7a-android-22
     env:
-      - CMAKE_FLAGS="-DBUILD_EDITOR=OFF"
-      - CMAKE_SFML_FLAGS="-DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=$TRAVIS_BUILD_DIR/android-ndk-r18b -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=26"
-    install: &androidInstall
-      - echo y | sdkmanager "cmake;3.10.2.4988404"
-      - sudo ln -sf /usr/local/android-sdk/cmake/3.10.2.4988404/bin/cmake /usr/bin/cmake
-      - wget https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip
-      - unzip -qq android-ndk-r18b-linux-x86_64.zip
+    - NDK="$TRAVIS_BUILD_DIR/android-ndk-r16b/"
+    - RELEASE_FILENAME="NovelTea-$TRAVIS_TAG-android.apk"
+    - CMAKE_FLAGS="-DBUILD_EDITOR=OFF"
+    - CMAKE_SFML_FLAGS="-DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=$NDK
+      -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang
+      -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=16"
+    install:
+    - echo y | sdkmanager "cmake;3.10.2.4988404"
+    - sudo ln -sf /usr/local/android-sdk/cmake/3.10.2.4988404/bin/cmake /usr/bin/cmake
+    - wget -q https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
+    - unzip -qq android-ndk-r16b-linux-x86_64.zip
     script:
-      - cmake $CMAKE_FLAGS $CMAKE_SFML_FLAGS .
-      - VERBOSE=1 cmake --build . --config Release --target install
-      - cd android
-      - echo "sdk.dir=/usr/local/android-sdk" > local.properties
-      - echo "ndk.dir=$TRAVIS_BUILD_DIR/android-ndk-r18b" >> local.properties
-      - ./gradlew build
+    - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a -c 100M
+    - emulator -avd test -no-audio -no-window &
+    - android-wait-for-emulator
+    - adb shell input keyevent 82 &
+    - cmake $CMAKE_FLAGS $CMAKE_SFML_FLAGS .
+    - cmake --build . --config Release --target install
+    - cd android
+    - echo "sdk.dir=/usr/local/android-sdk/" > local.properties
+    - echo "ndk.dir=$NDK" >> local.properties
+    - "./gradlew build connectedCheck"
+    - ls
 
-notifications:
-  email: false
+deploy:
+  provider: releases
+  api_key:
+    secure: AzACC9GIKIk3up35QCV92eijEF8bhhtSaciCuSdY55s2VzTt+mbTTcW3MTBnQA6Msy58mp+a2G6pph9KQV7pVlf/peTZXuCyd6mnQ4gyn6BKKHZBurb1ykTo7ypDihbGYF17ASOzRL7bZjCloghttKEhpOFZqEnBlWMSuXg/P6JMyMziMEFlB6kBQ6sk8sPucqlkD5IGQmmpKKkSzjN8dg2/1Tsr+DDDXg39kCLxnHJdE1nMs5Tth7LDdYd8FOhA0LC9fuqDp+rW/RH8v70oTSDxcriSIms75kfi1Lr6PHjZ0qAg/VNE5NICZN2etrHe20jT7VLmswjYXAEsSW3N6kIFzODbIoc/cauE1A2Qob94ocAp2dseeDfKyCecVszn4cwYS32iwuQZ/JZOJCm/mZ3vHHo7g+aD1217ZFEGFyI44mw0/h7IdNaHOPt3NzmIjNAdXY2X/C3nsrhHgeg86XwWOvUmRzXMW+E2NW3DC3zjAdAt3m0l+CJy8Tq2+ljms4AOkqJrzZtO+24pFaeHYF922vhQ+7qUdqbgnyLhYS/sXBEPW4xPFvHSaUucIy/vMtRZb0gUYZxHQq5rK6B4Fdc2oEmtZb2fEFRsPdgiBtNuWd9KvPThpbLCEn4xPaJjzjF0M8jLmFaQWl6kQdbkVGzc2CzXSYM+axtNYIvvJBY=
+  file: $RELEASE_FILENAME
+  on:
+    repo: tedvalson/NovelTea
+    tags: true
+  skip_cleanup: true
+  overwrite: true
