@@ -32,13 +32,20 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView"/>
+    <widget class="EntityTreeView" name="treeView"/>
    </item>
    <item>
     <widget class="QTextEdit" name="scriptEdit"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EntityTreeView</class>
+   <extends>QTreeView</extends>
+   <header>EntityTreeView.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

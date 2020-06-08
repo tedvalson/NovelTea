@@ -50,7 +50,7 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QTreeView" name="treeView">
+      <widget class="EntityTreeView" name="treeView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -59,7 +59,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>150</width>
+         <width>50</width>
          <height>100</height>
         </size>
        </property>
@@ -67,7 +67,7 @@
         <bool>false</bool>
        </property>
        <attribute name="headerDefaultSectionSize">
-        <number>200</number>
+        <number>100</number>
        </attribute>
        <attribute name="headerMinimumSectionSize">
         <number>50</number>
@@ -274,6 +274,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>EntityTreeView</class>
+   <extends>QTreeView</extends>
+   <header>EntityTreeView.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

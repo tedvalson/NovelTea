@@ -4,7 +4,6 @@
 #include "EditorTabWidget.hpp"
 #include "TreeModel.hpp"
 #include <QMainWindow>
-#include <QSortFilterProxyModel>
 
 namespace Ui {
 class MainWindow;
@@ -60,7 +59,6 @@ private:
 	static MainWindow *_instance;
     Ui::MainWindow *ui;
 	TreeModel *treeModel;
-	QSortFilterProxyModel *proxyModel;
 	QMenu *menuTreeView;
 	std::string selectedIdName;
 	EditorTabWidget::Type selectedType;

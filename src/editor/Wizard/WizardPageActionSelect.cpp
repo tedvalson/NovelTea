@@ -46,8 +46,7 @@ nlohmann::json WizardPageActionSelect::getValue() const
 	{
 		if (ui->radioExisting->isChecked())
 		{
-			auto proxyModel = static_cast<QSortFilterProxyModel*>(MainWindow::instance().getItemModel());
-			auto index = proxyModel->mapToSource(ui->treeView->currentIndex());
+			auto index = ui->treeView->mapToSource(ui->treeView->currentIndex());
 			auto treeItem = static_cast<TreeItem*>(index.internalPointer());
 			if (treeItem)
 			{

@@ -23,15 +23,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	treeModel(new TreeModel),
-	proxyModel(new QSortFilterProxyModel),
 	menuTreeView(new QMenu),
 	selectedType(EditorTabWidget::Invalid)
 {
 	ui->setupUi(this);
 
-	proxyModel->setSourceModel(treeModel);
-	proxyModel->sort(0);
-	ui->treeView->setModel(proxyModel);
+	ui->treeView->setModel(treeModel);
 
 	menuTreeView->addAction(ui->actionOpen);
 	menuTreeView->addAction(ui->actionRename);
@@ -46,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
 	delete menuTreeView;
-	delete proxyModel;
 	delete treeModel;
 	delete ui;
 }
@@ -160,7 +156,7 @@ void MainWindow::warnIfInvalid() const
 
 QAbstractItemModel *MainWindow::getItemModel() const
 {
-	return proxyModel;
+	return treeModel;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -254,7 +250,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
 
 void MainWindow::on_treeView_activated(const QModelIndex &index)
 {
-	auto proxyIndex = proxyModel->mapToSource(index);
+	auto proxyIndex = ui->treeView->mapToSource(index);
 	auto item = static_cast<TreeItem*>(proxyIndex.internalPointer());
 	auto type = item->data(1);
 	if (!type.isValid())
@@ -268,7 +264,7 @@ void MainWindow::on_treeView_activated(const QModelIndex &index)
 void MainWindow::on_treeView_pressed(const QModelIndex &index)
 {
 	qDebug() << "index:" << index.column() << index.row();
-	auto proxyIndex = proxyModel->mapToSource(index);
+	auto proxyIndex = ui->treeView->mapToSource(index);
 	if (QApplication::mouseButtons() != Qt::RightButton)
 		return;
 	auto item = static_cast<TreeItem*>(proxyIndex.internalPointer());
@@ -455,7 +451,8 @@ void MainWindow::on_actionDelete_triggered()
 	j->erase(selectedIdName);
 	Proj.saveToFile();
 
-	proxyModel->removeRow(index.row(), index.parent());
+	auto proxyIndex = ui->treeView->mapToSource(index);
+	treeModel->removeRow(proxyIndex.row(), proxyIndex.parent());
 }
 
 void MainWindow::on_actionCloseProject_triggered()

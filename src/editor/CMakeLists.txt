@@ -51,6 +51,7 @@ set(SRC
 	${SRCROOT}/Wizard/WizardPageObject.cpp
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp
+	${SRCROOT}/EntityTreeView.cpp
 	${SRCROOT}/EditorUtils.cpp
 )
 
