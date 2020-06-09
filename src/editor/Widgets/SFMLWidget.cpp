@@ -51,7 +51,7 @@ void SFMLWidget::showEvent(QShowEvent *)
 	if (!_initialized)
 	{
 		std::cout << "initialized!" << std::endl;
-		sf::RenderWindow::create(static_cast<sf::WindowHandle>(winId()));
+		takeWindow();
 		onInit();
 //		_timer.start();
 		_initialized = true;
@@ -84,11 +84,22 @@ void SFMLWidget::resizeEvent(QResizeEvent *)
 
 	if (w == QWidget::width() && h == QWidget::height())
 	{
-		sf::RenderWindow::create(static_cast<sf::WindowHandle>(winId()));
+		takeWindow();
 		onResize();
 	}
 	else
 		resize(w, h);
+}
+
+void SFMLWidget::takeWindow()
+{
+#if defined(_WIN32)
+	sf::RenderWindow::create(reinterpret_cast<sf::WindowHandle>(winId()));
+#elif defined(__APPLE__) && defined(__MACH__)
+	sf::RenderWindow::create(reinterpret_cast<sf::WindowHandle>(winId()));
+#else
+	sf::RenderWindow::create(static_cast<sf::WindowHandle>(winId()));
+#endif
 }
 
 void SFMLWidget::paintEvent(QPaintEvent *)

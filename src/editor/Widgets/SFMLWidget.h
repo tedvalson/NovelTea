@@ -25,6 +25,8 @@ protected:
 	void paintEvent(QPaintEvent*) override;
 	void resizeEvent(QResizeEvent*);
 
+	void takeWindow();
+
 private:
 	QPaintEngine *paintEngine() const override;
 

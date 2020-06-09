@@ -4,6 +4,7 @@
 #include "StateIdentifiers.hpp"
 #include <SFML/System/Time.hpp>
 #include <SFML/Window/Event.hpp>
+#include <functional>
 #include <memory>
 #include <vector>
 #include <SFML/Graphics/Color.hpp>

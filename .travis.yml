@@ -58,10 +58,6 @@ matrix:
     env:
     - RELEASE_FILENAME="NovelTea-$TRAVIS_TAG-osx.zip"
     - CMAKE_FLAGS="-DBUILD_TEST=OFF -DCMAKE_PREFIX_PATH=$(brew --prefix)/opt/qt5"
-    before_install:
-    - brew install qt5
-    #- brew link qt5 --force
-    - export Qt5_DIR=$(brew --prefix)/opt/qt5
 
   - name: Windows GCC
     os: windows
@@ -86,8 +82,6 @@ matrix:
     dist: trusty
     android: &androidComponents
       components:
-      #- tools
-      #- platform-tools
       - build-tools-26.0.1
       - android-22
       - sys-img-armeabi-v7a-android-22
@@ -114,7 +108,6 @@ matrix:
     - echo "sdk.dir=/usr/local/android-sdk/" > local.properties
     - echo "ndk.dir=$NDK" >> local.properties
     - "./gradlew build connectedCheck"
-    - ls
 
 deploy:
   provider: releases
