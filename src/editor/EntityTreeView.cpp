@@ -3,7 +3,7 @@
 
 EntityTreeView::EntityTreeView(QWidget *parent)
 	: QTreeView(parent)
-	, proxyModel(new QSortFilterProxyModel)
+	, proxyModel(new EntitySortFilterProxyModel)
 {
 
 }
@@ -23,4 +23,9 @@ void EntityTreeView::setModel(QAbstractItemModel *model)
 QModelIndex EntityTreeView::mapToSource(const QModelIndex &proxyIndex) const
 {
 	return proxyModel->mapToSource(proxyIndex);
+}
+
+void EntityTreeView::setFilterRegExp(const QString &pattern)
+{
+	proxyModel->setFilterRegExp(pattern);
 }

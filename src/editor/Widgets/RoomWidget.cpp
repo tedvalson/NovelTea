@@ -1,8 +1,10 @@
 #include "RoomWidget.hpp"
 #include "ui_RoomWidget.h"
+#include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/States/StateEditor.hpp>
+#include <QWizard>
 #include <QDebug>
 
 RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
@@ -55,7 +57,6 @@ void RoomWidget::saveData() const
 void RoomWidget::loadData()
 {
 	m_room = Proj.room(idName());
-	ui->listWidget->disconnect();
 	ui->listWidget->clear();
 
 	qDebug() << "Loading room data... " << QString::fromStdString(idName());
@@ -81,6 +82,45 @@ void RoomWidget::propertyChanged(QtProperty *property, const QVariant &value)
 	setModified();
 }
 
+void RoomWidget::on_actionAddObject_triggered()
+{
+	QWizard wizard;
+	auto page = new WizardPageActionSelect;
+
+	page->setFilterRegExp("Objects");
+	page->allowCustomScript(false);
+
+	wizard.addPage(page);
+
+	if (wizard.exec() == QDialog::Accepted)
+	{
+		auto v = page->getValue();
+		if (v[NovelTea::ID::entityType] == NovelTea::EntityType::Object)
+		{
+			auto item = new QListWidgetItem(QString::fromStdString(v[NovelTea::ID::entityId]));
+			item->setCheckState(Qt::Checked);
+			ui->listWidget->addItem(item);
+		}
+	}
+}
+
 void RoomWidget::on_actionRemoveObject_triggered()
 {
+
+}
+
+void RoomWidget::on_textEdit_textChanged()
+{
+	json jdata;
+	jdata["event"] = "text";
+	jdata["data"] = ui->textEdit->toPlainText().toStdString();
+	ui->preview->processData(jdata);
+}
+
+void RoomWidget::on_listWidget_itemPressed(QListWidgetItem *item)
+{
+	if (QApplication::mouseButtons() != Qt::RightButton)
+		return;
+
+	qDebug() << item->text();
 }

@@ -9,6 +9,8 @@ WizardPageActionSelect::WizardPageActionSelect(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->treeView->setModel(MainWindow::instance().getItemModel());
+	ui->treeView->setHeaderHidden(true);
+	setFilterRegExp("^(?!Objects)");
 
 	ui->scriptEdit->hide();
 	ui->treeView->hide();
@@ -64,6 +66,22 @@ nlohmann::json WizardPageActionSelect::getValue() const
 	}
 
 	return json::array({-1,""});
+}
+
+void WizardPageActionSelect::setFilterRegExp(const QString &pattern)
+{
+	ui->treeView->setFilterRegExp(pattern);
+}
+
+void WizardPageActionSelect::allowCustomScript(bool allow)
+{
+	ui->radioCustom->setVisible(allow);
+	ui->radioExisting->setVisible(allow);
+	if (!allow)
+	{
+		ui->radioExisting->setChecked(true);
+		ui->treeView->expandToDepth(1);
+	}
 }
 
 bool WizardPageActionSelect::isComplete() const

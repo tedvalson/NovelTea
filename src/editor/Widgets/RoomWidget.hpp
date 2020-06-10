@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QMenu>
 #include <QStandardItemModel>
+#include <QListWidgetItem>
 #include <json.hpp>
 #include "QtPropertyBrowser/qtpropertymanager.h"
 #include "QtPropertyBrowser/qtvariantproperty.h"
@@ -30,7 +31,10 @@ public:
 	Type getType() const override;
 
 private slots:
+	void on_actionAddObject_triggered();
 	void on_actionRemoveObject_triggered();
+	void on_textEdit_textChanged();
+	void on_listWidget_itemPressed(QListWidgetItem *item);
 
 private:
 	void fillPropertyEditor();

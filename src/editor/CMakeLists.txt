@@ -52,6 +52,7 @@ set(SRC
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp
 	${SRCROOT}/EntityTreeView.cpp
+	${SRCROOT}/EntitySortFilterProxyModel.cpp
 	${SRCROOT}/EditorUtils.cpp
 )
 

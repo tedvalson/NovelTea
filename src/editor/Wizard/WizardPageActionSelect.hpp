@@ -20,6 +20,9 @@ public:
 	void setValue(nlohmann::json value);
 	nlohmann::json getValue() const;
 
+	void setFilterRegExp(const QString &pattern);
+	void allowCustomScript(bool allow);
+
 	bool isComplete() const override;
 
 protected:

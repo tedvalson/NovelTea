@@ -1,8 +1,8 @@
 #ifndef ENTITYTREEVIEW_HPP
 #define ENTITYTREEVIEW_HPP
 
+#include "EntitySortFilterProxyModel.hpp"
 #include <NovelTea/ProjectData.hpp>
-#include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <QModelIndex>
 #include <QVariant>
@@ -19,8 +19,10 @@ public:
 	void setModel(QAbstractItemModel *model);
 	QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
 
+	void setFilterRegExp(const QString &pattern);
+
 private:
-	QSortFilterProxyModel *proxyModel;
+	EntitySortFilterProxyModel *proxyModel;
 };
 
 #endif // ENTITYTREEVIEW_HPP
