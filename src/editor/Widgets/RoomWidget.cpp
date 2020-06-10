@@ -1,5 +1,7 @@
 #include "RoomWidget.hpp"
 #include "ui_RoomWidget.h"
+#include "MainWindow.hpp"
+#include "ObjectWidget.hpp"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Room.hpp>
@@ -12,15 +14,19 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	, ui(new Ui::RoomWidget)
 	, variantManager(new QtVariantPropertyManager)
 	, variantFactory(new QtVariantEditorFactory)
+	, m_objectMenu(new QMenu)
 {
 	_idName = idName;
 	ui->setupUi(this);
 	ui->preview->setMode(NovelTea::StateEditorMode::Room);
 	load();
+
+	m_objectMenu->addAction(ui->actionView_Edit);
 }
 
 RoomWidget::~RoomWidget()
 {
+	delete m_objectMenu;
 	delete variantFactory;
 	delete variantManager;
 	delete ui;
@@ -121,6 +127,17 @@ void RoomWidget::on_listWidget_itemPressed(QListWidgetItem *item)
 {
 	if (QApplication::mouseButtons() != Qt::RightButton)
 		return;
+	m_objectMenu->popup(QCursor::pos());
+}
 
-	qDebug() << item->text();
+void RoomWidget::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
+{
+	ui->actionView_Edit->trigger();
+}
+
+void RoomWidget::on_actionView_Edit_triggered()
+{
+	auto item = ui->listWidget->currentItem();
+	auto w = new ObjectWidget(item->text().toStdString());
+	MainWindow::instance().addEditorTab(w, true);
 }

@@ -222,6 +222,14 @@
     <string>Remove</string>
    </property>
   </action>
+  <action name="actionView_Edit">
+   <property name="icon">
+    <iconset theme="edit-find"/>
+   </property>
+   <property name="text">
+    <string>View / Edit</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
