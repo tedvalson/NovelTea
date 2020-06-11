@@ -37,6 +37,7 @@ private slots:
 	void on_listWidget_itemPressed(QListWidgetItem *item);
 	void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 	void on_actionView_Edit_triggered();
+	void on_listWidget_currentRowChanged(int currentRow);
 
 private:
 	void fillPropertyEditor();

@@ -57,7 +57,17 @@ void RoomWidget::fillPropertyEditor()
 void RoomWidget::saveData() const
 {
 	if (m_room)
+	{
+		std::vector<NovelTea::Room::RoomObject> objects;
+		for (int i = 0; i < ui->listWidget->count(); ++i)
+		{
+			auto item = ui->listWidget->item(i);
+			objects.push_back({item->text().toStdString(), item->checkState() == Qt::Checked});
+		}
+		m_room->setObjects(objects);
+		m_room->setDescription(ui->textEdit->toPlainText().toStdString());
 		ProjData[NovelTea::ID::rooms][idName()] = *m_room;
+	}
 }
 
 void RoomWidget::loadData()
@@ -74,11 +84,20 @@ void RoomWidget::loadData()
 		m_room = std::make_shared<NovelTea::Room>();
 	}
 
+	for (auto &roomObject : m_room->getObjects())
+	{
+		auto item = new QListWidgetItem(QString::fromStdString(roomObject.idName));
+		item->setCheckState(roomObject.placeInRoom ? Qt::Checked : Qt::Unchecked);
+		ui->listWidget->addItem(item);
+	}
+
+	ui->textEdit->setText(QString::fromStdString(m_room->getDescription()));
 	fillPropertyEditor();
 
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
+	MODIFIER(ui->textEdit, &QTextEdit::textChanged);
 }
 
 void RoomWidget::propertyChanged(QtProperty *property, const QVariant &value)
@@ -100,10 +119,19 @@ void RoomWidget::on_actionAddObject_triggered()
 
 	if (wizard.exec() == QDialog::Accepted)
 	{
-		auto v = page->getValue();
-		if (v[NovelTea::ID::entityType] == NovelTea::EntityType::Object)
+		auto jval = page->getValue();
+		auto idName = QString::fromStdString(jval[NovelTea::ID::entityId]);
+		if (jval[NovelTea::ID::entityType] == NovelTea::EntityType::Object)
 		{
-			auto item = new QListWidgetItem(QString::fromStdString(v[NovelTea::ID::entityId]));
+			// Check if object already exists
+			for (int i = 0; i < ui->listWidget->count(); ++i)
+			{
+				auto item = ui->listWidget->item(i);
+				if (item->text() == idName)
+					return;
+			}
+
+			auto item = new QListWidgetItem(idName);
 			item->setCheckState(Qt::Checked);
 			ui->listWidget->addItem(item);
 		}
@@ -112,7 +140,7 @@ void RoomWidget::on_actionAddObject_triggered()
 
 void RoomWidget::on_actionRemoveObject_triggered()
 {
-
+	delete ui->listWidget->currentItem();
 }
 
 void RoomWidget::on_textEdit_textChanged()
@@ -140,4 +168,9 @@ void RoomWidget::on_actionView_Edit_triggered()
 	auto item = ui->listWidget->currentItem();
 	auto w = new ObjectWidget(item->text().toStdString());
 	MainWindow::instance().addEditorTab(w, true);
+}
+
+void RoomWidget::on_listWidget_currentRowChanged(int currentRow)
+{
+	ui->actionRemoveObject->setEnabled(currentRow >= 0);
 }
