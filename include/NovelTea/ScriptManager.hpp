@@ -24,6 +24,16 @@ public:
 		return dukglue_peval<T>(m_context, script.c_str());
 	}
 
+	inline void runInClosure(const std::string& script)
+	{
+		runInClosure<void>(script);
+	}
+
+	template <typename T>
+	inline T runInClosure(const std::string &script)
+	{
+		return run<T>("(function(){" + script + "})();");
+	}
 
 protected:
 	ScriptManager();

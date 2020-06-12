@@ -132,7 +132,16 @@
              <widget class="QListWidget" name="listWidget"/>
             </item>
             <item>
-             <widget class="QTextEdit" name="textEdit"/>
+             <widget class="ScriptEdit" name="textEdit">
+              <property name="font">
+               <font>
+                <family>DejaVu Sans Mono</family>
+               </font>
+              </property>
+              <property name="lineWrapMode">
+               <enum>QPlainTextEdit::NoWrap</enum>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -243,6 +252,11 @@
    <extends>QWidget</extends>
    <header>Widgets/QtPropertyBrowser/qttreepropertybrowser.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Widgets/ScriptEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

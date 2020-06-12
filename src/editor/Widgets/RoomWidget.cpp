@@ -91,13 +91,13 @@ void RoomWidget::loadData()
 		ui->listWidget->addItem(item);
 	}
 
-	ui->textEdit->setText(QString::fromStdString(m_room->getDescription()));
+	ui->textEdit->setPlainText(QString::fromStdString(m_room->getDescription()));
 	fillPropertyEditor();
 
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
-	MODIFIER(ui->textEdit, &QTextEdit::textChanged);
+	MODIFIER(ui->textEdit, &QPlainTextEdit::textChanged);
 }
 
 void RoomWidget::propertyChanged(QtProperty *property, const QVariant &value)
@@ -148,7 +148,9 @@ void RoomWidget::on_textEdit_textChanged()
 	json jdata;
 	jdata["event"] = "text";
 	jdata["data"] = ui->textEdit->toPlainText().toStdString();
-	ui->preview->processData(jdata);
+
+	if (ui->textEdit->checkErrors())
+		ui->preview->processData(jdata);
 }
 
 void RoomWidget::on_listWidget_itemPressed(QListWidgetItem *item)

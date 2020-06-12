@@ -41,6 +41,7 @@ set(SRC
 	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
 	${SRCROOT}/Widgets/SFMLWidget.cpp
+	${SRCROOT}/Widgets/ScriptEdit.cpp
 	${SRCROOT}/Widgets/MainWindow.cpp
 	${SRCROOT}/Wizard/Wizard.cpp
 	${SRCROOT}/Wizard/WizardPageActionSelect.cpp
@@ -51,6 +52,7 @@ set(SRC
 	${SRCROOT}/Wizard/WizardPageObject.cpp
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp
+	${SRCROOT}/SyntaxHighLighter.cpp
 	${SRCROOT}/EntityTreeView.cpp
 	${SRCROOT}/EntitySortFilterProxyModel.cpp
 	${SRCROOT}/EditorUtils.cpp
