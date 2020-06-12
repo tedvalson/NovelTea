@@ -38,8 +38,8 @@ ScriptManager::~ScriptManager()
 void ScriptManager::registerFunctions()
 {
 	dukglue_register_function(m_context, print, "print");
-	dukglue_register_function(m_context, SaveData::setVariables, "setVariables");
-	dukglue_register_function(m_context, SaveData::getVariables, "getVariables");
+	dukglue_register_function(m_context, SaveData::saveVariables, "saveVariables");
+	dukglue_register_function(m_context, SaveData::loadVariables, "loadVariables");
 
 }
 

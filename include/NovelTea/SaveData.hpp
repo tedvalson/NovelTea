@@ -25,8 +25,8 @@ public:
 	const json &data() const;
 	json &data();
 
-	static void setVariables(const std::string &jsonData);
-	static std::string getVariables(const std::string &jsonData);
+	static void saveVariables(const std::string &jsonData);
+	static std::string loadVariables(const std::string &jsonData);
 
 protected:
 	SaveData();

@@ -89,7 +89,7 @@ json &SaveData::data()
 	return _json;
 }
 
-void SaveData::setVariables(const std::string &jsonData)
+void SaveData::saveVariables(const std::string &jsonData)
 {
 	auto j = json::parse(jsonData);
 	for (auto &item : j.items())
@@ -98,7 +98,7 @@ void SaveData::setVariables(const std::string &jsonData)
 	}
 }
 
-std::string SaveData::getVariables(const std::string &jsonData)
+std::string SaveData::loadVariables(const std::string &jsonData)
 {
 	auto j = json::parse(jsonData);
 	auto result = json::object();
