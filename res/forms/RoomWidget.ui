@@ -133,11 +133,6 @@
             </item>
             <item>
              <widget class="ScriptEdit" name="textEdit">
-              <property name="font">
-               <font>
-                <family>DejaVu Sans Mono</family>
-               </font>
-              </property>
               <property name="lineWrapMode">
                <enum>QPlainTextEdit::NoWrap</enum>
               </property>

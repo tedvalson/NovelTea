@@ -3,6 +3,7 @@
 #include <NovelTea/ScriptManager.hpp>
 #include <QTextBlock>
 #include <QPainter>
+#include <QFont>
 #include <iostream>
 
 ScriptEdit::ScriptEdit(QWidget *parent)
@@ -12,11 +13,16 @@ ScriptEdit::ScriptEdit(QWidget *parent)
 {
 	lineNumberArea = new LineNumberArea(this);
 
+	// Set some fixed properties
+	auto fnt = font();
+	fnt.setStyleHint(QFont::Monospace);
+	fnt.setFamily(fnt.defaultFamily());
+	setFont(fnt);
+	setTabStopWidth(fontMetrics().width(QLatin1Char(' ')) * 4);
+
 	connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
 	connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 	connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-
-	setTabStopWidth(fontMetrics().width(QLatin1Char(' ')) * 4);
 
 	updateLineNumberAreaWidth(0);
 	highlightCurrentLine();
@@ -31,7 +37,8 @@ int ScriptEdit::lineNumberAreaWidth()
 {
 	int digits = 1;
 	int max = qMax(1, document()->blockCount());
-	while (max >= 10) {
+	while (max >= 10)
+	{
 		max /= 10;
 		++digits;
 	}
@@ -43,17 +50,20 @@ int ScriptEdit::lineNumberAreaWidth()
 
 bool ScriptEdit::checkErrors()
 {
+	auto result = false;
 	try
 	{
 		Script.runInClosure(toPlainText().toStdString());
 		lineWithError = -1;
-		return true;
+		result = true;
 	}
 	catch (DukException &e)
 	{
 		processErrorMsg(e.what());
-		return false;
 	}
+
+	repaint();
+	return result;
 }
 
 void ScriptEdit::updateLineNumberAreaWidth(int /* newBlockCount */)
@@ -82,6 +92,10 @@ void ScriptEdit::resizeEvent(QResizeEvent *e)
 
 void ScriptEdit::processErrorMsg(const std::string &error)
 {
+	// Get error line number from DukException string, example:
+	//
+	// ReferenceError: identifier 'v' undefined
+	// at [anon] (eval:3)
 	const auto rx = QRegExp("\\(eval:(\\d+)\\)");
 
 	lineWithError = -1;
@@ -95,7 +109,8 @@ void ScriptEdit::highlightCurrentLine()
 {
 	QList<QTextEdit::ExtraSelection> extraSelections;
 
-	if (!isReadOnly()) {
+	if (!isReadOnly())
+	{
 		QTextEdit::ExtraSelection selection;
 
 		QColor lineColor = QColor(Qt::yellow).lighter(180);
