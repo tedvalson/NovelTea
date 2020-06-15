@@ -1,9 +1,11 @@
 #include <NovelTea/ScriptManager.hpp>
-
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/Cutscene.hpp>
+#include <NovelTea/CutsceneSegment.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
+#include <SFML/System/FileInputStream.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -23,11 +25,9 @@ namespace NovelTea
 {
 
 ScriptManager::ScriptManager()
+	: m_context(nullptr)
 {
-	m_context = duk_create_heap_default();
-
-	registerFunctions();
-	registerClasses();
+	reset();
 }
 
 ScriptManager::~ScriptManager()
@@ -35,12 +35,30 @@ ScriptManager::~ScriptManager()
 	duk_destroy_heap(m_context);
 }
 
+void ScriptManager::reset()
+{
+	if (m_context)
+		duk_destroy_heap(m_context);
+	m_context = duk_create_heap_default();
+
+	registerFunctions();
+	registerClasses();
+
+	sf::FileInputStream file;
+	std::string script;
+	if (file.open("/home/android/dev/NovelTea/core.js"))
+	{
+		script.resize(file.getSize());
+		file.read(&script[0], script.size());
+		run(script);
+	}
+}
+
 void ScriptManager::registerFunctions()
 {
 	dukglue_register_function(m_context, print, "print");
 	dukglue_register_function(m_context, SaveData::saveVariables, "saveVariables");
 	dukglue_register_function(m_context, SaveData::loadVariables, "loadVariables");
-
 }
 
 void ScriptManager::registerClasses()
@@ -57,12 +75,13 @@ void ScriptManager::registerClasses()
 	// TextFragment
 	REGISTER_CONSTRUCTOR(TextFragment);
 	dukglue_register_property(m_context, &TextFragment::getText, &TextFragment::setText, "text");
-}
 
-ScriptManager &ScriptManager::instance()
-{
-	static ScriptManager obj;
-	return obj;
+	// Cutscene
+	REGISTER_CONSTRUCTOR(Cutscene);
+	dukglue_register_method(m_context, &Cutscene::addSegment, "addSegment");
+	dukglue_register_property(m_context, &Cutscene::getFullScreen, &Cutscene::setFullScreen, "fullScreen");
+	dukglue_register_property(m_context, &Cutscene::getCanFastForward, &Cutscene::setCanFastForward, "canFastForward");
+	dukglue_register_property(m_context, &Cutscene::getSpeedFactor, &Cutscene::setSpeedFactor, "speedFactor");
 }
 
 } // namespace NovelTea

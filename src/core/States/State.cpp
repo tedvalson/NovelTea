@@ -4,8 +4,9 @@
 
 namespace NovelTea {
 
-State::Context::Context(EngineConfig& config, sf::String& text, std::vector<char*>& data)
+State::Context::Context(EngineConfig& config, ScriptManager& scriptManager, sf::String& text, std::vector<char*>& data)
 : config(config)
+, scriptManager(scriptManager)
 , text(text)
 , data(data)
 {

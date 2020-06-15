@@ -40,21 +40,22 @@ public:
 	sf::Vector2f mapPixelToCoords(const sf::Vector2i& point) const;
 
 private:
-	EngineConfig _config;
-	float _deltaPerFrame;
-	StateStack _stateStack;
+	EngineConfig m_config;
+	float m_deltaPerFrame;
+	StateStack m_stateStack;
 
-	sf::View _view;
-	sf::RectangleShape _bg;
-	float _internalRatio;
-	size_t _width;
-	size_t _height;
+	sf::View m_view;
+	sf::RectangleShape m_bg;
+	float m_internalRatio;
+	size_t m_width;
+	size_t m_height;
 
-	size_t _lastTime;
+	size_t m_lastTime;
 
 	// Shared State context variables
-	std::vector<char*> _data;
-	sf::String _text;
+	std::vector<char*> m_data;
+	sf::String m_text;
+	ScriptManager m_scriptManager;
 };
 
 } // namespace NovelTea

@@ -10,11 +10,11 @@ namespace NovelTea
 {
 
 Engine::Engine(EngineConfig config)
-: _config(config)
-, _stateStack(State::Context(_config, _text, _data))
+: m_config(config)
+, m_stateStack(State::Context(m_config, m_scriptManager, m_text, m_data))
 {
-	_stateStack.registerState<StateEditor>(StateID::Editor);
-	_stateStack.registerState<StateMain>(StateID::Main);
+	m_stateStack.registerState<StateEditor>(StateID::Editor);
+	m_stateStack.registerState<StateMain>(StateID::Main);
 }
 
 void Engine::run()
@@ -33,56 +33,56 @@ void Engine::resize(size_t width, size_t height)
 	sf::Vector2f widgetSize(width, height);
 	auto ratio = widgetSize.x / widgetSize.y;
 
-	if (ratio < _internalRatio)
+	if (ratio < m_internalRatio)
 	{
 		viewport.width = 1.f;
-		viewport.height = ratio / _internalRatio;
+		viewport.height = ratio / m_internalRatio;
 		viewport.left = 0.f;
 		viewport.top = (1.f - viewport.height) / 2.f;
 	}
 	else
 	{
-		viewport.width = _internalRatio / ratio;
+		viewport.width = m_internalRatio / ratio;
 		viewport.height = 1.f;
 		viewport.left = (1.f - viewport.width) / 2.f;
 		viewport.top = 0.f;
 	}
 
-	_view.setViewport(viewport);
-	_width = width;
-	_height = height;
+	m_view.setViewport(viewport);
+	m_width = width;
+	m_height = height;
 }
 
 void Engine::render(sf::RenderTarget &target)
 {
 	target.clear();
-	target.setView(_view);
-	target.draw(_bg);
-	_stateStack.render(target);
+	target.setView(m_view);
+	target.draw(m_bg);
+	m_stateStack.render(target);
 }
 
 void Engine::update()
 {
 	auto time = getSystemTimeMs();
-	auto elapsed = sf::milliseconds(time - _lastTime);
+	auto elapsed = sf::milliseconds(time - m_lastTime);
 	auto delta = elapsed.asSeconds();
-	if (delta < _deltaPerFrame)
+	if (delta < m_deltaPerFrame)
 	{
-		sf::sleep(sf::seconds(_deltaPerFrame - delta));
-		_lastTime = getSystemTimeMs();
-		_stateStack.update(_deltaPerFrame);
+		sf::sleep(sf::seconds(m_deltaPerFrame - delta));
+		m_lastTime = getSystemTimeMs();
+		m_stateStack.update(m_deltaPerFrame);
 	}
 	else
 	{
-		_lastTime = time;
-		_stateStack.update(delta);
+		m_lastTime = time;
+		m_stateStack.update(delta);
 	}
 }
 
 void Engine::update(float deltaSeconds)
 {
-	_lastTime = getSystemTimeMs();
-	_stateStack.update(deltaSeconds);
+	m_lastTime = getSystemTimeMs();
+	m_stateStack.update(deltaSeconds);
 }
 
 void Engine::processEvent(const sf::Event &event)
@@ -123,12 +123,12 @@ void Engine::processEvent(const sf::Event &event)
 		e.mouseButton.y = coords.y;
 	}
 
-	_stateStack.processEvent(e);
+	m_stateStack.processEvent(e);
 }
 
 void *Engine::processData(void *data)
 {
-	return _stateStack.processData(data);
+	return m_stateStack.processData(data);
 }
 
 size_t Engine::getSystemTimeMs()
@@ -140,17 +140,17 @@ size_t Engine::getSystemTimeMs()
 
 void Engine::initialize()
 {
-	_lastTime = getSystemTimeMs();
-	_deltaPerFrame = 1.f / _config.fps;
-	_internalRatio = static_cast<float>(_config.width) / _config.height;
-	_view.reset(sf::FloatRect(0, 0, _config.width, _config.height));
+	m_lastTime = getSystemTimeMs();
+	m_deltaPerFrame = 1.f / m_config.fps;
+	m_internalRatio = static_cast<float>(m_config.width) / m_config.height;
+	m_view.reset(sf::FloatRect(0, 0, m_config.width, m_config.height));
 
-	_bg.setSize(sf::Vector2f(_config.width, _config.height));
-	_bg.setFillColor(sf::Color::White);
+	m_bg.setSize(sf::Vector2f(m_config.width, m_config.height));
+	m_bg.setFillColor(sf::Color::White);
 
-	resize(_config.width, _config.height);
+	resize(m_config.width, m_config.height);
 
-	_stateStack.pushState(_config.initialState);
+	m_stateStack.pushState(m_config.initialState);
 }
 
 sf::Vector2f Engine::mapPixelToCoords(const sf::Vector2i &point) const
@@ -158,9 +158,9 @@ sf::Vector2f Engine::mapPixelToCoords(const sf::Vector2i &point) const
 	// First, convert from viewport coordinates to homogeneous coordinates
 	sf::Vector2f normalized;
 
-	float width  = static_cast<float>(_width);
-	float height = static_cast<float>(_height);
-	const sf::FloatRect& viewport = _view.getViewport();
+	float width  = static_cast<float>(m_width);
+	float height = static_cast<float>(m_height);
+	const sf::FloatRect& viewport = m_view.getViewport();
 
 	auto viewRect = sf::IntRect(static_cast<int>(0.5f + width  * viewport.left),
 				static_cast<int>(0.5f + height * viewport.top),
@@ -171,7 +171,7 @@ sf::Vector2f Engine::mapPixelToCoords(const sf::Vector2i &point) const
 	normalized.y =  1.f - 2.f * (point.y - viewRect.top)  / viewRect.height;
 
 	// Then transform by the inverse of the view matrix
-	return _view.getInverseTransform().transformPoint(normalized);
+	return m_view.getInverseTransform().transformPoint(normalized);
 }
 
 } // namespace NovelTea

@@ -4,12 +4,15 @@
 #include "StateIdentifiers.hpp"
 #include <SFML/System/Time.hpp>
 #include <SFML/Window/Event.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <functional>
 #include <memory>
 #include <vector>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/String.hpp>
 
+
+#define Script getContext().scriptManager
 
 namespace sf
 {
@@ -30,8 +33,9 @@ public:
 
 	struct Context
 	{
-		Context(EngineConfig& config, sf::String& text, std::vector<char*>& data);
+		Context(EngineConfig& config, ScriptManager& scriptManager, sf::String& text, std::vector<char*>& data);
 		EngineConfig& config;
+		ScriptManager& scriptManager;
 		sf::String& text;
 		std::vector<char*>& data;
 	};

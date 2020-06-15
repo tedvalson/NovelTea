@@ -3,15 +3,15 @@
 
 #include <dukglue/dukglue.h>
 
-#define Script NovelTea::ScriptManager::instance()
-
 namespace NovelTea
 {
 
 class ScriptManager
 {
 public:
-	static ScriptManager &instance();
+	ScriptManager();
+	~ScriptManager();
+	void reset();
 
 	inline void run(const std::string& script)
 	{
@@ -36,9 +36,6 @@ public:
 	}
 
 protected:
-	ScriptManager();
-	~ScriptManager();
-
 	void registerFunctions();
 	void registerClasses();
 
