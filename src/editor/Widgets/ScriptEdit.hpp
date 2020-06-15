@@ -1,6 +1,7 @@
 #ifndef SCRIPTEDIT_HPP
 #define SCRIPTEDIT_HPP
 
+#include <NovelTea/ScriptManager.hpp>
 #include <QPlainTextEdit>
 
 class SyntaxHighlighter;
@@ -19,6 +20,7 @@ public:
 	bool checkErrors();
 
 protected:
+	bool event(QEvent *event) override;
 	void resizeEvent(QResizeEvent *event) override;
 	void processErrorMsg(const std::string &error);
 
@@ -28,29 +30,31 @@ private slots:
 	void updateLineNumberArea(const QRect &, int);
 
 private:
-	QWidget *lineNumberArea;
-	SyntaxHighlighter *syntaxHighlighter;
-	int lineWithError;
+	QWidget *m_lineNumberArea;
+	SyntaxHighlighter *m_syntaxHighlighter;
+	int m_lineWithError;
+	std::string m_errorMessage;
+	NovelTea::ScriptManager m_scriptManager;
 };
 
 class LineNumberArea : public QWidget
 {
 public:
 	LineNumberArea(ScriptEdit *editor) : QWidget(editor) {
-		scriptEdit = editor;
+		m_scriptEdit = editor;
 	}
 
 	QSize sizeHint() const {
-		return QSize(scriptEdit->lineNumberAreaWidth(), 0);
+		return QSize(m_scriptEdit->lineNumberAreaWidth(), 0);
 	}
 
 protected:
 	void paintEvent(QPaintEvent *event) {
-		scriptEdit->lineNumberAreaPaintEvent(event);
+		m_scriptEdit->lineNumberAreaPaintEvent(event);
 	}
 
 private:
-	ScriptEdit *scriptEdit;
+	ScriptEdit *m_scriptEdit;
 };
 
 #endif // SCRIPTEDIT_HPP
