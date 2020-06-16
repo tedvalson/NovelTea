@@ -16,11 +16,18 @@ class ActiveText : public JsonSerializable, public sf::Drawable, public TweenTra
 {
 	friend class CutsceneRenderer;
 public:
+	struct Segment {
+		TweenText text;
+		std::string objectIdName;
+		sf::FloatRect bounds;
+	};
+
 	ActiveText();
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
 	std::string toPlainText() const;
+	std::string objectFromPoint(const sf::Vector2f &point) const;
 
 	void setText(const std::string &text);
 
@@ -32,6 +39,8 @@ public:
 
 	void refresh();
 
+	float getTextWidth() const;
+
 	void setCursorStart(const sf::Vector2f &cursorPos);
 	const sf::Vector2f &getCursorEnd() const;
 
@@ -41,12 +50,14 @@ protected:
 
 private:
 	std::vector<std::shared_ptr<TextBlock>> m_textBlocks;
-	mutable std::vector<TweenText> m_texts;
+	mutable std::vector<Segment> m_segments;
 	mutable sf::Vector2f m_cursorPos;
 	sf::Vector2f m_cursorStart;
 	sf::Vector2f m_size;
 	mutable bool m_needsUpdate = true;
+
 	mutable sf::RectangleShape m_debugBorder;
+	mutable std::vector<sf::RectangleShape> m_debugSegmentShapes;
 };
 
 } // namespace NovelTea

@@ -8,35 +8,65 @@ namespace NovelTea
 {
 
 ActiveText::ActiveText()
-	: m_size(sf::Vector2f(300.f, 300.f))
+	: m_size(sf::Vector2f(400.f, 400.f))
 {
 }
 
-std::vector<sf::String> explode(const sf::String &string, sf::Uint32 delimiter)
+void splitAndAppend(const std::string &text, const std::string &idName, std::vector<std::pair<std::string, std::string>> &pairs)
 {
-	if (string.isEmpty())
-		return std::vector<sf::String>();
-
-	// For each character in the string
-	std::vector<sf::String> result;
-	sf::String buffer;
-	for (sf::Uint32 character : string) {
-		// If we've hit the delimiter character
-		if (character == delimiter) {
-			// Add them to the result vector
-			result.push_back(buffer);
+	std::string buffer;
+	for (auto &c : text)
+	{
+		if (c == ' ')
+		{
+			if (!buffer.empty())
+				pairs.emplace_back(buffer, idName);
+			pairs.emplace_back("", "");
 			buffer.clear();
-		} else {
-			// Accumulate the next character into the sequence
-			buffer += character;
 		}
+		else
+			buffer += c;
 	}
 
-	// Add to the result if buffer still has contents or if the last character is a delimiter
-	if (!buffer.isEmpty() || string[string.getSize() - 1] == delimiter)
-		result.push_back(buffer);
+	if (!buffer.empty())
+		pairs.emplace_back(buffer, idName);
+}
 
-	return result;
+std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::String &s)
+{
+	std::vector<std::pair<std::string, std::string>> v;
+
+	size_t searchPos = 0,
+		   processedPos = 0,
+		   startPos;
+
+	while ((startPos = s.find("[[", searchPos)) != sf::String::InvalidPos)
+	{
+		auto endPos = s.find("]]", startPos);
+		auto midPos = s.find("|", startPos);
+		if (endPos == sf::String::InvalidPos)
+			break;
+
+		// if there is no mid char "|" in between braces, skip it
+		if (midPos == sf::String::InvalidPos || endPos < midPos)
+		{
+			searchPos = endPos + 2;
+			continue;
+		}
+
+		auto idName = s.substring(midPos + 1, endPos - midPos - 1);
+		auto text = s.substring(startPos + 2, midPos - startPos - 2);
+		if (startPos != processedPos)
+			splitAndAppend(s.substring(processedPos, startPos - processedPos).toAnsiString(), "", v);
+		splitAndAppend(text, idName, v);
+		processedPos = searchPos = endPos + 2;
+	}
+
+	// Push remaining unprocessed string
+	if (processedPos < s.getSize())
+		splitAndAppend(s.substring(processedPos), "", v);
+
+	return v;
 }
 
 json ActiveText::toJson() const
@@ -74,6 +104,16 @@ std::string ActiveText::toPlainText() const
 			result += frag->getText();
 	}
 	return result;
+}
+
+std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
+{
+	for (auto &segment : m_segments)
+	{
+		if (segment.bounds.contains(point))
+			return segment.objectIdName;
+	}
+	return std::string();
 }
 
 void ActiveText::setText(const std::string &text)
@@ -118,6 +158,14 @@ void ActiveText::refresh()
 	m_needsUpdate = true;
 }
 
+float ActiveText::getTextWidth() const
+{
+	auto width = 0.f;
+	for (auto &segment : m_segments)
+		width += segment.text.getLocalBounds().width;
+	return width;
+}
+
 void ActiveText::setCursorStart(const sf::Vector2f &cursorPos)
 {
 	m_needsUpdate = true;
@@ -135,10 +183,10 @@ void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	ensureUpdate();
 	states.transform *= getTransform();
 
-	for (auto &text : m_texts)
-	{
-		target.draw(text, states);
-	}
+	for (auto &segment : m_segments)
+		target.draw(segment.text, states);
+	for (auto &shape : m_debugSegmentShapes)
+		target.draw(shape, states);
 
 	target.draw(m_debugBorder, states);
 }
@@ -150,7 +198,8 @@ void ActiveText::ensureUpdate() const
 
 	auto processedFirstBlock = false;
 	m_cursorPos = m_cursorStart;
-	m_texts.clear();
+	m_segments.clear();
+	m_debugSegmentShapes.clear();
 
 	for (auto &block : blocks())
 	{
@@ -175,42 +224,53 @@ void ActiveText::ensureUpdate() const
 			if (format.underline())
 				style |= sf::Text::Underlined;
 
+			auto textObjectPairs = getTextObjectPairs(frag->getText());
 
-			auto words = explode(frag->getText(), ' ');
+
+			sf::RectangleShape shape;
+			shape.setFillColor(sf::Color(0, 0, 0, 50));
 
 			TweenText text;
 			text.setFont(*font);
+			text.setCharacterSize(format.size()*3);
 			text.setFillColor(sf::Color::Black);
 			text.setStyle(style);
-			text.setCharacterSize(format.size()*3);
 
 			text.setString(" ");
 			auto spaceWidth = text.getLocalBounds().width;
 
-			for (auto &word : words)
+			for (auto &p : textObjectPairs)
 			{
 				// Don't start line with a space
-				if (word.isEmpty() && m_cursorPos.x == 0)
+				if (p.first.empty())
+				{
+					if (m_cursorPos.x > 0)
+						m_cursorPos.x += spaceWidth;
 					continue;
+				}
 
-				text.setString(word);
+				text.setString(p.first);
 
-				auto newX = m_cursorPos.x + text.getLocalBounds().width + spaceWidth;
+				auto newX = m_cursorPos.x + text.getLocalBounds().width;
 
 				if (newX > m_size.x && m_cursorPos.x > 0.f)
 				{
 					m_cursorPos.x = 0.f;
-					m_cursorPos.y += text.getLocalBounds().height;
-					m_cursorPos.y += 5.f * text.getLineSpacing();
+					m_cursorPos.y += text.getCharacterSize();//text.getLocalBounds().height;
+					m_cursorPos.y += 2.f * text.getLineSpacing();
 				}
 
 				text.setPosition(m_cursorPos);
-				m_cursorPos.x += text.getLocalBounds().width + spaceWidth;
-				m_texts.push_back(text);
-			}
+				m_cursorPos.x += text.getLocalBounds().width;
+				auto bounds = sf::FloatRect(text.getPosition().x, text.getPosition().y, text.getLocalBounds().width, text.getCharacterSize());
 
-			// No trailing spaces
-			m_cursorPos.x -= spaceWidth;
+				shape.setSize(sf::Vector2f(bounds.width, bounds.height));
+				shape.setPosition(bounds.left, bounds.top);
+				m_debugSegmentShapes.push_back(shape);
+
+				bounds = getTransform().transformRect(bounds);
+				m_segments.push_back({text, p.second, bounds});
+			}
 		}
 	}
 
