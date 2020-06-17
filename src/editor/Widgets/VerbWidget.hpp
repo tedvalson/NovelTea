@@ -3,12 +3,8 @@
 
 #include "EditorTabWidget.hpp"
 #include <QWidget>
-#include <QMenu>
-#include <QStandardItemModel>
+#include <QLineEdit>
 #include <json.hpp>
-#include "QtPropertyBrowser/qtpropertymanager.h"
-#include "QtPropertyBrowser/qtvariantproperty.h"
-#include "QtPropertyBrowser/qttreepropertybrowser.h"
 
 using json = nlohmann::json;
 
@@ -30,22 +26,18 @@ public:
 	Type getType() const override;
 
 private slots:
-	void on_actionRemoveObject_triggered();
+	void on_pushButton_clicked();
+	void on_horizontalSlider_valueChanged(int value);
 
 private:
-	void fillPropertyEditor();
-
+	void addLineEdit();
+	void loadActionStructure();
 	void saveData() const override;
 	void loadData() override;
 
-	void propertyChanged(QtProperty *property, const QVariant &value);
-
 	Ui::VerbWidget *ui;
 
-	QStandardItemModel *itemModel;
-
-	QtVariantPropertyManager *variantManager;
-	QtVariantEditorFactory *variantFactory;
+	std::vector<QLineEdit*> m_lineEdits;
 
 	std::shared_ptr<NovelTea::Verb> m_verb;
 };

@@ -10,7 +10,7 @@ WizardPageActionSelect::WizardPageActionSelect(QWidget *parent) :
 	ui->setupUi(this);
 	ui->treeView->setModel(MainWindow::instance().getItemModel());
 	ui->treeView->setHeaderHidden(true);
-	setFilterRegExp("^(?!Objects)");
+	setFilterRegExp("^(?!Objects|Verbs)");
 
 	ui->scriptEdit->hide();
 	ui->treeView->hide();
