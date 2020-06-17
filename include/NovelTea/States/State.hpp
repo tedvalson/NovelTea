@@ -2,15 +2,12 @@
 #define NOVELTEA_STATE_HPP
 
 #include "StateIdentifiers.hpp"
-#include <SFML/System/Time.hpp>
 #include <SFML/Window/Event.hpp>
 #include <NovelTea/ScriptManager.hpp>
+#include <json.hpp>
 #include <functional>
 #include <memory>
 #include <vector>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/System/String.hpp>
-
 
 #define Script getContext().scriptManager
 
@@ -33,11 +30,10 @@ public:
 
 	struct Context
 	{
-		Context(EngineConfig& config, ScriptManager& scriptManager, sf::String& text, std::vector<char*>& data);
+		Context(EngineConfig& config, ScriptManager& scriptManager, nlohmann::json& data);
 		EngineConfig& config;
 		ScriptManager& scriptManager;
-		sf::String& text;
-		std::vector<char*>& data;
+		nlohmann::json& data;
 	};
 
 	State(StateStack& stack, Context& context, StateCallback callback);

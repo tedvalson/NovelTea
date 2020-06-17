@@ -11,7 +11,7 @@ namespace NovelTea
 
 Engine::Engine(EngineConfig config)
 : m_config(config)
-, m_stateStack(State::Context(m_config, m_scriptManager, m_text, m_data))
+, m_stateStack(State::Context(m_config, m_scriptManager, m_data))
 {
 	m_stateStack.registerState<StateEditor>(StateID::Editor);
 	m_stateStack.registerState<StateMain>(StateID::Main);

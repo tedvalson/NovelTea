@@ -53,8 +53,7 @@ private:
 	size_t m_lastTime;
 
 	// Shared State context variables
-	std::vector<char*> m_data;
-	sf::String m_text;
+	nlohmann::json m_data;
 	ScriptManager m_scriptManager;
 };
 
