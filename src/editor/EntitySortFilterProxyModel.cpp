@@ -9,7 +9,7 @@ EntitySortFilterProxyModel::EntitySortFilterProxyModel(QObject *parent)
 
 EntitySortFilterProxyModel::~EntitySortFilterProxyModel()
 {
-	//	delete proxyModel;
+
 }
 
 bool EntitySortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const

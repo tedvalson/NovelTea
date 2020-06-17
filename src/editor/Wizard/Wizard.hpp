@@ -18,6 +18,7 @@ public:
 		Room,
 		Object,
 		Script,
+		Verb,
 	};
 
 	explicit Wizard(QWidget *parent = 0);

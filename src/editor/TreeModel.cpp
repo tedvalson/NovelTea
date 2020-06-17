@@ -62,12 +62,14 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	objectRoot   = new TreeItem("Objects", rootItem);
 	roomRoot     = new TreeItem("Rooms", rootItem);
 	scriptRoot   = new TreeItem("Scripts", rootItem);
+	verbRoot     = new TreeItem("Verbs", rootItem);
 
 	rootItem->appendChild(cutsceneRoot);
 	rootItem->appendChild(dialogueRoot);
 	rootItem->appendChild(objectRoot);
 	rootItem->appendChild(roomRoot);
 	rootItem->appendChild(scriptRoot);
+	rootItem->appendChild(verbRoot);
 
 	if (project.isLoaded())
 	{
@@ -92,6 +94,13 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 			columnData << QString::fromStdString(item.key());
 			columnData << static_cast<int>(NovelTea::EntityType::Object);
 			objectRoot->appendChild(new TreeItem(columnData, objectRoot));
+		}
+		for (auto &item : j[NovelTea::ID::verbs].items())
+		{
+			QList<QVariant> columnData;
+			columnData << QString::fromStdString(item.key());
+			columnData << static_cast<int>(NovelTea::EntityType::Verb);
+			verbRoot->appendChild(new TreeItem(columnData, verbRoot));
 		}
 	}
 

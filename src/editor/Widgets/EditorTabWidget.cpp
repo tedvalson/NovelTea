@@ -37,6 +37,8 @@ EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType 
 			return Type::Room;
 		case NovelTea::EntityType::Object:
 			return Type::Object;
+		case NovelTea::EntityType::Verb:
+			return Type::Verb;
 		default:
 			return Type::Invalid;
 	}
@@ -52,6 +54,8 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 			return NovelTea::EntityType::Room;
 		case Type::Object:
 			return NovelTea::EntityType::Object;
+		case Type::Verb:
+			return NovelTea::EntityType::Verb;
 		default:
 			return NovelTea::EntityType::Invalid;
 	}

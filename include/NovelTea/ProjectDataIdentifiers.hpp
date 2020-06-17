@@ -13,6 +13,7 @@ enum class EntityType : int {
 	Room,
 	Object,
 	Dialogue,
+	Verb,
 };
 
 namespace ID
@@ -35,6 +36,7 @@ namespace ID
 	const auto textFormats        = "textformats";
 	const auto objects            = "objects";
 	const auto dialogues          = "dialogues";
+	const auto verbs              = "verbs";
 
 	// For SaveData
 	const auto variables          = "variabes";

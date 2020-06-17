@@ -17,6 +17,7 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 	newSelectionGroup->addButton(ui->radioNewRoom, Wizard::Page::Room);
 	newSelectionGroup->addButton(ui->radioNewObject, Wizard::Page::Object);
 	newSelectionGroup->addButton(ui->radioNewScript, Wizard::Page::Script);
+	newSelectionGroup->addButton(ui->radioNewVerb, Wizard::Page::Verb);
 
 	if (!Proj.isLoaded())
 	{
@@ -24,6 +25,7 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 		ui->radioNewRoom->setEnabled(false);
 		ui->radioNewObject->setEnabled(false);
 		ui->radioNewScript->setEnabled(false);
+		ui->radioNewVerb->setEnabled(false);
 	}
 
 	connect(newSelectionGroup, SIGNAL(buttonClicked(int)), this, SLOT(setTypeId(int)));

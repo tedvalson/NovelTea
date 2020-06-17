@@ -17,6 +17,7 @@ namespace NovelTea
 class Cutscene;
 class Room;
 class Object;
+class Verb;
 
 class ProjectData: public JsonSerializable
 {
@@ -38,6 +39,7 @@ public:
 	std::shared_ptr<Cutscene> cutscene(const std::string &idName);
 	std::shared_ptr<Room> room(const std::string &idName);
 	std::shared_ptr<Object> object(const std::string &idName);
+	std::shared_ptr<Verb> verb(const std::string &idName);
 
 	void saveToFile(const std::string &filename = std::string());
 	bool loadFromFile(const std::string &filename);

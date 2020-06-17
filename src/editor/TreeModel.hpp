@@ -48,6 +48,7 @@ private:
 	TreeItem *objectRoot;
 	TreeItem *roomRoot;
 	TreeItem *scriptRoot;
+	TreeItem *verbRoot;
 };
 
 #endif // TREEMODEL_H

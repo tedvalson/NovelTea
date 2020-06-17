@@ -14,6 +14,7 @@ set(UIFILES
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/RoomWidget.ui
 	${UIROOT}/ObjectWidget.ui
+	${UIROOT}/VerbWidget.ui
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
 	${UIROOT}/ProjectSettingsWidget.ui
@@ -21,6 +22,7 @@ set(UIFILES
 	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageCutscene.ui
 	${UIROOT}/WizardPageRoom.ui
+	${UIROOT}/WizardPageVerb.ui
 	${UIROOT}/WizardPageObject.ui
 )
 
@@ -37,6 +39,7 @@ set(SRC
 	${SRCROOT}/Widgets/CutsceneWidget.cpp
 	${SRCROOT}/Widgets/RoomWidget.cpp
 	${SRCROOT}/Widgets/ObjectWidget.cpp
+	${SRCROOT}/Widgets/VerbWidget.cpp
 	${SRCROOT}/Widgets/NovelTeaWidget.cpp
 	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
@@ -50,6 +53,7 @@ set(SRC
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp
 	${SRCROOT}/Wizard/WizardPageRoom.cpp
 	${SRCROOT}/Wizard/WizardPageObject.cpp
+	${SRCROOT}/Wizard/WizardPageVerb.cpp
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp
 	${SRCROOT}/SyntaxHighlighter.cpp

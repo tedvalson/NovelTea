@@ -17,6 +17,7 @@ public:
 		Object   = 2,
 		Dialogue,
 		Settings,
+		Verb,
 	};
 
 	explicit EditorTabWidget(QWidget *parent = 0);

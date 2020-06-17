@@ -2,6 +2,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/Verb.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -117,6 +118,13 @@ std::shared_ptr<Object> ProjectData::object(const std::string &idName)
 	if (!_json[ID::objects].contains(idName))
 		return nullptr;
 	return std::make_shared<Object>(_json[ID::objects][idName].get<Object>());
+}
+
+std::shared_ptr<Verb> ProjectData::verb(const std::string &idName)
+{
+	if (!_json[ID::verbs].contains(idName))
+		return nullptr;
+	return std::make_shared<Verb>(_json[ID::verbs][idName].get<Verb>());
 }
 
 void ProjectData::saveToFile(const std::string &filename)

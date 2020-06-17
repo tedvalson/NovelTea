@@ -52,6 +52,13 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="QRadioButton" name="radioNewVerb">
+     <property name="text">
+      <string>Verb</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

@@ -4,6 +4,7 @@
 #include "CutsceneWidget.hpp"
 #include "RoomWidget.hpp"
 #include "ObjectWidget.hpp"
+#include "VerbWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
 #include <NovelTea/ProjectData.hpp>
@@ -118,6 +119,8 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 			row = 3;
 		else if (type == EditorTabWidget::Object)
 			row = 2;
+		else if (type == EditorTabWidget::Verb)
+			row = 5;
 
 		auto parent = treeModel->index(row, 0);
 		if (treeModel->insertRow(0, parent))
@@ -429,6 +432,8 @@ void MainWindow::on_actionOpen_triggered()
 		addEditorTab(new RoomWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Object)
 		addEditorTab(new ObjectWidget(selectedIdName));
+	else if (selectedType == EditorTabWidget::Verb)
+		addEditorTab(new VerbWidget(selectedIdName));
 }
 
 void MainWindow::on_actionDelete_triggered()
