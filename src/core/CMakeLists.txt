@@ -24,7 +24,10 @@ set(SOURCE_FILES
 	${SRCROOT}/TextFragment.cpp
 	${SRCROOT}/TextBlock.cpp
 	${SRCROOT}/Utils.cpp
-	${SRCROOT}/CutscenePageBreakSegment.cpp	
+	${SRCROOT}/CutscenePageBreakSegment.cpp
+	${SRCROOT}/GUI/NinePatch.cpp
+	${SRCROOT}/GUI/Scrollable.cpp
+	${SRCROOT}/GUI/ScrollBar.cpp
 	${PROJECT_SOURCE_DIR}/external/duktape.c
 	${TWEEN_ENGINE_SOURCE}
 )

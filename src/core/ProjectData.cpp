@@ -1,4 +1,5 @@
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
@@ -208,9 +209,9 @@ bool ProjectData::fromJson(const json &j)
 
 	for (auto &jfont : j[ID::projectFonts])
 	{
-		auto font = std::make_shared<sf::Font>();
+		auto font = AssetManager<sf::Font>::get("fonts/DejaVuSerif.ttf");
 		std::cout << "Loading font: " << jfont << std::endl;
-		if (font->loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf"))
+		if (font)
 			m_fonts.push_back(font);
 	}
 
