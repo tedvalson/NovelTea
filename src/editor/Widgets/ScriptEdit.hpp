@@ -1,23 +1,53 @@
 #ifndef SCRIPTEDIT_HPP
 #define SCRIPTEDIT_HPP
 
-#include <NovelTea/ScriptManager.hpp>
+#include "SyntaxHighlighter.hpp"
 #include <QPlainTextEdit>
+#include <QScopedPointer>
 
-class SyntaxHighlighter;
+class ScriptEditPrivate;
 
 class ScriptEdit : public QPlainTextEdit
 {
 	Q_OBJECT
+	Q_PROPERTY(bool bracketsMatchingEnabled READ isBracketsMatchingEnabled WRITE setBracketsMatchingEnabled)
+	Q_PROPERTY(bool codeFoldingEnabled READ isCodeFoldingEnabled WRITE setCodeFoldingEnabled)
+	Q_PROPERTY(bool lineNumbersVisible READ isLineNumbersVisible WRITE setLineNumbersVisible)
+	Q_PROPERTY(bool textWrapEnabled READ isTextWrapEnabled WRITE setTextWrapEnabled)
 
 public:
 	explicit ScriptEdit(QWidget *parent = 0);
 	~ScriptEdit();
 
-	void lineNumberAreaPaintEvent(QPaintEvent *event);
-	int lineNumberAreaWidth();
-
+	template <typename T>
 	bool checkErrors();
+
+	void setColor(SyntaxHighlighter::ColorComponent component, const QColor &color);
+
+	QStringList keywords() const;
+	void setKeywords(const QStringList &keywords);
+
+	int getLineWithError() const;
+
+	bool isBracketsMatchingEnabled() const;
+	bool isCodeFoldingEnabled() const;
+	bool isLineNumbersVisible() const;
+	bool isTextWrapEnabled() const;
+
+	bool isFoldable(int line) const;
+	bool isFolded(int line) const;
+
+public slots:
+	void updateSidebar();
+	void mark(const QString &str, Qt::CaseSensitivity sens = Qt::CaseInsensitive);
+	void setBracketsMatchingEnabled(bool enable);
+	void setCodeFoldingEnabled(bool enable);
+	void setLineNumbersVisible(bool visible);
+	void setTextWrapEnabled(bool enable);
+
+	void fold(int line);
+	void unfold(int line);
+	void toggleFold(int line);
 
 protected:
 	bool event(QEvent *event) override;
@@ -25,36 +55,13 @@ protected:
 	void processErrorMsg(const std::string &error);
 
 private slots:
-	void updateLineNumberAreaWidth(int newBlockCount);
-	void highlightCurrentLine();
-	void updateLineNumberArea(const QRect &, int);
+	void updateCursor();
+	void updateSidebar(const QRect &rect, int d);
 
 private:
-	QWidget *m_lineNumberArea;
-	SyntaxHighlighter *m_syntaxHighlighter;
-	int m_lineWithError;
-	std::string m_errorMessage;
-	NovelTea::ScriptManager m_scriptManager;
-};
-
-class LineNumberArea : public QWidget
-{
-public:
-	LineNumberArea(ScriptEdit *editor) : QWidget(editor) {
-		m_scriptEdit = editor;
-	}
-
-	QSize sizeHint() const {
-		return QSize(m_scriptEdit->lineNumberAreaWidth(), 0);
-	}
-
-protected:
-	void paintEvent(QPaintEvent *event) {
-		m_scriptEdit->lineNumberAreaPaintEvent(event);
-	}
-
-private:
-	ScriptEdit *m_scriptEdit;
+	QScopedPointer<ScriptEditPrivate> d_ptr;
+	Q_DECLARE_PRIVATE(ScriptEdit);
+	Q_DISABLE_COPY(ScriptEdit);
 };
 
 #endif // SCRIPTEDIT_HPP

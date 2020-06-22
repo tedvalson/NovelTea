@@ -149,7 +149,7 @@ void RoomWidget::on_textEdit_textChanged()
 	jdata["event"] = "text";
 	jdata["data"] = ui->textEdit->toPlainText().toStdString();
 
-	if (ui->textEdit->checkErrors())
+	if (ui->textEdit->checkErrors<std::string>())
 		ui->preview->processData(jdata);
 }
 
