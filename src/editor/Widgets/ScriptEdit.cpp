@@ -27,6 +27,7 @@ public:
 	QColor foldIndicatorColor;
 	QFont font;
 	int foldIndicatorWidth;
+	int lineNumberPadding;
 	QPixmap rightArrowIcon;
 	QPixmap downArrowIcon;
 protected:
@@ -37,6 +38,7 @@ protected:
 SidebarWidget::SidebarWidget(ScriptEdit *editor)
 : QWidget(editor)
 , foldIndicatorWidth(0)
+, lineNumberPadding(4)
 {
 	backgroundColor = Qt::lightGray;
 	lineNumberColor = Qt::gray;
@@ -86,7 +88,7 @@ void SidebarWidget::paintEvent(QPaintEvent *event)
 		if (ln.number == editor->getLineWithError())
 			p.fillRect(0, ln.position, width(), fh, QColor(Qt::red).lighter(150));
 
-		p.drawText(0, ln.position, width() - 4 - foldIndicatorWidth, fh, Qt::AlignRight, QString::number(ln.number));
+		p.drawText(0, ln.position, width() - foldIndicatorWidth - lineNumberPadding, fh, Qt::AlignRight, QString::number(ln.number));
 	}
 
 	if (foldIndicatorWidth > 0) {
@@ -565,6 +567,7 @@ void ScriptEdit::updateSidebar()
 
 	int sw = 0;
 	if (d->showLineNumbers) {
+		sw =+ d->sidebar->lineNumberPadding * 2;
 		int digits = 1;
 		int max = qMax(1, document()->blockCount());
 		while (max >= 10) {
