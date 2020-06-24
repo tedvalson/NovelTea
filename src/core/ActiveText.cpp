@@ -262,7 +262,7 @@ void ActiveText::ensureUpdate() const
 
 				text.setPosition(m_cursorPos);
 				m_cursorPos.x += text.getLocalBounds().width;
-				auto bounds = sf::FloatRect(text.getPosition().x, text.getPosition().y, text.getLocalBounds().width, text.getCharacterSize());
+				auto bounds = sf::FloatRect(text.getGlobalBounds().left, text.getGlobalBounds().top, text.getLocalBounds().width, text.getLocalBounds().height);
 
 				shape.setSize(sf::Vector2f(bounds.width, bounds.height));
 				shape.setPosition(bounds.left, bounds.top);
