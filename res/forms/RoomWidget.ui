@@ -132,7 +132,7 @@
              <widget class="QListWidget" name="listWidget"/>
             </item>
             <item>
-             <widget class="ScriptEdit" name="textEdit">
+             <widget class="ScriptEdit" name="scriptEdit">
               <property name="lineWrapMode">
                <enum>QPlainTextEdit::NoWrap</enum>
               </property>

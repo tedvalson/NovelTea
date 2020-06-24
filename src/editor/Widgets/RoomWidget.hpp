@@ -33,7 +33,7 @@ public:
 private slots:
 	void on_actionAddObject_triggered();
 	void on_actionRemoveObject_triggered();
-	void on_textEdit_textChanged();
+	void on_scriptEdit_textChanged();
 	void on_listWidget_itemPressed(QListWidgetItem *item);
 	void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 	void on_actionView_Edit_triggered();

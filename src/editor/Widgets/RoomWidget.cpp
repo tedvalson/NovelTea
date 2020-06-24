@@ -65,7 +65,7 @@ void RoomWidget::saveData() const
 			objects.push_back({item->text().toStdString(), item->checkState() == Qt::Checked});
 		}
 		m_room->setObjects(objects);
-		m_room->setDescription(ui->textEdit->toPlainText().toStdString());
+		m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
 		ProjData[NovelTea::ID::rooms][idName()] = *m_room;
 	}
 }
@@ -91,13 +91,13 @@ void RoomWidget::loadData()
 		ui->listWidget->addItem(item);
 	}
 
-	ui->textEdit->setPlainText(QString::fromStdString(m_room->getDescription()));
+	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescription()));
 	fillPropertyEditor();
 
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
-	MODIFIER(ui->textEdit, &QPlainTextEdit::textChanged);
+	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
 }
 
 void RoomWidget::propertyChanged(QtProperty *property, const QVariant &value)
@@ -143,13 +143,13 @@ void RoomWidget::on_actionRemoveObject_triggered()
 	delete ui->listWidget->currentItem();
 }
 
-void RoomWidget::on_textEdit_textChanged()
+void RoomWidget::on_scriptEdit_textChanged()
 {
 	json jdata;
 	jdata["event"] = "text";
-	jdata["data"] = ui->textEdit->toPlainText().toStdString();
+	jdata["data"] = ui->scriptEdit->toPlainText().toStdString();
 
-	if (ui->textEdit->checkErrors<std::string>())
+	if (ui->scriptEdit->checkErrors<std::string>())
 		ui->preview->processData(jdata);
 }
 
