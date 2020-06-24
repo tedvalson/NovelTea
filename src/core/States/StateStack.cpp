@@ -90,8 +90,9 @@ State::Ptr StateStack::createState(StateID stateID, StateCallback callback)
 
 void StateStack::applyPendingChanges()
 {
-	for(const PendingChange& change : m_pendingList)
+	for (int i = 0; i < m_pendingList.size(); ++i)
 	{
+		const PendingChange &change = m_pendingList[i];
 		switch (change.action)
 		{
 			case Push:
