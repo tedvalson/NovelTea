@@ -1,5 +1,6 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
@@ -98,6 +99,13 @@ std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
 	if (index >= m_fonts.size())
 		return nullptr;
 	return m_fonts[index];
+}
+
+std::shared_ptr<Action> ProjectData::action(const std::string &idName)
+{
+	if (!_json[ID::actions].contains(idName))
+		return nullptr;
+	return std::make_shared<Action>(_json[ID::actions][idName].get<Action>());
 }
 
 std::shared_ptr<Cutscene> ProjectData::cutscene(const std::string &idName)

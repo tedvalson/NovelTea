@@ -14,6 +14,7 @@
 namespace NovelTea
 {
 
+class Action;
 class Cutscene;
 class Room;
 class Object;
@@ -36,6 +37,7 @@ public:
 
 	std::shared_ptr<sf::Font> getFont(size_t index) const;
 
+	std::shared_ptr<Action> action(const std::string &idName);
 	std::shared_ptr<Cutscene> cutscene(const std::string &idName);
 	std::shared_ptr<Room> room(const std::string &idName);
 	std::shared_ptr<Object> object(const std::string &idName);

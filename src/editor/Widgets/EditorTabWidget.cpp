@@ -2,7 +2,7 @@
 
 
 EditorTabWidget::EditorTabWidget(QWidget *parent)
-	: QWidget(parent)
+: QWidget(parent)
 {
 
 }
@@ -31,6 +31,8 @@ EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType 
 {
 	switch (entityType)
 	{
+		case NovelTea::EntityType::Action:
+			return Type::Action;
 		case NovelTea::EntityType::Cutscene:
 			return Type::Cutscene;
 		case NovelTea::EntityType::Room:
@@ -48,6 +50,8 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 {
 	switch (tabType)
 	{
+		case Type::Action:
+			return NovelTea::EntityType::Action;
 		case Type::Cutscene:
 			return NovelTea::EntityType::Cutscene;
 		case Type::Room:

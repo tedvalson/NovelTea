@@ -10,6 +10,7 @@ enum class EntityType : int {
 	Invalid      = -1,
 	CustomScript = 0,
 	Cutscene     = 1,
+	Action,
 	Room,
 	Object,
 	Dialogue,
@@ -36,6 +37,7 @@ namespace ID
 	const auto textFormats        = "textformats";
 	const auto objects            = "objects";
 	const auto dialogues          = "dialogues";
+	const auto actions            = "actions";
 	const auto verbs              = "verbs";
 
 	// For SaveData

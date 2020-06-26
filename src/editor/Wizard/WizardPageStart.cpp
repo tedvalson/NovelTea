@@ -12,20 +12,22 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	newSelectionGroup->addButton(ui->radioNewProject, Wizard::Page::Project);
-	newSelectionGroup->addButton(ui->radioNewCutscene, Wizard::Page::Cutscene);
-	newSelectionGroup->addButton(ui->radioNewRoom, Wizard::Page::Room);
-	newSelectionGroup->addButton(ui->radioNewObject, Wizard::Page::Object);
-	newSelectionGroup->addButton(ui->radioNewScript, Wizard::Page::Script);
-	newSelectionGroup->addButton(ui->radioNewVerb, Wizard::Page::Verb);
+	newSelectionGroup->addButton(ui->radioProject, Wizard::Page::Project);
+	newSelectionGroup->addButton(ui->radioAction, Wizard::Page::Action);
+	newSelectionGroup->addButton(ui->radioCutscene, Wizard::Page::Cutscene);
+	newSelectionGroup->addButton(ui->radioRoom, Wizard::Page::Room);
+	newSelectionGroup->addButton(ui->radioObject, Wizard::Page::Object);
+	newSelectionGroup->addButton(ui->radioScript, Wizard::Page::Script);
+	newSelectionGroup->addButton(ui->radioVerb, Wizard::Page::Verb);
 
 	if (!Proj.isLoaded())
 	{
-		ui->radioNewCutscene->setEnabled(false);
-		ui->radioNewRoom->setEnabled(false);
-		ui->radioNewObject->setEnabled(false);
-		ui->radioNewScript->setEnabled(false);
-		ui->radioNewVerb->setEnabled(false);
+		ui->radioAction->setEnabled(false);
+		ui->radioCutscene->setEnabled(false);
+		ui->radioRoom->setEnabled(false);
+		ui->radioObject->setEnabled(false);
+		ui->radioScript->setEnabled(false);
+		ui->radioVerb->setEnabled(false);
 	}
 
 	connect(newSelectionGroup, SIGNAL(buttonClicked(int)), this, SLOT(setTypeId(int)));

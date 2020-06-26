@@ -101,16 +101,6 @@ void VerbWidget::loadActionStructure()
 	}
 }
 
-void VerbWidget::on_pushButton_clicked()
-{
-	QLayoutItem *child;
-	while ((child = ui->layoutActionStructure->takeAt(0)) != 0)
-	{
-		delete child->widget();
-		delete child;
-	}
-}
-
 void VerbWidget::addLineEdit()
 {
 	auto lineEdit = new QLineEdit;

@@ -9,6 +9,7 @@ set(SOURCE_FILES
 	${SRCROOT}/States/StateEditor.cpp
 	${SRCROOT}/States/StateMain.cpp
 	${SRCROOT}/JsonSerializable.cpp
+	${SRCROOT}/Action.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/Room.cpp
 	${SRCROOT}/Object.cpp

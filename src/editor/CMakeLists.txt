@@ -9,8 +9,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(UIFILES
+	${UIROOT}/ActionBuildWidget.ui
 	${UIROOT}/ActionSelectWidget.ui
 	${UIROOT}/WizardPageActionSelect.ui
+	${UIROOT}/ActionWidget.ui
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/RoomWidget.ui
 	${UIROOT}/ObjectWidget.ui
@@ -20,6 +22,7 @@ set(UIFILES
 	${UIROOT}/ProjectSettingsWidget.ui
 	${UIROOT}/WizardPageStart.ui
 	${UIROOT}/WizardPageProject.ui
+	${UIROOT}/WizardPageAction.ui
 	${UIROOT}/WizardPageCutscene.ui
 	${UIROOT}/WizardPageRoom.ui
 	${UIROOT}/WizardPageVerb.ui
@@ -34,8 +37,10 @@ set(SRC
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertymanager.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qttreepropertybrowser.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtvariantproperty.cpp
+	${SRCROOT}/Widgets/ActionBuildWidget.cpp
 	${SRCROOT}/Widgets/ActionSelectWidget.cpp
 	${SRCROOT}/Widgets/EditorTabWidget.cpp
+	${SRCROOT}/Widgets/ActionWidget.cpp
 	${SRCROOT}/Widgets/CutsceneWidget.cpp
 	${SRCROOT}/Widgets/RoomWidget.cpp
 	${SRCROOT}/Widgets/ObjectWidget.cpp
@@ -49,6 +54,7 @@ set(SRC
 	${SRCROOT}/Wizard/Wizard.cpp
 	${SRCROOT}/Wizard/WizardPageActionSelect.cpp
 	${SRCROOT}/Wizard/WizardPageStart.cpp
+	${SRCROOT}/Wizard/WizardPageAction.cpp
 	${SRCROOT}/Wizard/WizardPageProject.cpp
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp
 	${SRCROOT}/Wizard/WizardPageRoom.cpp

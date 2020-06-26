@@ -57,6 +57,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	delete rootItem;
 	rootItem = new TreeItem("Project");
 
+	actionRoot = new TreeItem("Actions", rootItem);
 	cutsceneRoot = new TreeItem("Cutscenes", rootItem);
 	dialogueRoot = new TreeItem("Dialogues", rootItem);
 	objectRoot   = new TreeItem("Objects", rootItem);
@@ -64,6 +65,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	scriptRoot   = new TreeItem("Scripts", rootItem);
 	verbRoot     = new TreeItem("Verbs", rootItem);
 
+	rootItem->appendChild(actionRoot);
 	rootItem->appendChild(cutsceneRoot);
 	rootItem->appendChild(dialogueRoot);
 	rootItem->appendChild(objectRoot);
@@ -74,6 +76,13 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	if (project.isLoaded())
 	{
 		auto j = project.data();
+		for (auto &item : j[NovelTea::ID::actions].items())
+		{
+			QList<QVariant> columnData;
+			columnData << QString::fromStdString(item.key());
+			columnData << static_cast<int>(NovelTea::EntityType::Action);
+			actionRoot->appendChild(new TreeItem(columnData, actionRoot));
+		}
 		for (auto &item : j[NovelTea::ID::cutscenes].items())
 		{
 			QList<QVariant> columnData;
@@ -226,6 +235,25 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
 		return createIndex(row, column, childItem);
 	else
 		return QModelIndex();
+}
+
+QModelIndex TreeModel::index(EditorTabWidget::Type tabType) const
+{
+	int row = 0;
+	if (tabType == EditorTabWidget::Cutscene)
+		row = 1;
+	else if (tabType == EditorTabWidget::Dialogue)
+		row = 2;
+	else if (tabType == EditorTabWidget::Object)
+		row = 3;
+	else if (tabType == EditorTabWidget::Room)
+		row = 4;
+	else if (tabType == EditorTabWidget::Script)
+		row = 5;
+	else if (tabType == EditorTabWidget::Verb)
+		row = 6;
+
+	return index(row, 0);
 }
 
 QModelIndex TreeModel::parent(const QModelIndex &index) const

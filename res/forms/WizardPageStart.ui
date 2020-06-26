@@ -18,42 +18,49 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QRadioButton" name="radioNewProject">
+    <widget class="QRadioButton" name="radioProject">
      <property name="text">
       <string>Project</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="radioNewCutscene">
+    <widget class="QRadioButton" name="radioAction">
+     <property name="text">
+      <string>Action</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QRadioButton" name="radioCutscene">
      <property name="text">
       <string>Cutscene</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="radioNewRoom">
+    <widget class="QRadioButton" name="radioRoom">
      <property name="text">
       <string>Room</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="radioNewObject">
+    <widget class="QRadioButton" name="radioObject">
      <property name="text">
       <string>Object</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="radioNewScript">
+    <widget class="QRadioButton" name="radioScript">
      <property name="text">
       <string>Script</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QRadioButton" name="radioNewVerb">
+    <widget class="QRadioButton" name="radioVerb">
      <property name="text">
       <string>Verb</string>
      </property>

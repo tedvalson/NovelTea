@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 #include "ui_MainWindow.h"
 #include "TreeItem.hpp"
+#include "ActionWidget.hpp"
 #include "CutsceneWidget.hpp"
 #include "RoomWidget.hpp"
 #include "ObjectWidget.hpp"
@@ -114,15 +115,8 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 	if (widget->isModified())
 	{
 		auto type = widget->getType();
-		int row = 0;
-		if (type == EditorTabWidget::Room)
-			row = 3;
-		else if (type == EditorTabWidget::Object)
-			row = 2;
-		else if (type == EditorTabWidget::Verb)
-			row = 5;
-
-		auto parent = treeModel->index(row, 0);
+		// TODO: add type properly for context menu?
+		auto parent = treeModel->index(type);
 		if (treeModel->insertRow(0, parent))
 		{
 			treeModel->setData(treeModel->index(0, 0, parent), QString::fromStdString(widget->idName()));
@@ -426,6 +420,8 @@ void MainWindow::on_actionOpen_triggered()
 	int existingIndex = getEditorTabIndex(selectedType, selectedIdName);
 	if (existingIndex >= 0)
 		ui->tabWidget->setCurrentIndex(existingIndex);
+	else if (selectedType == EditorTabWidget::Action)
+		addEditorTab(new ActionWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Cutscene)
 		addEditorTab(new CutsceneWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Room)
@@ -442,7 +438,9 @@ void MainWindow::on_actionDelete_triggered()
 	QModelIndex index = ui->treeView->selectionModel()->currentIndex();
 
 	json *j;
-	if (selectedType == EditorTabWidget::Cutscene)
+	if (selectedType == EditorTabWidget::Action)
+		j = &ProjData[NovelTea::ID::actions];
+	else if (selectedType == EditorTabWidget::Cutscene)
 		j = &ProjData[NovelTea::ID::cutscenes];
 	else if (selectedType == EditorTabWidget::Room)
 		j = &ProjData[NovelTea::ID::rooms];

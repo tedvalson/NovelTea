@@ -2,6 +2,7 @@
 #define NOVELTEA_OBJECT_HPP
 
 #include <NovelTea/JsonSerializable.hpp>
+#include <NovelTea/Utils.hpp>
 
 namespace NovelTea
 {
@@ -13,6 +14,8 @@ public:
 	~Object();
 	json toJson() const override;
 	bool fromJson(const json &j) override;
+
+	ADD_ACCESSOR(std::string, Name, m_name)
 
 private:
 	std::string m_name;

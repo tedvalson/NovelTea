@@ -14,6 +14,7 @@ public:
 	enum Page {
 		Start = 0,
 		Project = 1,
+		Action,
 		Cutscene,
 		Room,
 		Object,
