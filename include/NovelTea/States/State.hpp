@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-#define Script getContext().scriptManager
+#define ScriptMan getContext().scriptManager
 
 namespace sf
 {
