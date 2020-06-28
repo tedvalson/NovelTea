@@ -16,6 +16,7 @@ public:
 		Project = 1,
 		Action,
 		Cutscene,
+		Dialogue,
 		Room,
 		Object,
 		Script,

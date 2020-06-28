@@ -446,10 +446,14 @@ void MainWindow::on_actionOpen_triggered()
 		addEditorTab(new ActionWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Cutscene)
 		addEditorTab(new CutsceneWidget(selectedIdName));
+	else if (selectedType == EditorTabWidget::Dialogue)
+		addEditorTab(new DialogueWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Room)
 		addEditorTab(new RoomWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Object)
 		addEditorTab(new ObjectWidget(selectedIdName));
+	else if (selectedType == EditorTabWidget::Script)
+		addEditorTab(new ScriptWidget(selectedIdName));
 	else if (selectedType == EditorTabWidget::Verb)
 		addEditorTab(new VerbWidget(selectedIdName));
 }

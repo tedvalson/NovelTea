@@ -35,10 +35,14 @@ EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType 
 			return Type::Action;
 		case NovelTea::EntityType::Cutscene:
 			return Type::Cutscene;
+		case NovelTea::EntityType::Dialogue:
+			return Type::Dialogue;
 		case NovelTea::EntityType::Room:
 			return Type::Room;
 		case NovelTea::EntityType::Object:
 			return Type::Object;
+		case NovelTea::EntityType::Script:
+			return Type::Script;
 		case NovelTea::EntityType::Verb:
 			return Type::Verb;
 		default:
@@ -54,10 +58,14 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 			return NovelTea::EntityType::Action;
 		case Type::Cutscene:
 			return NovelTea::EntityType::Cutscene;
+		case Type::Dialogue:
+			return NovelTea::EntityType::Dialogue;
 		case Type::Room:
 			return NovelTea::EntityType::Room;
 		case Type::Object:
 			return NovelTea::EntityType::Object;
+		case Type::Script:
+			return NovelTea::EntityType::Script;
 		case Type::Verb:
 			return NovelTea::EntityType::Verb;
 		default:

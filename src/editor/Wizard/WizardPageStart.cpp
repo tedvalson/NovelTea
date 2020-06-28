@@ -15,6 +15,7 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 	newSelectionGroup->addButton(ui->radioProject, Wizard::Page::Project);
 	newSelectionGroup->addButton(ui->radioAction, Wizard::Page::Action);
 	newSelectionGroup->addButton(ui->radioCutscene, Wizard::Page::Cutscene);
+	newSelectionGroup->addButton(ui->radioDialogue, Wizard::Page::Dialogue);
 	newSelectionGroup->addButton(ui->radioRoom, Wizard::Page::Room);
 	newSelectionGroup->addButton(ui->radioObject, Wizard::Page::Object);
 	newSelectionGroup->addButton(ui->radioScript, Wizard::Page::Script);

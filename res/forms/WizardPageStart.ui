@@ -39,6 +39,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QRadioButton" name="radioDialogue">
+     <property name="text">
+      <string>Dialogue</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QRadioButton" name="radioRoom">
      <property name="text">
       <string>Room</string>

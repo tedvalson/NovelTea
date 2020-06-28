@@ -13,6 +13,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/Room.cpp
 	${SRCROOT}/Object.cpp
+	${SRCROOT}/Dialogue.cpp
 	${SRCROOT}/Verb.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/SaveData.cpp

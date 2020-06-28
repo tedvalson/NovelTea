@@ -17,6 +17,7 @@ public:
 		Object   = 2,
 		Action,
 		Dialogue,
+		Script,
 		Settings,
 		Verb,
 	};
