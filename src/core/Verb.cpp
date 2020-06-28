@@ -1,4 +1,6 @@
 #include <NovelTea/Verb.hpp>
+#include <NovelTea/Object.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -48,6 +50,36 @@ bool Verb::fromJson(const json &j)
 		std::cerr << e.what() << std::endl;
 		return false;
 	}
+}
+
+std::string Verb::getActionText(std::vector<std::string> objectIds, std::string blankStr) const
+{
+	auto &actionStructure = getActionStructure();
+	std::string result = actionStructure[0];
+
+	for (int i = 1; i < actionStructure.size(); ++i)
+	{
+		auto objectStr = blankStr;
+
+		if (i-1 < objectIds.size())
+		{
+			auto objectId = objectIds[i-1];
+			if (!objectId.empty())
+			{
+				auto object = Proj.get<Object>(objectId);
+				if (object)
+				{
+					objectStr = object->getName();
+					std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
+				}
+			}
+		}
+
+		result += " " + objectStr;
+		if (!actionStructure[i].empty())
+			result += " " + actionStructure[i];
+	}
+	return result;
 }
 
 } // namespace NovelTea

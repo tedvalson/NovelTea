@@ -2,6 +2,7 @@
 #define OBJECTWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <NovelTea/Object.hpp>
 #include <QWidget>
 #include <QMenu>
 #include <QStandardItemModel>
@@ -14,9 +15,6 @@ using json = nlohmann::json;
 
 namespace Ui {
 class ObjectWidget;
-}
-namespace NovelTea {
-class Object;
 }
 
 class ObjectWidget : public EditorTabWidget

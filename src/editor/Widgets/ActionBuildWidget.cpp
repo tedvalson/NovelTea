@@ -137,19 +137,10 @@ void ActionBuildWidget::comboBox_currentIndexChanged(const QString &value)
 	auto verb = Proj.get<NovelTea::Verb>(ui->comboVerb->currentText().toStdString());
 	if (verb)
 	{
-		auto actionStructure = verb->getActionStructure();
-		actionSentence += QString::fromStdString(actionStructure[0]);
-		for (int i = 0; i < m_comboBoxes.size(); ++i)
-		{
-			auto strObject = m_comboBoxes[i]->currentText();
-			auto object = Proj.object(strObject.toStdString());
-			if (object)
-				strObject = QString::fromStdString(object->getName()).toLower();
-			else
-				strObject = "______";
-			actionSentence += " " + strObject;
-			actionSentence += " " + QString::fromStdString(actionStructure[i+1]);
-		}
+		std::vector<std::string> objectIds;
+		for (auto &comboBox : m_comboBoxes)
+			objectIds.push_back(comboBox->currentText().toStdString());
+		actionSentence = QString::fromStdString(verb->getActionText(objectIds));
 	}
 
 	ui->label->setText(actionSentence);

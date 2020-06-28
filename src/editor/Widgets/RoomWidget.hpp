@@ -2,6 +2,7 @@
 #define ROOMWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <NovelTea/Room.hpp>
 #include <QWidget>
 #include <QMenu>
 #include <QStandardItemModel>
@@ -15,9 +16,6 @@ using json = nlohmann::json;
 
 namespace Ui {
 class RoomWidget;
-}
-namespace NovelTea {
-class Room;
 }
 
 class RoomWidget : public EditorTabWidget
