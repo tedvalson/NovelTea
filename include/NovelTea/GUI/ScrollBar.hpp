@@ -30,14 +30,14 @@ public:
 	void setPosition(float x, float y);
 	const sf::Vector2f& getPosition() const;
 
-	void setDragRect(const sf::IntRect &rect);
+	void setDragRect(const sf::FloatRect &rect);
 	void setSize(const sf::Vector2u &size);
 	void setScrollAreaSize(const sf::Vector2u &size);
 	void setDeceleration(float rate);
 	void setColor(const sf::Color &color);
 	void setAutoHide(bool autoHide);
 
-	sf::IntRect getDragRect() const;
+	sf::FloatRect getDragRect() const;
 	sf::Vector2u getSize() const;
 	sf::Vector2u getScrollAreaSize() const;
 	float getDeceleration() const;
@@ -75,7 +75,7 @@ private:
 
 	mutable bool m_needsUpdate;
 	mutable std::vector<Scrollable*> m_scrollObjects;
-	sf::IntRect m_dragRect;
+	sf::FloatRect m_dragRect;
 	sf::Vector2u m_scrollAreaSize;
 	sf::Vector2u m_size;
 	sf::Vector2f m_position;

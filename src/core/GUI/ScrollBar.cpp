@@ -97,7 +97,7 @@ bool ScrollBar::processEvent(const sf::Event &event)
 	}
 	else if (event.type == sf::Event::MouseButtonPressed)
 	{
-		if (!m_isTouching && m_dragRect.contains(event.touch.x, event.touch.y))
+		if (!m_isTouching && (m_dragRect == sf::FloatRect() || m_dragRect.contains(event.touch.x, event.touch.y)))
 		{
 			m_isTouching = true;
 			m_isScrolling = false;
@@ -145,7 +145,7 @@ void ScrollBar::update(float delta)
 	m_tweenManager.update(delta);
 }
 
-void ScrollBar::setDragRect(const sf::IntRect &rect)
+void ScrollBar::setDragRect(const sf::FloatRect &rect)
 {
 	m_dragRect = rect;
 	m_needsUpdate = true;
@@ -260,7 +260,7 @@ void ScrollBar::setAutoHide(bool autoHide)
 	m_autoHide = autoHide;
 }
 
-sf::IntRect ScrollBar::getDragRect() const
+sf::FloatRect ScrollBar::getDragRect() const
 {
 	return m_dragRect;
 }
