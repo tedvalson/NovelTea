@@ -47,12 +47,12 @@ void ObjectWidget::fillPropertyEditor()
 void ObjectWidget::saveData() const
 {
 	if (m_object)
-		ProjData[NovelTea::ID::objects][idName()] = *m_object;
+		ProjData[NovelTea::Object::id][idName()] = *m_object;
 }
 
 void ObjectWidget::loadData()
 {
-	m_object = Proj.object(idName());
+	m_object = Proj.get<NovelTea::Object>(idName());
 
 	qDebug() << "Loading object data... " << QString::fromStdString(idName());
 

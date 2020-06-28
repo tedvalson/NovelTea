@@ -11,9 +11,10 @@ class Object : public JsonSerializable
 {
 public:
 	Object();
-	~Object();
 	json toJson() const override;
 	bool fromJson(const json &j) override;
+
+	static constexpr auto id = "object";
 
 	ADD_ACCESSOR(std::string, Name, m_name)
 

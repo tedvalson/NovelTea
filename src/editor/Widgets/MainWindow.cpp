@@ -3,8 +3,10 @@
 #include "TreeItem.hpp"
 #include "ActionWidget.hpp"
 #include "CutsceneWidget.hpp"
+#include "DialogueWidget.hpp"
 #include "RoomWidget.hpp"
 #include "ObjectWidget.hpp"
+#include "ScriptWidget.hpp"
 #include "VerbWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
@@ -149,6 +151,26 @@ void MainWindow::warnIfInvalid() const
 	std::string error;
 	if (!Proj.isValid(error))
 		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
+}
+
+json &MainWindow::getDataFromTabType(EditorTabWidget::Type type)
+{
+	if (type == EditorTabWidget::Action)
+		return ProjData[NovelTea::Action::id];
+	else if (type == EditorTabWidget::Cutscene)
+		return ProjData[NovelTea::Cutscene::id];
+	else if (type == EditorTabWidget::Dialogue)
+		return ProjData[NovelTea::Dialogue::id];
+	else if (type == EditorTabWidget::Object)
+		return ProjData[NovelTea::Object::id];
+	else if (type == EditorTabWidget::Room)
+		return ProjData[NovelTea::Room::id];
+	else if (type == EditorTabWidget::Script)
+		return ProjData[NovelTea::Script::id];
+	else if (type == EditorTabWidget::Verb)
+		return ProjData[NovelTea::Verb::id];
+	else
+		throw std::exception();
 }
 
 QAbstractItemModel *MainWindow::getItemModel() const
@@ -389,7 +411,7 @@ void MainWindow::on_actionRename_triggered()
 		auto newName = text.toStdString();
 		auto existingOldIndex = getEditorTabIndex(selectedType, selectedIdName);
 		auto existingNewIndex = getEditorTabIndex(selectedType, newName);
-		auto &j = ProjData[NovelTea::ID::cutscenes];
+		auto &j = getDataFromTabType(selectedType);
 
 		if (existingNewIndex >= 0 || j.contains(newName))
 		{
@@ -437,21 +459,8 @@ void MainWindow::on_actionDelete_triggered()
 	// TODO: You sure you want to remove this?
 	QModelIndex index = ui->treeView->selectionModel()->currentIndex();
 
-	json *j;
-	if (selectedType == EditorTabWidget::Action)
-		j = &ProjData[NovelTea::ID::actions];
-	else if (selectedType == EditorTabWidget::Cutscene)
-		j = &ProjData[NovelTea::ID::cutscenes];
-	else if (selectedType == EditorTabWidget::Room)
-		j = &ProjData[NovelTea::ID::rooms];
-	else if (selectedType == EditorTabWidget::Object)
-		j = &ProjData[NovelTea::ID::objects];
-	else if (selectedType == EditorTabWidget::Dialogue)
-		j = &ProjData[NovelTea::ID::dialogues];
-	else
-		return;
-
-	j->erase(selectedIdName);
+	auto &j = getDataFromTabType(selectedType);
+	j.erase(selectedIdName);
 	Proj.saveToFile();
 
 	auto proxyIndex = ui->treeView->mapToSource(index);

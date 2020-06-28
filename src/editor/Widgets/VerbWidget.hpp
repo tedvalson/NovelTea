@@ -2,6 +2,7 @@
 #define VERBWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <NovelTea/Verb.hpp>
 #include <QWidget>
 #include <QLineEdit>
 #include <json.hpp>
@@ -10,9 +11,6 @@ using json = nlohmann::json;
 
 namespace Ui {
 class VerbWidget;
-}
-namespace NovelTea {
-class Verb;
 }
 
 class VerbWidget : public EditorTabWidget

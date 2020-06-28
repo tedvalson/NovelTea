@@ -24,6 +24,8 @@ public:
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
 
+	static json &getDataFromTabType(EditorTabWidget::Type type);
+
 	QAbstractItemModel *getItemModel() const;
 
 protected:

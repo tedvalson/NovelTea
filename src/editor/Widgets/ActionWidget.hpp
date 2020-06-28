@@ -2,6 +2,7 @@
 #define ACTIONWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <NovelTea/Action.hpp>
 #include <QWidget>
 #include <QComboBox>
 #include <json.hpp>
@@ -10,9 +11,6 @@ using json = nlohmann::json;
 
 namespace Ui {
 class ActionWidget;
-}
-namespace NovelTea {
-class Action;
 }
 
 class ActionWidget : public EditorTabWidget

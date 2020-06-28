@@ -53,7 +53,7 @@ void Action::setVerbObjectCombo(const json &j)
 			!j[1].is_array() || j[1].empty())
 		return;
 
-	auto verb = Proj.verb(j[0]);
+	auto verb = Proj.get<Verb>(j[0]);
 	if (!verb)
 		return;
 

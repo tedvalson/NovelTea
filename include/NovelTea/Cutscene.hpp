@@ -18,6 +18,8 @@ public:
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
+	static constexpr auto id = "cutscene";
+
 	void addSegment(std::shared_ptr<CutsceneSegment> segment);
 
 	// TODO: make CutsceneWidget a friend to not expose this entirely
@@ -40,7 +42,6 @@ public:
 	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
 
 private:
-	std::string m_name;
 	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
 
 	bool m_fullScreen;

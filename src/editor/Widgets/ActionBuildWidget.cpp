@@ -82,7 +82,7 @@ void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)
 	}
 
 	auto verbId = value.toStdString();
-	auto verb = Proj.verb(verbId);
+	auto verb = Proj.get<NovelTea::Verb>(verbId);
 	if (verb)
 	{
 		auto objectCount = verb->getObjectCount();
@@ -108,11 +108,11 @@ void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)
 bool ActionBuildWidget::isValid() const
 {
 	auto verbId = ui->comboVerb->currentText().toStdString();
-	auto verb = Proj.verb(verbId);
+	auto verb = Proj.get<NovelTea::Verb>(verbId);
 	if (!verb || verb->getObjectCount() != m_comboBoxes.size())
 		return false;
 	for (auto &comboBox : m_comboBoxes)
-		if (!Proj.object(comboBox->currentText().toStdString()))
+		if (!Proj.get<NovelTea::Object>(comboBox->currentText().toStdString()))
 			return false;
 	return true;
 }
@@ -134,7 +134,7 @@ void ActionBuildWidget::comboBox_currentIndexChanged(const QString &value)
 	}
 
 	QString actionSentence;
-	auto verb = Proj.verb(ui->comboVerb->currentText().toStdString());
+	auto verb = Proj.get<NovelTea::Verb>(ui->comboVerb->currentText().toStdString());
 	if (verb)
 	{
 		auto actionStructure = verb->getActionStructure();

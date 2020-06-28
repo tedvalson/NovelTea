@@ -44,13 +44,13 @@ void VerbWidget::saveData() const
 		m_verb->setDefaultScriptSuccess(ui->scriptEditSuccess->toPlainText().toStdString());
 		m_verb->setDefaultScriptFailure(ui->scriptEditFailure->toPlainText().toStdString());
 		m_verb->setActionStructure(actionStructure);
-		ProjData[NovelTea::ID::verbs][idName()] = *m_verb;
+		ProjData[NovelTea::Verb::id][idName()] = *m_verb;
 	}
 }
 
 void VerbWidget::loadData()
 {
-	m_verb = Proj.verb(idName());
+	m_verb = Proj.get<NovelTea::Verb>(idName());
 
 	qDebug() << "Loading verb data... " << QString::fromStdString(idName());
 

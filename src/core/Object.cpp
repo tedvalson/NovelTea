@@ -9,11 +9,6 @@ Object::Object()
 {
 }
 
-Object::~Object()
-{
-	std::cout << "Object destroyed!" << std::endl;
-}
-
 json Object::toJson() const
 {
 	auto j = json::array({

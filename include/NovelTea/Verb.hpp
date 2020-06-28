@@ -15,6 +15,8 @@ public:
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
+	static constexpr auto id = "verb";
+
 	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(int, ObjectCount, m_objectCount)
 	ADD_ACCESSOR(std::vector<std::string>, ActionStructure, m_actionStructure)

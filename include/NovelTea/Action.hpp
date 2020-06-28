@@ -18,6 +18,8 @@ public:
 	void setVerbObjectCombo(const json &j);
 	json getVerbObjectCombo() const;
 
+	static constexpr auto id = "action";
+
 	ADD_ACCESSOR(std::string, VerbId, m_verbId)
 	ADD_ACCESSOR(std::string, Script, m_script)
 	ADD_ACCESSOR(std::vector<std::string>, ObjectIds, m_objectIds)

@@ -20,6 +20,8 @@ public:
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
+	static constexpr auto id = "room";
+
 	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(std::string, Description, m_description)
 	ADD_ACCESSOR(std::vector<RoomObject>, Objects, m_objects)

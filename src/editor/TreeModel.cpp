@@ -1,6 +1,13 @@
 #include "TreeModel.hpp"
 #include "TreeItem.hpp"
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Action.hpp>
+#include <NovelTea/Object.hpp>
+#include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Dialogue.hpp>
+#include <NovelTea/Room.hpp>
+#include <NovelTea/Script.hpp>
+#include <NovelTea/Verb.hpp>
 #include <QStringList>
 #include <QContextMenuEvent>
 #include <QFont>
@@ -50,6 +57,19 @@ bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent)
 	return success;
 }
 
+void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, std::string typeIndex)
+{
+	if (!data.contains(typeIndex))
+		return;
+	for (auto &item : data[typeIndex].items())
+	{
+		QList<QVariant> columnData;
+		columnData << QString::fromStdString(item.key());
+		columnData << static_cast<int>(type);
+		root->appendChild(new TreeItem(columnData, root));
+	}
+}
+
 void TreeModel::loadProject(const NovelTea::ProjectData &project)
 {
 	beginResetModel();
@@ -75,42 +95,15 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 
 	if (project.isLoaded())
 	{
-		auto j = project.data();
-		for (auto &item : j[NovelTea::ID::actions].items())
-		{
-			QList<QVariant> columnData;
-			columnData << QString::fromStdString(item.key());
-			columnData << static_cast<int>(NovelTea::EntityType::Action);
-			actionRoot->appendChild(new TreeItem(columnData, actionRoot));
-		}
-		for (auto &item : j[NovelTea::ID::cutscenes].items())
-		{
-			QList<QVariant> columnData;
-			columnData << QString::fromStdString(item.key());
-			columnData << static_cast<int>(NovelTea::EntityType::Cutscene);
-			cutsceneRoot->appendChild(new TreeItem(columnData, cutsceneRoot));
-		}
-		for (auto &item : j[NovelTea::ID::rooms].items())
-		{
-			QList<QVariant> columnData;
-			columnData << QString::fromStdString(item.key());
-			columnData << static_cast<int>(NovelTea::EntityType::Room);
-			roomRoot->appendChild(new TreeItem(columnData, roomRoot));
-		}
-		for (auto &item : j[NovelTea::ID::objects].items())
-		{
-			QList<QVariant> columnData;
-			columnData << QString::fromStdString(item.key());
-			columnData << static_cast<int>(NovelTea::EntityType::Object);
-			objectRoot->appendChild(new TreeItem(columnData, objectRoot));
-		}
-		for (auto &item : j[NovelTea::ID::verbs].items())
-		{
-			QList<QVariant> columnData;
-			columnData << QString::fromStdString(item.key());
-			columnData << static_cast<int>(NovelTea::EntityType::Verb);
-			verbRoot->appendChild(new TreeItem(columnData, verbRoot));
-		}
+		auto jdata = project.data();
+
+		loadEntities(jdata, actionRoot, NovelTea::EntityType::Action, NovelTea::Action::id);
+		loadEntities(jdata, cutsceneRoot, NovelTea::EntityType::Cutscene, NovelTea::Cutscene::id);
+		loadEntities(jdata, dialogueRoot, NovelTea::EntityType::Dialogue, NovelTea::Dialogue::id);
+		loadEntities(jdata, objectRoot, NovelTea::EntityType::Object, NovelTea::Object::id);
+		loadEntities(jdata, roomRoot, NovelTea::EntityType::Room, NovelTea::Room::id);
+		loadEntities(jdata, scriptRoot, NovelTea::EntityType::Script, NovelTea::Script::id);
+		loadEntities(jdata, verbRoot, NovelTea::EntityType::Verb, NovelTea::Verb::id);
 	}
 
 	endResetModel();
@@ -239,8 +232,10 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
 
 QModelIndex TreeModel::index(EditorTabWidget::Type tabType) const
 {
-	int row = 0;
-	if (tabType == EditorTabWidget::Cutscene)
+	int row;
+	if (tabType == EditorTabWidget::Action)
+		row = 0;
+	else if (tabType == EditorTabWidget::Cutscene)
 		row = 1;
 	else if (tabType == EditorTabWidget::Dialogue)
 		row = 2;
@@ -252,6 +247,8 @@ QModelIndex TreeModel::index(EditorTabWidget::Type tabType) const
 		row = 5;
 	else if (tabType == EditorTabWidget::Verb)
 		row = 6;
+	else
+		return QModelIndex();
 
 	return index(row, 0);
 }

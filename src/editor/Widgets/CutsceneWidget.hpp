@@ -2,6 +2,7 @@
 #define CUTSCENEWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <NovelTea/Cutscene.hpp>
 #include <QWidget>
 #include <QMenu>
 #include <QStandardItemModel>
@@ -14,10 +15,6 @@ using json = nlohmann::json;
 
 namespace Ui {
 class CutsceneWidget;
-}
-namespace NovelTea {
-class Cutscene;
-class CutsceneSegment;
 }
 
 class CutsceneWidget : public EditorTabWidget

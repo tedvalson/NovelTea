@@ -6,8 +6,7 @@ namespace NovelTea
 {
 
 Cutscene::Cutscene()
-	: m_name("New Cutscene")
-	, m_fullScreen(true)
+	: m_fullScreen(true)
 	, m_canFastForward(true)
 	, m_speedFactor(1.f)
 	, m_nextEntity(json::array({-1,""}))

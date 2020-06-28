@@ -1,10 +1,5 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/AssetManager.hpp>
-#include <NovelTea/Action.hpp>
-#include <NovelTea/Cutscene.hpp>
-#include <NovelTea/Object.hpp>
-#include <NovelTea/Room.hpp>
-#include <NovelTea/Verb.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -28,7 +23,6 @@ ProjectData &ProjectData::instance()
 
 void ProjectData::newProject()
 {
-	Cutscene cutscene;
 	TextFormat textFormat;
 
 	_json = json::object({
@@ -40,7 +34,6 @@ void ProjectData::newProject()
 		{ID::textFormats, json::array({textFormat})},
 	});
 
-	_json[ID::cutscenes]["New Cutscene"] = cutscene;
 	_json[ID::projectFonts] = json::array({0});
 	fromJson(_json);
 }
@@ -99,41 +92,6 @@ std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
 	if (index >= m_fonts.size())
 		return nullptr;
 	return m_fonts[index];
-}
-
-std::shared_ptr<Action> ProjectData::action(const std::string &idName)
-{
-	if (!_json[ID::actions].contains(idName))
-		return nullptr;
-	return std::make_shared<Action>(_json[ID::actions][idName].get<Action>());
-}
-
-std::shared_ptr<Cutscene> ProjectData::cutscene(const std::string &idName)
-{
-	if (!_json[ID::cutscenes].contains(idName))
-		return nullptr;
-	return std::make_shared<Cutscene>(_json[ID::cutscenes][idName].get<Cutscene>());
-}
-
-std::shared_ptr<Room> ProjectData::room(const std::string &idName)
-{
-	if (!_json[ID::rooms].contains(idName))
-		return nullptr;
-	return std::make_shared<Room>(_json[ID::rooms][idName].get<Room>());
-}
-
-std::shared_ptr<Object> ProjectData::object(const std::string &idName)
-{
-	if (!_json[ID::objects].contains(idName))
-		return nullptr;
-	return std::make_shared<Object>(_json[ID::objects][idName].get<Object>());
-}
-
-std::shared_ptr<Verb> ProjectData::verb(const std::string &idName)
-{
-	if (!_json[ID::verbs].contains(idName))
-		return nullptr;
-	return std::make_shared<Verb>(_json[ID::verbs][idName].get<Verb>());
 }
 
 void ProjectData::saveToFile(const std::string &filename)

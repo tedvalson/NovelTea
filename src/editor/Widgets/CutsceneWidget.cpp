@@ -266,12 +266,12 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 void CutsceneWidget::saveData() const
 {
 	if (m_cutscene)
-		ProjData[NovelTea::ID::cutscenes][idName()] = *m_cutscene;
+		ProjData[NovelTea::Cutscene::id][idName()] = *m_cutscene;
 }
 
 void CutsceneWidget::loadData()
 {
-	m_cutscene = Proj.cutscene(idName());
+	m_cutscene = Proj.get<NovelTea::Cutscene>(idName());
 	itemModel->disconnect();
 	itemModel->removeRows(0, itemModel->rowCount());
 

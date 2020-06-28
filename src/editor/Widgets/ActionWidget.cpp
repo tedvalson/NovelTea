@@ -41,13 +41,13 @@ void ActionWidget::saveData() const
 	{
 		m_action->setScript(ui->script->toPlainText().toStdString());
 		m_action->setVerbObjectCombo(ui->actionBuilder->getValue());
-		ProjData[NovelTea::ID::actions][idName()] = *m_action;
+		ProjData[NovelTea::Action::id][idName()] = *m_action;
 	}
 }
 
 void ActionWidget::loadData()
-{	
-	m_action = Proj.action(idName());
+{
+	m_action = Proj.get<NovelTea::Action>(idName());
 
 	qDebug() << "Loading action data... " << QString::fromStdString(idName());
 

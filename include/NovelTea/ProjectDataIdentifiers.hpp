@@ -14,6 +14,7 @@ enum class EntityType : int {
 	Room,
 	Object,
 	Dialogue,
+	Script,
 	Verb,
 };
 
@@ -29,19 +30,12 @@ namespace ID
 	const auto projectFontDefault = "fontDefault";
 	const auto entityType         = 0;
 	const auto entityId           = 1;
-	const auto cutscenes          = "cutscenes";
 	const auto cutsceneSegType    = 0;
 	const auto cutsceneSegText    = 0;
 	const auto cutsceneSegBreak   = 1;
-	const auto rooms              = "rooms";
 	const auto textFormats        = "textformats";
-	const auto objects            = "objects";
-	const auto dialogues          = "dialogues";
-	const auto actions            = "actions";
-	const auto verbs              = "verbs";
 
 	// For SaveData
-	const auto variables          = "variabes";
 
 } // namespace ID
 
