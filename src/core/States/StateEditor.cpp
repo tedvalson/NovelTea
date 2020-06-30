@@ -1,5 +1,6 @@
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Cutscene.hpp>
@@ -21,7 +22,15 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	text.setFillColor(sf::Color::Black);
 	text.setOutlineColor(sf::Color::Yellow);
 	text.setOutlineThickness(1.f);
-	text.setPosition(0.f, 250.f);
+	text.setPosition(0.f, 450.f);
+
+	m_verbList.setSelectCallback([this](std::shared_ptr<Verb> verb){
+		m_verbList.hide();
+	});
+	m_verbList.setShowHideCallback([this](bool showing){
+		if (!showing)
+			activeText.setHighlightId("");
+	});
 }
 
 void StateEditor::render(sf::RenderTarget &target)
@@ -30,7 +39,13 @@ void StateEditor::render(sf::RenderTarget &target)
 	if (mode == StateEditorMode::Cutscene)
 		target.draw(cutsceneRenderer);
 	else if (mode == StateEditorMode::Room)
+	{
 		target.draw(activeText);
+		if (m_verbList.isVisible())
+			target.draw(m_verbList);
+	}
+
+	target.draw(text);
 }
 
 void *StateEditor::processData(void *data)
@@ -68,9 +83,12 @@ void *StateEditor::processData(void *data)
 	{
 		if (event == "text")
 		{
-			activeText.setText(jsonData["data"]);
+			std::string data = jsonData["data"];
+			auto r = ScriptMan.runInClosure<std::string>(data);
+
+			activeText.setText(r);
 			activeText.setPosition(10.f, 10.f);
-			activeText.setSize(sf::Vector2f(300.f, 500.f));
+			activeText.setSize(sf::Vector2f(460.f, 600.f));
 			activeText.setCursorStart(sf::Vector2f(50.f, 25.f));
 		}
 	}
@@ -82,7 +100,34 @@ void *StateEditor::processData(void *data)
 
 bool StateEditor::processEvent(const sf::Event &event)
 {
+	if (m_verbList.isVisible())
+		if (!m_verbList.processEvent(event))
+			return false;
+
 	if (event.type == sf::Event::MouseButtonReleased)
+	{
+		if (mode == StateEditorMode::Room)
+		{
+			if (!m_verbList.isVisible())
+			{
+				auto p = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+				auto word = activeText.objectFromPoint(p);
+				activeText.setHighlightId(word);
+				if (!word.empty())
+				{
+					auto object = Proj.get<Object>(word);
+					m_verbList.setVerbs(object);
+					m_verbList.setPosition(p);
+					m_verbList.show();
+				}
+			}
+			else if (!m_verbList.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
+			{
+				m_verbList.hide();
+			}
+		}
+	}
+	if (event.type == sf::Event::MouseButtonPressed)
 	{
 
 	}
@@ -93,6 +138,8 @@ bool StateEditor::processEvent(const sf::Event &event)
 bool StateEditor::update(float deltaSeconds)
 {
 //	cutsceneRenderer.update(deltaSeconds);
+	if (m_verbList.isVisible())
+		m_verbList.update(deltaSeconds);
 	tweenManager.update(deltaSeconds);
 	return true;
 }

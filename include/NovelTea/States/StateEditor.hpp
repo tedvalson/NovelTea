@@ -7,6 +7,7 @@
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/CutsceneRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/GUI/VerbList.hpp>
 #include <json.hpp>
 
 using json = nlohmann::json;
@@ -18,6 +19,7 @@ enum class StateEditorMode : int {
 	Nothing  = 0,
 	Cutscene = 1,
 	Room,
+	Dialogue,
 };
 
 class StateEditor : public State
@@ -37,6 +39,9 @@ private:
 	ActiveText activeText;
 	TweenRectangleShape shape;
 	sf::Texture texture;
+
+	VerbList m_verbList;
+
 	TweenEngine::TweenManager tweenManager;
 	StateEditorMode mode;
 };
