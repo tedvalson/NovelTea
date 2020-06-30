@@ -153,6 +153,22 @@ sf::Vector2f ActiveText::getSize() const
 	return m_size;
 }
 
+void ActiveText::setHighlightId(const std::string &id)
+{
+	for (auto &segment : m_segments)
+	{
+		if (id.empty() || id != segment.objectIdName)
+		{
+			segment.text.setOutlineThickness(0.f);
+		}
+		else
+		{
+			segment.text.setOutlineColor(sf::Color::Yellow);
+			segment.text.setOutlineThickness(3.f);
+		}
+	}
+}
+
 void ActiveText::refresh()
 {
 	m_needsUpdate = true;
@@ -233,7 +249,6 @@ void ActiveText::ensureUpdate() const
 			TweenText text;
 			text.setFont(*font);
 			text.setCharacterSize(format.size()*3);
-			text.setFillColor(sf::Color::Black);
 			text.setStyle(style);
 
 			text.setString(" ");
@@ -250,6 +265,7 @@ void ActiveText::ensureUpdate() const
 				}
 
 				text.setString(p.first);
+				text.setFillColor(p.second.empty() ? sf::Color::Black : sf::Color::Blue);
 
 				auto newX = m_cursorPos.x + text.getLocalBounds().width;
 

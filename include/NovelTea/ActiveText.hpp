@@ -37,6 +37,7 @@ public:
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
 
+	void setHighlightId(const std::string &id);
 	void refresh();
 
 	float getTextWidth() const;
