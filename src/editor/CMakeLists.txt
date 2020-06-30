@@ -25,8 +25,10 @@ set(UIFILES
 	${UIROOT}/WizardPageStart.ui
 	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageAction.ui
+	${UIROOT}/WizardPageDialogue.ui
 	${UIROOT}/WizardPageCutscene.ui
 	${UIROOT}/WizardPageRoom.ui
+	${UIROOT}/WizardPageScript.ui
 	${UIROOT}/WizardPageVerb.ui
 	${UIROOT}/WizardPageObject.ui
 )

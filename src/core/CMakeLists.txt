@@ -15,6 +15,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Room.cpp
 	${SRCROOT}/Object.cpp
 	${SRCROOT}/Dialogue.cpp
+	${SRCROOT}/Script.cpp
 	${SRCROOT}/Verb.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/SaveData.cpp
