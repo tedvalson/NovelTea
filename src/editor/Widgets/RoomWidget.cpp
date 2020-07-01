@@ -66,13 +66,13 @@ void RoomWidget::saveData() const
 		}
 		m_room->setObjects(objects);
 		m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
-		ProjData[NovelTea::ID::rooms][idName()] = *m_room;
+		ProjData[NovelTea::Room::id][idName()] = *m_room;
 	}
 }
 
 void RoomWidget::loadData()
 {
-	m_room = Proj.room(idName());
+	m_room = Proj.get<NovelTea::Room>(idName());
 	ui->listWidget->clear();
 
 	qDebug() << "Loading room data... " << QString::fromStdString(idName());
