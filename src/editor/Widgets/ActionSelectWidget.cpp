@@ -37,6 +37,12 @@ void ActionSelectWidget::setValue(nlohmann::json value)
 			idText = "<b>Cutscene:</b> " + idText;
 		else if (type == NovelTea::EntityType::CustomScript)
 			idText = "<b>Custom:</b> " + idText;
+		else if (type == NovelTea::EntityType::Dialogue)
+			idText = "<b>Dialogue:</b> " + idText;
+		else if (type == NovelTea::EntityType::Room)
+			idText = "<b>Room:</b> " + idText;
+		else if (type == NovelTea::EntityType::Script)
+			idText = "<b>Script:</b> " + idText;
 
 		ui->label->setText(idText);
 	}
