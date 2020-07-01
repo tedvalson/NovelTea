@@ -23,12 +23,14 @@ public:
 	ADD_ACCESSOR(std::string, VerbId, m_verbId)
 	ADD_ACCESSOR(std::string, Script, m_script)
 	ADD_ACCESSOR(std::vector<std::string>, ObjectIds, m_objectIds)
+	ADD_ACCESSOR(bool, PositionDependent, m_positionDependent)
 	ADD_ACCESSOR(json, Properties, m_properties)
 
 private:
 	std::string m_verbId;
 	std::string m_script;
 	std::vector<std::string> m_objectIds;
+	bool m_positionDependent;
 	json m_properties;
 };
 

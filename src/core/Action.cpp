@@ -7,7 +7,8 @@ namespace NovelTea
 {
 
 Action::Action()
-: m_properties(json::object())
+: m_positionDependent(false)
+, m_properties(json::object())
 {
 	
 }
@@ -18,6 +19,7 @@ json Action::toJson() const
 		m_verbId,
 		m_script,
 		m_objectIds,
+		m_positionDependent,
 		m_properties,
 	});
 	return j;
@@ -25,18 +27,19 @@ json Action::toJson() const
 
 bool Action::fromJson(const json &j)
 {
-	if (!j.is_array() || j.size() != 4)
+	if (!j.is_array() || j.size() != 5)
 		return false;
 
 	try
 	{
 		m_verbId = j[0];
 		m_script = j[1];
-		m_properties = j[3];
+		m_positionDependent = j[3];
+		m_properties = j[4];
 
 		m_objectIds.clear();
-		for (auto &jpart : j[2])
-			m_objectIds.push_back(jpart);
+		for (auto &jobject : j[2])
+			m_objectIds.push_back(jobject);
 
 		return true;
 	}
