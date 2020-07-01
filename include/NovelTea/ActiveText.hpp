@@ -14,8 +14,9 @@ class TextBlock;
 
 class ActiveText : public JsonSerializable, public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
-	friend class CutsceneRenderer;
 public:
+	static const int ALPHA = 11;
+
 	struct Segment {
 		TweenText text;
 		std::string objectIdName;
@@ -45,8 +46,12 @@ public:
 	void setCursorStart(const sf::Vector2f &cursorPos);
 	const sf::Vector2f &getCursorEnd() const;
 
+	std::vector<Segment> &getSegments();
+
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+	void setValues(int tweenType, float *newValues) override;
+	int getValues(int tweenType, float *returnValues) override;
 	void ensureUpdate() const;
 
 private:
@@ -56,6 +61,7 @@ private:
 	sf::Vector2f m_cursorStart;
 	sf::Vector2f m_size;
 	mutable bool m_needsUpdate = true;
+	float m_alpha;
 
 	mutable sf::RectangleShape m_debugBorder;
 	mutable std::vector<sf::RectangleShape> m_debugSegmentShapes;

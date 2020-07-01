@@ -92,12 +92,12 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 		}).start(m_tweenManager);
 
 	activeText->setPosition(0.f, 0.f);
-	for (auto &segment : activeText->m_segments)
-	{
-		TweenEngine::Tween::from(segment.text, TweenText::FILL_COLOR_ALPHA, duration)
-			.target(0.f)
-			.start(m_tweenManager);
-	}
+	TweenEngine::Tween::set(*activeText, ActiveText::ALPHA)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(*activeText, ActiveText::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *segment)

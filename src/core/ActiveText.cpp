@@ -9,6 +9,7 @@ namespace NovelTea
 
 ActiveText::ActiveText()
 	: m_size(sf::Vector2f(400.f, 400.f))
+	, m_alpha(255.f)
 {
 }
 
@@ -194,6 +195,11 @@ const sf::Vector2f &ActiveText::getCursorEnd() const
 	return m_cursorPos;
 }
 
+std::vector<ActiveText::Segment> &ActiveText::getSegments()
+{
+	return m_segments;
+}
+
 void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	ensureUpdate();
@@ -205,6 +211,33 @@ void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 		target.draw(shape, states);
 
 	target.draw(m_debugBorder, states);
+}
+
+void ActiveText::setValues(int tweenType, float *newValues)
+{
+	switch (tweenType) {
+		case ALPHA: {
+			sf::Color color;
+			m_alpha = newValues[0];
+			for (auto &segment : m_segments) {
+				SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
+			}
+			break;
+		}
+		default:
+			TweenTransformable::setValues(tweenType, newValues);
+	}
+}
+
+int ActiveText::getValues(int tweenType, float *returnValues)
+{
+	switch (tweenType) {
+		case ALPHA:
+			returnValues[0] = m_alpha;
+			return 1;
+		default:
+			return TweenTransformable::getValues(tweenType, returnValues);
+	}
 }
 
 void ActiveText::ensureUpdate() const
