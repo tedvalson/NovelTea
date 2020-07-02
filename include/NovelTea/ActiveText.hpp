@@ -46,6 +46,9 @@ public:
 	void setCursorStart(const sf::Vector2f &cursorPos);
 	const sf::Vector2f &getCursorEnd() const;
 
+	void setAlpha(float alpha);
+	float getAlpha() const;
+
 	std::vector<Segment> &getSegments();
 
 protected:

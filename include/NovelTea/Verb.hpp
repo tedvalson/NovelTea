@@ -8,6 +8,8 @@
 namespace NovelTea
 {
 
+class Object;
+
 class Verb : public JsonSerializable
 {
 public:
@@ -17,6 +19,7 @@ public:
 
 	static constexpr auto id = "verb";
 
+	std::string getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr = "____") const;
 	std::string getActionText(std::vector<std::string> objectIds, std::string blankStr = "____") const;
 
 	ADD_ACCESSOR(std::string, Name, m_name)

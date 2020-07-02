@@ -14,7 +14,7 @@
 namespace NovelTea
 {
 
-using VerbSelectCallback = std::function<void(std::shared_ptr<Verb>)>;
+using VerbSelectCallback = std::function<void(const std::string&)>;
 using VerbShowHideCallback = std::function<void(bool)>;
 
 class VerbList : public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>
@@ -32,7 +32,7 @@ public:
 	bool isVisible() const;
 
 	void setVerbs(const std::vector<std::string> &verbs);
-	void setVerbs(const std::shared_ptr<Object> &object);
+	void setVerbs(const std::string &objectId);
 
 	void setSelectCallback(VerbSelectCallback callback);
 	void setShowHideCallback(VerbShowHideCallback callback);
@@ -54,7 +54,7 @@ protected:
 
 private:
 	struct VerbOption {
-		std::shared_ptr<Verb> verb;
+		std::string verbId;
 		TweenText text;
 	};
 

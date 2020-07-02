@@ -59,7 +59,7 @@ bool VerbList::processEvent(const sf::Event &event)
 			if (verb.text.getGlobalBounds().contains(p))
 			{
 				if (m_selectCallback)
-					m_selectCallback(verb.verb);
+					m_selectCallback(verb.verbId);
 				return false;
 			}
 		}
@@ -110,14 +110,17 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 	m_verbs.clear();
 	float maxWidth = 0.f;
 	float posY = m_margin;
-	for (auto &j : ProjData[Verb::id])
+	for (auto &item : ProjData[Verb::id].items())
 	{
 		VerbOption option;
-		option.verb = std::make_shared<Verb>(j.get<Verb>());
+		option.verbId = item.key();
 		option.text.setCharacterSize(40);
 		option.text.setFillColor(sf::Color::Black);
 		option.text.setFont(*Proj.getFont(0));
-		option.text.setString(option.verb->getName());
+
+		auto verb = Proj.get<Verb>(option.verbId);
+		if (verb)
+			option.text.setString(verb->getName());
 		maxWidth = std::max(maxWidth, option.text.getLocalBounds().width);
 		m_verbs.push_back(option);
 		posY += 42.f;
@@ -133,12 +136,10 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 	repositionItems();
 }
 
-void VerbList::setVerbs(const std::shared_ptr<Object> &object)
+void VerbList::setVerbs(const std::string &objectId)
 {
-	if (object)
-	{
-		//
-	}
+	std::vector<std::string> v;
+	setVerbs(v);
 }
 
 void VerbList::setSelectCallback(VerbSelectCallback callback)
@@ -212,11 +213,6 @@ void VerbList::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 	target.setView(view);
 }
-
-#define SET_ALPHA(getFunc, setFunc, maxValue) \
-color = getFunc(); \
-color.a = std::max(std::min(newValues[0] * maxValue / 255.f, 255.f), 0.f); \
-setFunc(color);
 
 void VerbList::setValues(int tweenType, float *newValues)
 {

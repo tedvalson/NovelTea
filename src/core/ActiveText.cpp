@@ -195,6 +195,21 @@ const sf::Vector2f &ActiveText::getCursorEnd() const
 	return m_cursorPos;
 }
 
+void ActiveText::setAlpha(float alpha)
+{
+	sf::Color color;
+	m_alpha = alpha;
+	float *newValues = &alpha; // Hack for the macro below
+	for (auto &segment : m_segments) {
+		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
+	}
+}
+
+float ActiveText::getAlpha() const
+{
+	return m_alpha;
+}
+
 std::vector<ActiveText::Segment> &ActiveText::getSegments()
 {
 	return m_segments;
@@ -217,11 +232,7 @@ void ActiveText::setValues(int tweenType, float *newValues)
 {
 	switch (tweenType) {
 		case ALPHA: {
-			sf::Color color;
-			m_alpha = newValues[0];
-			for (auto &segment : m_segments) {
-				SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
-			}
+			setAlpha(newValues[0]);
 			break;
 		}
 		default:
@@ -233,7 +244,7 @@ int ActiveText::getValues(int tweenType, float *returnValues)
 {
 	switch (tweenType) {
 		case ALPHA:
-			returnValues[0] = m_alpha;
+			returnValues[0] = getAlpha();
 			return 1;
 		default:
 			return TweenTransformable::getValues(tweenType, returnValues);
@@ -297,8 +308,10 @@ void ActiveText::ensureUpdate() const
 					continue;
 				}
 
+				auto color = p.second.empty() ? sf::Color::Black : sf::Color::Blue;
+				color.a = m_alpha;
 				text.setString(p.first);
-				text.setFillColor(p.second.empty() ? sf::Color::Black : sf::Color::Blue);
+				text.setFillColor(color);
 
 				auto newX = m_cursorPos.x + text.getLocalBounds().width;
 

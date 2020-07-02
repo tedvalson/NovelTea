@@ -52,7 +52,7 @@ bool Verb::fromJson(const json &j)
 	}
 }
 
-std::string Verb::getActionText(std::vector<std::string> objectIds, std::string blankStr) const
+std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr) const
 {
 	auto &actionStructure = getActionStructure();
 	std::string result = actionStructure[0];
@@ -60,18 +60,13 @@ std::string Verb::getActionText(std::vector<std::string> objectIds, std::string 
 	for (int i = 1; i < actionStructure.size(); ++i)
 	{
 		auto objectStr = blankStr;
-
-		if (i-1 < objectIds.size())
+		if (i-1 < objects.size())
 		{
-			auto objectId = objectIds[i-1];
-			if (!objectId.empty())
+			auto object = objects[i-1];
+			if (object)
 			{
-				auto object = Proj.get<Object>(objectId);
-				if (object)
-				{
-					objectStr = object->getName();
-					std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
-				}
+				objectStr = object->getName();
+				std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
 			}
 		}
 
@@ -80,6 +75,14 @@ std::string Verb::getActionText(std::vector<std::string> objectIds, std::string 
 			result += " " + actionStructure[i];
 	}
 	return result;
+}
+
+std::string Verb::getActionText(std::vector<std::string> objectIds, std::string blankStr) const
+{
+	std::vector<std::shared_ptr<Object>> objects;
+	for (auto &objectId : objectIds)
+		objects.push_back(Proj.get<Object>(objectId));
+	return getActionText(objects, blankStr);
 }
 
 } // namespace NovelTea

@@ -14,6 +14,8 @@
 namespace NovelTea
 {
 
+class Action;
+
 class ProjectData: public JsonSerializable
 {
 public:
@@ -34,10 +36,14 @@ public:
 	template <typename T>
 	std::shared_ptr<T> get(const std::string &idName)
 	{
+		if (idName.empty())
+			return nullptr;
 		if (!_json[T::id].contains(idName))
 			return nullptr;
 		return std::make_shared<T>(_json[T::id][idName].get<T>());
 	}
+
+	std::shared_ptr<Action> findAction(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	void saveToFile(const std::string &filename = std::string());
 	bool loadFromFile(const std::string &filename);
