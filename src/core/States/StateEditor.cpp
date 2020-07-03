@@ -4,6 +4,8 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Action.hpp>
+#include <NovelTea/Verb.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -24,12 +26,35 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	text.setOutlineThickness(1.f);
 	text.setPosition(0.f, 450.f);
 
-	m_verbList.setSelectCallback([this](std::shared_ptr<Verb> verb){
+	m_actionBuilder.setPosition(10.f, 500.f);
+	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
+
+	m_verbList.setSelectCallback([this](const std::string &verbId){
+		m_actionBuilder.setVerb(verbId);
+		m_actionBuilder.setObject(m_selectedObjectId, 0);
 		m_verbList.hide();
 	});
 	m_verbList.setShowHideCallback([this](bool showing){
 		if (!showing)
+		{
 			activeText.setHighlightId("");
+			m_actionBuilder.show();
+		}
+	});
+
+	m_actionBuilder.setCallback([this](bool confirmed){
+		if (confirmed)
+		{
+			auto action = m_actionBuilder.getAction();
+			auto verb = Proj.get<Verb>(m_actionBuilder.getVerb());
+			if (action)
+			{
+			}
+			else if (!verb->getDefaultScriptSuccess().empty())
+			{
+			}
+		}
+		m_actionBuilder.hide();
 	});
 }
 
@@ -41,11 +66,12 @@ void StateEditor::render(sf::RenderTarget &target)
 	else if (mode == StateEditorMode::Room)
 	{
 		target.draw(activeText);
+		if (m_actionBuilder.isVisible())
+			target.draw(m_actionBuilder);
 		if (m_verbList.isVisible())
 			target.draw(m_verbList);
 	}
 
-	target.draw(text);
 }
 
 void *StateEditor::processData(void *data)
@@ -104,6 +130,8 @@ bool StateEditor::processEvent(const sf::Event &event)
 		if (!m_verbList.processEvent(event))
 			return false;
 
+	m_actionBuilder.processEvent(event);
+
 	if (event.type == sf::Event::MouseButtonReleased)
 	{
 		if (mode == StateEditorMode::Room)
@@ -115,8 +143,8 @@ bool StateEditor::processEvent(const sf::Event &event)
 				activeText.setHighlightId(word);
 				if (!word.empty())
 				{
-					auto object = Proj.get<Object>(word);
-					m_verbList.setVerbs(object);
+					m_selectedObjectId = word;
+					m_verbList.setVerbs(word);
 					m_verbList.setPosition(p);
 					m_verbList.show();
 				}
@@ -138,8 +166,8 @@ bool StateEditor::processEvent(const sf::Event &event)
 bool StateEditor::update(float deltaSeconds)
 {
 //	cutsceneRenderer.update(deltaSeconds);
-	if (m_verbList.isVisible())
-		m_verbList.update(deltaSeconds);
+	m_verbList.update(deltaSeconds);
+	m_actionBuilder.update(deltaSeconds);
 	tweenManager.update(deltaSeconds);
 	return true;
 }

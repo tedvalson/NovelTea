@@ -8,6 +8,7 @@
 #include <NovelTea/CutsceneRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
+#include <NovelTea/GUI/ActionBuilder.hpp>
 #include <json.hpp>
 
 using json = nlohmann::json;
@@ -41,6 +42,9 @@ private:
 	sf::Texture texture;
 
 	VerbList m_verbList;
+	ActionBuilder m_actionBuilder;
+
+	std::string m_selectedObjectId;
 
 	TweenEngine::TweenManager tweenManager;
 	StateEditorMode mode;

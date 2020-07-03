@@ -8,6 +8,7 @@ set(SOURCE_FILES
 	${SRCROOT}/States/State.cpp
 	${SRCROOT}/States/StateEditor.cpp
 	${SRCROOT}/States/StateMain.cpp
+	${SRCROOT}/GUI/ActionBuilder.cpp
 	${SRCROOT}/GUI/VerbList.cpp
 	${SRCROOT}/JsonSerializable.cpp
 	${SRCROOT}/Action.cpp

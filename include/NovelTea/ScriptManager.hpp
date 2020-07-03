@@ -35,6 +35,20 @@ public:
 		return run<T>("(function(){" + script + "})();");
 	}
 
+	template <typename... Args>
+	void call(const std::string &script, const std::string &funcName, Args&&... args)
+	{
+		call<void>(script, funcName, args...);
+	}
+
+	template <typename T, typename... Args>
+	T call(const std::string &script, const std::string &funcName, Args&&... args)
+	{
+		auto s = script+";"+funcName+";";
+		auto fn = dukglue_peval<DukValue>(m_context, s.c_str());
+		return dukglue_pcall<T>(m_context, fn, std::forward<Args>(args)...);
+	}
+
 protected:
 	void registerFunctions();
 	void registerClasses();
