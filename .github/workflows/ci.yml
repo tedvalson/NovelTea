@@ -9,24 +9,37 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
+    
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Checkout SFML
-      uses: actions/checkout@v2
+      
+    - name: Cache Qt and SFML
+      id: cache
+      uses: actions/cache@v2
       with:
-        repository: SFML/SFML
-        path: SFML
-    
+        path: [../Qt, SFML/install]
+        key: ${{ runner.os }}-NovelTea
+          
     - name: Setup Linux Environment
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt install libxrandr-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev
         sudo apt install doxygen libgtest-dev
         
-    - name: Install Qt5
+    - name: Install Qt
       uses: jurplel/install-qt-action@v2
+      with:
+        cached: ${{ steps.cache.outputs.cache-hit }}
+
+    - name: Checkout SFML
+      if: ${{ !steps.cache.outputs.cache-hit }}
+      uses: actions/checkout@v2
+      with:
+        repository: SFML/SFML
+        path: SFML
 
     - name: Compile SFML
+      if: ${{ !steps.cache.outputs.cache-hit }}
       run: |
         cd SFML
         mkdir install
