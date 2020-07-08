@@ -10,7 +10,7 @@ set(SOURCE_FILES
 	${SRCROOT}/States/StateMain.cpp
 	${SRCROOT}/GUI/ActionBuilder.cpp
 	${SRCROOT}/GUI/VerbList.cpp
-	${SRCROOT}/JsonSerializable.cpp
+	${SRCROOT}/Entity.cpp
 	${SRCROOT}/Action.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/Room.cpp

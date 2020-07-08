@@ -14,6 +14,11 @@ Room::~Room()
 	std::cout << "room destroyed!" << std::endl;
 }
 
+size_t Room::jsonSize() const
+{
+	return 5;
+}
+
 json Room::toJson() const
 {
 	auto jobjects = json::array();
@@ -27,6 +32,7 @@ json Room::toJson() const
 	}
 	auto j = json::array({
 		m_id,
+		m_parentId,
 		m_name,
 		m_description,
 		jobjects,
@@ -34,26 +40,14 @@ json Room::toJson() const
 	return j;
 }
 
-bool Room::fromJson(const json &j)
+void Room::loadJson(const json &j)
 {
-	m_objects.clear();
-	if (!j.is_array() || j.size() != 4)
-		return false;
-
-	try
-	{
-		m_id = j[0];
-		m_name = j[1];
-		m_description = j[2];
-		for (auto &jroomObject : j[3])
-			m_objects.push_back({jroomObject[0], jroomObject[1]});
-		return true;
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-		return false;
-	}
+	m_id = j[0];
+	m_parentId = j[1];
+	m_name = j[2];
+	m_description = j[3];
+	for (auto &jroomObject : j[4])
+		m_objects.push_back({jroomObject[0], jroomObject[1]});
 }
 
 } // namespace NovelTea

@@ -1,55 +1,45 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/SaveData.hpp>
-#include <iostream>
 
 namespace NovelTea
 {
 
 Action::Action()
 : m_positionDependent(false)
-, m_properties(json::object())
 {
 	
+}
+
+size_t Action::jsonSize() const
+{
+	return 6;
 }
 
 json Action::toJson() const
 {
 	auto j = json::array({
 		m_id,
+		m_parentId,
 		m_verbId,
 		m_script,
 		m_objectIds,
 		m_positionDependent,
-		m_properties,
 	});
 	return j;
 }
 
-bool Action::fromJson(const json &j)
+void Action::loadJson(const json &j)
 {
-	if (!j.is_array() || j.size() != 6)
-		return false;
+	m_id = j[0];
+	m_parentId = j[1];
+	m_verbId = j[2];
+	m_script = j[3];
+	m_positionDependent = j[5];
 
-	try
-	{
-		m_id = j[0];
-		m_verbId = j[1];
-		m_script = j[2];
-		m_positionDependent = j[4];
-		m_properties = j[5];
-
-		m_objectIds.clear();
-		for (auto &jobject : j[3])
-			m_objectIds.push_back(jobject);
-
-		return true;
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-		return false;
-	}
+	m_objectIds.clear();
+	for (auto &jobject : j[4])
+		m_objectIds.push_back(jobject);
 }
 
 void Action::setVerbObjectCombo(const json &j)
@@ -86,11 +76,11 @@ std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vecto
 	for (auto &item : ProjData[Action::id].items())
 	{
 		auto j = item.value();
-		if (j[1] == verbId)
+		if (j[2] == verbId)
 		{
 			auto match = true;
-			auto &jobjects = j[3];
-			bool positionDependent = j[4];
+			auto &jobjects = j[4];
+			bool positionDependent = j[5];
 
 			if (objectIds.size() != jobjects.size())
 				continue;

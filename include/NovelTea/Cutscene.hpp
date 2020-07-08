@@ -1,8 +1,7 @@
 #ifndef NOVELTEA_CUTSCENE_HPP
 #define NOVELTEA_CUTSCENE_HPP
 
-#include <NovelTea/JsonSerializable.hpp>
-#include <NovelTea/Utils.hpp>
+#include <NovelTea/Entity.hpp>
 #include <vector>
 
 namespace NovelTea
@@ -10,13 +9,14 @@ namespace NovelTea
 
 class CutsceneSegment;
 
-class Cutscene : public JsonSerializable
+class Cutscene : public Entity
 {
 public:
 	Cutscene();
 	~Cutscene();
+	size_t jsonSize() const override;
 	json toJson() const override;
-	bool fromJson(const json &j) override;
+	void loadJson(const json &j) override;
 
 	static constexpr auto id = "cutscene";
 
@@ -36,7 +36,6 @@ public:
 	Cutscene(const Cutscene&) = delete;
 	Cutscene& operator=(const Cutscene&) = delete;
 
-	ADD_ACCESSOR(std::string, Id, m_id)
 	ADD_ACCESSOR(bool, FullScreen, m_fullScreen)
 	ADD_ACCESSOR(bool, CanFastForward, m_canFastForward)
 	ADD_ACCESSOR(float, SpeedFactor, m_speedFactor)
@@ -45,7 +44,6 @@ public:
 private:
 	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
 
-	std::string m_id;
 	bool m_fullScreen;
 	bool m_canFastForward;
 	float m_speedFactor;

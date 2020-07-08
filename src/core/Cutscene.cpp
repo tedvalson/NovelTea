@@ -18,6 +18,11 @@ Cutscene::~Cutscene()
 	std::cout << "cutscene destroyed!" << std::endl;
 }
 
+size_t Cutscene::jsonSize() const
+{
+	return 7;
+}
+
 json Cutscene::toJson() const
 {
 	auto jsegments = json::array();
@@ -26,6 +31,7 @@ json Cutscene::toJson() const
 
 	auto j = json::array({
 		m_id,
+		m_parentId,
 		m_fullScreen,
 		m_canFastForward,
 		m_speedFactor,
@@ -35,33 +41,22 @@ json Cutscene::toJson() const
 	return j;
 }
 
-bool Cutscene::fromJson(const json &j)
+void Cutscene::loadJson(const json &j)
 {
-	if (!j.is_array() || j.size() != 6)
-		return false;
-
-	try
+	m_segments.clear();
+	m_id = j[0];
+	m_parentId = j[1];
+	m_fullScreen = j[2];
+	m_canFastForward = j[3];
+	m_speedFactor = j[4];
+	m_nextEntity = j[5];
+	for (auto &jsegment : j[6])
 	{
-		m_segments.clear();
-		m_id = j[0];
-		m_fullScreen = j[1];
-		m_canFastForward = j[2];
-		m_speedFactor = j[3];
-		m_nextEntity = j[4];
-		for (auto &jsegment : j[5])
-		{
-			auto segment = CutsceneSegment::createSegment(jsegment);
-			if (segment)
-				m_segments.push_back(segment);
-			else
-				std::cout << "unknown segment type!" << std::endl;
-		}
-		return true;
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-		return false;
+		auto segment = CutsceneSegment::createSegment(jsegment);
+		if (segment)
+			m_segments.push_back(segment);
+		else
+			std::cout << "unknown segment type!" << std::endl;
 	}
 }
 
