@@ -35,7 +35,7 @@ EditorTabWidget::Type DialogueWidget::getType() const
 void DialogueWidget::saveData() const
 {
 	if (m_dialogue)
-		ProjData[NovelTea::Dialogue::id][idName()] = *m_dialogue;
+		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
 }
 
 void DialogueWidget::loadData()

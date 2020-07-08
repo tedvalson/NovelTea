@@ -1,6 +1,6 @@
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Object.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -17,6 +17,7 @@ Verb::Verb()
 json Verb::toJson() const
 {
 	auto j = json::array({
+		m_id,
 		m_name,
 		m_objectCount,
 		m_defaultScriptSuccess,
@@ -29,19 +30,20 @@ json Verb::toJson() const
 
 bool Verb::fromJson(const json &j)
 {
-	if (!j.is_array() || j.size() != 6)
+	if (!j.is_array() || j.size() != 7)
 		return false;
 
 	try
 	{
-		m_name = j[0];
-		m_objectCount = j[1];
-		m_defaultScriptSuccess = j[2];
-		m_defaultScriptFailure = j[3];
-		m_properties = j[5];
+		m_id = j[0];
+		m_name = j[1];
+		m_objectCount = j[2];
+		m_defaultScriptSuccess = j[3];
+		m_defaultScriptFailure = j[4];
+		m_properties = j[6];
 
 		m_actionStructure.clear();
-		for (auto &jpart : j[4])
+		for (auto &jpart : j[5])
 			m_actionStructure.push_back(jpart);
 		return true;
 	}
@@ -55,7 +57,9 @@ bool Verb::fromJson(const json &j)
 std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr) const
 {
 	auto &actionStructure = getActionStructure();
-	std::string result = actionStructure[0];
+	std::string result;
+	if (!actionStructure.empty())
+		result = actionStructure[0];
 
 	for (int i = 1; i < actionStructure.size(); ++i)
 	{
@@ -63,7 +67,7 @@ std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, st
 		if (i-1 < objects.size())
 		{
 			auto object = objects[i-1];
-			if (object)
+			if (!object->getId().empty())
 			{
 				objectStr = object->getName();
 				std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
@@ -81,7 +85,7 @@ std::string Verb::getActionText(std::vector<std::string> objectIds, std::string 
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
-		objects.push_back(Proj.get<Object>(objectId));
+		objects.push_back(Save.get<Object>(objectId));
 	return getActionText(objects, blankStr);
 }
 

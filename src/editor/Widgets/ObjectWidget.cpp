@@ -47,7 +47,7 @@ void ObjectWidget::fillPropertyEditor()
 void ObjectWidget::saveData() const
 {
 	if (m_object)
-		ProjData[NovelTea::Object::id][idName()] = *m_object;
+		Proj.set<NovelTea::Object>(m_object, idName());
 }
 
 void ObjectWidget::loadData()

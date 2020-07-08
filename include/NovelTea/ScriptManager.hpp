@@ -13,7 +13,9 @@ public:
 	~ScriptManager();
 	void reset();
 
-	inline void run(const std::string& script)
+	void runScriptId(const std::string &scriptId);
+
+	inline void run(const std::string &script)
 	{
 		run<void>(script);
 	}
@@ -52,6 +54,7 @@ public:
 protected:
 	void registerFunctions();
 	void registerClasses();
+	void registerGlobals();
 
 private:
 	duk_context *m_context;

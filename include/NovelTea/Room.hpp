@@ -22,11 +22,13 @@ public:
 
 	static constexpr auto id = "room";
 
+	ADD_ACCESSOR(std::string, Id, m_id)
 	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(std::string, Description, m_description)
 	ADD_ACCESSOR(std::vector<RoomObject>, Objects, m_objects)
 
 private:
+	std::string m_id;
 	std::string m_name;
 	std::string m_description;
 	std::vector<RoomObject> m_objects;

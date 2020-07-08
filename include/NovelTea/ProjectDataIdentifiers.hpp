@@ -36,6 +36,7 @@ namespace ID
 	const auto textFormats        = "textformats";
 
 	// For SaveData
+	const auto variables          = "variables";
 
 } // namespace ID
 

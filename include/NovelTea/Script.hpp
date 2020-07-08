@@ -16,10 +16,12 @@ public:
 
 	static constexpr auto id = "script";
 
-	ADD_ACCESSOR(std::string, Name, m_name)
+	ADD_ACCESSOR(std::string, Id, m_id)
+	ADD_ACCESSOR(std::string, Content, m_content)
 
 private:
-	std::string m_name;
+	std::string m_id;
+	std::string m_content;
 };
 
 } // namespace NovelTea

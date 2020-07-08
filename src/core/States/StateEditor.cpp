@@ -1,5 +1,5 @@
 #include <NovelTea/States/StateEditor.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ActiveText.hpp>
@@ -46,7 +46,7 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 		if (confirmed)
 		{
 			auto action = m_actionBuilder.getAction();
-			auto verb = Proj.get<Verb>(m_actionBuilder.getVerb());
+			auto verb = Save.get<Verb>(m_actionBuilder.getVerb());
 			if (action)
 			{
 			}

@@ -16,9 +16,11 @@ public:
 
 	static constexpr auto id = "dialogue";
 
+	ADD_ACCESSOR(std::string, Id, m_id)
 	ADD_ACCESSOR(std::string, Name, m_name)
 
 private:
+	std::string m_id;
 	std::string m_name;
 };
 

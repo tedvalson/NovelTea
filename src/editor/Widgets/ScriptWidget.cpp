@@ -31,7 +31,7 @@ EditorTabWidget::Type ScriptWidget::getType() const
 void ScriptWidget::saveData() const
 {
 	if (m_script)
-		ProjData[NovelTea::Script::id][idName()] = *m_script;
+		Proj.set<NovelTea::Script>(m_script, idName());
 }
 
 void ScriptWidget::loadData()

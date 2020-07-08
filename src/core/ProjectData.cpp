@@ -95,38 +95,6 @@ std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
 	return m_fonts[index];
 }
 
-std::shared_ptr<Action> ProjectData::findAction(const std::string &verbId, const std::vector<std::string> &objectIds)
-{
-	for (auto &item : _json[Action::id].items())
-	{
-		auto j = item.value();
-		if (j[0] == verbId)
-		{
-			auto match = true;
-			auto &jobjects = j[2];
-			bool positionDependent = j[3];
-
-			if (objectIds.size() != jobjects.size())
-				continue;
-
-			for (int i = 0; i < jobjects.size(); ++i)
-			{
-				if ((positionDependent && objectIds[i] != jobjects[i]) ||
-					(!positionDependent && std::find(objectIds.begin(), objectIds.end(), jobjects[i]) == objectIds.end()))
-				{
-					match = false;
-					break;
-				}
-			}
-
-			if (match)
-				return get<Action>(item.key());
-		}
-	}
-
-	return nullptr;
-}
-
 void ProjectData::saveToFile(const std::string &filename)
 {
 	if (filename.empty() && _filename.empty())

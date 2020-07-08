@@ -1,6 +1,7 @@
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <NovelTea/Action.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Object.hpp>
 #include <TweenEngine/Tween.h>
@@ -91,13 +92,10 @@ bool ActionBuilder::isVisible() const
 void ActionBuilder::setVerb(const std::string &verbId)
 {
 	m_verbId = verbId;
-	auto verb = Proj.get<Verb>(verbId);
-	if (verb)
-	{
-		m_objectIds.resize(verb->getObjectCount());
-		for (auto &objectId : m_objectIds)
-			objectId.clear();
-	}
+	auto verb = Save.get<Verb>(verbId);
+	m_objectIds.resize(verb->getObjectCount());
+	for (auto &objectId : m_objectIds)
+		objectId.clear();
 }
 
 void ActionBuilder::setObject(const std::string &objectId, size_t index)
@@ -121,7 +119,7 @@ std::vector<std::string> ActionBuilder::getObjects() const
 
 std::shared_ptr<Action> ActionBuilder::getAction() const
 {
-	return Proj.findAction(m_verbId, m_objectIds);
+	return Action::find(m_verbId, m_objectIds);
 }
 
 void ActionBuilder::setSize(const sf::Vector2f &size)
@@ -144,12 +142,8 @@ void ActionBuilder::setCallback(ActionBuilderCallback callback)
 
 void ActionBuilder::updateText()
 {
-	auto verb = Proj.get<Verb>(m_verbId);
-	if (verb)
-	{
-		m_text.setText(verb->getActionText(m_objectIds));
-
-	}
+	auto verb = Save.get<Verb>(m_verbId);
+	m_text.setText(verb->getActionText(m_objectIds));
 }
 
 void ActionBuilder::draw(sf::RenderTarget &target, sf::RenderStates states) const

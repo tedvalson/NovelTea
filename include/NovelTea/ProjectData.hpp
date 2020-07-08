@@ -34,16 +34,24 @@ public:
 	std::shared_ptr<sf::Font> getFont(size_t index) const;
 
 	template <typename T>
-	std::shared_ptr<T> get(const std::string &idName)
+	static std::shared_ptr<T> get(const std::string &idName)
 	{
 		if (idName.empty())
 			return nullptr;
-		if (!_json[T::id].contains(idName))
+		if (!ProjData[T::id].contains(idName))
 			return nullptr;
-		return std::make_shared<T>(_json[T::id][idName].get<T>());
+		return std::make_shared<T>(ProjData[T::id][idName].get<T>());
 	}
 
-	std::shared_ptr<Action> findAction(const std::string &verbId, const std::vector<std::string> &objectIds);
+	template <typename T>
+	static void set(std::shared_ptr<T> obj, const std::string &idName = std::string())
+	{
+		if (!idName.empty())
+			obj->setId(idName);
+		else if (obj->getId().empty())
+			return;
+		ProjData[T::id][obj->getId()] = *obj;
+	}
 
 	void saveToFile(const std::string &filename = std::string());
 	bool loadFromFile(const std::string &filename);

@@ -5,7 +5,7 @@ namespace NovelTea
 {
 
 Room::Room()
-	: m_name("New Room")
+: m_name("null")
 {
 }
 
@@ -26,6 +26,7 @@ json Room::toJson() const
 		jobjects.push_back(jobject);
 	}
 	auto j = json::array({
+		m_id,
 		m_name,
 		m_description,
 		jobjects,
@@ -36,14 +37,15 @@ json Room::toJson() const
 bool Room::fromJson(const json &j)
 {
 	m_objects.clear();
-	if (!j.is_array() || j.size() != 3)
+	if (!j.is_array() || j.size() != 4)
 		return false;
 
 	try
 	{
-		m_name = j[0];
-		m_description = j[1];
-		for (auto &jroomObject : j[2])
+		m_id = j[0];
+		m_name = j[1];
+		m_description = j[2];
+		for (auto &jroomObject : j[3])
 			m_objects.push_back({jroomObject[0], jroomObject[1]});
 		return true;
 	}

@@ -66,7 +66,7 @@ void RoomWidget::saveData() const
 		}
 		m_room->setObjects(objects);
 		m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
-		ProjData[NovelTea::Room::id][idName()] = *m_room;
+		Proj.set<NovelTea::Room>(m_room, idName());
 	}
 }
 

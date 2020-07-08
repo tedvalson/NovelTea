@@ -10,11 +10,6 @@ SaveData::SaveData()
 {
 }
 
-SaveData::~SaveData()
-{
-
-}
-
 SaveData &SaveData::instance()
 {
 	static SaveData obj;
@@ -23,14 +18,14 @@ SaveData &SaveData::instance()
 
 bool SaveData::isLoaded() const
 {
-	return _loaded;
+	return m_loaded;
 }
 
 void SaveData::saveToFile(const std::string &filename)
 {
-	if (filename.empty() && _filename.empty())
+	if (filename.empty() && m_filename.empty())
 		return;
-	std::ofstream file(filename.empty() ? _filename : filename);
+	std::ofstream file(filename.empty() ? m_filename : filename);
 	auto j = toJson();
 //	json::to_msgpack(j, file);
 	file << j;
@@ -47,7 +42,7 @@ bool SaveData::loadFromFile(const std::string &filename)
 		auto j = json::parse(file);
 		auto success = fromJson(j);
 		if (success)
-			_filename = filename;
+			m_filename = filename;
 		return success;
 	}
 	catch (std::exception &e)
@@ -60,58 +55,83 @@ bool SaveData::loadFromFile(const std::string &filename)
 
 const std::string &SaveData::filename() const
 {
-	return _filename;
+	return m_filename;
 }
 
 json SaveData::toJson() const
 {
 //	_json[NT_ENGINE_VERSION] = m_engineVersion;
-	return _json;
+	return m_json;
 }
 
 bool SaveData::fromJson(const json &j)
 {
-	_loaded = false;
-	_filename.clear();
+	m_loaded = false;
+	m_filename.clear();
 
-	_json = j;
-	_loaded = true;
+	m_json = j;
+	m_loaded = true;
 	return true;
 }
 
 const json &SaveData::data() const
 {
-	return _json;
+	return m_json;
 }
 
 json &SaveData::data()
 {
-	return _json;
+	return m_json;
 }
 
-void SaveData::saveVariables(const std::string &jsonData)
+void SaveData::writeVariables(const std::string &jsonData)
 {
 	auto j = json::parse(jsonData);
 	for (auto &item : j.items())
 	{
-		Save.data()[ID::variables][item.key()] = item.value();
+		m_json[ID::variables][item.key()] = item.value();
 	}
 }
 
-std::string SaveData::loadVariables(const std::string &jsonData)
+std::string SaveData::readVariables(const std::string &jsonData)
 {
 	auto j = json::parse(jsonData);
 	auto result = json::object();
 	for (auto &v : j)
 	{
 		std::string varName = v;
-		auto d = Save.data()[ID::variables];
+		auto d = m_json[ID::variables];
 		if (d.contains(varName))
 			result[varName] = d[varName];
 		else
 			result[varName] = nullptr;
 	}
 	return result.dump();
+}
+
+void SaveData::setDirectory(const std::string &path)
+{
+	m_directory = path;
+}
+
+const std::string &SaveData::getDirectory() const
+{
+	return m_directory;
+}
+
+void SaveData::save(int slot)
+{
+	saveToFile(getSlotFilename(slot));
+}
+
+bool SaveData::load(int slot)
+{
+	return loadFromFile(getSlotFilename(slot));
+}
+
+std::string SaveData::getSlotFilename(int slot) const
+{
+	return m_directory + "/" + std::to_string(slot) + ".ntsav";
 }
 
 } // namespace NovelTea

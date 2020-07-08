@@ -430,10 +430,11 @@ void MainWindow::on_actionRename_triggered()
 
 		// Rename in project data, then save to file
 		j[newName] = j[selectedIdName];
+		j[newName][0] = newName;
 		j.erase(selectedIdName);
 		Proj.saveToFile();
 
-		treeModel->rename(EditorTabWidget::tabTypeToEntityType(selectedType), QString::fromStdString(selectedIdName), QString::fromStdString(newName));
+		treeModel->rename(selectedType, QString::fromStdString(selectedIdName), QString::fromStdString(newName));
 	}
 }
 

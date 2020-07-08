@@ -41,7 +41,7 @@ void ActionWidget::saveData() const
 	{
 		m_action->setScript(ui->script->toPlainText().toStdString());
 		m_action->setVerbObjectCombo(ui->actionBuilder->getValue());
-		ProjData[NovelTea::Action::id][idName()] = *m_action;
+		Proj.set<NovelTea::Action>(m_action, idName());
 	}
 }
 

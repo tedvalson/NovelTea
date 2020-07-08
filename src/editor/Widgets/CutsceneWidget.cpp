@@ -266,7 +266,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 void CutsceneWidget::saveData() const
 {
 	if (m_cutscene)
-		ProjData[NovelTea::Cutscene::id][idName()] = *m_cutscene;
+		Proj.set<NovelTea::Cutscene>(m_cutscene, idName());
 }
 
 void CutsceneWidget::loadData()

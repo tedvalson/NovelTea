@@ -36,6 +36,7 @@ public:
 	Cutscene(const Cutscene&) = delete;
 	Cutscene& operator=(const Cutscene&) = delete;
 
+	ADD_ACCESSOR(std::string, Id, m_id)
 	ADD_ACCESSOR(bool, FullScreen, m_fullScreen)
 	ADD_ACCESSOR(bool, CanFastForward, m_canFastForward)
 	ADD_ACCESSOR(float, SpeedFactor, m_speedFactor)
@@ -44,6 +45,7 @@ public:
 private:
 	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
 
+	std::string m_id;
 	bool m_fullScreen;
 	bool m_canFastForward;
 	float m_speedFactor;

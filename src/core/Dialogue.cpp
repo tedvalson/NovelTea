@@ -12,6 +12,7 @@ Dialogue::Dialogue()
 json Dialogue::toJson() const
 {
 	auto j = json::array({
+		m_id,
 		m_name,
 	});
 	return j;
@@ -19,12 +20,13 @@ json Dialogue::toJson() const
 
 bool Dialogue::fromJson(const json &j)
 {
-	if (!j.is_array() || j.size() != 1)
+	if (!j.is_array() || j.size() != 2)
 		return false;
 
 	try
 	{
-		m_name = j[0];
+		m_id = j[0];
+		m_name = j[1];
 		return true;
 	}
 	catch (std::exception &e)

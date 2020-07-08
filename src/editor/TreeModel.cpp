@@ -109,16 +109,9 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	endResetModel();
 }
 
-void TreeModel::rename(NovelTea::EntityType type, const QString &oldName, const QString &newName)
+void TreeModel::rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName)
 {
-	TreeItem *parent = nullptr;
-	if (type == NovelTea::EntityType::Cutscene)
-	{
-		parent = cutsceneRoot;
-		// TODO: rename all references to this cutscene in the project
-		// NovelTea::Cutscene::rename (?) or more generic
-	}
-
+	auto parent = static_cast<TreeItem*>(index(type).internalPointer());
 	if (!parent)
 		return;
 	for (int i = 0; i < parent->childCount(); ++i)

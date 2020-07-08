@@ -25,6 +25,7 @@ json Cutscene::toJson() const
 		jsegments.push_back(*seg);
 
 	auto j = json::array({
+		m_id,
 		m_fullScreen,
 		m_canFastForward,
 		m_speedFactor,
@@ -36,20 +37,32 @@ json Cutscene::toJson() const
 
 bool Cutscene::fromJson(const json &j)
 {
-	m_segments.clear();
-	m_fullScreen = j[0];
-	m_canFastForward = j[1];
-	m_speedFactor = j[2];
-	m_nextEntity = j[3];
-	for (auto &jsegment : j[4])
+	if (!j.is_array() || j.size() != 6)
+		return false;
+
+	try
 	{
-		auto segment = CutsceneSegment::createSegment(jsegment);
-		if (segment)
-			m_segments.push_back(segment);
-		else
-			std::cout << "unknown segment type!" << std::endl;
+		m_segments.clear();
+		m_id = j[0];
+		m_fullScreen = j[1];
+		m_canFastForward = j[2];
+		m_speedFactor = j[3];
+		m_nextEntity = j[4];
+		for (auto &jsegment : j[5])
+		{
+			auto segment = CutsceneSegment::createSegment(jsegment);
+			if (segment)
+				m_segments.push_back(segment);
+			else
+				std::cout << "unknown segment type!" << std::endl;
+		}
+		return true;
 	}
-	return true;
+	catch (std::exception &e)
+	{
+		std::cerr << e.what() << std::endl;
+		return false;
+	}
 }
 
 void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)

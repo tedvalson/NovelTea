@@ -1,5 +1,5 @@
 #include <NovelTea/GUI/VerbList.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -110,6 +110,7 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 	m_verbs.clear();
 	float maxWidth = 0.f;
 	float posY = m_margin;
+	// TODO: check SaveData
 	for (auto &item : ProjData[Verb::id].items())
 	{
 		VerbOption option;
@@ -118,9 +119,8 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 		option.text.setFillColor(sf::Color::Black);
 		option.text.setFont(*Proj.getFont(0));
 
-		auto verb = Proj.get<Verb>(option.verbId);
-		if (verb)
-			option.text.setString(verb->getName());
+		auto verb = Save.get<Verb>(option.verbId);
+		option.text.setString(verb->getName());
 		maxWidth = std::max(maxWidth, option.text.getLocalBounds().width);
 		m_verbs.push_back(option);
 		posY += 42.f;

@@ -44,7 +44,7 @@ void VerbWidget::saveData() const
 		m_verb->setDefaultScriptSuccess(ui->scriptEditSuccess->toPlainText().toStdString());
 		m_verb->setDefaultScriptFailure(ui->scriptEditFailure->toPlainText().toStdString());
 		m_verb->setActionStructure(actionStructure);
-		ProjData[NovelTea::Verb::id][idName()] = *m_verb;
+		Proj.set<NovelTea::Verb>(m_verb, idName());
 	}
 }
 
