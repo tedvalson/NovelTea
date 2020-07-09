@@ -11,7 +11,6 @@ namespace NovelTea
 class JsonSerializable
 {
 public:
-	virtual ~JsonSerializable();
 	virtual json toJson() const = 0;
 	virtual bool fromJson(const json &j) = 0;
 };
