@@ -50,9 +50,9 @@ public:
 		if (!exists<T>(idName))
 			return std::make_shared<T>();
 		if (Save.data()[T::id].contains(idName))
-			return std::make_shared<T>(Save.data()[T::id][idName].get<T>());
+			return std::make_shared<T>(Save.data()[T::id][idName].template get<T>());
 		else
-			return std::make_shared<T>(ProjData[T::id][idName].get<T>());
+			return std::make_shared<T>(ProjData[T::id][idName].template get<T>());
 	}
 
 	template <typename T>

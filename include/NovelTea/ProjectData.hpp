@@ -40,7 +40,7 @@ public:
 			return nullptr;
 		if (!ProjData[T::id].contains(idName))
 			return nullptr;
-		return std::make_shared<T>(ProjData[T::id][idName].get<T>());
+		return std::make_shared<T>(ProjData[T::id][idName].template get<T>());
 	}
 
 	template <typename T>

@@ -5,7 +5,6 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Object.hpp>
-#include <NovelTea/Player.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
@@ -144,10 +143,6 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &SaveData::readVariables, "readVariables");
 
 	// Player
-	dukglue_register_global(m_context, std::make_shared<Player>(), "Player");
-	dukglue_register_property(m_context, &Player::getInventory, &Player::setInventory, "inv");
-	dukglue_register_property(m_context, &Player::getRoomId, &Player::setRoomId, "roomId");
-	dukglue_register_property(m_context, &Player::getRoom, &Player::setRoom, "room");
 
 	// Script
 	dukglue_register_global(m_context, this, "Script");

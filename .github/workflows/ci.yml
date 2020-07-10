@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
     
     - name: Checkout
@@ -17,11 +17,14 @@ jobs:
       id: cache
       uses: actions/cache@v2
       with:
-        path: [../Qt, SFML/install]
+        path: |
+          ../Qt
+          SFML/install
         key: ${{ runner.os }}-NovelTea
           
     - name: Setup Linux Environment
       if: ${{ runner.os == 'Linux' }}
+      continue-on-error: true
       run: |
         sudo apt install libxrandr-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev
         sudo apt install doxygen libgtest-dev
