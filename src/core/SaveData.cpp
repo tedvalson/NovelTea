@@ -1,5 +1,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/Room.hpp>
+#include <NovelTea/Player.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -7,6 +9,7 @@ namespace NovelTea
 {
 
 SaveData::SaveData()
+	: m_directory(".")
 {
 }
 
@@ -56,6 +59,15 @@ bool SaveData::loadFromFile(const std::string &filename)
 const std::string &SaveData::filename() const
 {
 	return m_filename;
+}
+
+void SaveData::reset()
+{
+	if (!Proj.isLoaded())
+		return;
+	m_json = json::object();
+	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
+	Player::instance().reset();
 }
 
 json SaveData::toJson() const

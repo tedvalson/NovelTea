@@ -1,4 +1,5 @@
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
 #include <fstream>
@@ -184,6 +185,7 @@ bool ProjectData::fromJson(const json &j)
 
 	_json = j;
 	_loaded = true;
+	Save.reset();
 	return true;
 }
 

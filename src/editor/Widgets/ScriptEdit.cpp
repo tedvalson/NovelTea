@@ -1,5 +1,6 @@
 #include "ScriptEdit.hpp"
 #include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <QWhatsThis>
 #include <QTextBlock>
 #include <QPainter>
@@ -625,7 +626,7 @@ bool ScriptEdit::checkErrors()
 		d_ptr->lineWithError = -1;
 		result = true;
 	}
-	catch (DukException &e)
+	catch (std::exception &e)
 	{
 		processErrorMsg(e.what());
 	}

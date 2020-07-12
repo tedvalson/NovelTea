@@ -18,6 +18,8 @@ set(SOURCE_FILES
 	${SRCROOT}/Dialogue.cpp
 	${SRCROOT}/Script.cpp
 	${SRCROOT}/Verb.cpp
+	${SRCROOT}/Player.cpp
+	${SRCROOT}/ObjectList.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/SaveData.cpp
 	${SRCROOT}/ScriptManager.cpp

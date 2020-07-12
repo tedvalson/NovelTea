@@ -6,6 +6,8 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/States/StateEditor.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Player.hpp>
 #include <QWizard>
 #include <QDebug>
 
@@ -22,6 +24,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	load();
 
 	m_objectMenu->addAction(ui->actionView_Edit);
+	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::onListViewChanged);
 }
 
 RoomWidget::~RoomWidget()
@@ -54,18 +57,58 @@ void RoomWidget::fillPropertyEditor()
 	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &RoomWidget::propertyChanged);
 }
 
+void RoomWidget::onListViewChanged()
+{
+	updateRoom();
+	updatePreview();
+}
+
+void RoomWidget::updateRoom() const
+{
+	if (!m_room)
+		return;
+	auto objectList = m_room->getObjectList();
+	std::vector<NovelTea::Room::RoomObject> objects;
+	objectList->clear();
+	for (int i = 0; i < ui->listWidget->count(); ++i)
+	{
+		auto item = ui->listWidget->item(i);
+		if (item->checkState() == Qt::Checked)
+			objectList->addId(item->text().toStdString());
+		objects.push_back({item->text().toStdString(), item->checkState() == Qt::Checked});
+	}
+	m_room->setObjects(objects);
+	m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
+}
+
+void RoomWidget::updatePreview()
+{
+	json jdata;
+	jdata["event"] = "text";
+	jdata["data"] = ui->scriptEdit->toPlainText().toStdString();
+
+	if (ui->scriptEdit->checkErrors<std::string>())
+	{
+		// Reset any changes made by previous script execution
+		Save.reset();
+		if (m_room)
+		{
+			m_room->getObjectList()->saveChanges();
+			// Save room in case changes aren't yet saved to project
+			Save.set<NovelTea::Room>(m_room);
+			// Force reloading of room data we just saved in player
+			NovelTea::Player::instance().setRoomId(m_room->getId());
+		}
+
+		ui->preview->processData(jdata);
+	}
+}
+
 void RoomWidget::saveData() const
 {
 	if (m_room)
 	{
-		std::vector<NovelTea::Room::RoomObject> objects;
-		for (int i = 0; i < ui->listWidget->count(); ++i)
-		{
-			auto item = ui->listWidget->item(i);
-			objects.push_back({item->text().toStdString(), item->checkState() == Qt::Checked});
-		}
-		m_room->setObjects(objects);
-		m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
+		updateRoom();
 		Proj.set<NovelTea::Room>(m_room, idName());
 	}
 }
@@ -145,12 +188,7 @@ void RoomWidget::on_actionRemoveObject_triggered()
 
 void RoomWidget::on_scriptEdit_textChanged()
 {
-	json jdata;
-	jdata["event"] = "text";
-	jdata["data"] = ui->scriptEdit->toPlainText().toStdString();
-
-	if (ui->scriptEdit->checkErrors<std::string>())
-		ui->preview->processData(jdata);
+	updatePreview();
 }
 
 void RoomWidget::on_listWidget_itemPressed(QListWidgetItem *item)

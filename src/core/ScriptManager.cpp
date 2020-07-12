@@ -5,6 +5,8 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/ObjectList.hpp>
+#include <NovelTea/Player.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
@@ -20,7 +22,8 @@
 #define REGISTER_CONSTRUCTOR(className) \
 	dukglue_register_function(m_context, std::make_shared<className>, "make"#className)
 
-#define REGISTER_ACCESSOR(className) \
+#define REGISTER_ENTITY(className) \
+	dukglue_set_base_class<Entity, className>(m_context);  \
 	dukglue_register_function(m_context, SaveData::set<className>, "save"#className); \
 	dukglue_register_function(m_context, SaveData::get<className>, "load"#className); \
 	dukglue_register_function(m_context, SaveData::exists<className>, "exists"#className); \
@@ -98,13 +101,20 @@ void ScriptManager::registerClasses()
 	REGISTER_CONSTRUCTOR(TextFragment);
 	dukglue_register_property(m_context, &TextFragment::getText, &TextFragment::setText, "text");
 
+	// ObjectList
+	dukglue_register_method(m_context, &ObjectList::add, "add");
+	dukglue_register_method(m_context, &ObjectList::remove, "remove");
+	dukglue_register_method(m_context, &ObjectList::addId, "addId");
+	dukglue_register_method(m_context, &ObjectList::removeId, "removeId");
+	dukglue_register_method(m_context, &ObjectList::contains, "contains");
+
 	// Action
 	REGISTER_CONSTRUCTOR(Action);
-	REGISTER_ACCESSOR(Action);
+	REGISTER_ENTITY(Action);
 
 	// Cutscene
 	REGISTER_CONSTRUCTOR(Cutscene);
-	REGISTER_ACCESSOR(Cutscene);
+	REGISTER_ENTITY(Cutscene);
 	dukglue_register_method(m_context, &Cutscene::addSegment, "addSegment");
 	dukglue_register_property(m_context, &Cutscene::getFullScreen, &Cutscene::setFullScreen, "fullScreen");
 	dukglue_register_property(m_context, &Cutscene::getCanFastForward, &Cutscene::setCanFastForward, "canFastForward");
@@ -112,25 +122,27 @@ void ScriptManager::registerClasses()
 
 	// Dialogue
 	REGISTER_CONSTRUCTOR(Dialogue);
-	REGISTER_ACCESSOR(Dialogue);
+	REGISTER_ENTITY(Dialogue);
 
 	// Object
 	REGISTER_CONSTRUCTOR(Object);
-	REGISTER_ACCESSOR(Object);
+	REGISTER_ENTITY(Object);
 	dukglue_register_property(m_context, &Object::getName, &Object::setName, "name");
 
 	// Room
 	REGISTER_CONSTRUCTOR(Room);
-	REGISTER_ACCESSOR(Room);
+	REGISTER_ENTITY(Room);
+	dukglue_register_method(m_context, &Room::contains, "contains");
 	dukglue_register_property(m_context, &Room::getName, &Room::setName, "name");
+	dukglue_register_property(m_context, &Room::getObjectList, nullptr, "objects");
 
 	// Script
 	REGISTER_CONSTRUCTOR(Script);
-	REGISTER_ACCESSOR(Script);
+	REGISTER_ENTITY(Script);
 
 	// Verb
 	REGISTER_CONSTRUCTOR(Verb);
-	REGISTER_ACCESSOR(Verb);
+	REGISTER_ENTITY(Verb);
 }
 
 void ScriptManager::registerGlobals()
@@ -143,6 +155,9 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &SaveData::readVariables, "readVariables");
 
 	// Player
+	dukglue_register_global(m_context, &Player::instance(), "Player");
+	dukglue_register_property(m_context, &Player::getObjectList, nullptr, "inventory");
+	dukglue_register_property(m_context, &Player::getRoom, &Player::setRoom, "room");
 
 	// Script
 	dukglue_register_global(m_context, this, "Script");

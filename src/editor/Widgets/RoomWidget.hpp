@@ -39,6 +39,9 @@ private slots:
 
 private:
 	void fillPropertyEditor();
+	void onListViewChanged();
+	void updateRoom() const;
+	void updatePreview();
 
 	void saveData() const override;
 	void loadData() override;

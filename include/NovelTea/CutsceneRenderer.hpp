@@ -5,7 +5,7 @@
 #include <TweenEngine/TweenManager.h>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/System/Time.hpp>
-#include <memory>
+#include <json.hpp>
 
 namespace NovelTea
 {
@@ -15,6 +15,8 @@ class CutsceneTextSegment;
 class CutscenePageBreakSegment;
 class ActiveText;
 
+using ModeCallback = std::function<void(const nlohmann::json&)>;
+
 class CutsceneRenderer : public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
 public:
@@ -23,6 +25,8 @@ public:
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
 	void reset();
 	void update(float delta);
+
+	void setModeCallback(ModeCallback modeCallback);
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -34,6 +38,7 @@ protected:
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	size_t m_segmentIndex;
+	ModeCallback m_modeCallback;
 
 	std::vector<std::shared_ptr<ActiveText>> m_texts;
 	std::vector<std::shared_ptr<ActiveText>> m_textsOld;

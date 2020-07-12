@@ -2,8 +2,8 @@
 #define NOVELTEA_UTILS_HPP
 
 #define ADD_ACCESSOR(type, name, var) \
-	void set##name(const type & arg){var = arg;} \
-	const type & get##name() const {return var;}
+	virtual void set##name(const type & arg){var = arg;} \
+	virtual const type & get##name() const {return var;}
 
 #define SET_ALPHA(getFunc, setFunc, maxValue) \
 	color = getFunc(); \

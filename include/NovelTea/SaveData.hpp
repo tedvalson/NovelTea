@@ -20,6 +20,9 @@ public:
 	bool loadFromFile(const std::string &filename);
 	const std::string &filename() const;
 
+	// Reset to conform to loaded project
+	void reset();
+
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 

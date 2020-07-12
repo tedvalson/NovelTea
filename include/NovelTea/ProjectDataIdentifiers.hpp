@@ -34,9 +34,12 @@ namespace ID
 	const auto cutsceneSegText    = 0;
 	const auto cutsceneSegBreak   = 1;
 	const auto textFormats        = "textformats";
+	const auto player             = "player";
 
 	// For SaveData
 	const auto variables          = "variables";
+	const auto objectLocations    = "objectLocations";
+	const auto properties         = "properties";
 
 } // namespace ID
 
