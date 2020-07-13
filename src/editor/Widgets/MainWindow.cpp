@@ -17,6 +17,7 @@
 #include <QCloseEvent>
 #include <QInputDialog>
 #include <QSettings>
+#include <QProcess>
 #include "Wizard/Wizard.hpp"
 #include "QtPropertyBrowser/qtpropertymanager.h"
 #include "QtPropertyBrowser/qtvariantproperty.h"
@@ -475,4 +476,12 @@ void MainWindow::on_actionDelete_triggered()
 void MainWindow::on_actionCloseProject_triggered()
 {
 	closeProject();
+}
+
+void MainWindow::on_actionPlayGame_triggered()
+{
+	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
+	QStringList args;
+	args << "editor";
+	QProcess::execute(launcherPath, args);
 }
