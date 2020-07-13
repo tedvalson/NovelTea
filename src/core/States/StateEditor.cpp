@@ -14,12 +14,11 @@ namespace NovelTea
 
 StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
-, mode(StateEditorMode::Nothing)
+, m_mode(StateEditorMode::Nothing)
 {
-	font.loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf");
 	ScriptMan.reset();
 
-	text.setFont(font);
+	text.setFont(*Proj.getFont(0));
 	text.setCharacterSize(30);
 	text.setString("Testing test!?");
 	text.setFillColor(sf::Color::Black);
@@ -38,8 +37,9 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_verbList.setShowHideCallback([this](bool showing){
 		if (!showing)
 		{
-			activeText.setHighlightId("");
-			m_actionBuilder.show();
+			m_roomActiveText.setHighlightId("");
+			if (!m_selectedObjectId.empty())
+				m_actionBuilder.show();
 		}
 	});
 
@@ -62,11 +62,11 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 void StateEditor::render(sf::RenderTarget &target)
 {
 //	target.draw(text);
-	if (mode == StateEditorMode::Cutscene)
-		target.draw(cutsceneRenderer);
-	else if (mode == StateEditorMode::Room)
+	if (m_mode == StateEditorMode::Cutscene)
+		target.draw(m_cutsceneRenderer);
+	else if (m_mode == StateEditorMode::Room)
 	{
-		target.draw(activeText);
+		target.draw(m_roomActiveText);
 		if (m_actionBuilder.isVisible())
 			target.draw(m_actionBuilder);
 		if (m_verbList.isVisible())
@@ -83,40 +83,41 @@ void *StateEditor::processData(void *data)
 
 	if (event == "mode")
 	{
-		mode = jsonData["mode"];
+		m_mode = jsonData["mode"];
 	}
-	else if (mode == StateEditorMode::Cutscene)
+	else if (m_mode == StateEditorMode::Cutscene)
 	{
 		if (event == "cutscene")
 		{
 			auto cutscene = std::make_shared<Cutscene>(jsonData["cutscene"]);
-			cutsceneRenderer.setCutscene(cutscene);
-			cutsceneRenderer.setPosition(10.f, 10.f);
+			m_cutsceneRenderer.setCutscene(cutscene);
+			m_cutsceneRenderer.setPosition(10.f, 10.f);
 		}
 		else if (event == "setPlaybackTime")
 		{
 			int ms = jsonData["value"];
-			cutsceneRenderer.reset();
-			cutsceneRenderer.update(0.001f * ms);
+			m_cutsceneRenderer.reset();
+			m_cutsceneRenderer.update(0.001f * ms);
 		}
 		else if (event == "update")
 		{
 			size_t deltaMs = jsonData["delta"];
 			auto delta = 0.001f * deltaMs;
-			cutsceneRenderer.update(delta);
+			m_cutsceneRenderer.update(delta);
 		}
 	}
-	else if (mode == StateEditorMode::Room)
+	else if (m_mode == StateEditorMode::Room)
 	{
 		if (event == "text")
 		{
 			std::string data = jsonData["data"];
+			ScriptMan.reset();
 			auto r = ScriptMan.runInClosure<std::string>(data);
 
-			activeText.setText(r);
-			activeText.setPosition(10.f, 10.f);
-			activeText.setSize(sf::Vector2f(460.f, 600.f));
-			activeText.setCursorStart(sf::Vector2f(50.f, 25.f));
+			m_roomActiveText.setText(r);
+			m_roomActiveText.setPosition(10.f, 10.f);
+			m_roomActiveText.setSize(sf::Vector2f(460.f, 600.f));
+			m_roomActiveText.setCursorStart(sf::Vector2f(50.f, 25.f));
 		}
 	}
 
@@ -135,13 +136,13 @@ bool StateEditor::processEvent(const sf::Event &event)
 
 	if (event.type == sf::Event::MouseButtonReleased)
 	{
-		if (mode == StateEditorMode::Room)
+		if (m_mode == StateEditorMode::Room)
 		{
 			if (!m_verbList.isVisible())
 			{
 				auto p = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-				auto word = activeText.objectFromPoint(p);
-				activeText.setHighlightId(word);
+				auto word = m_roomActiveText.objectFromPoint(p);
+				m_roomActiveText.setHighlightId(word);
 				if (!word.empty())
 				{
 					m_selectedObjectId = word;
@@ -152,6 +153,7 @@ bool StateEditor::processEvent(const sf::Event &event)
 			}
 			else if (!m_verbList.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
 			{
+				m_selectedObjectId = "";
 				m_verbList.hide();
 			}
 		}
@@ -164,12 +166,11 @@ bool StateEditor::processEvent(const sf::Event &event)
 	return true;
 }
 
-bool StateEditor::update(float deltaSeconds)
+bool StateEditor::update(float delta)
 {
-//	cutsceneRenderer.update(deltaSeconds);
-	m_verbList.update(deltaSeconds);
-	m_actionBuilder.update(deltaSeconds);
-	tweenManager.update(deltaSeconds);
+	m_verbList.update(delta);
+	m_actionBuilder.update(delta);
+	m_tweenManager.update(delta);
 	return true;
 }
 

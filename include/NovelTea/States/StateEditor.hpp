@@ -28,26 +28,26 @@ class StateEditor : public State
 public:
 	StateEditor(StateStack& stack, Context& context, StateCallback callback);
 	bool processEvent(const sf::Event &event) override;
-	bool update(float deltaSeconds) override;
+	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
 
 	void *processData(void *data) override;
 
 private:
-	sf::Font font;
 	TweenText text;
-	CutsceneRenderer cutsceneRenderer;
-	ActiveText activeText;
 	TweenRectangleShape shape;
 	sf::Texture texture;
+
+	CutsceneRenderer m_cutsceneRenderer;
+	ActiveText m_roomActiveText;
 
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
 
 	std::string m_selectedObjectId;
 
-	TweenEngine::TweenManager tweenManager;
-	StateEditorMode mode;
+	TweenEngine::TweenManager m_tweenManager;
+	StateEditorMode m_mode;
 };
 
 } // namespace NovelTea
