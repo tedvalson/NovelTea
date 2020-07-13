@@ -108,23 +108,20 @@ bool VerbList::isVisible() const
 void VerbList::setVerbs(const std::vector<std::string> &verbs)
 {
 	m_verbs.clear();
-	float maxWidth = 0.f;
-	float posY = m_margin;
-	// TODO: check SaveData
+
+	for (auto &item : Save.data()[Verb::id].items())
+		addVerbOption(item.key());
 	for (auto &item : ProjData[Verb::id].items())
 	{
-		VerbOption option;
-		option.verbId = item.key();
-		option.text.setCharacterSize(40);
-		option.text.setFillColor(sf::Color::Black);
-		option.text.setFont(*Proj.getFont(0));
-
-		auto verb = Save.get<Verb>(option.verbId);
-		option.text.setString(verb->getName());
-		maxWidth = std::max(maxWidth, option.text.getLocalBounds().width);
-		m_verbs.push_back(option);
-		posY += 42.f;
+		auto verbId = item.key();
+		if (!Save.data()[Verb::id].contains(verbId))
+			addVerbOption(verbId);
 	}
+
+	float maxWidth = 0.f;
+	float posY = m_margin + 42.f * m_verbs.size();
+	for (auto &verb : m_verbs)
+		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
 
 	m_bounds = sf::FloatRect(0.f, 0.f, maxWidth + m_margin*2, posY + m_margin*2);
 	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
@@ -252,6 +249,19 @@ void VerbList::repositionItems()
 	}
 //	m_size.y = posY - m_scrollPos;
 	updateScrollSize();
+}
+
+void VerbList::addVerbOption(const std::string &verbId)
+{
+	VerbOption option;
+	option.verbId = verbId;
+	option.text.setCharacterSize(40);
+	option.text.setFillColor(sf::Color::Black);
+	option.text.setFont(*Proj.getFont(0));
+
+	auto verb = Save.get<Verb>(verbId);
+	option.text.setString(verb->getName());
+	m_verbs.push_back(option);
 }
 
 } // namespace NovelTea

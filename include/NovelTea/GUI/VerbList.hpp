@@ -51,6 +51,7 @@ protected:
 	int getValues(int tweenType, float *returnValues) override;
 
 	void repositionItems();
+	void addVerbOption(const std::string &verbId);
 
 private:
 	struct VerbOption {
