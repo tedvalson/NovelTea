@@ -2,9 +2,12 @@
 #define NOVELTEA_SCRIPTMANAGER_HPP
 
 #include <dukglue/dukglue.h>
+#include <json.hpp>
 
 namespace NovelTea
 {
+
+class Script;
 
 class ScriptManager
 {
@@ -13,6 +16,7 @@ public:
 	~ScriptManager();
 	void reset();
 
+	void runScript(std::shared_ptr<Script> script);
 	void runScriptId(const std::string &scriptId);
 
 	inline void run(const std::string &script)
@@ -55,6 +59,9 @@ protected:
 	void registerFunctions();
 	void registerClasses();
 	void registerGlobals();
+
+	void runAutorunScripts();
+	void checkAutorun(const nlohmann::json &j);
 
 private:
 	duk_context *m_context;

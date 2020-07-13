@@ -622,6 +622,7 @@ bool ScriptEdit::checkErrors()
 	auto result = false;
 	try
 	{
+		d_ptr->scriptManager.reset();
 		d_ptr->scriptManager.runInClosure<T>(toPlainText().toStdString());
 		d_ptr->lineWithError = -1;
 		result = true;

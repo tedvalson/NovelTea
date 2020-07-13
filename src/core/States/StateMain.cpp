@@ -19,6 +19,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_mode(Mode::Nothing)
 , m_cutsceneSpeed(1.f)
 {
+	ScriptMan.reset();
 	font.loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf");
 
 	text.setFont(font);

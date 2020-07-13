@@ -31,7 +31,12 @@ EditorTabWidget::Type ScriptWidget::getType() const
 void ScriptWidget::saveData() const
 {
 	if (m_script)
+	{
+		m_script->setGlobal(ui->checkBoxGlobal->isChecked());
+		m_script->setAutorun(ui->checkBoxAutorun->isChecked());
+		m_script->setContent(ui->scriptEdit->toPlainText().toStdString());
 		Proj.set<NovelTea::Script>(m_script, idName());
+	}
 }
 
 void ScriptWidget::loadData()
@@ -46,8 +51,12 @@ void ScriptWidget::loadData()
 		setModified();
 		m_script = std::make_shared<NovelTea::Script>();
 	}
-}
 
-void ScriptWidget::on_actionRemoveObject_triggered()
-{
+	ui->checkBoxGlobal->setChecked(m_script->getGlobal());
+	ui->checkBoxAutorun->setChecked(m_script->getAutorun());
+	ui->scriptEdit->setPlainText(QString::fromStdString(m_script->getContent()));
+
+	MODIFIER(ui->checkBoxGlobal, &QCheckBox::stateChanged);
+	MODIFIER(ui->checkBoxAutorun, &QCheckBox::stateChanged);
+	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
 }

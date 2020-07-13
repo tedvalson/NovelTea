@@ -23,7 +23,6 @@ public:
 	Type getType() const override;
 
 private slots:
-	void on_actionRemoveObject_triggered();
 
 private:
 	void saveData() const override;

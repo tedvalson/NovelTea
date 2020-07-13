@@ -17,6 +17,7 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 , mode(StateEditorMode::Nothing)
 {
 	font.loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf");
+	ScriptMan.reset();
 
 	text.setFont(font);
 	text.setCharacterSize(30);

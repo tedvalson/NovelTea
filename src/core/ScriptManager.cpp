@@ -69,16 +69,24 @@ void ScriptManager::reset()
 		file.read(&script[0], script.size());
 		run(script);
 	}
+
+	runAutorunScripts();
+}
+
+void ScriptManager::runScript(std::shared_ptr<Script> script)
+{
+	if (!script->getId().empty())
+	{
+		if (script->getGlobal())
+			run(script->getContent());
+		else
+			runInClosure(script->getContent());
+	}
 }
 
 void ScriptManager::runScriptId(const std::string &scriptId)
 {
-	auto script = Save.get<Script>(scriptId);
-	if (!script->getId().empty())
-	{
-		// TODO: check if it's flagged global
-		run(script->getContent());
-	}
+	runScript(Save.get<Script>(scriptId));
 }
 
 void ScriptManager::registerFunctions()
@@ -162,6 +170,24 @@ void ScriptManager::registerGlobals()
 	// Script
 	dukglue_register_global(m_context, this, "Script");
 	dukglue_register_method(m_context, &ScriptManager::runScriptId, "run");
+}
+
+void ScriptManager::runAutorunScripts()
+{
+	if (Save.isLoaded())
+		for (auto &jitem : Save.data()[Script::id])
+			checkAutorun(jitem);
+	if (Proj.isLoaded())
+		for (auto &item : ProjData[Script::id].items())
+			if (!Save.data()[Script::id].contains(item.key()))
+				checkAutorun(item.value());
+}
+
+void ScriptManager::checkAutorun(const nlohmann::json &j)
+{
+	auto script = Save.get<Script>(j[0]);
+	if (script->getAutorun())
+		runScript(script);
 }
 
 } // namespace NovelTea
