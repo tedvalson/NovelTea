@@ -20,6 +20,8 @@ public:
 	bool loadFromFile(const std::string &filename);
 	const std::string &filename() const;
 
+	std::string getParentId(const std::string &entityType, const std::string &entityId);
+
 	// Reset to conform to loaded project
 	void reset();
 

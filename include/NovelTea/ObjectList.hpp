@@ -2,6 +2,7 @@
 #define NOVELTEA_OBJECTLIST_HPP
 
 #include <NovelTea/Utils.hpp>
+#include <cstring>
 #include <memory>
 #include <vector>
 

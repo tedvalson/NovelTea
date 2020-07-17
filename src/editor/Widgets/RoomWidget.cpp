@@ -14,8 +14,6 @@
 RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::RoomWidget)
-	, variantManager(new QtVariantPropertyManager)
-	, variantFactory(new QtVariantEditorFactory)
 	, m_objectMenu(new QMenu)
 {
 	_idName = idName;
@@ -30,8 +28,6 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 RoomWidget::~RoomWidget()
 {
 	delete m_objectMenu;
-	delete variantFactory;
-	delete variantManager;
 	delete ui;
 }
 
@@ -43,18 +39,6 @@ QString RoomWidget::tabText() const
 EditorTabWidget::Type RoomWidget::getType() const
 {
 	return EditorTabWidget::Room;
-}
-
-void RoomWidget::fillPropertyEditor()
-{
-	variantManager->disconnect();
-	ui->propertyBrowser->clear();
-	ui->propertyBrowser->setFactoryForManager(variantManager, variantFactory);
-	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
-
-	QtVariantProperty *prop;
-
-	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &RoomWidget::propertyChanged);
 }
 
 void RoomWidget::onListViewChanged()
@@ -79,6 +63,7 @@ void RoomWidget::updateRoom() const
 	}
 	m_room->setObjects(objects);
 	m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
+	m_room->setProperties(ui->propertyEditor->getValue());
 }
 
 void RoomWidget::updatePreview()
@@ -134,20 +119,14 @@ void RoomWidget::loadData()
 		ui->listWidget->addItem(item);
 	}
 
+	ui->propertyEditor->setValue(m_room->getProperties());
 	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescription()));
-	fillPropertyEditor();
 
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
 	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
-}
-
-void RoomWidget::propertyChanged(QtProperty *property, const QVariant &value)
-{
-	auto propertyName = property->propertyName();
-
-	setModified();
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
 void RoomWidget::on_actionAddObject_triggered()

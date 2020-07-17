@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PropertyEditor</class>
+ <widget class="QWidget" name="PropertyEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>100</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>1</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="toolBar">
+     <property name="floatable">
+      <bool>false</bool>
+     </property>
+     <addaction name="actionAddProperty"/>
+     <addaction name="actionRemoveProperty"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionAddProperty">
+   <property name="icon">
+    <iconset theme="list-add">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Add Property</string>
+   </property>
+  </action>
+  <action name="actionRemoveProperty">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="list-remove">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Remove Property</string>
+   </property>
+  </action>
+  <action name="actionAddTextProperty">
+   <property name="text">
+    <string>Text</string>
+   </property>
+  </action>
+  <action name="actionAddNumberProperty">
+   <property name="text">
+    <string>Number</string>
+   </property>
+  </action>
+  <action name="actionAddBooleanProperty">
+   <property name="text">
+    <string>Boolean</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QtTreePropertyBrowser</class>
+   <extends>QWidget</extends>
+   <header>Widgets/QtPropertyBrowser/qttreepropertybrowser.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

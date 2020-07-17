@@ -129,7 +129,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QListWidget" name="listWidget"/>
+             <widget class="QListWidget" name="listWidget">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>150</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="ScriptEdit" name="scriptEdit">
@@ -144,9 +151,9 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabSettings">
+      <widget class="QWidget" name="tabProperties">
        <attribute name="title">
-        <string>Settings</string>
+        <string>Properties</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <property name="spacing">
@@ -165,14 +172,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
+         <widget class="PropertyEditor" name="propertyEditor" native="true"/>
         </item>
        </layout>
       </widget>
@@ -228,7 +228,9 @@
   </action>
   <action name="actionView_Edit">
    <property name="icon">
-    <iconset theme="edit-find"/>
+    <iconset theme="edit-find">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>View / Edit</string>
@@ -243,15 +245,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>QtTreePropertyBrowser</class>
-   <extends>QWidget</extends>
-   <header>Widgets/QtPropertyBrowser/qttreepropertybrowser.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ScriptEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>Widgets/ScriptEdit.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>PropertyEditor</class>
+   <extends>QWidget</extends>
+   <header>Widgets/PropertyEditor.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

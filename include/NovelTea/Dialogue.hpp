@@ -15,6 +15,7 @@ public:
 	void loadJson(const json &j) override;
 
 	static constexpr auto id = "dialogue";
+	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(std::string, Name, m_name)
 

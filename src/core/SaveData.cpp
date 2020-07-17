@@ -61,6 +61,20 @@ const std::string &SaveData::filename() const
 	return m_filename;
 }
 
+
+std::string SaveData::getParentId(const std::string &entityType, const std::string &entityId)
+{
+	if (entityType.empty())
+		return std::string();
+
+	json j;
+	if (Save.data()[entityType].contains(entityId))
+		j = Save.data()[entityType][entityId];
+	else
+		j = ProjData[entityType][entityId];
+	return j[1];
+}
+
 void SaveData::reset()
 {
 	if (!Proj.isLoaded())

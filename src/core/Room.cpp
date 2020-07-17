@@ -6,8 +6,7 @@ namespace NovelTea
 {
 
 Room::Room()
-: m_name("null")
-, m_objectList(std::make_shared<ObjectList>())
+: m_objectList(std::make_shared<ObjectList>())
 {
 }
 
@@ -35,7 +34,7 @@ json Room::toJson() const
 	auto j = json::array({
 		m_id,
 		m_parentId,
-		m_name,
+		m_properties,
 		m_description,
 		jobjects,
 	});
@@ -46,7 +45,7 @@ void Room::loadJson(const json &j)
 {
 	m_id = j[0];
 	m_parentId = j[1];
-	m_name = j[2];
+	m_properties = j[2];
 	m_description = j[3];
 	for (auto &jroomObject : j[4])
 		m_objects.push_back({jroomObject[0], jroomObject[1]});

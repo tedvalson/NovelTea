@@ -19,6 +19,7 @@ public:
 	void loadJson(const json &j) override;
 
 	static constexpr auto id = "cutscene";
+	const std::string entityId() const override {return id;}
 
 	void addSegment(std::shared_ptr<CutsceneSegment> segment);
 

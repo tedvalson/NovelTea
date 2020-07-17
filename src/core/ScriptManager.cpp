@@ -27,6 +27,8 @@
 	dukglue_register_function(m_context, SaveData::set<className>, "save"#className); \
 	dukglue_register_function(m_context, SaveData::get<className>, "load"#className); \
 	dukglue_register_function(m_context, SaveData::exists<className>, "exists"#className); \
+	dukglue_register_method(m_context, &className::prop, "prop"); \
+	dukglue_register_method(m_context, &className::setProp, "setProp"); \
 	dukglue_register_property(m_context, &className::getId, nullptr, "id");
 
 namespace
@@ -141,7 +143,6 @@ void ScriptManager::registerClasses()
 	REGISTER_CONSTRUCTOR(Room);
 	REGISTER_ENTITY(Room);
 	dukglue_register_method(m_context, &Room::contains, "contains");
-	dukglue_register_property(m_context, &Room::getName, &Room::setName, "name");
 	dukglue_register_property(m_context, &Room::getObjectList, nullptr, "objects");
 
 	// Script

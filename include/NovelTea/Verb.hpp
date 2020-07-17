@@ -18,6 +18,7 @@ public:
 	void loadJson(const json &j) override;
 
 	static constexpr auto id = "verb";
+	const std::string entityId() const override {return id;}
 
 	std::string getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr = "____") const;
 	std::string getActionText(std::vector<std::string> objectIds, std::string blankStr = "____") const;

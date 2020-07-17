@@ -26,16 +26,15 @@ public:
 	static json getProjectRoomObjects();
 
 	static constexpr auto id = "room";
+	const std::string entityId() const override {return id;}
 
 	void setId(const std::string &idName) override;
 	const std::shared_ptr<ObjectList> &getObjectList() const;
 
-	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(std::string, Description, m_description)
 	ADD_ACCESSOR(std::vector<RoomObject>, Objects, m_objects)
 
 private:
-	std::string m_name;
 	std::string m_description;
 	std::vector<RoomObject> m_objects;
 

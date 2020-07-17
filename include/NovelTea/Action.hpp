@@ -21,6 +21,7 @@ public:
 	static std::shared_ptr<Action> find(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	static constexpr auto id = "action";
+	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(std::string, VerbId, m_verbId)
 	ADD_ACCESSOR(std::string, Script, m_script)

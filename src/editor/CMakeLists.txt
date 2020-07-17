@@ -22,6 +22,7 @@ set(UIFILES
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
 	${UIROOT}/ProjectSettingsWidget.ui
+	${UIROOT}/PropertyEditor.ui
 	${UIROOT}/WizardPageStart.ui
 	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageAction.ui
@@ -53,6 +54,7 @@ set(SRC
 	${SRCROOT}/Widgets/VerbWidget.cpp
 	${SRCROOT}/Widgets/NovelTeaWidget.cpp
 	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
+	${SRCROOT}/Widgets/PropertyEditor.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/ScriptEdit.cpp

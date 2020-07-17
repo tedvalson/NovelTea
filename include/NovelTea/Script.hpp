@@ -15,6 +15,7 @@ public:
 	void loadJson(const json &j) override;
 
 	static constexpr auto id = "script";
+	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(bool, Global, m_global)
 	ADD_ACCESSOR(bool, Autorun, m_autorun)

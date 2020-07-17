@@ -20,6 +20,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Verb.cpp
 	${SRCROOT}/Player.cpp
 	${SRCROOT}/ObjectList.cpp
+	${SRCROOT}/PropertyList.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/SaveData.cpp
 	${SRCROOT}/ScriptManager.cpp
