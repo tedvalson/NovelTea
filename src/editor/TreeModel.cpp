@@ -57,17 +57,52 @@ bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent)
 	return success;
 }
 
-void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, std::string typeIndex)
+void addToJson(json *jout, const json &jitem, const json& jdata, std::vector<std::string> keys)
 {
-	if (!data.contains(typeIndex))
+	std::string id = jitem[0];
+	std::string parentId = jitem[1];
+	keys.push_back(id);
+	if (id == parentId) // Shouldn't be possible
 		return;
-	for (auto &item : data[typeIndex].items())
+	if (parentId.empty())
+	{
+		for (auto it = keys.rbegin(); it != keys.rend(); ++it)
+			jout = &((*jout)[*it]);
+		if (jout->empty())
+			*jout = json::object();
+	}
+	else if (jdata.contains(parentId))
+		addToJson(jout, jdata[parentId], jdata, keys);
+}
+
+void addToTree(const json &data, TreeItem *parent, NovelTea::EntityType type)
+{
+	for (auto &item : data.items())
 	{
 		QList<QVariant> columnData;
 		columnData << QString::fromStdString(item.key());
 		columnData << static_cast<int>(type);
-		root->appendChild(new TreeItem(columnData, root));
+
+		auto child = new TreeItem(columnData, parent);
+		parent->appendChild(child);
+
+		auto j = item.value();
+		if (!j.empty())
+			addToTree(j, child, type);
 	}
+}
+
+void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, std::string typeIndex)
+{
+	if (!data.contains(typeIndex))
+		return;
+
+	std::vector<std::string> keys;
+	auto j = json::object();
+	for (auto &jitem : data[typeIndex])
+		addToJson(&j, jitem, data[typeIndex], keys);
+
+	addToTree(j, root, type);
 }
 
 void TreeModel::loadProject(const NovelTea::ProjectData &project)
@@ -77,7 +112,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	delete rootItem;
 	rootItem = new TreeItem("Project");
 
-	actionRoot = new TreeItem("Actions", rootItem);
+	actionRoot   = new TreeItem("Actions", rootItem);
 	cutsceneRoot = new TreeItem("Cutscenes", rootItem);
 	dialogueRoot = new TreeItem("Dialogues", rootItem);
 	objectRoot   = new TreeItem("Objects", rootItem);
@@ -124,6 +159,20 @@ void TreeModel::rename(EditorTabWidget::Type type, const QString &oldName, const
 			break;
 		}
 	}
+}
+
+bool TreeModel::changeParent(const QModelIndex &child, const QModelIndex &newParent)
+{
+	auto childItem = getItem(child);
+	auto parentItem = getItem(newParent);
+	if (beginMoveRows(child.parent(), child.row(), child.row(), newParent, parentItem->childCount()))
+	{
+		std::cout << "change parent" << std::endl;
+		childItem->changeParent(parentItem);
+		endMoveRows();
+		return true;
+	}
+	return false;
 }
 
 void TreeModel::update()

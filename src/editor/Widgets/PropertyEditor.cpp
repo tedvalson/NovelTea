@@ -129,6 +129,7 @@ void PropertyEditor::update()
 void PropertyEditor::on_actionRemoveProperty_triggered()
 {
 	ui->propertyBrowser->removeProperty(ui->propertyBrowser->currentItem()->property());
+	update();
 }
 
 void PropertyEditor::on_actionAddTextProperty_triggered()

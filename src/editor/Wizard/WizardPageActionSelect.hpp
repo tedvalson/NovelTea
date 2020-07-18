@@ -19,6 +19,7 @@ public:
 
 	void setValue(nlohmann::json value);
 	nlohmann::json getValue() const;
+	QModelIndex getSelectedIndex() const;
 
 	void setFilterRegExp(const QString &pattern);
 	void allowCustomScript(bool allow);

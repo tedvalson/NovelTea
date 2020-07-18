@@ -1,4 +1,5 @@
 #include <NovelTea/PropertyList.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Object.hpp>
 #include <iostream>

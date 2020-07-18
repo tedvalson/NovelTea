@@ -1,7 +1,6 @@
 #ifndef NOVELTEA_PROJECTDATA_HPP
 #define NOVELTEA_PROJECTDATA_HPP
 
-#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/TextFormat.hpp>
 #include <NovelTea/Utils.hpp>
@@ -77,7 +76,7 @@ private:
 
 	//
 	sf::String m_title;
-	float m_engineVersion = NOVELTEA_VERSION;
+	float m_engineVersion;
 	int m_startTypeId;
 	int m_startEntityId;
 

@@ -142,8 +142,8 @@ void RoomWidget::on_actionAddObject_triggered()
 	if (wizard.exec() == QDialog::Accepted)
 	{
 		auto jval = page->getValue();
-		auto idName = QString::fromStdString(jval[NovelTea::ID::entityId]);
-		if (jval[NovelTea::ID::entityType] == NovelTea::EntityType::Object)
+		auto idName = QString::fromStdString(jval[NovelTea::ID::selectEntityId]);
+		if (jval[NovelTea::ID::selectEntityType] == NovelTea::EntityType::Object)
 		{
 			// Check if object already exists
 			for (int i = 0; i < ui->listWidget->count(); ++i)

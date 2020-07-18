@@ -38,6 +38,7 @@ public:
 
 	void loadProject(const NovelTea::ProjectData &project);
 	void rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName);
+	bool changeParent(const QModelIndex &child, const QModelIndex &newParent);
 	void update();
 
 private:

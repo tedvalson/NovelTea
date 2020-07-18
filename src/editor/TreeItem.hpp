@@ -20,6 +20,7 @@ public:
 	bool setData(int column, QVariant value);
 	int row() const;
 	TreeItem *parent();
+	void changeParent(TreeItem *parent);
 
 	bool insertChildren(int position, int count, int columns);
 	bool removeChildren(int position, int count);

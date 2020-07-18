@@ -54,6 +54,13 @@ TreeItem *TreeItem::parent()
 	return parentItem;
 }
 
+void TreeItem::changeParent(TreeItem *parent)
+{
+	parentItem->childItems.takeAt(row());
+	parent->appendChild(this);
+	parentItem = parent;
+}
+
 bool TreeItem::insertChildren(int position, int count, int columns)
 {
 	if (position < 0 || position > childItems.size())

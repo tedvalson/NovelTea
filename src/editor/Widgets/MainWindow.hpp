@@ -57,6 +57,8 @@ private slots:
 	void on_actionDelete_triggered();
 	void on_actionCloseProject_triggered();
 	void on_actionPlayGame_triggered();
+	void on_actionSelectParent_triggered();
+	void on_actionClearParentSelection_triggered();
 
 private:
 	static MainWindow *_instance;

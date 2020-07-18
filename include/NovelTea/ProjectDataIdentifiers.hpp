@@ -25,11 +25,14 @@ namespace ID
 	const auto projectVersion     = "version";
 	const auto projectAuthor      = "author";
 	const auto projectWebsite     = "website";
-	const auto projectEntrypoint  = "entrypoint";
 	const auto projectFonts       = "fonts";
 	const auto projectFontDefault = "fontDefault";
-	const auto entityType         = 0;
-	const auto entityId           = 1;
+	const auto projectEntrypoint  = "entrypoint";
+	const auto selectEntityType   = 0;
+	const auto selectEntityId     = 1;
+	const auto entityId           = 0;
+	const auto entityParentId     = 1;
+	const auto entityProperties   = 2;
 	const auto cutsceneSegType    = 0;
 	const auto cutsceneSegText    = 0;
 	const auto cutsceneSegBreak   = 1;

@@ -30,11 +30,11 @@ WizardPageActionSelect::~WizardPageActionSelect()
 
 void WizardPageActionSelect::setValue(nlohmann::json value)
 {
-	auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::entityType]);
+	auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::selectEntityType]);
 	if (type == NovelTea::EntityType::CustomScript)
 	{
 		ui->radioCustom->setChecked(true);
-		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::entityId]));
+		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::selectEntityId]));
 	}
 	else if (type != NovelTea::EntityType::Invalid)
 	{
@@ -66,6 +66,11 @@ nlohmann::json WizardPageActionSelect::getValue() const
 	}
 
 	return json::array({-1,""});
+}
+
+QModelIndex WizardPageActionSelect::getSelectedIndex() const
+{
+	return ui->treeView->mapToSource(ui->treeView->currentIndex());
 }
 
 void WizardPageActionSelect::setFilterRegExp(const QString &pattern)

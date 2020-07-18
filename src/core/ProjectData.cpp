@@ -1,4 +1,5 @@
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
@@ -9,6 +10,7 @@ namespace NovelTea
 {
 
 ProjectData::ProjectData()
+	: m_engineVersion(NOVELTEA_VERSION)
 {
 }
 

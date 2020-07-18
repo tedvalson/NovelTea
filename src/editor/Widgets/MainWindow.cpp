@@ -10,6 +10,7 @@
 #include "VerbWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
+#include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <QFileDialog>
 #include <QDebug>
@@ -37,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	menuTreeView->addAction(ui->actionOpen);
 	menuTreeView->addAction(ui->actionRename);
+	menuTreeView->addAction(ui->actionSelectParent);
+	menuTreeView->addAction(ui->actionClearParentSelection);
 	menuTreeView->addAction(ui->actionDelete);
 
 	readSettings();
@@ -484,4 +487,56 @@ void MainWindow::on_actionPlayGame_triggered()
 	QStringList args;
 	args << "editor";
 	QProcess::execute(launcherPath, args);
+}
+
+void MainWindow::on_actionSelectParent_triggered()
+{
+	QWizard wizard;
+	auto page = new WizardPageActionSelect;
+
+	if (selectedType == EditorTabWidget::Action)
+		page->setFilterRegExp("Actions");
+	else if (selectedType == EditorTabWidget::Cutscene)
+		page->setFilterRegExp("Cutscenes");
+	else if (selectedType == EditorTabWidget::Dialogue)
+		page->setFilterRegExp("Dialogues");
+	else if (selectedType == EditorTabWidget::Object)
+		page->setFilterRegExp("Objects");
+	else if (selectedType == EditorTabWidget::Room)
+		page->setFilterRegExp("Rooms");
+	else if (selectedType == EditorTabWidget::Script)
+		page->setFilterRegExp("Scripts");
+	else if (selectedType == EditorTabWidget::Verb)
+		page->setFilterRegExp("Verbs");
+
+	page->allowCustomScript(false);
+	wizard.addPage(page);
+
+	if (wizard.exec() == QDialog::Accepted)
+	{
+		auto child = ui->treeView->mapToSource(ui->treeView->currentIndex());
+		auto newParent = page->getSelectedIndex();
+		auto newParentItem = static_cast<TreeItem*>(newParent.internalPointer());
+		if (treeModel->changeParent(child, newParent))
+		{
+			auto newParentId = newParentItem->data(0).toString().toStdString();
+			auto &j = getDataFromTabType(selectedType);
+			j[selectedIdName][NovelTea::ID::entityParentId] = newParentId;
+			Proj.saveToFile();
+		}
+	}
+}
+
+void MainWindow::on_actionClearParentSelection_triggered()
+{
+	auto child = ui->treeView->mapToSource(ui->treeView->currentIndex());
+	auto parent = child.parent();
+	while (parent.parent().isValid())
+		parent = parent.parent();
+	if (treeModel->changeParent(child, parent))
+	{
+		auto &j = getDataFromTabType(selectedType);
+		j[selectedIdName][NovelTea::ID::entityParentId] = "";
+		Proj.saveToFile();
+	}
 }
