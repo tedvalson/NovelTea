@@ -18,7 +18,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: |
-          ../Qt
+          ${{ github.workspace }}/Qt
           SFML/install
         key: ${{ runner.os }}-NovelTea
           
@@ -32,6 +32,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
+        dir: ${{ github.workspace }}
         cached: ${{ steps.cache.outputs.cache-hit }}
 
     - name: Checkout SFML
