@@ -46,6 +46,7 @@ private:
 	ActionBuilder m_actionBuilder;
 	std::string m_selectedObjectId;
 
+	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;
 	float m_cutsceneSpeed;
 

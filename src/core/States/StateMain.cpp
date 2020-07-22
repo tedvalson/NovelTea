@@ -1,4 +1,5 @@
 #include <NovelTea/States/StateMain.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ScriptManager.hpp>
@@ -30,9 +31,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	text.setOutlineThickness(1.f);
 	text.setPosition(0.f, 250.f);
 
-	m_cutsceneRenderer.setModeCallback([this](const json& jEntity){
-		setMode(jEntity);
-	});
 
 	m_actionBuilder.setPosition(10.f, 500.f);
 	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
@@ -101,8 +99,8 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 {
 	if (mode == Mode::Cutscene)
 	{
-		auto cutscene = Save.get<Cutscene>(idName);
-		m_cutsceneRenderer.setCutscene(cutscene);
+		m_cutscene = Save.get<Cutscene>(idName);
+		m_cutsceneRenderer.setCutscene(m_cutscene);
 	}
 	else if (mode == Mode::Room)
 	{
@@ -116,8 +114,8 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 void StateMain::setMode(const json &jEntity)
 {
 	auto mode = Mode::Nothing;
-	auto type = jEntity[ID::entityType];
-	auto idName = jEntity[ID::entityId];
+	auto type = jEntity[ID::selectEntityType];
+	auto idName = jEntity[ID::selectEntityId];
 
 	if (type == EntityType::Cutscene)
 		mode = Mode::Cutscene;
@@ -190,6 +188,10 @@ bool StateMain::update(float delta)
 	if (m_mode == Mode::Cutscene)
 	{
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
+		if (m_cutsceneRenderer.isComplete())
+		{
+			setMode(m_cutscene->getNextEntity());
+		}
 	}
 
 	m_verbList.update(delta);

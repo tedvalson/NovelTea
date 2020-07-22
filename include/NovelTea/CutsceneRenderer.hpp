@@ -15,8 +15,6 @@ class CutsceneTextSegment;
 class CutscenePageBreakSegment;
 class ActiveText;
 
-using ModeCallback = std::function<void(const nlohmann::json&)>;
-
 class CutsceneRenderer : public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
 public:
@@ -26,7 +24,7 @@ public:
 	void reset();
 	void update(float delta);
 
-	void setModeCallback(ModeCallback modeCallback);
+	bool isComplete() const;
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -38,7 +36,7 @@ protected:
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	size_t m_segmentIndex;
-	ModeCallback m_modeCallback;
+	bool m_isComplete;
 
 	std::vector<std::shared_ptr<ActiveText>> m_texts;
 	std::vector<std::shared_ptr<ActiveText>> m_textsOld;

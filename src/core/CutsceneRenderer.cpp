@@ -10,7 +10,6 @@ namespace NovelTea
 {
 
 CutsceneRenderer::CutsceneRenderer()
-	: m_modeCallback(nullptr)
 {
 	setCutscene(std::make_shared<Cutscene>());
 }
@@ -23,14 +22,14 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 	TweenEngine::Tween::mark()
 		.delay(0.001f * cutscene->getDelayMs())
 		.setCallback(TweenEngine::TweenCallback::BEGIN, [this](TweenEngine::BaseTween*){
-			if (m_modeCallback)
-				m_modeCallback(m_cutscene->getNextEntity());
+			m_isComplete = true;
 		})
 		.start(m_tweenManager);
 }
 
 void CutsceneRenderer::reset()
 {
+	m_isComplete = false;
 	m_segmentIndex = 0;
 	m_timePassed = sf::Time::Zero;
 	m_timeToNext = sf::Time::Zero;
@@ -78,9 +77,9 @@ void CutsceneRenderer::update(float delta)
 	m_tweenManager.update(timeDelta.asSeconds());
 }
 
-void CutsceneRenderer::setModeCallback(ModeCallback modeCallback)
+bool CutsceneRenderer::isComplete() const
 {
-	m_modeCallback = modeCallback;
+	return m_isComplete;
 }
 
 void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const

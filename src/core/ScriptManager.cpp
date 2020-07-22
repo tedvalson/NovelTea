@@ -14,6 +14,7 @@
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <SFML/System/FileInputStream.hpp>
 
 #include <fstream>
@@ -186,7 +187,7 @@ void ScriptManager::runAutorunScripts()
 
 void ScriptManager::checkAutorun(const nlohmann::json &j)
 {
-	auto script = Save.get<Script>(j[0]);
+	auto script = Save.get<Script>(j[ID::entityId]);
 	if (script->getAutorun())
 		runScript(script);
 }
