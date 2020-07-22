@@ -1,7 +1,9 @@
 
 #include <NovelTea/Player.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/Cutscene.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -18,20 +20,6 @@ Player &Player::instance()
 {
 	static Player player;
 	return player;
-}
-
-json Player::toJson() const
-{
-	auto j = json::array({
-//		m_name
-	});
-	return j;
-}
-
-bool Player::fromJson(const json &j)
-{
-//	m_name = j[0];
-	return true;
 }
 
 void Player::reset()
@@ -53,6 +41,30 @@ void Player::setRoomId(const std::string &roomId)
 const std::string &Player::getRoomId() const
 {
 	return m_roomId;
+}
+
+void Player::pushNextEntity(std::shared_ptr<Entity> entity)
+{
+	m_entityQueue.push(entity);
+}
+
+void Player::pushNextEntityJson(json jentity)
+{
+	auto type = jentity[ID::selectEntityType];
+	auto idName = jentity[ID::selectEntityId];
+	if (type == EntityType::Cutscene)
+		pushNextEntity(Save.get<Cutscene>(idName));
+	else if (type == EntityType::Room)
+		pushNextEntity(Save.get<Room>(idName));
+}
+
+std::shared_ptr<Entity> Player::popNextEntity()
+{
+	if (m_entityQueue.empty())
+		return nullptr;
+	auto nextEntity = m_entityQueue.front();
+	m_entityQueue.pop();
+	return nextEntity;
 }
 
 } // namespace NovelTea

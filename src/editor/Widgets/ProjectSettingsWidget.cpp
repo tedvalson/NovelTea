@@ -83,7 +83,7 @@ void ProjectSettingsWidget::saveData() const
 	j[ID::projectVersion] = ui->lineEditVersion->text().toStdString();
 	j[ID::projectAuthor] = ui->lineEditAuthor->text().toStdString();
 	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
-	j[ID::projectEntrypoint] = ui->actionSelect->getValue();
+	j[ID::entrypointEntity] = ui->actionSelect->getValue();
 	j[ID::projectFontDefault] = defaultFontIndex;
 	MainWindow::instance().reloadProject();
 }
@@ -96,7 +96,7 @@ void ProjectSettingsWidget::loadData()
 	ui->lineEditAuthor->setText(QString::fromStdString(j.value(ID::projectAuthor, "Project Author")));
 	ui->lineEditWebsite->setText(QString::fromStdString(j.value(ID::projectWebsite, "")));
 
-	auto entryPoint = j.value(ID::projectEntrypoint, json::array());
+	auto entryPoint = j.value(ID::entrypointEntity, json::array());
 	ui->actionSelect->setValue(entryPoint);
 
 	ui->listFonts->clear();

@@ -5,6 +5,7 @@
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
@@ -30,7 +31,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	text.setOutlineColor(sf::Color::Yellow);
 	text.setOutlineThickness(1.f);
 	text.setPosition(0.f, 250.f);
-
 
 	m_actionBuilder.setPosition(10.f, 500.f);
 	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
@@ -75,8 +75,12 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 
 	// TODO: check SaveData for last entrypoint
-	auto &entryPoint = ProjData[ID::projectEntrypoint];
-	setMode(entryPoint);
+	auto &saveEntryPoint = Save.data()[ID::entrypointEntity];
+	auto &projEntryPoint = ProjData[ID::entrypointEntity];
+	if (saveEntryPoint.empty())
+		setMode(projEntryPoint);
+	else
+		setMode(saveEntryPoint);
 }
 
 void StateMain::render(sf::RenderTarget &target)
@@ -101,6 +105,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	{
 		m_cutscene = Save.get<Cutscene>(idName);
 		m_cutsceneRenderer.setCutscene(m_cutscene);
+		Player::instance().pushNextEntityJson(m_cutscene->getNextEntity());
 	}
 	else if (mode == Mode::Room)
 	{
@@ -127,6 +132,22 @@ void StateMain::setMode(const json &jEntity)
 	}
 
 	setMode(mode, idName);
+}
+
+void StateMain::gotoNextEntity()
+{
+	auto nextEntity = Player::instance().popNextEntity();
+	if (nextEntity)
+	{
+		auto mode = Mode::Nothing;
+		if (nextEntity->entityId() == Cutscene::id)
+			mode = Mode::Cutscene;
+		else if (nextEntity->entityId() == Room::id)
+			mode = Mode::Room;
+		else if (nextEntity->entityId() == Dialogue::id)
+			mode = Mode::Dialogue;
+		setMode(mode, nextEntity->getId());
+	}
 }
 
 void StateMain::updateRoomText()
@@ -190,9 +211,11 @@ bool StateMain::update(float delta)
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
 		{
-			setMode(m_cutscene->getNextEntity());
+			gotoNextEntity();
 		}
 	}
+	else // if Mode::Nothing
+		gotoNextEntity();
 
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);

@@ -55,7 +55,7 @@ bool ProjectData::isLoaded() const
 
 bool ProjectData::isValid(std::string &errorMessage) const
 {
-	auto entryPoint = data().value(ID::projectEntrypoint, json::array({-1,""}));
+	auto entryPoint = data().value(ID::entrypointEntity, json::array({-1,""}));
 //	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
 	if (entryPoint[1].empty())
 	{

@@ -6,6 +6,7 @@
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/ObjectList.hpp>
+#include <NovelTea/PropertyList.hpp>
 #include <NovelTea/Player.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
@@ -166,6 +167,7 @@ void ScriptManager::registerGlobals()
 
 	// Player
 	dukglue_register_global(m_context, &Player::instance(), "Player");
+	dukglue_register_method(m_context, &Player::pushNextEntity, "pushNext");
 	dukglue_register_property(m_context, &Player::getObjectList, nullptr, "inventory");
 	dukglue_register_property(m_context, &Player::getRoom, &Player::setRoom, "room");
 

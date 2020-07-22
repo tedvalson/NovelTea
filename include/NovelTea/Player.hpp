@@ -1,8 +1,9 @@
 #ifndef NOVELTEA_PLAYER_HPP
 #define NOVELTEA_PLAYER_HPP
 
-#include <NovelTea/JsonSerializable.hpp>
+#include <NovelTea/Entity.hpp>
 #include <NovelTea/Utils.hpp>
+#include <queue>
 
 namespace NovelTea
 {
@@ -10,18 +11,19 @@ namespace NovelTea
 class ObjectList;
 class Room;
 
-class Player : public JsonSerializable
+class Player
 {
 public:
 	static Player &instance();
-
-	json toJson() const override;
-	bool fromJson(const json &j) override;
 
 	void reset();
 
 	void setRoomId(const std::string &roomId);
 	const std::string &getRoomId() const;
+
+	void pushNextEntity(std::shared_ptr<Entity> entity);
+	void pushNextEntityJson(json jentity);
+	std::shared_ptr<Entity> popNextEntity();
 
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(std::shared_ptr<Room>, Room, m_room)
@@ -31,6 +33,7 @@ private:
 	std::shared_ptr<ObjectList> m_objectList;
 	std::shared_ptr<Room> m_room;
 	std::string m_roomId;
+	std::queue<std::shared_ptr<Entity>> m_entityQueue;
 };
 
 } // namespace NovelTea

@@ -34,6 +34,8 @@ public:
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);
 
+	void gotoNextEntity();
+
 	void updateRoomText();
 
 private:

@@ -27,7 +27,7 @@ namespace ID
 	const auto projectWebsite     = "website";
 	const auto projectFonts       = "fonts";
 	const auto projectFontDefault = "fontDefault";
-	const auto projectEntrypoint  = "entrypoint";
+	const auto entrypointEntity   = "entrypoint";
 	const auto selectEntityType   = 0;
 	const auto selectEntityId     = 1;
 	const auto entityId           = 0;
@@ -41,6 +41,7 @@ namespace ID
 
 	// For SaveData
 	const auto variables          = "variables";
+	const auto entityQueue        = "entityQueue";
 	const auto objectLocations    = "objectLocations";
 	const auto properties         = "properties";
 
