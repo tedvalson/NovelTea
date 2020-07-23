@@ -16,6 +16,7 @@ VerbWidget::VerbWidget(const std::string &idName, QWidget *parent)
 	MODIFIER(ui->scriptEditSuccess, &ScriptEdit::textChanged);
 	MODIFIER(ui->scriptEditFailure, &ScriptEdit::textChanged);
 	MODIFIER(ui->horizontalSlider, &QSlider::valueChanged);
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
 VerbWidget::~VerbWidget()
@@ -44,6 +45,7 @@ void VerbWidget::saveData() const
 		m_verb->setDefaultScriptSuccess(ui->scriptEditSuccess->toPlainText().toStdString());
 		m_verb->setDefaultScriptFailure(ui->scriptEditFailure->toPlainText().toStdString());
 		m_verb->setActionStructure(actionStructure);
+		m_verb->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Verb>(m_verb, idName());
 	}
 }
@@ -65,6 +67,7 @@ void VerbWidget::loadData()
 	ui->scriptEditSuccess->setPlainText(QString::fromStdString(m_verb->getDefaultScriptSuccess()));
 	ui->scriptEditFailure->setPlainText(QString::fromStdString(m_verb->getDefaultScriptFailure()));
 	ui->horizontalSlider->setValue(m_verb->getObjectCount());
+	ui->propertyEditor->setValue(m_verb->getProperties());
 	loadActionStructure();
 }
 

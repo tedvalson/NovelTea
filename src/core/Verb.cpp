@@ -14,7 +14,7 @@ Verb::Verb()
 
 size_t Verb::jsonSize() const
 {
-	return 7;
+	return 8;
 }
 
 json Verb::toJson() const
@@ -22,6 +22,7 @@ json Verb::toJson() const
 	auto j = json::array({
 		m_id,
 		m_parentId,
+		m_properties,
 		m_name,
 		m_objectCount,
 		m_defaultScriptSuccess,
@@ -35,13 +36,14 @@ void Verb::loadJson(const json &j)
 {
 	m_id = j[0];
 	m_parentId = j[1];
-	m_name = j[2];
-	m_objectCount = j[3];
-	m_defaultScriptSuccess = j[4];
-	m_defaultScriptFailure = j[5];
+	m_properties = j[2];
+	m_name = j[3];
+	m_objectCount = j[4];
+	m_defaultScriptSuccess = j[5];
+	m_defaultScriptFailure = j[6];
 
 	m_actionStructure.clear();
-	for (auto &jpart : j[6])
+	for (auto &jpart : j[7])
 		m_actionStructure.push_back(jpart);
 }
 

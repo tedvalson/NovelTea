@@ -20,7 +20,7 @@ Cutscene::~Cutscene()
 
 size_t Cutscene::jsonSize() const
 {
-	return 7;
+	return 8;
 }
 
 json Cutscene::toJson() const
@@ -32,6 +32,7 @@ json Cutscene::toJson() const
 	auto j = json::array({
 		m_id,
 		m_parentId,
+		m_properties,
 		m_fullScreen,
 		m_canFastForward,
 		m_speedFactor,
@@ -46,11 +47,12 @@ void Cutscene::loadJson(const json &j)
 	m_segments.clear();
 	m_id = j[0];
 	m_parentId = j[1];
-	m_fullScreen = j[2];
-	m_canFastForward = j[3];
-	m_speedFactor = j[4];
-	m_nextEntity = j[5];
-	for (auto &jsegment : j[6])
+	m_properties = j[2];
+	m_fullScreen = j[3];
+	m_canFastForward = j[4];
+	m_speedFactor = j[5];
+	m_nextEntity = j[6];
+	for (auto &jsegment : j[7])
 	{
 		auto segment = CutsceneSegment::createSegment(jsegment);
 		if (segment)

@@ -35,6 +35,7 @@ void ScriptWidget::saveData() const
 		m_script->setGlobal(ui->checkBoxGlobal->isChecked());
 		m_script->setAutorun(ui->checkBoxAutorun->isChecked());
 		m_script->setContent(ui->scriptEdit->toPlainText().toStdString());
+		m_script->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Script>(m_script, idName());
 	}
 }
@@ -55,8 +56,10 @@ void ScriptWidget::loadData()
 	ui->checkBoxGlobal->setChecked(m_script->getGlobal());
 	ui->checkBoxAutorun->setChecked(m_script->getAutorun());
 	ui->scriptEdit->setPlainText(QString::fromStdString(m_script->getContent()));
+	ui->propertyEditor->setValue(m_script->getProperties());
 
 	MODIFIER(ui->checkBoxGlobal, &QCheckBox::stateChanged);
 	MODIFIER(ui->checkBoxAutorun, &QCheckBox::stateChanged);
 	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }

@@ -112,7 +112,7 @@
      </widget>
      <widget class="QWidget" name="tabReferences">
       <attribute name="title">
-       <string>References</string>
+       <string>Properties</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <property name="spacing">
@@ -128,8 +128,11 @@
         <number>0</number>
        </property>
        <property name="bottomMargin">
-        <number>2</number>
+        <number>0</number>
        </property>
+       <item>
+        <widget class="PropertyEditor" name="propertyEditor" native="true"/>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -141,6 +144,12 @@
    <class>ScriptEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>Widgets/ScriptEdit.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>PropertyEditor</class>
+   <extends>QWidget</extends>
+   <header>Widgets/PropertyEditor.hpp</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>ActionBuildWidget</class>

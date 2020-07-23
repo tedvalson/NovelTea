@@ -24,7 +24,7 @@ bool Entity::fromJson(const json &j)
 	}
 	catch (std::exception &e)
 	{
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Entity::fromJson " << e.what() << std::endl;
 		return false;
 	}
 }

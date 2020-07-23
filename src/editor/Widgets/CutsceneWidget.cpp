@@ -266,7 +266,10 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 void CutsceneWidget::saveData() const
 {
 	if (m_cutscene)
+	{
+		m_cutscene->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Cutscene>(m_cutscene, idName());
+	}
 }
 
 void CutsceneWidget::loadData()
@@ -287,12 +290,14 @@ void CutsceneWidget::loadData()
 		m_cutscene = std::make_shared<NovelTea::Cutscene>();
 	}
 
+	ui->propertyEditor->setValue(m_cutscene->getProperties());
 	fillSettingsPropertyEditor();
 	updateCutscene();
 
 	MODIFIER(itemModel, &QStandardItemModel::dataChanged);
 	MODIFIER(itemModel, &QStandardItemModel::rowsRemoved);
 	MODIFIER(itemModel, &QStandardItemModel::rowsInserted);
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
 void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant &value)

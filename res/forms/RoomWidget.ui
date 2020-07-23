@@ -169,7 +169,7 @@
          <number>0</number>
         </property>
         <property name="bottomMargin">
-         <number>2</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="PropertyEditor" name="propertyEditor" native="true"/>

@@ -18,6 +18,7 @@ ActionWidget::ActionWidget(const std::string &idName, QWidget *parent)
 
 	MODIFIER(ui->script, &ScriptEdit::textChanged);
 	MODIFIER(ui->actionBuilder, &ActionBuildWidget::valueChanged);
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
 ActionWidget::~ActionWidget()
@@ -41,6 +42,7 @@ void ActionWidget::saveData() const
 	{
 		m_action->setScript(ui->script->toPlainText().toStdString());
 		m_action->setVerbObjectCombo(ui->actionBuilder->getValue());
+		m_action->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Action>(m_action, idName());
 	}
 }
@@ -60,6 +62,7 @@ void ActionWidget::loadData()
 
 	ui->script->setPlainText(QString::fromStdString(m_action->getScript()));
 	ui->actionBuilder->setValue(m_action->getVerbObjectCombo());
+	ui->propertyEditor->setValue(m_action->getProperties());
 }
 
 void ActionWidget::on_pushButton_clicked()

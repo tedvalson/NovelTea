@@ -161,6 +161,28 @@
        </property>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabProperties">
+      <attribute name="title">
+       <string>Properties</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="PropertyEditor" name="propertyEditor" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -170,6 +192,12 @@
    <class>ScriptEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>Widgets/ScriptEdit.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>PropertyEditor</class>
+   <extends>QWidget</extends>
+   <header>Widgets/PropertyEditor.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

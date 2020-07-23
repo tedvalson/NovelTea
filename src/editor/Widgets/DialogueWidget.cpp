@@ -35,7 +35,10 @@ EditorTabWidget::Type DialogueWidget::getType() const
 void DialogueWidget::saveData() const
 {
 	if (m_dialogue)
+	{
+		m_dialogue->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
+	}
 }
 
 void DialogueWidget::loadData()
@@ -50,6 +53,10 @@ void DialogueWidget::loadData()
 		setModified();
 		m_dialogue = std::make_shared<NovelTea::Dialogue>();
 	}
+
+	ui->propertyEditor->setValue(m_dialogue->getProperties());
+
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
 void DialogueWidget::on_actionRemoveObject_triggered()

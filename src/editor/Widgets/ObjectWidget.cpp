@@ -47,7 +47,10 @@ void ObjectWidget::fillPropertyEditor()
 void ObjectWidget::saveData() const
 {
 	if (m_object)
+	{
+		m_object->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Object>(m_object, idName());
+	}
 }
 
 void ObjectWidget::loadData()
@@ -63,7 +66,10 @@ void ObjectWidget::loadData()
 		m_object = std::make_shared<NovelTea::Object>();
 	}
 
+	ui->propertyEditor->setValue(m_object->getProperties());
 	fillPropertyEditor();
+
+	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
 void ObjectWidget::propertyChanged(QtProperty *property, const QVariant &value)
