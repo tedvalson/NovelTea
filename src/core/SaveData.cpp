@@ -1,6 +1,12 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/Action.hpp>
+#include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Dialogue.hpp>
+#include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/Script.hpp>
+#include <NovelTea/Verb.hpp>
 #include <NovelTea/Player.hpp>
 #include <fstream>
 #include <iostream>
@@ -75,6 +81,17 @@ std::string SaveData::getParentId(const std::string &entityType, const std::stri
 	return j[1];
 }
 
+void getProjectProps(json &j, const std::string &typeId)
+{
+	for (auto jitem : ProjData[typeId])
+	{
+		std::string id = jitem[ID::entityId];
+		auto &jprops = jitem[ID::entityProperties];
+		if (!jprops.empty())
+			j[typeId][id] = jprops;
+	}
+}
+
 void SaveData::reset()
 {
 	if (!Proj.isLoaded())
@@ -82,6 +99,15 @@ void SaveData::reset()
 	m_json = json::object();
 	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
 	Player::instance().reset();
+
+	auto &jprops = m_json[ID::properties];
+	getProjectProps(jprops, Action::id);
+	getProjectProps(jprops, Cutscene::id);
+	getProjectProps(jprops, Dialogue::id);
+	getProjectProps(jprops, Object::id);
+	getProjectProps(jprops, Room::id);
+	getProjectProps(jprops, Script::id);
+	getProjectProps(jprops, Verb::id);
 }
 
 json SaveData::toJson() const
