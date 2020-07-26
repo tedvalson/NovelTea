@@ -2,6 +2,7 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Object.hpp>
+#include <string>
 
 namespace NovelTea
 {
