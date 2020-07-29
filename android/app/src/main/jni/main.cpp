@@ -1,88 +1,54 @@
-#include <SFML/System.hpp>
-#include <SFML/Window.hpp>
+#include <NovelTea/Engine.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <SFML/Network.hpp>
-#include <NovelTea/ActiveText.hpp>
 
 int main(int argc, char *argv[])
 {
-    sf::VideoMode screen(sf::VideoMode::getDesktopMode());
+	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 
-    sf::RenderWindow window(screen, "");
-    window.setFramerateLimit(30);
-    
-    NovelTea::ActiveText t;
+	sf::RenderWindow window(screen, "");
+	window.setFramerateLimit(30);
+	
+	NovelTea::EngineConfig config;
+	config.width = 480;
+	config.height = 700;
+	config.fps = 30;
+	config.initialState = NovelTea::StateID::Main;
+	auto engine = new NovelTea::Engine(config);
+	engine->initialize();
 
-    sf::Font font;
-    if (!font.loadFromFile("DejaVuSerif.ttf"))
-        return EXIT_FAILURE;
+	Proj.loadFromFile("test.ntp");
+	Save.setDirectory(".");
 
-    sf::Text text("Tap anywhere to move the text." + std::to_string(3.4f), font, 64);
-    text.setFillColor(sf::Color::Black);
-    text.setPosition(10, 10);
+	// We shouldn't try drawing to the screen while in background
+	// so we'll have to track that. You can do minor background
+	// work, but keep battery life in mind.
+	bool active = true;
 
-    sf::View view = window.getDefaultView();
+	while (window.isOpen())
+	{
+		sf::Event event;
 
-    sf::Color background = sf::Color::White;
+		while (active ? window.pollEvent(event) : window.waitEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			else if (event.type == sf::Event::Resized)
+				engine->resize(event.size.width, event.size.height);
 
-    // We shouldn't try drawing to the screen while in background
-    // so we'll have to track that. You can do minor background
-    // work, but keep battery life in mind.
-    bool active = true;
-
-    while (window.isOpen())
-    {
-        sf::Event event;
-
-        while (active ? window.pollEvent(event) : window.waitEvent(event))
-        {
-            switch (event.type)
-            {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
-                case sf::Event::KeyPressed:
-                    if (event.key.code == sf::Keyboard::Escape)
-                        window.close();
-                    break;
-                case sf::Event::Resized:
-                    view.setSize(event.size.width, event.size.height);
-                    view.setCenter(event.size.width/2, event.size.height/2);
-                    window.setView(view);
-                    break;
-                case sf::Event::LostFocus:
-                    background = sf::Color::Black;
-                    break;
-                case sf::Event::GainedFocus:
-                    background = sf::Color::White;
-                    break;
-                
-                // On Android MouseLeft/MouseEntered are (for now) triggered,
-                // whenever the app loses or gains focus.
-                case sf::Event::MouseLeft:
-                    active = false;
-                    break;
-                case sf::Event::MouseEntered:
-                    active = true;
-                    break;
-                case sf::Event::TouchBegan:
-                    if (event.touch.finger == 0)
-                    {
-                        text.setPosition(event.touch.x, event.touch.y);
-                    }
-                    break;
-            }
-        }
-
-        if (active)
-        {
-            window.clear(background);
-            window.draw(text);
-            window.display();
-        }
-        else {
-            sf::sleep(sf::milliseconds(100));
-        }
-    }
+			engine->processEvent(event);
+		}
+		
+		if (active)
+		{
+			engine->update();
+			engine->render(window);
+			window.display();
+		}
+		else
+			sf::sleep(sf::milliseconds(100));
+	}
+	
+	delete engine;
+	return 0;
 }

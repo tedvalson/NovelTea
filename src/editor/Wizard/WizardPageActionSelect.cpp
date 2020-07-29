@@ -55,7 +55,6 @@ sj::JSON WizardPageActionSelect::getValue() const
 				auto typeData = treeItem->data(1);
 				if (typeData.isValid())
 				{
-					auto type = static_cast<NovelTea::EntityType>(typeData.toInt());
 //					auto type = static_cast<NovelTea::EntityType>(typeData.toInt());
 					auto id = treeItem->data(0).toString().toStdString();
 					return sj::Array(typeData.toInt(), id);

@@ -6,6 +6,7 @@ LOCAL_MODULE    := noveltea-launcher
 
 LOCAL_SRC_FILES := main.cpp
 LOCAL_STATIC_LIBRARIES := noveltea
+LOCAL_CFLAGS := -std=c++11 -fexceptions -frtti
 
 include $(BUILD_SHARED_LIBRARY)
 

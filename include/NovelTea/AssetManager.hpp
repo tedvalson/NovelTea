@@ -23,7 +23,11 @@ public:
 		if (item == manager.m_assets.end())
 		{
 			std::shared_ptr<T> asset(new T);
+#ifdef ANDROID
+			if (!asset->loadFromFile(filename))
+#else
 			if (!asset->loadFromFile("/home/android/dev/NovelTea/res/" + filename))
+#endif
 			{
 				sf::err() << "Failed to load asset: " << filename << std::endl;
 				return nullptr;

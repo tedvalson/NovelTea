@@ -124,9 +124,9 @@ bool ProjectData::loadFromFile(const std::string &filename)
 		file.read(&s[0], s.size());
 
 //		auto j = json::from_msgpack(file);
-		auto j = json::parse(file);
 //		auto j = json::parse(file);
 
+		auto j = json::Load(s);
 		auto success = fromJson(j);
 		if (success)
 			_filename = filename;

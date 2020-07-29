@@ -26,7 +26,6 @@
 
 #define REGISTER_ENTITY(className) \
 	dukglue_set_base_class<Entity, className>(m_context);  \
-	dukglue_register_function(m_context, SaveData::set<className>, "save"#className); \
 	dukglue_register_function(m_context, SaveData::get<className>, "load"#className); \
 	dukglue_register_function(m_context, SaveData::exists<className>, "exists"#className); \
 	dukglue_register_method(m_context, &className::prop, "prop"); \
@@ -67,7 +66,11 @@ void ScriptManager::reset()
 
 	sf::FileInputStream file;
 	std::string script;
+#ifdef ANDROID
+	if (file.open("core.js"))
+#else
 	if (file.open("/home/android/dev/NovelTea/core.js"))
+#endif
 	{
 		script.resize(file.getSize());
 		file.read(&script[0], script.size());
