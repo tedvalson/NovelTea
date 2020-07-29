@@ -80,7 +80,7 @@ void RoomWidget::updatePreview()
 		{
 			m_room->getObjectList()->saveChanges();
 			// Save room in case changes aren't yet saved to project
-			Save.set<NovelTea::Room>(m_room);
+			Save.set(m_room);
 			// Force reloading of room data we just saved in player
 			NovelTea::Player::instance().setRoomId(m_room->getId());
 		}
@@ -142,8 +142,9 @@ void RoomWidget::on_actionAddObject_triggered()
 	if (wizard.exec() == QDialog::Accepted)
 	{
 		auto jval = page->getValue();
-		auto idName = QString::fromStdString(jval[NovelTea::ID::selectEntityId]);
-		if (jval[NovelTea::ID::selectEntityType] == NovelTea::EntityType::Object)
+		auto idName = QString::fromStdString(jval[NovelTea::ID::selectEntityId].ToString());
+		auto type = static_cast<NovelTea::EntityType>(jval[NovelTea::ID::selectEntityType].ToInt());
+		if (type == NovelTea::EntityType::Object)
 		{
 			// Check if object already exists
 			for (int i = 0; i < ui->listWidget->count(); ++i)

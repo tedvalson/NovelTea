@@ -3,7 +3,7 @@
 
 #include <QWizardPage>
 #include <QModelIndex>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
 namespace Ui {
 class WizardPageActionSelect;
@@ -17,8 +17,8 @@ public:
 	explicit WizardPageActionSelect(QWidget *parent = 0);
 	~WizardPageActionSelect();
 
-	void setValue(nlohmann::json value);
-	nlohmann::json getValue() const;
+	void setValue(sj::JSON value);
+	sj::JSON getValue() const;
 	QModelIndex getSelectedIndex() const;
 
 	void setFilterRegExp(const QString &pattern);

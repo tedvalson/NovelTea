@@ -4,9 +4,9 @@
 #include "EditorTabWidget.hpp"
 #include <NovelTea/Script.hpp>
 #include <QWidget>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace Ui {
 class ScriptWidget;

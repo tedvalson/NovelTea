@@ -4,7 +4,7 @@
 
 namespace NovelTea {
 
-State::Context::Context(EngineConfig& config, ScriptManager& scriptManager, nlohmann::json& data)
+State::Context::Context(EngineConfig& config, ScriptManager& scriptManager, sj::JSON& data)
 : config(config)
 , scriptManager(scriptManager)
 , data(data)

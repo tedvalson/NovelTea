@@ -6,6 +6,7 @@
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <vector>
+#include <memory>
 
 namespace NovelTea
 {

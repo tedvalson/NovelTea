@@ -16,7 +16,7 @@ CutsceneSegment::~CutsceneSegment()
 std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)
 {
 	std::shared_ptr<CutsceneSegment> segment;
-	Type type = j[0];
+	Type type = static_cast<Type>(j[0].ToInt());
 
 	if (type == Type::Text)
 		segment.reset(new CutsceneTextSegment);

@@ -18,39 +18,42 @@ size_t Action::jsonSize() const
 
 json Action::toJson() const
 {
-	auto j = json::array({
+	auto jobjects = sj::Array();
+	for (auto &objectId : m_objectIds)
+		jobjects.append(objectId);
+	auto j = sj::Array(
 		m_id,
 		m_parentId,
 		m_properties,
 		m_verbId,
 		m_script,
-		m_objectIds,
-		m_positionDependent,
-	});
+		jobjects,
+		m_positionDependent
+	);
 	return j;
 }
 
 void Action::loadJson(const json &j)
 {
-	m_id = j[0];
-	m_parentId = j[1];
+	m_id = j[0].ToString();
+	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_verbId = j[3];
-	m_script = j[4];
-	m_positionDependent = j[6];
+	m_verbId = j[3].ToString();
+	m_script = j[4].ToString();
+	m_positionDependent = j[6].ToBool();
 
 	m_objectIds.clear();
-	for (auto &jobject : j[5])
-		m_objectIds.push_back(jobject);
+	for (auto &jobject : j[5].ArrayRange())
+		m_objectIds.push_back(jobject.ToString());
 }
 
 void Action::setVerbObjectCombo(const json &j)
 {
-	if (!j.is_array() || j.size() != 2 ||
-			!j[1].is_array() || j[1].empty())
+	if (!j.IsArray() || j.size() != 2 ||
+			!j[1].IsArray() || j[1].IsEmpty())
 		return;
 
-	auto verb = Save.get<Verb>(j[0]);
+	auto verb = Save.get<Verb>(j[0].ToString());
 	if (!verb)
 		return;
 
@@ -58,39 +61,39 @@ void Action::setVerbObjectCombo(const json &j)
 	if (j[1].size() != objectCount)
 		return;
 
-	m_verbId = j[0];
+	m_verbId = j[0].ToString();
 	m_objectIds.clear();
-	for (auto &jobjectId : j[1])
-		m_objectIds.push_back(jobjectId);
+	for (auto &jobjectId : j[1].ArrayRange())
+		m_objectIds.push_back(jobjectId.ToString());
 }
 
 json Action::getVerbObjectCombo() const
 {
-	auto j = json::array({m_verbId, {}});
+	auto j = sj::Array(m_verbId, sj::Array());
 	for (auto &objectId : m_objectIds)
-		j[1].push_back(objectId);
+		j[1].append(objectId);
 	return j;
 }
 
 std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
 	// TODO: check SaveData
-	for (auto &item : ProjData[Action::id].items())
+	for (auto &item : ProjData[Action::id].ObjectRange())
 	{
-		auto j = item.value();
-		if (j[3] == verbId)
+		auto j = item.second;
+		if (j[3].ToString() == verbId)
 		{
 			auto match = true;
 			auto &jobjects = j[5];
-			bool positionDependent = j[6];
+			bool positionDependent = j[6].ToBool();
 
 			if (objectIds.size() != jobjects.size())
 				continue;
 
 			for (int i = 0; i < jobjects.size(); ++i)
 			{
-				if ((positionDependent && objectIds[i] != jobjects[i]) ||
-					(!positionDependent && std::find(objectIds.begin(), objectIds.end(), jobjects[i]) == objectIds.end()))
+				if ((positionDependent && objectIds[i] != jobjects[i].ToString()) ||
+					(!positionDependent && std::find(objectIds.begin(), objectIds.end(), jobjects[i].ToString()) == objectIds.end()))
 				{
 					match = false;
 					break;
@@ -98,7 +101,7 @@ std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vecto
 			}
 
 			if (match)
-				return Save.get<Action>(item.key());
+				return Save.get<Action>(item.first);
 		}
 	}
 

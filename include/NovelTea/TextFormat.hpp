@@ -37,19 +37,9 @@ private:
 	sf::Color _color = sf::Color::Black;
 };
 
-} // namespace NovelTea
+sf::Color jsonToColor(const json &j);
+json colorToJson(const sf::Color &color);
 
-namespace nlohmann {
-template<typename BasicJsonType>
-inline void to_json(BasicJsonType& j, const sf::Color &color)
-{
-	j = json::array({color.r, color.g, color.b, color.a});
-}
-template<typename BasicJsonType>
-void from_json(const BasicJsonType& j, sf::Color &color)
-{
-	color = sf::Color(j[0], j[1], j[2], j[3]);
-}
-} // namespace nlohmann
+} // namespace NovelTea
 
 #endif // NOVELTEA_TEXTFORMAT_HPP

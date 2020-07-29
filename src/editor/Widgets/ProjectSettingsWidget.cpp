@@ -91,12 +91,12 @@ void ProjectSettingsWidget::saveData() const
 void ProjectSettingsWidget::loadData()
 {
 	auto &j = ProjData;
-	ui->lineEditName->setText(QString::fromStdString(j.value(ID::projectName, "Project Name")));
-	ui->lineEditVersion->setText(QString::fromStdString(j.value(ID::projectVersion, "1.0")));
-	ui->lineEditAuthor->setText(QString::fromStdString(j.value(ID::projectAuthor, "Project Author")));
-	ui->lineEditWebsite->setText(QString::fromStdString(j.value(ID::projectWebsite, "")));
+	ui->lineEditName->setText(QString::fromStdString(j[ID::projectName].ToString()));
+	ui->lineEditVersion->setText(QString::fromStdString(j[ID::projectVersion].ToString()));
+	ui->lineEditAuthor->setText(QString::fromStdString(j[ID::projectAuthor].ToString()));
+	ui->lineEditWebsite->setText(QString::fromStdString(j[ID::projectWebsite].ToString()));
 
-	auto entryPoint = j.value(ID::entrypointEntity, json::array());
+	auto entryPoint = j[ID::entrypointEntity];
 	ui->actionSelect->setValue(entryPoint);
 
 	ui->listFonts->clear();
@@ -118,7 +118,7 @@ void ProjectSettingsWidget::loadData()
 		addFont(font.familyName());
 	}
 
-	makeFontDefault(j.value(ID::projectFontDefault, 0));
+	makeFontDefault(j[ID::projectFontDefault].ToInt());
 }
 
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)

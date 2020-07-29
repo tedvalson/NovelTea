@@ -50,8 +50,8 @@ void Player::pushNextEntity(std::shared_ptr<Entity> entity)
 
 void Player::pushNextEntityJson(json jentity)
 {
-	auto type = jentity[ID::selectEntityType];
-	auto idName = jentity[ID::selectEntityId];
+	auto type = static_cast<EntityType>(jentity[ID::selectEntityType].ToInt());
+	auto idName = jentity[ID::selectEntityId].ToString();
 	if (type == EntityType::Cutscene)
 		pushNextEntity(Save.get<Cutscene>(idName));
 	else if (type == EntityType::Room)

@@ -2,9 +2,9 @@
 #define NOVELTEAWIDGET_H
 
 #include "SFMLWidget.h"
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 
 namespace NovelTea {

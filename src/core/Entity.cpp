@@ -5,7 +5,7 @@ namespace NovelTea
 {
 
 Entity::Entity()
-	: m_properties(json::object())
+	: m_properties(sj::Object())
 	, m_propertyList(std::make_shared<PropertyList>())
 {
 
@@ -13,7 +13,7 @@ Entity::Entity()
 
 bool Entity::fromJson(const json &j)
 {
-	if (!j.is_array() || j.size() != jsonSize())
+	if (!j.IsArray() || j.size() != jsonSize())
 		return false;
 
 	try

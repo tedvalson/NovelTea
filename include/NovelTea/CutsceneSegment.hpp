@@ -2,6 +2,7 @@
 #define NOVELTEA_CUTSCENESEGMENT_HPP
 
 #include <NovelTea/JsonSerializable.hpp>
+#include <memory>
 
 namespace NovelTea
 {

@@ -29,6 +29,7 @@ set(SOURCE_FILES
 	${SRCROOT}/CutsceneSegment.cpp
 	${SRCROOT}/CutsceneTextSegment.cpp
 	${SRCROOT}/ActiveText.cpp
+	${SRCROOT}/json.cpp
 	${SRCROOT}/TextFragment.cpp
 	${SRCROOT}/TextBlock.cpp
 	${SRCROOT}/Utils.cpp
@@ -36,6 +37,7 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/NinePatch.cpp
 	${SRCROOT}/GUI/Scrollable.cpp
 	${SRCROOT}/GUI/ScrollBar.cpp
+	
 	${PROJECT_SOURCE_DIR}/external/duktape.c
 	${TWEEN_ENGINE_SOURCE}
 )

@@ -4,7 +4,7 @@
 #include "StateIdentifiers.hpp"
 #include <SFML/Window/Event.hpp>
 #include <NovelTea/ScriptManager.hpp>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -30,10 +30,10 @@ public:
 
 	struct Context
 	{
-		Context(EngineConfig& config, ScriptManager& scriptManager, nlohmann::json& data);
+		Context(EngineConfig& config, ScriptManager& scriptManager, sj::JSON& data);
 		EngineConfig& config;
 		ScriptManager& scriptManager;
-		nlohmann::json& data;
+		sj::JSON& data;
 	};
 
 	State(StateStack& stack, Context& context, StateCallback callback);

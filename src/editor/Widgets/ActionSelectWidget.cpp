@@ -7,7 +7,7 @@
 ActionSelectWidget::ActionSelectWidget(QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::ActionSelectWidget),
-	m_value(nlohmann::json::array({-1,""}))
+	m_value(sj::Array(-1,""))
 {
 	ui->setupUi(this);
 }
@@ -17,15 +17,15 @@ ActionSelectWidget::~ActionSelectWidget()
 	delete ui;
 }
 
-void ActionSelectWidget::setValue(nlohmann::json value)
+void ActionSelectWidget::setValue(sj::JSON value)
 {
 	if (getValue() != value)
 	{
 		m_value = value;
 		emit valueChanged(value);
 
-		auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::selectEntityType]);
-		auto idText = QString::fromStdString(value[NovelTea::ID::selectEntityId]).simplified();
+		auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::selectEntityType].ToInt());
+		auto idText = QString::fromStdString(value[NovelTea::ID::selectEntityId].ToString()).simplified();
 		if (idText.length() > 30)
 		{
 			idText.truncate(28);
@@ -48,7 +48,7 @@ void ActionSelectWidget::setValue(nlohmann::json value)
 	}
 }
 
-nlohmann::json ActionSelectWidget::getValue() const
+sj::JSON ActionSelectWidget::getValue() const
 {
 	return m_value;
 }

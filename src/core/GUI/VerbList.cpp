@@ -109,12 +109,12 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 {
 	m_verbs.clear();
 
-	for (auto &item : Save.data()[Verb::id].items())
-		addVerbOption(item.key());
-	for (auto &item : ProjData[Verb::id].items())
+	for (auto &item : Save.data()[Verb::id].ObjectRange())
+		addVerbOption(item.first);
+	for (auto &item : ProjData[Verb::id].ObjectRange())
 	{
-		auto verbId = item.key();
-		if (!Save.data()[Verb::id].contains(verbId))
+		auto verbId = item.first;
+		if (!Save.data()[Verb::id].hasKey(verbId))
 			addVerbOption(verbId);
 	}
 
@@ -151,7 +151,7 @@ void VerbList::setShowHideCallback(VerbShowHideCallback callback)
 
 void VerbList::setScroll(float position)
 {
-	m_scrollPos = std::round(position);
+	m_scrollPos = round(position);
 	repositionItems();
 }
 

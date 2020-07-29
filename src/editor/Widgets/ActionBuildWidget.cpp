@@ -9,7 +9,7 @@
 ActionBuildWidget::ActionBuildWidget(QWidget *parent)
 : QWidget(parent)
 , ui(new Ui::ActionBuildWidget)
-, m_value(json::array({"",{}}))
+, m_value(sj::Array("", sj::Array()))
 {
 	ui->setupUi(this);
 	refresh();
@@ -23,22 +23,22 @@ ActionBuildWidget::~ActionBuildWidget()
 	delete ui;
 }
 
-void ActionBuildWidget::setValue(nlohmann::json value)
+void ActionBuildWidget::setValue(sj::JSON value)
 {
 	if (getValue() != value)
 	{
-		if (!value.is_array() || value.size() != 2 ||
-				!value[1].is_array() || value[1].empty())
+		if (!value.IsArray() || value.size() != 2 ||
+				!value[1].IsArray() || value[1].IsEmpty())
 			return;
 
-		auto strVerb = QString::fromStdString(value[0]);
+		auto strVerb = QString::fromStdString(value[0].ToString());
 		ui->comboVerb->setCurrentIndex(ui->comboVerb->findText(strVerb));
 		if (value[1].size() != m_comboBoxes.size())
 			return;
 
 		for (auto i = 0; i < m_comboBoxes.size(); ++i)
 		{
-			auto index = m_comboBoxes[i]->findText(QString::fromStdString(value[1][i]));
+			auto index = m_comboBoxes[i]->findText(QString::fromStdString(value[1][i].ToString()));
 			m_comboBoxes[i]->setCurrentIndex(index);
 		}
 
@@ -48,7 +48,7 @@ void ActionBuildWidget::setValue(nlohmann::json value)
 	}
 }
 
-nlohmann::json ActionBuildWidget::getValue() const
+sj::JSON ActionBuildWidget::getValue() const
 {
 	return m_value;
 }
@@ -121,15 +121,15 @@ void ActionBuildWidget::comboBox_currentIndexChanged(const QString &value)
 {
 	if (isValid())
 	{
-		auto j = json::array();
-		auto jobjects = json::array();
+		auto j = sj::Array();
+		auto jobjects = sj::Array();
 		for (auto &comboBox : m_comboBoxes)
 		{
 			auto objectId = comboBox->currentText().toStdString();
-			jobjects.push_back(objectId);
+			jobjects.append(objectId);
 		}
-		j.push_back(ui->comboVerb->currentText().toStdString());
-		j.push_back(jobjects);
+		j.append(ui->comboVerb->currentText().toStdString());
+		j.append(jobjects);
 		setValue(j);
 	}
 

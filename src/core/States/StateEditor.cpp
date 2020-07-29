@@ -79,29 +79,30 @@ void *StateEditor::processData(void *data)
 {
 	auto &jsonData = *static_cast<json*>(data);
 	auto resp = new json;
-	auto event = jsonData["event"];
+	auto event = jsonData["event"].ToString();
 
 	if (event == "mode")
 	{
-		m_mode = jsonData["mode"];
+		m_mode = static_cast<StateEditorMode>(jsonData["mode"].ToInt());
 	}
 	else if (m_mode == StateEditorMode::Cutscene)
 	{
 		if (event == "cutscene")
 		{
-			auto cutscene = std::make_shared<Cutscene>(jsonData["cutscene"]);
+			auto cutscene = std::make_shared<Cutscene>();
+			cutscene->fromJson(jsonData["cutscene"]);
 			m_cutsceneRenderer.setCutscene(cutscene);
 			m_cutsceneRenderer.setPosition(10.f, 10.f);
 		}
 		else if (event == "setPlaybackTime")
 		{
-			int ms = jsonData["value"];
+			auto ms = jsonData["value"].ToInt();
 			m_cutsceneRenderer.reset();
 			m_cutsceneRenderer.update(0.001f * ms);
 		}
 		else if (event == "update")
 		{
-			size_t deltaMs = jsonData["delta"];
+			auto deltaMs = jsonData["delta"].ToInt();
 			auto delta = 0.001f * deltaMs;
 			m_cutsceneRenderer.update(delta);
 		}
@@ -110,7 +111,7 @@ void *StateEditor::processData(void *data)
 	{
 		if (event == "text")
 		{
-			std::string data = jsonData["data"];
+			auto data = jsonData["data"].ToString();
 			ScriptMan.reset();
 			auto r = ScriptMan.runInClosure<std::string>(data);
 

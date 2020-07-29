@@ -19,7 +19,10 @@ size_t Verb::jsonSize() const
 
 json Verb::toJson() const
 {
-	auto j = json::array({
+	auto jactionStruct = sj::Array();
+	for (auto &s : m_actionStructure)
+		jactionStruct.append(s);
+	auto j = sj::Array(
 		m_id,
 		m_parentId,
 		m_properties,
@@ -27,24 +30,24 @@ json Verb::toJson() const
 		m_objectCount,
 		m_defaultScriptSuccess,
 		m_defaultScriptFailure,
-		m_actionStructure,
-	});
+		jactionStruct
+	);
 	return j;
 }
 
 void Verb::loadJson(const json &j)
 {
-	m_id = j[0];
-	m_parentId = j[1];
+	m_id = j[0].ToString();
+	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_name = j[3];
-	m_objectCount = j[4];
-	m_defaultScriptSuccess = j[5];
-	m_defaultScriptFailure = j[6];
+	m_name = j[3].ToString();
+	m_objectCount = j[4].ToInt();
+	m_defaultScriptSuccess = j[5].ToString();
+	m_defaultScriptFailure = j[6].ToString();
 
 	m_actionStructure.clear();
-	for (auto &jpart : j[7])
-		m_actionStructure.push_back(jpart);
+	for (auto &jpart : j[7].ArrayRange())
+		m_actionStructure.push_back(jpart.ToString());
 }
 
 std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr) const

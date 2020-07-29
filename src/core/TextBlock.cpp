@@ -11,20 +11,20 @@ TextBlock::TextBlock()
 
 json TextBlock::toJson() const
 {
-	json jfrags = json::array();
+	json jfrags = sj::Array();
 	for (auto &fragment : m_textFragments)
-		jfrags.push_back(*fragment);
+		jfrags.append(fragment->toJson());
 
-	return json::array({
-		m_alignment,
+	return sj::Array(
+		static_cast<int>(m_alignment),
 		jfrags
-	});
+	);
 }
 
 bool TextBlock::fromJson(const json &j)
 {
-	m_alignment = j[0];
-	for (auto &jfrag : j[1])
+	m_alignment = static_cast<Alignment>(j[0].ToInt());
+	for (auto &jfrag : j[1].ArrayRange())
 	{
 		auto fragment = std::make_shared<TextFragment>();
 		if (fragment->fromJson(jfrag))

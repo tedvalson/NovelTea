@@ -3,7 +3,7 @@
 
 #include <NovelTea/Utils.hpp>
 #include <dukglue/dukglue.h>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 #include <vector>
 
 namespace NovelTea
@@ -26,7 +26,7 @@ public:
 private:
 	std::string m_attachedType;
 	std::string m_attachedId;
-	nlohmann::json m_properties;
+	sj::JSON m_properties;
 };
 
 } // namespace NovelTea

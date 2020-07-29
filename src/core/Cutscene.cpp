@@ -9,7 +9,7 @@ Cutscene::Cutscene()
 	: m_fullScreen(true)
 	, m_canFastForward(true)
 	, m_speedFactor(1.f)
-	, m_nextEntity(json::array({-1,""}))
+	, m_nextEntity(sj::Array(-1,""))
 {
 }
 
@@ -25,11 +25,11 @@ size_t Cutscene::jsonSize() const
 
 json Cutscene::toJson() const
 {
-	auto jsegments = json::array();
+	auto jsegments = sj::Array();
 	for (auto &seg : m_segments)
-		jsegments.push_back(*seg);
+		jsegments.append(seg->toJson());
 
-	auto j = json::array({
+	auto j = sj::Array(
 		m_id,
 		m_parentId,
 		m_properties,
@@ -37,22 +37,22 @@ json Cutscene::toJson() const
 		m_canFastForward,
 		m_speedFactor,
 		m_nextEntity,
-		jsegments,
-	});
+		jsegments
+	);
 	return j;
 }
 
 void Cutscene::loadJson(const json &j)
 {
 	m_segments.clear();
-	m_id = j[0];
-	m_parentId = j[1];
+	m_id = j[0].ToString();
+	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_fullScreen = j[3];
-	m_canFastForward = j[4];
-	m_speedFactor = j[5];
+	m_fullScreen = j[3].ToBool();
+	m_canFastForward = j[4].ToBool();
+	m_speedFactor = j[5].ToFloat();
 	m_nextEntity = j[6];
-	for (auto &jsegment : j[7])
+	for (auto &jsegment : j[7].ArrayRange())
 	{
 		auto segment = CutsceneSegment::createSegment(jsegment);
 		if (segment)

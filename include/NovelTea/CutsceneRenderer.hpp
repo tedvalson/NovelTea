@@ -5,7 +5,8 @@
 #include <TweenEngine/TweenManager.h>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/System/Time.hpp>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
+#include <memory>
 
 namespace NovelTea
 {

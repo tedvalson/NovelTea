@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QComboBox>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
 namespace Ui {
 class ActionBuildWidget;
@@ -17,8 +17,8 @@ public:
 	explicit ActionBuildWidget(QWidget *parent = 0);
 	~ActionBuildWidget();
 
-	void setValue(nlohmann::json value);
-	nlohmann::json getValue() const;
+	void setValue(sj::JSON value);
+	sj::JSON getValue() const;
 
 public slots:
 	void refresh();
@@ -28,13 +28,13 @@ private slots:
 	void comboBox_currentIndexChanged(const QString &value);
 
 signals:
-	void valueChanged(nlohmann::json value);
+	void valueChanged(sj::JSON value);
 
 private:
 	bool isValid() const;
 
 	Ui::ActionBuildWidget *ui;
-	nlohmann::json m_value;
+	sj::JSON m_value;
 
 	std::vector<QComboBox*> m_comboBoxes;
 	QStringList m_objectStrings;

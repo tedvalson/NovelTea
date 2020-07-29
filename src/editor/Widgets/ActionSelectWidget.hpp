@@ -2,7 +2,7 @@
 #define ACTIONSELECTWIDGET_HPP
 
 #include <QWidget>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
 namespace Ui {
 class ActionSelectWidget;
@@ -16,18 +16,18 @@ public:
 	explicit ActionSelectWidget(QWidget *parent = 0);
 	~ActionSelectWidget();
 
-	void setValue(nlohmann::json value);
-	nlohmann::json getValue() const;
+	void setValue(sj::JSON value);
+	sj::JSON getValue() const;
 
 private slots:
 	void on_pushButton_clicked();
 
 signals:
-	void valueChanged(nlohmann::json value);
+	void valueChanged(sj::JSON value);
 
 private:
 	Ui::ActionSelectWidget *ui;
-	nlohmann::json m_value;
+	sj::JSON m_value;
 };
 
 #endif // ACTIONSELECTWIDGET_HPP

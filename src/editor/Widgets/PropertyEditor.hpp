@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "QtPropertyBrowser/qtpropertymanager.h"
 #include "QtPropertyBrowser/qtvariantproperty.h"
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
 namespace Ui {
 class PropertyEditor;
@@ -18,8 +18,8 @@ public:
 	explicit PropertyEditor(QWidget *parent = 0);
 	~PropertyEditor();
 
-	void setValue(nlohmann::json value);
-	nlohmann::json getValue() const;
+	void setValue(sj::JSON value);
+	sj::JSON getValue() const;
 
 protected:
 	void addProperty(int type);
@@ -34,7 +34,7 @@ private slots:
 	void on_propertyBrowser_currentItemChanged(QtBrowserItem *item);
 
 signals:
-	void valueChanged(nlohmann::json value);
+	void valueChanged(sj::JSON value);
 
 private:
 	Ui::PropertyEditor *ui;
@@ -42,7 +42,7 @@ private:
 	QtVariantPropertyManager *m_variantManager;
 	QtVariantEditorFactory *m_variantFactory;
 
-	nlohmann::json m_value;
+	sj::JSON m_value;
 };
 
 #endif // PROPERTYEDITOR_HPP

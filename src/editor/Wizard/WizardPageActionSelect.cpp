@@ -28,13 +28,13 @@ WizardPageActionSelect::~WizardPageActionSelect()
 	delete ui;
 }
 
-void WizardPageActionSelect::setValue(nlohmann::json value)
+void WizardPageActionSelect::setValue(sj::JSON value)
 {
-	auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::selectEntityType]);
+	auto type = static_cast<NovelTea::EntityType>(value[NovelTea::ID::selectEntityType].ToInt());
 	if (type == NovelTea::EntityType::CustomScript)
 	{
 		ui->radioCustom->setChecked(true);
-		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::selectEntityId]));
+		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::selectEntityId].ToString()));
 	}
 	else if (type != NovelTea::EntityType::Invalid)
 	{
@@ -42,7 +42,7 @@ void WizardPageActionSelect::setValue(nlohmann::json value)
 	}
 }
 
-nlohmann::json WizardPageActionSelect::getValue() const
+sj::JSON WizardPageActionSelect::getValue() const
 {
 	if (isComplete())
 	{
@@ -56,16 +56,17 @@ nlohmann::json WizardPageActionSelect::getValue() const
 				if (typeData.isValid())
 				{
 					auto type = static_cast<NovelTea::EntityType>(typeData.toInt());
+//					auto type = static_cast<NovelTea::EntityType>(typeData.toInt());
 					auto id = treeItem->data(0).toString().toStdString();
-					return json::array({type, id});
+					return sj::Array(typeData.toInt(), id);
 				}
 			}
 		}
 		if (ui->radioCustom->isChecked())
-			return json::array({NovelTea::EntityType::CustomScript, ui->scriptEdit->toPlainText().toStdString()});
+			return sj::Array(static_cast<int>(NovelTea::EntityType::CustomScript), ui->scriptEdit->toPlainText().toStdString());
 	}
 
-	return json::array({-1,""});
+	return sj::Array(-1,"");
 }
 
 QModelIndex WizardPageActionSelect::getSelectedIndex() const

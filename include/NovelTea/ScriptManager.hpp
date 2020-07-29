@@ -2,7 +2,7 @@
 #define NOVELTEA_SCRIPTMANAGER_HPP
 
 #include <dukglue/dukglue.h>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
 namespace NovelTea
 {
@@ -61,7 +61,7 @@ protected:
 	void registerGlobals();
 
 	void runAutorunScripts();
-	void checkAutorun(const nlohmann::json &j);
+	void checkAutorun(const sj::JSON &j);
 
 private:
 	duk_context *m_context;

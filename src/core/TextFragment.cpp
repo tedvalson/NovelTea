@@ -10,16 +10,16 @@ TextFragment::TextFragment()
 
 json TextFragment::toJson() const
 {
-	return json::array({
+	return sj::Array(
 		Proj.addTextFormat(m_textFormat),
 		m_text
-	});
+	);
 }
 
 bool TextFragment::fromJson(const json &j)
 {
-	m_textFormat = Proj.textFormat(j[0]);
-	m_text = j[1];
+	m_textFormat = Proj.textFormat(j[0].ToInt());
+	m_text = j[1].ToString();
 	return true;
 }
 

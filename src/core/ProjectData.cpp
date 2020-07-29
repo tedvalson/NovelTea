@@ -3,6 +3,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
+#include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -29,22 +30,22 @@ void ProjectData::newProject()
 {
 	TextFormat textFormat;
 
-	_json = json::object({
-		{ID::engineVersion, m_engineVersion},
-		{ID::projectName, "Project Name"},
-		{ID::projectVersion, "1.0"},
-		{ID::projectAuthor, "Author Name"},
-		{ID::projectWebsite, ""},
-		{ID::textFormats, json::array({textFormat})},
+	_json = json({
+		ID::engineVersion, m_engineVersion,
+		ID::projectName, "Project Name",
+		ID::projectVersion, "1.0",
+		ID::projectAuthor, "Author Name",
+		ID::projectWebsite, "",
+		ID::textFormats, sj::Array(textFormat.toJson())
 	});
 
-	_json[ID::projectFonts] = json::array({0});
+	_json[ID::projectFonts] = sj::Array(0);
 	fromJson(_json);
 }
 
 void ProjectData::closeProject()
 {
-	_json = json::array();
+	_json = sj::Array();
 	_loaded = false;
 }
 
@@ -55,9 +56,11 @@ bool ProjectData::isLoaded() const
 
 bool ProjectData::isValid(std::string &errorMessage) const
 {
-	auto entryPoint = data().value(ID::entrypointEntity, json::array({-1,""}));
+	auto entryPoint = sj::Array(-1, "");
+	if (_json.hasKey(ID::entrypointEntity))
+		entryPoint = _json[ID::entrypointEntity];
 //	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
-	if (entryPoint[1].empty())
+	if (entryPoint[1].IsEmpty())
 	{
 		errorMessage = "No valid entry point defined in project settings.";
 		return false;
@@ -112,11 +115,18 @@ bool ProjectData::loadFromFile(const std::string &filename)
 {
 	try
 	{
-		std::ifstream file(filename);
-		if (!file.is_open())
+		sf::FileInputStream file;
+		std::string s;
+		if (!file.open(filename))
 			return false;
+
+		s.resize(file.getSize());
+		file.read(&s[0], s.size());
+
 //		auto j = json::from_msgpack(file);
 		auto j = json::parse(file);
+//		auto j = json::parse(file);
+
 		auto success = fromJson(j);
 		if (success)
 			_filename = filename;
@@ -147,9 +157,9 @@ json ProjectData::toJson() const
 //	});
 
 	// TextFormat list
-	json jtextformats = json::array();
+	json jtextformats = sj::Array();
 	for (auto &format : _textFormats)
-		jtextformats.push_back(format);
+		jtextformats.append(format.toJson());
 
 	// Cutscene list
 //	json jcutscenes = json::array();
@@ -174,13 +184,17 @@ bool ProjectData::fromJson(const json &j)
 	_textFormats.clear();
 	m_fonts.clear();
 
-	for (auto &jformat : j[ID::textFormats])
-		_textFormats.push_back(jformat);
+	for (auto &jformat : j[ID::textFormats].ArrayRange())
+	{
+		TextFormat format;
+		format.fromJson(jformat);
+		_textFormats.push_back(format);
+	}
 
-	for (auto &jfont : j[ID::projectFonts])
+	for (auto &jfont : j[ID::projectFonts].ArrayRange())
 	{
 		auto font = AssetManager<sf::Font>::get("fonts/DejaVuSerif.ttf");
-		std::cout << "Loading font: " << jfont << std::endl;
+		std::cout << "Loading font: " << jfont.ToString() << std::endl;
 		if (font)
 			m_fonts.push_back(font);
 	}

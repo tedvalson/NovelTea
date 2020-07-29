@@ -68,8 +68,8 @@ void ObjectList::attach(const std::string &type, const std::string &id)
 	// Otherwise, save the existing ones.
 	if (m_objects.empty())
 	{
-		for (auto &jobjectId : j)
-			m_objects.push_back(Save.get<Object>(jobjectId));
+		for (auto &jobjectId : j.ArrayRange())
+			m_objects.push_back(Save.get<Object>(jobjectId.ToString()));
 	}
 	else
 		saveChanges();
@@ -80,10 +80,10 @@ void ObjectList::saveChanges()
 	if (m_attachedType.empty())
 		return;
 
-	auto jobjects = json::array();
+	auto jobjects = sj::Array();
 	for (auto &object : m_objects)
 		if (!object->getId().empty())
-			jobjects.push_back(object->getId());
+			jobjects.append(object->getId());
 
 	Save.data()[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
 }

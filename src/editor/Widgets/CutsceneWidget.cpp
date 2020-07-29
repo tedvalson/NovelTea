@@ -408,7 +408,7 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 
 	auto timeMs = NovelTea::Engine::getSystemTimeMs();
 	auto deltaMs = timeMs - m_lastTimeMs;
-	auto jdata = json::object({{"event","update"}, {"delta",deltaMs}});
+	auto jdata = json({"event","update", "delta",deltaMs});
 	ui->preview->processData(jdata);
 
 	ui->horizontalSlider->setValue(currentValue + deltaMs);
@@ -434,7 +434,7 @@ void CutsceneWidget::updateCutscene()
 	auto newValue = static_cast<float>(oldValue) / oldMax * newMax;
 	ui->horizontalSlider->setMaximum(newMax);
 
-	auto jdata = json::object({{"event","cutscene"}, {"cutscene",*m_cutscene}});
+	auto jdata = json({"event","cutscene", "cutscene",m_cutscene->toJson()});
 	ui->preview->processData(jdata);
 
 	if (oldValue > 0)
@@ -446,7 +446,7 @@ void CutsceneWidget::updateCutscene()
 		}
 		else
 		{
-			jdata = json::object({{"event","setPlaybackTime"}, {"value",oldValue}});
+			jdata = json({"event","setPlaybackTime", "value",oldValue});
 			ui->preview->processData(jdata);
 		}
 	}
@@ -504,7 +504,7 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 	if (m_cutscenePlaying)
 		return;
 
-	json data = json::object({{"event","setPlaybackTime"}, {"value",value}});
+	json data = json({"event","setPlaybackTime", "value",value});
 	ui->preview->processData(data);
 }
 

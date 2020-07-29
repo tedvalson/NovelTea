@@ -6,12 +6,12 @@
 #include <QWidget>
 #include <QMenu>
 #include <QStandardItemModel>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 #include "QtPropertyBrowser/qtpropertymanager.h"
 #include "QtPropertyBrowser/qtvariantproperty.h"
 #include "QtPropertyBrowser/qttreepropertybrowser.h"
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace Ui {
 class ObjectWidget;

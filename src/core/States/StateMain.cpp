@@ -22,15 +22,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_cutsceneSpeed(1.f)
 {
 	ScriptMan.reset();
-	font.loadFromFile("/home/android/dev/NovelTea/res/fonts/DejaVuSans.ttf");
-
-	text.setFont(font);
-	text.setCharacterSize(30);
-	text.setString("Hello World!");
-	text.setFillColor(sf::Color::Black);
-	text.setOutlineColor(sf::Color::Yellow);
-	text.setOutlineThickness(1.f);
-	text.setPosition(0.f, 250.f);
 
 	m_actionBuilder.setPosition(10.f, 500.f);
 	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
@@ -77,7 +68,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// TODO: check SaveData for last entrypoint
 	auto &saveEntryPoint = Save.data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
-	if (saveEntryPoint.empty())
+	if (saveEntryPoint.IsEmpty())
 		setMode(projEntryPoint);
 	else
 		setMode(saveEntryPoint);
@@ -119,8 +110,8 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 void StateMain::setMode(const json &jEntity)
 {
 	auto mode = Mode::Nothing;
-	auto type = jEntity[ID::selectEntityType];
-	auto idName = jEntity[ID::selectEntityId];
+	auto type = static_cast<EntityType>(jEntity[ID::selectEntityType].ToInt());
+	auto idName = jEntity[ID::selectEntityId].ToString();
 
 	if (type == EntityType::Cutscene)
 		mode = Mode::Cutscene;

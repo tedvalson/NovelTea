@@ -72,7 +72,7 @@ bool MainWindow::loadProject(const QString &filename)
 		{
 			treeModel->loadProject(Proj);
 			warnIfInvalid();
-			setWindowTitle(QString::fromStdString(ProjData[NovelTea::ID::projectName]) + " - NovelTea Editor");
+			setWindowTitle(QString::fromStdString(ProjData[NovelTea::ID::projectName].ToString()) + " - NovelTea Editor");
 			return true;
 		}
 	}
@@ -338,7 +338,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 void MainWindow::on_actionProjectSettings_triggered()
 {
 	auto w = new ProjectSettingsWidget;
-	addEditorTab(w);
+	addEditorTab(w, true);
 }
 
 void MainWindow::on_actionOpenProject_triggered()
@@ -417,7 +417,7 @@ void MainWindow::on_actionRename_triggered()
 		auto existingNewIndex = getEditorTabIndex(selectedType, newName);
 		auto &j = getDataFromTabType(selectedType);
 
-		if (existingNewIndex >= 0 || j.contains(newName))
+		if (existingNewIndex >= 0 || j.hasKey(newName))
 		{
 			QMessageBox::critical(this, "Failed to rename",
 				QString::fromStdString("\"" + newName + "\" already exists."));

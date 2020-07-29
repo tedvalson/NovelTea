@@ -8,6 +8,7 @@
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Player.hpp>
+#include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -44,11 +45,16 @@ bool SaveData::loadFromFile(const std::string &filename)
 {
 	try
 	{
-		std::ifstream file(filename);
-		if (!file.is_open())
+		sf::FileInputStream file;
+		std::string s;
+		if (!file.open(filename))
 			return false;
+
+		s.resize(file.getSize());
+		file.read(&s[0], s.size());
+		auto j = json::Load(s);
+
 //		auto j = json::from_msgpack(file);
-		auto j = json::parse(file);
 		auto success = fromJson(j);
 		if (success)
 			m_filename = filename;
@@ -74,21 +80,20 @@ std::string SaveData::getParentId(const std::string &entityType, const std::stri
 		return std::string();
 
 	json j;
-	if (Save.data()[entityType].contains(entityId))
+	if (Save.data()[entityType].hasKey(entityId))
 		j = Save.data()[entityType][entityId];
 	else
 		j = ProjData[entityType][entityId];
-	return j[1];
+	return j[1].ToString();
 }
 
 void getProjectProps(json &j, const std::string &typeId)
 {
-	for (auto jitem : ProjData[typeId])
+	for (auto &item : ProjData[typeId].ObjectRange())
 	{
-		std::string id = jitem[ID::entityId];
-		auto &jprops = jitem[ID::entityProperties];
-		if (!jprops.empty())
-			j[typeId][id] = jprops;
+		auto &jprops = item.second[ID::entityProperties];
+		if (!jprops.IsEmpty())
+			j[typeId][item.first] = jprops;
 	}
 }
 
@@ -96,7 +101,7 @@ void SaveData::reset()
 {
 	if (!Proj.isLoaded())
 		return;
-	m_json = json::object();
+	m_json = sj::Object();
 	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
 	Player::instance().reset();
 
@@ -138,22 +143,22 @@ json &SaveData::data()
 
 void SaveData::writeVariables(const std::string &jsonData)
 {
-	auto j = json::parse(jsonData);
-	for (auto &item : j.items())
+	auto j = json::Load(jsonData);
+	for (auto &item : j.ObjectRange())
 	{
-		m_json[ID::variables][item.key()] = item.value();
+		m_json[ID::variables][item.first] = item.second;
 	}
 }
 
 std::string SaveData::readVariables(const std::string &jsonData)
 {
-	auto j = json::parse(jsonData);
-	auto result = json::object();
-	for (auto &v : j)
+	auto j = json::Load(jsonData);
+	auto result = sj::Object();
+	for (auto &v : j.ArrayRange())
 	{
-		std::string varName = v;
+		auto varName = v.ToString();
 		auto d = m_json[ID::variables];
-		if (d.contains(varName))
+		if (d.hasKey(varName))
 			result[varName] = d[varName];
 		else
 			result[varName] = nullptr;
@@ -184,6 +189,15 @@ bool SaveData::load(int slot)
 std::string SaveData::getSlotFilename(int slot) const
 {
 	return m_directory + "/" + std::to_string(slot) + ".ntsav";
+}
+
+void SaveData::set(std::shared_ptr<Entity> obj, const std::string &idName)
+{
+	if (!idName.empty())
+		obj->setId(idName);
+	else if (obj->getId().empty())
+		return;
+	Save.data()[obj->entityId()][obj->getId()] = obj->toJson();
 }
 
 } // namespace NovelTea

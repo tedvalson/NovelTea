@@ -5,9 +5,9 @@
 #include <NovelTea/Action.hpp>
 #include <QWidget>
 #include <QComboBox>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace Ui {
 class ActionWidget;

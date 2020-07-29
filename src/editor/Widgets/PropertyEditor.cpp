@@ -12,7 +12,7 @@ PropertyEditor::PropertyEditor(QWidget *parent)
 , m_menuAdd(new QMenu)
 , m_variantManager(new QtVariantPropertyManager)
 , m_variantFactory(new QtVariantEditorFactory)
-, m_value(nlohmann::json::object())
+, m_value(sj::Object())
 {
 	ui->setupUi(this);
 
@@ -39,34 +39,34 @@ PropertyEditor::~PropertyEditor()
 	delete ui;
 }
 
-void PropertyEditor::setValue(nlohmann::json value)
+void PropertyEditor::setValue(sj::JSON value)
 {
 	if (getValue() != value)
 	{
-		if (!value.is_object())
+		if (value.JSONType() != json::Class::Object)
 			return;
 
 		QtVariantProperty *prop;
 		ui->propertyBrowser->clear();
 		m_variantManager->clear();
 
-		for (auto &item : value.items())
+		for (auto &item : value.ObjectRange())
 		{
-			auto jval = item.value();
+			auto &jval = item.second;
 			auto val = QVariant();
 			auto type = QVariant::String;
-			if (jval.is_string()) {
-				val = QString::fromStdString(jval);
-			} else if (jval.is_boolean()) {
+			if (jval.JSONType() == json::Class::String) {
+				val = QString::fromStdString(jval.ToString());
+			} else if (jval.JSONType() == json::Class::Boolean) {
 				type = QVariant::Bool;
-				val = static_cast<bool>(jval);
-			} else if (jval.is_number()) {
+				val = jval.ToBool();
+			} else if (jval.JSONType() == json::Class::Floating || jval.JSONType() == json::Class::Integral) {
 				type = QVariant::Double;
-				val = static_cast<double>(jval);
+				val = static_cast<double>(jval.ToFloat());
 			} else
 				continue;
 
-			prop = m_variantManager->addProperty(type, QString::fromStdString(item.key()));
+			prop = m_variantManager->addProperty(type, QString::fromStdString(item.first));
 			prop->setValue(val);
 			ui->propertyBrowser->addProperty(prop);
 		}
@@ -76,7 +76,7 @@ void PropertyEditor::setValue(nlohmann::json value)
 	}
 }
 
-nlohmann::json PropertyEditor::getValue() const
+sj::JSON PropertyEditor::getValue() const
 {
 	return m_value;
 }
@@ -110,7 +110,7 @@ void PropertyEditor::addProperty(int type, const QString &name, const QVariant &
 
 void PropertyEditor::update()
 {
-	m_value = json::object();
+	m_value = sj::Object();
 	for (auto &prop : ui->propertyBrowser->properties())
 	{
 		auto name = prop->propertyName().toStdString();

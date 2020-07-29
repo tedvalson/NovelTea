@@ -2,6 +2,8 @@
 #define NOVELTEA_TEXTBLOCK_HPP
 
 #include <NovelTea/JsonSerializable.hpp>
+#include <memory>
+#include <vector>
 
 namespace NovelTea
 {

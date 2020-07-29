@@ -5,9 +5,9 @@
 #include <NovelTea/Verb.hpp>
 #include <QWidget>
 #include <QLineEdit>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace Ui {
 class VerbWidget;

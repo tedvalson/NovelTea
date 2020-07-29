@@ -9,9 +9,9 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace NovelTea
 {

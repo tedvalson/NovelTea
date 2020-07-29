@@ -1,9 +1,9 @@
 #ifndef NOVELTEA_JSONSERIALIZABLE_HPP
 #define NOVELTEA_JSONSERIALIZABLE_HPP
 
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace NovelTea
 {
@@ -16,19 +16,5 @@ public:
 };
 
 } // namespace NovelTea
-
-namespace nlohmann {
-template<typename BasicJsonType>
-inline void to_json(BasicJsonType& j, const NovelTea::JsonSerializable &obj)
-{
-	j = obj.toJson();
-}
-template<typename BasicJsonType>
-inline void from_json(const BasicJsonType& j, NovelTea::JsonSerializable &obj)
-{
-	// TODO: check return and throw error?
-	obj.fromJson(j);
-}
-} // namespace nlohmann
 
 #endif // NOVELTEA_JSONSERIALIZABLE_HPP

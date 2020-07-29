@@ -11,7 +11,7 @@ EditorUtils::EditorUtils()
 
 json EditorUtils::documentToJson(const QTextDocument *doc)
 {
-	json j = json::array();
+	json j = sj::Array();
 	int fmtIndexLast = -1;
 
 	json jblock;
@@ -20,9 +20,9 @@ json EditorUtils::documentToJson(const QTextDocument *doc)
 	{
 		if (block.isValid())
 		{
-			json jfrag = json::array({0});
+			json jfrag = sj::Array(0);
 			auto sfrag = std::string();
-			jblock = json::array({0,{}});
+			jblock = sj::Array(0, sj::Array());
 			for (auto it = block.begin(); !it.atEnd(); ++it)
 			{
 				QTextFragment fragment = it.fragment();
@@ -36,7 +36,7 @@ json EditorUtils::documentToJson(const QTextDocument *doc)
 						if (fmtIndexLast >= 0)
 						{
 							jfrag[1] = sfrag;
-							jblock[1].push_back(jfrag);
+							jblock[1].append(jfrag);
 						}
 						fmtIndexLast = fmtIndex;
 						jfrag[0] = fmtIndex;
@@ -50,8 +50,8 @@ json EditorUtils::documentToJson(const QTextDocument *doc)
 			fmtIndexLast = -1;
 
 			jfrag[1] = sfrag;
-			jblock[1].push_back(jfrag);
-			j.push_back(jblock);
+			jblock[1].append(jfrag);
+			j.append(jblock);
 		}
 	}
 
@@ -68,7 +68,7 @@ QTextDocument *EditorUtils::jsonToDocument(const json &j)
 
 	doc->setDefaultFont(defaultFont);
 
-	for (auto &jblock : j)
+	for (auto &jblock : j.ArrayRange())
 	{
 		blockFormat.setAlignment(Qt::AlignLeft);
 		if (firstBlock)
@@ -79,10 +79,10 @@ QTextDocument *EditorUtils::jsonToDocument(const json &j)
 		else
 			cursor.insertBlock(blockFormat);
 
-		for (auto &jfrag : jblock[1])
+		for (auto &jfrag : jblock[1].ArrayRange())
 		{
-			auto textformat = toQTextCharFormat(Proj.textFormat(jfrag[0]));
-			cursor.insertText(QString::fromStdString(jfrag[1]), textformat);
+			auto textformat = toQTextCharFormat(Proj.textFormat(jfrag[0].ToInt()));
+			cursor.insertText(QString::fromStdString(jfrag[1].ToString()), textformat);
 		}
 	}
 	return doc;

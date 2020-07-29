@@ -59,8 +59,8 @@ bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent)
 
 void addToJson(json *jout, const json &jitem, const json& jdata, std::vector<std::string> keys)
 {
-	std::string id = jitem[0];
-	std::string parentId = jitem[1];
+	auto id = jitem[0].ToString();
+	auto parentId = jitem[1].ToString();
 	keys.push_back(id);
 	if (id == parentId) // Shouldn't be possible
 		return;
@@ -68,39 +68,39 @@ void addToJson(json *jout, const json &jitem, const json& jdata, std::vector<std
 	{
 		for (auto it = keys.rbegin(); it != keys.rend(); ++it)
 			jout = &((*jout)[*it]);
-		if (jout->empty())
-			*jout = json::object();
+		if (jout->IsEmpty())
+			*jout = sj::Object();
 	}
-	else if (jdata.contains(parentId))
+	else if (jdata.hasKey(parentId))
 		addToJson(jout, jdata[parentId], jdata, keys);
 }
 
 void addToTree(const json &data, TreeItem *parent, NovelTea::EntityType type)
 {
-	for (auto &item : data.items())
+	for (auto &item : data.ObjectRange())
 	{
 		QList<QVariant> columnData;
-		columnData << QString::fromStdString(item.key());
+		columnData << QString::fromStdString(item.first);
 		columnData << static_cast<int>(type);
 
 		auto child = new TreeItem(columnData, parent);
 		parent->appendChild(child);
 
-		auto j = item.value();
-		if (!j.empty())
+		auto j = item.second;
+		if (!j.IsEmpty())
 			addToTree(j, child, type);
 	}
 }
 
 void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, std::string typeIndex)
 {
-	if (!data.contains(typeIndex))
+	if (!data.hasKey(typeIndex))
 		return;
 
 	std::vector<std::string> keys;
-	auto j = json::object();
-	for (auto &jitem : data[typeIndex])
-		addToJson(&j, jitem, data[typeIndex], keys);
+	auto j = sj::Object();
+	for (auto &item : data[typeIndex].ObjectRange())
+		addToJson(&j, item.second, data[typeIndex], keys);
 
 	addToTree(j, root, type);
 }
@@ -177,10 +177,6 @@ bool TreeModel::changeParent(const QModelIndex &child, const QModelIndex &newPar
 
 void TreeModel::update()
 {
-	auto item = cutsceneRoot->child(0);
-	auto i = createIndex(0, 0, item);
-	if (!setData(i, "Kool test"))
-		std::cout << "failed to update" << std::endl;
 
 }
 

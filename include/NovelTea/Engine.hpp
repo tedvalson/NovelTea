@@ -53,7 +53,7 @@ private:
 	size_t m_lastTime;
 
 	// Shared State context variables
-	nlohmann::json m_data;
+	sj::JSON m_data;
 	ScriptManager m_scriptManager;
 };
 

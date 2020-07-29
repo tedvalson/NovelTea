@@ -15,21 +15,21 @@ size_t Object::jsonSize() const
 
 json Object::toJson() const
 {
-	auto j = json::array({
+	auto j = sj::Array(
 		m_id,
 		m_parentId,
 		m_properties,
-		m_name,
-	});
+		m_name
+	);
 	return j;
 }
 
 void Object::loadJson(const json &j)
 {
-	m_id = j[0];
-	m_parentId = j[1];
+	m_id = j[0].ToString();
+	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_name = j[3];
+	m_name = j[3].ToString();
 }
 
 } // namespace NovelTea

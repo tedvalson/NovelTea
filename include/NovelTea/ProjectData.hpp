@@ -6,6 +6,7 @@
 #include <NovelTea/Utils.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/System/String.hpp>
+#include <memory>
 
 #define Proj NovelTea::ProjectData::instance()
 #define ProjData NovelTea::ProjectData::instance().data()
@@ -37,9 +38,11 @@ public:
 	{
 		if (idName.empty())
 			return nullptr;
-		if (!ProjData[T::id].contains(idName))
+		if (!ProjData[T::id].hasKey(idName))
 			return nullptr;
-		return std::make_shared<T>(ProjData[T::id][idName].template get<T>());
+		auto result = std::make_shared<T>();
+		result->fromJson(ProjData[T::id][idName]);
+		return result;
 	}
 
 	template <typename T>
@@ -49,7 +52,7 @@ public:
 			obj->setId(idName);
 		else if (obj->getId().empty())
 			return;
-		ProjData[T::id][obj->getId()] = *obj;
+		ProjData[T::id][obj->getId()] = obj->toJson();
 	}
 
 	void saveToFile(const std::string &filename = std::string());

@@ -19,23 +19,23 @@ bool TextFormat::operator==(const TextFormat &format) const
 
 json TextFormat::toJson() const
 {
-	auto j = json::array({
+	auto j = sj::Array(
 		bold(),
 		italic(),
 		underline(),
 		size(),
-		color()
-	});
+		colorToJson(color())
+	);
 	return j;
 }
 
 bool TextFormat::fromJson(const json &j)
 {
-	bold(j[0]);
-	italic(j[1]);
-	underline(j[2]);
-	size(j[3]);
-	color(j[4]);
+	bold(j[0].ToBool());
+	italic(j[1].ToBool());
+	underline(j[2].ToBool());
+	size(j[3].ToInt());
+	color(jsonToColor(j[4]));
 	return true;
 }
 
@@ -87,6 +87,16 @@ void TextFormat::color(const sf::Color val)
 const sf::Color &TextFormat::color() const
 {
 	return _color;
+}
+
+sf::Color jsonToColor(const json &j)
+{
+	return sf::Color(j[0].ToInt(), j[1].ToInt(), j[2].ToInt(), j[3].ToInt());
+}
+
+json colorToJson(const sf::Color &color)
+{
+	return sj::Array(color.r, color.g, color.b, color.a);
 }
 
 } // namespace NovelTea

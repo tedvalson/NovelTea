@@ -44,7 +44,7 @@ void NovelTeaWidget::setMode(NovelTea::StateEditorMode mode)
 {
 	json jdata;
 	jdata["event"] = "mode";
-	jdata["mode"] = mode;
+	jdata["mode"] = static_cast<int>(mode);
 	processData(jdata);
 }
 

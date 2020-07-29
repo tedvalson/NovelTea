@@ -179,17 +179,17 @@ void ScriptManager::registerGlobals()
 void ScriptManager::runAutorunScripts()
 {
 	if (Save.isLoaded())
-		for (auto &jitem : Save.data()[Script::id])
-			checkAutorun(jitem);
+		for (auto &item : Save.data()[Script::id].ObjectRange())
+			checkAutorun(item.second);
 	if (Proj.isLoaded())
-		for (auto &item : ProjData[Script::id].items())
-			if (!Save.data()[Script::id].contains(item.key()))
-				checkAutorun(item.value());
+		for (auto &item : ProjData[Script::id].ObjectRange())
+			if (!Save.data()[Script::id].hasKey(item.first))
+				checkAutorun(item.second);
 }
 
-void ScriptManager::checkAutorun(const nlohmann::json &j)
+void ScriptManager::checkAutorun(const sj::JSON &j)
 {
-	auto script = Save.get<Script>(j[ID::entityId]);
+	auto script = Save.get<Script>(j[ID::entityId].ToString());
 	if (script->getAutorun())
 		runScript(script);
 }

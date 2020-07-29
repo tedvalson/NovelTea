@@ -8,7 +8,7 @@ namespace NovelTea
 {
 
 PropertyList::PropertyList()
-	: m_properties(json::object())
+	: m_properties(sj::Object())
 {
 }
 
@@ -49,7 +49,7 @@ void PropertyList::set(const std::string &key, const DukValue &value)
 
 bool PropertyList::contains(const std::string &key) const
 {
-	return m_properties.contains(key);
+	return m_properties.hasKey(key);
 }
 
 void PropertyList::attach(const std::string &type, const std::string &id)
@@ -59,7 +59,7 @@ void PropertyList::attach(const std::string &type, const std::string &id)
 
 	// If no properties in list, load from SaveData.
 	// Otherwise, save the existing ones.
-	if (m_properties.empty())
+	if (m_properties.IsEmpty())
 		m_properties = Save.data()[ID::properties][type][id];
 	else
 		saveChanges();

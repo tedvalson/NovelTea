@@ -9,9 +9,9 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 namespace NovelTea
 {
@@ -39,8 +39,6 @@ public:
 	void updateRoomText();
 
 private:
-	sf::Font font;
-	TweenText text;
 	Mode m_mode;
 
 	ActiveText m_roomActiveText;

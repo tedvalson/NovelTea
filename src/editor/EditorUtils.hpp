@@ -6,10 +6,10 @@
 #include <SFML/Graphics/Color.hpp>
 #include <NovelTea/TextFormat.hpp>
 #include <NovelTea/ActiveText.hpp>
-#include <json.hpp>
+#include <NovelTea/json.hpp>
 #include <iostream>
 
-using json = nlohmann::json;
+using json = sj::JSON;
 
 class EditorUtils
 {

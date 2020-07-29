@@ -22,33 +22,33 @@ size_t Room::jsonSize() const
 
 json Room::toJson() const
 {
-	auto jobjects = json::array();
+	auto jobjects = sj::Array();
 	for (auto &roomObject : m_objects)
 	{
-		auto jobject = json::array({
+		auto jobject = sj::Array(
 			roomObject.idName,
 			roomObject.placeInRoom
-		});
-		jobjects.push_back(jobject);
+		);
+		jobjects.append(jobject);
 	}
-	auto j = json::array({
+	auto j = sj::Array(
 		m_id,
 		m_parentId,
 		m_properties,
 		m_description,
-		jobjects,
-	});
+		jobjects
+	);
 	return j;
 }
 
 void Room::loadJson(const json &j)
 {
-	m_id = j[0];
-	m_parentId = j[1];
+	m_id = j[0].ToString();
+	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_description = j[3];
-	for (auto &jroomObject : j[4])
-		m_objects.push_back({jroomObject[0], jroomObject[1]});
+	m_description = j[3].ToString();
+	for (auto &jroomObject : j[4].ArrayRange())
+		m_objects.push_back({jroomObject[0].ToString(), jroomObject[1].ToBool()});
 
 	m_objectList->attach(id, m_id);
 }
@@ -60,20 +60,20 @@ bool Room::contains(const std::string &objectId)
 
 json Room::getProjectRoomObjects()
 {
-	auto j = json::object();
+	auto j = sj::Object();
 	if (Proj.isLoaded())
 	{
-		for (auto &item : ProjData[id].items())
+		for (auto &item : ProjData[id].ObjectRange())
 		{
-			auto jroom = item.value();
-			auto jobjects = json::array();
-			for (auto &jroomObject : jroom[4])
+			auto jroom = item.second;
+			auto jobjects = sj::Array();
+			for (auto &jroomObject : jroom[4].ArrayRange())
 			{
-				bool placeInRoom = jroomObject[1];
+				bool placeInRoom = jroomObject[1].ToBool();
 				if (placeInRoom)
-					jobjects.push_back(jroomObject[0]);
+					jobjects.append(jroomObject[0].ToString());
 			}
-			j[item.key()] = jobjects;
+			j[item.first] = jobjects;
 		}
 	}
 	return j;

@@ -10,28 +10,29 @@ CutsceneTextSegment::CutsceneTextSegment()
 
 json CutsceneTextSegment::toJson() const
 {
-	json j = json::array({
-		type(),
+	json j = sj::Array(
+		static_cast<int>(type()),
 		getScriptOverride(),
 		getScriptOverrideName(),
 		m_transition,
 		getDuration(),
 		getDelay(),
 		m_beginWithNewline,
-		*m_activeText
-	});
+		m_activeText->toJson()
+	);
 	return j;
 }
 
 bool CutsceneTextSegment::fromJson(const json &j)
 {
-	setScriptOverride(j[1]);
-	setScriptOverrideName(j[2]);
-	m_transition = j[3];
-	setDuration(j[4]);
-	setDelay(j[5]);
-	m_beginWithNewline = j[6];
-	m_activeText = std::make_shared<ActiveText>(j[7]);
+	setScriptOverride(j[1].ToBool());
+	setScriptOverrideName(j[2].ToString());
+	m_transition = j[3].ToInt();
+	setDuration(j[4].ToInt());
+	setDelay(j[5].ToInt());
+	m_beginWithNewline = j[6].ToBool();
+	m_activeText = std::make_shared<ActiveText>();
+	m_activeText->fromJson(j[7]);
 	return true;
 }
 

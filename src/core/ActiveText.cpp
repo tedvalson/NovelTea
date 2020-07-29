@@ -76,9 +76,9 @@ std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::St
 
 json ActiveText::toJson() const
 {
-	json j = json::array();
+	json j = sj::Array();
 	for (auto &block : m_textBlocks)
-		j.push_back(*block);
+		j.append(block->toJson());
 	return j;
 }
 
@@ -87,7 +87,7 @@ bool ActiveText::fromJson(const json &j)
 	m_textBlocks.clear();
 	m_needsUpdate = true;
 
-	for (auto &jblock : j)
+	for (auto &jblock : j.ArrayRange())
 	{
 		auto block = std::make_shared<TextBlock>();
 		if (block->fromJson(jblock))
@@ -323,7 +323,6 @@ void ActiveText::ensureUpdate() const
 				{
 					m_cursorPos.x = 0.f;
 					m_cursorPos.y += text.getCharacterSize();//text.getLocalBounds().height;
-					m_cursorPos.y += 2.f * text.getLineSpacing();
 				}
 
 				text.setPosition(m_cursorPos);

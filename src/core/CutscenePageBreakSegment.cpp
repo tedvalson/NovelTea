@@ -9,24 +9,24 @@ CutscenePageBreakSegment::CutscenePageBreakSegment()
 
 json CutscenePageBreakSegment::toJson() const
 {
-	json j = json::array({
-		type(),
+	auto j = sj::Array(
+		static_cast<int>(type()),
 		getScriptOverride(),
 		getScriptOverrideName(),
 		m_transition,
 		getDuration(),
 		getDelay()
-	});
+	);
 	return j;
 }
 
 bool CutscenePageBreakSegment::fromJson(const json &j)
 {
-	setScriptOverride(j[1]);
-	setScriptOverrideName(j[2]);
-	m_transition = j[3];
-	setDuration(j[4]);
-	setDelay(j[5]);
+	setScriptOverride(j[1].ToBool());
+	setScriptOverrideName(j[2].ToString());
+	m_transition = j[3].ToInt();
+	setDuration(j[4].ToInt());
+	setDelay(j[5].ToInt());
 	return true;
 }
 
