@@ -11,71 +11,73 @@ set(CMAKE_AUTOMOC ON)
 set(UIFILES
 	${UIROOT}/ActionBuildWidget.ui
 	${UIROOT}/ActionSelectWidget.ui
-	${UIROOT}/WizardPageActionSelect.ui
 	${UIROOT}/ActionWidget.ui
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/DialogueWidget.ui
-	${UIROOT}/RoomWidget.ui
-	${UIROOT}/ObjectWidget.ui
-	${UIROOT}/ScriptWidget.ui
-	${UIROOT}/VerbWidget.ui
-	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/MainWindow.ui
+	${UIROOT}/ObjectWidget.ui
 	${UIROOT}/ProjectSettingsWidget.ui
 	${UIROOT}/PropertyEditor.ui
-	${UIROOT}/WizardPageStart.ui
-	${UIROOT}/WizardPageProject.ui
+	${UIROOT}/RoomWidget.ui
+	${UIROOT}/RichTextEditor.ui
+	${UIROOT}/ScriptWidget.ui
+	${UIROOT}/TestsWidget.ui
+	${UIROOT}/VerbWidget.ui
 	${UIROOT}/WizardPageAction.ui
-	${UIROOT}/WizardPageDialogue.ui
+	${UIROOT}/WizardPageActionSelect.ui
 	${UIROOT}/WizardPageCutscene.ui
+	${UIROOT}/WizardPageDialogue.ui
+	${UIROOT}/WizardPageObject.ui
+	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageRoom.ui
 	${UIROOT}/WizardPageScript.ui
+	${UIROOT}/WizardPageStart.ui
 	${UIROOT}/WizardPageVerb.ui
-	${UIROOT}/WizardPageObject.ui
 )
 
 set(SRC
 	${SRCROOT}/main.cpp
+	${SRCROOT}/EditorUtils.cpp
+	${SRCROOT}/EntitySortFilterProxyModel.cpp
+	${SRCROOT}/EntityTreeView.cpp
+	${SRCROOT}/SyntaxHighlighter.cpp
+	${SRCROOT}/TreeItem.cpp
+	${SRCROOT}/TreeModel.cpp
+	${SRCROOT}/Widgets/ActionBuildWidget.cpp
+	${SRCROOT}/Widgets/ActionSelectWidget.cpp
+	${SRCROOT}/Widgets/ActionWidget.cpp
+	${SRCROOT}/Widgets/CutsceneWidget.cpp
+	${SRCROOT}/Widgets/DialogueWidget.cpp
+	${SRCROOT}/Widgets/EditorTabWidget.cpp
+	${SRCROOT}/Widgets/MainWindow.cpp
+	${SRCROOT}/Widgets/NovelTeaWidget.cpp
+	${SRCROOT}/Widgets/ObjectWidget.cpp
+	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
+	${SRCROOT}/Widgets/PropertyEditor.cpp
+	${SRCROOT}/Widgets/RichTextEditor.cpp
+	${SRCROOT}/Widgets/RoomWidget.cpp
+	${SRCROOT}/Widgets/ScriptEdit.cpp
+	${SRCROOT}/Widgets/ScriptWidget.cpp
+	${SRCROOT}/Widgets/SFMLWidget.cpp
+	${SRCROOT}/Widgets/TestsWidget.cpp
+	${SRCROOT}/Widgets/VerbWidget.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qteditorfactory.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertybrowser.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertybrowserutils.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertymanager.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qttreepropertybrowser.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtvariantproperty.cpp
-	${SRCROOT}/Widgets/ActionBuildWidget.cpp
-	${SRCROOT}/Widgets/ActionSelectWidget.cpp
-	${SRCROOT}/Widgets/EditorTabWidget.cpp
-	${SRCROOT}/Widgets/ActionWidget.cpp
-	${SRCROOT}/Widgets/CutsceneWidget.cpp
-	${SRCROOT}/Widgets/DialogueWidget.cpp
-	${SRCROOT}/Widgets/RoomWidget.cpp
-	${SRCROOT}/Widgets/ObjectWidget.cpp
-	${SRCROOT}/Widgets/ScriptWidget.cpp
-	${SRCROOT}/Widgets/VerbWidget.cpp
-	${SRCROOT}/Widgets/NovelTeaWidget.cpp
-	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
-	${SRCROOT}/Widgets/PropertyEditor.cpp
-	${SRCROOT}/Widgets/RichTextEditor.cpp
-	${SRCROOT}/Widgets/SFMLWidget.cpp
-	${SRCROOT}/Widgets/ScriptEdit.cpp
-	${SRCROOT}/Widgets/MainWindow.cpp
 	${SRCROOT}/Wizard/Wizard.cpp
-	${SRCROOT}/Wizard/WizardPageActionSelect.cpp
-	${SRCROOT}/Wizard/WizardPageStart.cpp
 	${SRCROOT}/Wizard/WizardPageAction.cpp
-	${SRCROOT}/Wizard/WizardPageDialogue.cpp
-	${SRCROOT}/Wizard/WizardPageProject.cpp
+	${SRCROOT}/Wizard/WizardPageActionSelect.cpp
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp
-	${SRCROOT}/Wizard/WizardPageRoom.cpp
+	${SRCROOT}/Wizard/WizardPageDialogue.cpp
 	${SRCROOT}/Wizard/WizardPageObject.cpp
+	${SRCROOT}/Wizard/WizardPageProject.cpp
+	${SRCROOT}/Wizard/WizardPageRoom.cpp
 	${SRCROOT}/Wizard/WizardPageScript.cpp
+	${SRCROOT}/Wizard/WizardPageStart.cpp
 	${SRCROOT}/Wizard/WizardPageVerb.cpp
-	${SRCROOT}/TreeItem.cpp
-	${SRCROOT}/TreeModel.cpp
-	${SRCROOT}/SyntaxHighlighter.cpp
-	${SRCROOT}/EntityTreeView.cpp
-	${SRCROOT}/EntitySortFilterProxyModel.cpp
-	${SRCROOT}/EditorUtils.cpp
 )
 
 qt5_wrap_ui(UIOUT ${UIFILES})

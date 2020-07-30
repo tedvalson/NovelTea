@@ -3,40 +3,40 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/core)
 FILE(GLOB_RECURSE TWEEN_ENGINE_SOURCE ${PROJECT_SOURCE_DIR}/external/TweenEngine/src/*.cpp)
 
 set(SOURCE_FILES
-	${SRCROOT}/Engine.cpp
-	${SRCROOT}/States/StateStack.cpp
-	${SRCROOT}/States/State.cpp
-	${SRCROOT}/States/StateEditor.cpp
-	${SRCROOT}/States/StateMain.cpp
-	${SRCROOT}/GUI/ActionBuilder.cpp
-	${SRCROOT}/GUI/VerbList.cpp
-	${SRCROOT}/Entity.cpp
 	${SRCROOT}/Action.cpp
+	${SRCROOT}/ActiveText.cpp
 	${SRCROOT}/Cutscene.cpp
-	${SRCROOT}/Room.cpp
-	${SRCROOT}/Object.cpp
-	${SRCROOT}/Dialogue.cpp
-	${SRCROOT}/Script.cpp
-	${SRCROOT}/Verb.cpp
-	${SRCROOT}/Player.cpp
-	${SRCROOT}/ObjectList.cpp
-	${SRCROOT}/PropertyList.cpp
-	${SRCROOT}/ProjectData.cpp
-	${SRCROOT}/SaveData.cpp
-	${SRCROOT}/ScriptManager.cpp
-	${SRCROOT}/TextFormat.cpp
+	${SRCROOT}/CutscenePageBreakSegment.cpp
 	${SRCROOT}/CutsceneRenderer.cpp
 	${SRCROOT}/CutsceneSegment.cpp
 	${SRCROOT}/CutsceneTextSegment.cpp
-	${SRCROOT}/ActiveText.cpp
+	${SRCROOT}/Dialogue.cpp
+	${SRCROOT}/Engine.cpp
+	${SRCROOT}/Entity.cpp
 	${SRCROOT}/json.cpp
-	${SRCROOT}/TextFragment.cpp
+	${SRCROOT}/Object.cpp
+	${SRCROOT}/ObjectList.cpp
+	${SRCROOT}/Player.cpp
+	${SRCROOT}/ProjectData.cpp
+	${SRCROOT}/PropertyList.cpp
+	${SRCROOT}/Room.cpp
+	${SRCROOT}/SaveData.cpp
+	${SRCROOT}/Script.cpp
+	${SRCROOT}/ScriptManager.cpp
 	${SRCROOT}/TextBlock.cpp
+	${SRCROOT}/TextFormat.cpp
+	${SRCROOT}/TextFragment.cpp
 	${SRCROOT}/Utils.cpp
-	${SRCROOT}/CutscenePageBreakSegment.cpp
+	${SRCROOT}/Verb.cpp
+	${SRCROOT}/GUI/ActionBuilder.cpp
 	${SRCROOT}/GUI/NinePatch.cpp
 	${SRCROOT}/GUI/Scrollable.cpp
 	${SRCROOT}/GUI/ScrollBar.cpp
+	${SRCROOT}/GUI/VerbList.cpp
+	${SRCROOT}/States/State.cpp
+	${SRCROOT}/States/StateEditor.cpp
+	${SRCROOT}/States/StateMain.cpp
+	${SRCROOT}/States/StateStack.cpp
 	
 	${PROJECT_SOURCE_DIR}/external/duktape.c
 	${TWEEN_ENGINE_SOURCE}
