@@ -230,6 +230,39 @@ bool JSON::IsEmpty() const {
 	return sz == 0;
 }
 
+bool operator ==(const JSON &left, const JSON &right)
+{
+	if (left.Type != right.Type)
+		return false;
+
+	auto &l = left.Internal;
+	auto &r = right.Internal;
+	switch (left.Type)
+	{
+		case JSON::Class::Array:
+			return *l.List == *r.List;
+		case JSON::Class::Boolean:
+			return l.Bool == r.Bool;
+		case JSON::Class::Floating:
+			return l.Float == r.Float;
+		case JSON::Class::Integral:
+			return l.Int == r.Int;
+		case JSON::Class::Null:
+			return true;
+		case JSON::Class::Object:
+			return *l.Map == *r.Map;
+		case JSON::Class::String:
+			return *l.String == *r.String;
+		default:
+			return false;
+	}
+}
+
+bool operator !=(const JSON &left, const JSON &right)
+{
+	return !(left == right);
+}
+
 std::string JSON::ToString() const { bool b; return std::move( ToString( b ) ); }
 
 std::string JSON::ToString(bool &ok) const {

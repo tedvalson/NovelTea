@@ -413,6 +413,8 @@ class JSON
 		}
 
 		friend std::ostream& operator<<( std::ostream&, const JSON & );
+		friend bool operator ==(const JSON& left, const JSON& right);
+		friend bool operator !=(const JSON& left, const JSON& right);
 
 	private:
 		void SetType( Class type ) {
@@ -454,6 +456,7 @@ class JSON
 };
 
 JSON Array();
+JSON Object();
 
 template <typename... T>
 JSON Array( T... args ) {
@@ -461,9 +464,5 @@ JSON Array( T... args ) {
 	arr.append( args... );
 	return std::move( arr );
 }
-
-JSON Object();
-
-std::ostream& operator<<( std::ostream &os, const JSON &json );
 
 } // End Namespace json
