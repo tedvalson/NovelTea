@@ -34,8 +34,8 @@ public:
 
 	void setVerb(const std::string &verbId);
 	void setObject(const std::string &objectId, size_t index);
-	std::string getVerb() const;
-	std::vector<std::string> getObjects() const;
+	const std::string &getVerb() const;
+	const std::vector<std::string> &getObjects() const;
 	std::shared_ptr<Action> getAction() const;
 
 	void setSize(const sf::Vector2f &size);

@@ -249,7 +249,7 @@ bool StateMain::processEvent(const sf::Event &event)
 				{
 					m_selectedObjectId = word;
 					m_verbList.setVerbs(word);
-					m_verbList.setPosition(p);
+					m_verbList.setPositionBounded(p, sf::FloatRect(0.f, 0.f, getContext().config.width, getContext().config.height));
 					m_verbList.show();
 				}
 			}

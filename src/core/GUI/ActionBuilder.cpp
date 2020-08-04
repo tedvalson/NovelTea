@@ -107,12 +107,12 @@ void ActionBuilder::setObject(const std::string &objectId, size_t index)
 	}
 }
 
-std::string ActionBuilder::getVerb() const
+const std::string &ActionBuilder::getVerb() const
 {
 	return m_verbId;
 }
 
-std::vector<std::string> ActionBuilder::getObjects() const
+const std::vector<std::string> &ActionBuilder::getObjects() const
 {
 	return m_objectIds;
 }

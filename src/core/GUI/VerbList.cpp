@@ -165,6 +165,14 @@ const sf::Vector2f &VerbList::getScrollSize()
 	return m_size;
 }
 
+void VerbList::setPositionBounded(const sf::Vector2f &position, const sf::FloatRect &bounds)
+{
+	auto p = position;
+	if (p.x + m_bounds.width > bounds.width)
+		p.x = bounds.width - m_bounds.width;
+	setPosition(p);
+}
+
 sf::FloatRect VerbList::getLocalBounds() const
 {
 	return m_bounds;

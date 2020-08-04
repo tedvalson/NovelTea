@@ -41,6 +41,7 @@ public:
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
 
+	void setPositionBounded(const sf::Vector2f& position, const sf::FloatRect &bounds);
 	sf::FloatRect getLocalBounds() const;
 	sf::FloatRect getGlobalBounds() const;
 
