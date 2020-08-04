@@ -26,7 +26,7 @@ public:
 #ifdef ANDROID
 			if (!asset->loadFromFile(filename))
 #else
-			if (!asset->loadFromFile("/home/android/dev/NovelTea/res/" + filename))
+			if (!asset->loadFromFile("/home/android/dev/NovelTea/res/assets/" + filename))
 #endif
 			{
 				sf::err() << "Failed to load asset: " << filename << std::endl;
