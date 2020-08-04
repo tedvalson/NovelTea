@@ -13,10 +13,10 @@ set(SOURCE_FILES
 	${SRCROOT}/Dialogue.cpp
 	${SRCROOT}/Engine.cpp
 	${SRCROOT}/Entity.cpp
+	${SRCROOT}/Game.cpp
 	${SRCROOT}/json.cpp
 	${SRCROOT}/Object.cpp
 	${SRCROOT}/ObjectList.cpp
-	${SRCROOT}/Player.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/PropertyList.cpp
 	${SRCROOT}/Room.cpp

@@ -2,6 +2,7 @@
 #define NOVELTEA_OBJECTLIST_HPP
 
 #include <NovelTea/Utils.hpp>
+#include <NovelTea/Game.hpp>
 #include <cstring>
 #include <memory>
 #include <vector>
@@ -14,7 +15,7 @@ class Object;
 class ObjectList
 {
 public:
-	ObjectList();
+	ObjectList(SaveData &saveData = GSave);
 
 	bool addId(const std::string &objectId);
 	bool removeId(const std::string &objectId);
@@ -31,6 +32,7 @@ private:
 	std::string m_attachedType;
 	std::string m_attachedId;
 	std::vector<std::shared_ptr<Object>> m_objects;
+	SaveData *m_saveData;
 };
 
 } // namespace NovelTea

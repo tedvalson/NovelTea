@@ -3,13 +3,14 @@
 
 #include "StateIdentifiers.hpp"
 #include <SFML/Window/Event.hpp>
-#include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/json.hpp>
 #include <functional>
 #include <memory>
 #include <vector>
 
-#define ScriptMan getContext().scriptManager
+#define GGame getContext().game
+#define ScriptMan getContext().game.getScriptManager()
 
 namespace sf
 {
@@ -30,9 +31,9 @@ public:
 
 	struct Context
 	{
-		Context(EngineConfig& config, ScriptManager& scriptManager, sj::JSON& data);
+		Context(EngineConfig& config, Game& game, sj::JSON& data);
 		EngineConfig& config;
-		ScriptManager& scriptManager;
+		Game& game;
 		sj::JSON& data;
 	};
 

@@ -7,31 +7,24 @@
 
 NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
 	SFMLWidget(parent),
-	_engine(nullptr),
+	m_engine(nullptr),
 //	_internalSize(480, 852)
-	_internalSize(480, 700)
+	m_internalSize(480, 700)
 {
-	_internalRatio = _internalSize.x / _internalSize.y;
-
-	NovelTea::EngineConfig config;
-	config.width = _internalSize.x;
-	config.height = _internalSize.y;
-	config.initialState = NovelTea::StateID::Editor;
-	_engine = new NovelTea::Engine(config);
-	_engine->initialize();
-	_engine->update(0.f); // This triggers update of state stack
+	m_internalRatio = m_internalSize.x / m_internalSize.y;
+	reset();
 }
 
 NovelTeaWidget::~NovelTeaWidget()
 {
-	if (_engine)
-		delete _engine;
+	if (m_engine)
+		delete m_engine;
 }
 
 json NovelTeaWidget::processData(json jsonData)
 {
 	json resp;
-	auto ptr = static_cast<json*>(_engine->processData(&jsonData));
+	auto ptr = static_cast<json*>(m_engine->processData(&jsonData));
 	if (ptr)
 	{
 		resp = *ptr;
@@ -48,12 +41,32 @@ void NovelTeaWidget::setMode(NovelTea::StateEditorMode mode)
 	processData(jdata);
 }
 
+std::shared_ptr<NovelTea::Game> NovelTeaWidget::getGame()
+{
+	return m_engine->getGame();
+}
+
+void NovelTeaWidget::reset()
+{
+	NovelTea::EngineConfig config;
+	config.width = m_internalSize.x;
+	config.height = m_internalSize.y;
+	config.initialState = NovelTea::StateID::Editor;
+
+	if (m_engine)
+		delete m_engine;
+	m_engine = new NovelTea::Engine(config);
+	m_engine->initialize();
+	m_engine->update(0.f); // This triggers update of state stack
+	onResize();
+}
+
 void NovelTeaWidget::mousePressEvent(QMouseEvent *e)
 {
 	sf::Event event;
 	event.type = sf::Event::MouseButtonPressed;
 	event.mouseButton = sf::Event::MouseButtonEvent {sf::Mouse::Button::Left, e->x(), e->y()};
-	_engine->processEvent(event);
+	m_engine->processEvent(event);
 }
 
 void NovelTeaWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -61,7 +74,7 @@ void NovelTeaWidget::mouseReleaseEvent(QMouseEvent *e)
 	sf::Event event;
 	event.type = sf::Event::MouseButtonReleased;
 	event.mouseButton = sf::Event::MouseButtonEvent {sf::Mouse::Button::Left, e->x(), e->y()};
-	_engine->processEvent(event);
+	m_engine->processEvent(event);
 }
 
 void NovelTeaWidget::mouseMoveEvent(QMouseEvent *e)
@@ -69,7 +82,7 @@ void NovelTeaWidget::mouseMoveEvent(QMouseEvent *e)
 	sf::Event event;
 	event.type = sf::Event::MouseMoved;
 	event.mouseButton = sf::Event::MouseButtonEvent {sf::Mouse::Button::Left, e->x(), e->y()};
-	_engine->processEvent(event);
+	m_engine->processEvent(event);
 }
 
 void NovelTeaWidget::onInit()
@@ -78,7 +91,7 @@ void NovelTeaWidget::onInit()
 
 void NovelTeaWidget::onResize()
 {
-	_engine->resize(getSize().x, getSize().y);
+	m_engine->resize(getSize().x, getSize().y);
 }
 
 void NovelTeaWidget::onUpdate(float delta)
@@ -88,8 +101,8 @@ void NovelTeaWidget::onUpdate(float delta)
 	while (pollEvent(event))
 		std::cout << "pollEvent worked!" << std::endl;
 
-	_engine->update(delta);
-	_engine->render(*this);
+	m_engine->update(delta);
+	m_engine->render(*this);
 
 //	std::cout << "onupdate" << std::endl;
 

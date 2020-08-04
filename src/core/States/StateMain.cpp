@@ -1,15 +1,13 @@
 #include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Room.hpp>
-#include <NovelTea/SaveData.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
-#include <NovelTea/Player.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -19,6 +17,7 @@ namespace NovelTea
 StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 , m_mode(Mode::Nothing)
+, m_testPlaybackMode(false)
 , m_cutsceneSpeed(1.f)
 {
 	ScriptMan.reset();
@@ -43,35 +42,17 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_actionBuilder.setCallback([this](bool confirmed){
 		if (confirmed)
 		{
-			auto action = m_actionBuilder.getAction();
-			auto verb = Save.get<Verb>(m_actionBuilder.getVerb());
-			if (action)
-			{
-				auto object = Save.get<Object>(m_selectedObjectId);
-				auto s = "function f(object1,object2,object3,object4){"+action->getScript()+"}";
-				ScriptMan.call(s, "f", object);
-			}
-			else if (!verb->getDefaultScriptSuccess().empty())
-			{
-				auto object = Save.get<Object>(m_selectedObjectId);
-				auto s = "function f(object1,object2,object3,object4){"+verb->getDefaultScriptSuccess()+"}";
-				ScriptMan.call(s, "f", object);
-			}
-			else
-				std::cout << "Nothing happened." << std::endl;
-
-			updateRoomText();
+			processAction(m_actionBuilder.getVerb(), m_actionBuilder.getObjects());
 		}
 		m_actionBuilder.hide();
 	});
 
-	// TODO: check SaveData for last entrypoint
-	auto &saveEntryPoint = Save.data()[ID::entrypointEntity];
+	auto &saveEntryPoint = GSave.data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
-	if (saveEntryPoint.IsEmpty())
-		setMode(projEntryPoint);
-	else
+	if (!saveEntryPoint.IsEmpty())
 		setMode(saveEntryPoint);
+	else if (!projEntryPoint.IsEmpty())
+		setMode(projEntryPoint);
 }
 
 void StateMain::render(sf::RenderTarget &target)
@@ -94,13 +75,13 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 {
 	if (mode == Mode::Cutscene)
 	{
-		m_cutscene = Save.get<Cutscene>(idName);
+		m_cutscene = GSave.get<Cutscene>(idName);
 		m_cutsceneRenderer.setCutscene(m_cutscene);
-		Player::instance().pushNextEntityJson(m_cutscene->getNextEntity());
+		getContext().game.pushNextEntityJson(m_cutscene->getNextEntity());
 	}
 	else if (mode == Mode::Room)
 	{
-		Player::instance().setRoomId(idName);
+		getContext().game.setRoomId(idName);
 		updateRoomText();
 	}
 
@@ -125,9 +106,44 @@ void StateMain::setMode(const json &jEntity)
 	setMode(mode, idName);
 }
 
+bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
+{
+	auto action = Action::find(verbId, objectIds);
+	auto success = true;
+	auto verb = GSave.get<Verb>(verbId);
+
+	for (auto &objectId : objectIds)
+		if (!ActiveGame->getRoom()->contains(objectId) && !ActiveGame->getObjectList()->contains(objectId))
+			return false;
+
+	if (action)
+	{
+		auto object = GSave.get<Object>(objectIds[0]);
+		auto s = "function f(object1,object2,object3,object4){"+action->getScript()+"}";
+		ScriptMan.call(s, "f", object);
+	}
+	else if (!verb->getDefaultScriptSuccess().empty())
+	{
+		auto object = GSave.get<Object>(objectIds[0]);
+		auto s = "function f(object1,object2,object3,object4){"+verb->getDefaultScriptSuccess()+"}";
+		ScriptMan.call(s, "f", object);
+	}
+	else
+	{
+		success = false;
+		std::cout << "Nothing happened." << std::endl;
+	}
+
+	if (success)
+	{
+		updateRoomText();
+	}
+	return success;
+}
+
 void StateMain::gotoNextEntity()
 {
-	auto nextEntity = Player::instance().popNextEntity();
+	auto nextEntity = getContext().game.popNextEntity();
 	if (nextEntity)
 	{
 		auto mode = Mode::Nothing;
@@ -143,7 +159,7 @@ void StateMain::gotoNextEntity()
 
 void StateMain::updateRoomText()
 {
-	auto room = Player::instance().getRoom();
+	auto room = getContext().game.getRoom();
 	auto r = ScriptMan.runInClosure<std::string>(room->getDescription());
 	m_roomActiveText.setText(r);
 }

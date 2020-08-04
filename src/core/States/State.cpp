@@ -4,9 +4,9 @@
 
 namespace NovelTea {
 
-State::Context::Context(EngineConfig& config, ScriptManager& scriptManager, sj::JSON& data)
+State::Context::Context(EngineConfig& config, Game& game, sj::JSON& data)
 : config(config)
-, scriptManager(scriptManager)
+, game(game)
 , data(data)
 {
 }

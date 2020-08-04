@@ -1,4 +1,4 @@
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <NovelTea/Action.hpp>
@@ -92,7 +92,7 @@ bool ActionBuilder::isVisible() const
 void ActionBuilder::setVerb(const std::string &verbId)
 {
 	m_verbId = verbId;
-	auto verb = Save.get<Verb>(verbId);
+	auto verb = GSave.get<Verb>(verbId);
 	m_objectIds.resize(verb->getObjectCount());
 	for (auto &objectId : m_objectIds)
 		objectId.clear();
@@ -142,7 +142,7 @@ void ActionBuilder::setCallback(ActionBuilderCallback callback)
 
 void ActionBuilder::updateText()
 {
-	auto verb = Save.get<Verb>(m_verbId);
+	auto verb = GSave.get<Verb>(m_verbId);
 	m_text.setText(verb->getActionText(m_objectIds));
 }
 

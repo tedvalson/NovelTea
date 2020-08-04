@@ -7,13 +7,14 @@
 namespace NovelTea
 {
 
+class Game;
+class SaveData;
 class Script;
 
 class ScriptManager
 {
+	friend class Game;
 public:
-	ScriptManager();
-	~ScriptManager();
 	void reset();
 
 	void runScript(std::shared_ptr<Script> script);
@@ -56,6 +57,8 @@ public:
 	}
 
 protected:
+	ScriptManager(Game *game, SaveData *saveData);
+	~ScriptManager();
 	void registerFunctions();
 	void registerClasses();
 	void registerGlobals();
@@ -65,6 +68,8 @@ protected:
 
 private:
 	duk_context *m_context;
+	Game *m_game;
+	SaveData *m_saveData;
 };
 
 } // namespace NovelTea

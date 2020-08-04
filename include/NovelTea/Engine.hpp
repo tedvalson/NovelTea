@@ -34,6 +34,8 @@ public:
 
 	static size_t getSystemTimeMs();
 
+	std::shared_ptr<Game> getGame();
+
 //protected:
 	void initialize();
 
@@ -42,7 +44,7 @@ public:
 private:
 	EngineConfig m_config;
 	float m_deltaPerFrame;
-	StateStack m_stateStack;
+	std::unique_ptr<StateStack> m_stateStack;
 
 	sf::View m_view;
 	sf::RectangleShape m_bg;
@@ -54,7 +56,7 @@ private:
 
 	// Shared State context variables
 	sj::JSON m_data;
-	ScriptManager m_scriptManager;
+	std::shared_ptr<Game> m_game;
 };
 
 } // namespace NovelTea

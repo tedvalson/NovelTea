@@ -2,6 +2,7 @@
 #define NOVELTEAWIDGET_H
 
 #include "SFMLWidget.h"
+#include <NovelTea/Game.hpp>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
@@ -21,6 +22,9 @@ public:
 
 	json processData(json jsonData);
 	void setMode(NovelTea::StateEditorMode mode);
+	std::shared_ptr<NovelTea::Game> getGame();
+
+	void reset();
 
 protected:
 	void mousePressEvent(QMouseEvent *e);
@@ -37,12 +41,12 @@ protected:
 	void onUpdate(float delta) override;
 
 private:
-	NovelTea::Engine *_engine;
+	NovelTea::Engine *m_engine;
 //	NovelTea::InputManager *_inputManager;
 
 //	QBasicTimer timer;
-	sf::Vector2f _internalSize;
-	float _internalRatio;
+	sf::Vector2f m_internalSize;
+	float m_internalRatio;
 };
 
 #endif // NOVELTEAWIDGET_H

@@ -75,14 +75,14 @@ void RoomWidget::updatePreview()
 	if (ui->scriptEdit->checkErrors<std::string>())
 	{
 		// Reset any changes made by previous script execution
-		Save.reset();
+		GSave.reset();
 		if (m_room)
 		{
 			m_room->getObjectList()->saveChanges();
 			// Save room in case changes aren't yet saved to project
-			Save.set(m_room);
+			GSave.set(m_room);
 			// Force reloading of room data we just saved in player
-			NovelTea::Player::instance().setRoomId(m_room->getId());
+			ActiveGame->setRoomId(m_room->getId());
 		}
 
 		ui->preview->processData(jdata);

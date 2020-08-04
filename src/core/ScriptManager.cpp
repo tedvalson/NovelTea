@@ -1,5 +1,5 @@
 #include <NovelTea/ScriptManager.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
@@ -7,7 +7,6 @@
 #include <NovelTea/Object.hpp>
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/PropertyList.hpp>
-#include <NovelTea/Player.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
@@ -26,11 +25,11 @@
 
 #define REGISTER_ENTITY(className) \
 	dukglue_set_base_class<Entity, className>(m_context);  \
-	dukglue_register_function(m_context, SaveData::get<className>, "load"#className); \
-	dukglue_register_function(m_context, SaveData::exists<className>, "exists"#className); \
 	dukglue_register_method(m_context, &className::prop, "prop"); \
 	dukglue_register_method(m_context, &className::setProp, "setProp"); \
-	dukglue_register_property(m_context, &className::getId, nullptr, "id");
+	dukglue_register_property(m_context, &className::getId, nullptr, "id"); \
+	dukglue_register_method(m_context, &SaveData::get<className>, "load"#className); \
+	dukglue_register_method(m_context, &SaveData::exists<className>, "exists"#className);
 
 namespace
 {
@@ -43,8 +42,10 @@ namespace
 namespace NovelTea
 {
 
-ScriptManager::ScriptManager()
+ScriptManager::ScriptManager(Game *game, SaveData *saveData)
 	: m_context(nullptr)
+	, m_game(game)
+	, m_saveData(saveData)
 {
 	reset();
 }
@@ -93,7 +94,7 @@ void ScriptManager::runScript(std::shared_ptr<Script> script)
 
 void ScriptManager::runScriptId(const std::string &scriptId)
 {
-	runScript(Save.get<Script>(scriptId));
+	runScript(m_saveData->get<Script>(scriptId));
 }
 
 void ScriptManager::registerFunctions()
@@ -122,6 +123,10 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &ObjectList::addId, "addId");
 	dukglue_register_method(m_context, &ObjectList::removeId, "removeId");
 	dukglue_register_method(m_context, &ObjectList::contains, "contains");
+
+	// PropertyList
+	dukglue_register_method(m_context, &PropertyList::set, "set");
+	dukglue_register_method(m_context, &PropertyList::get, "get");
 
 	// Action
 	REGISTER_CONSTRUCTOR(Action);
@@ -162,17 +167,17 @@ void ScriptManager::registerClasses()
 void ScriptManager::registerGlobals()
 {
 	// Save
-	dukglue_register_global(m_context, &SaveData::instance(), "Save");
+	dukglue_register_global(m_context, m_saveData, "Save");
 	dukglue_register_method(m_context, &SaveData::save, "saveSlot");
 	dukglue_register_method(m_context, &SaveData::load, "loadSlot");
 	dukglue_register_method(m_context, &SaveData::writeVariables, "writeVariables");
 	dukglue_register_method(m_context, &SaveData::readVariables, "readVariables");
 
-	// Player
-	dukglue_register_global(m_context, &Player::instance(), "Player");
-	dukglue_register_method(m_context, &Player::pushNextEntity, "pushNext");
-	dukglue_register_property(m_context, &Player::getObjectList, nullptr, "inventory");
-	dukglue_register_property(m_context, &Player::getRoom, &Player::setRoom, "room");
+	// Game
+	dukglue_register_global(m_context, m_game, "Game");
+	dukglue_register_method(m_context, &Game::pushNextEntity, "pushNext");
+	dukglue_register_property(m_context, &Game::getObjectList, nullptr, "inventory");
+	dukglue_register_property(m_context, &Game::getRoom, &Game::setRoom, "room");
 
 	// Script
 	dukglue_register_global(m_context, this, "Script");
@@ -181,18 +186,18 @@ void ScriptManager::registerGlobals()
 
 void ScriptManager::runAutorunScripts()
 {
-	if (Save.isLoaded())
-		for (auto &item : Save.data()[Script::id].ObjectRange())
+	if (m_saveData->isLoaded())
+		for (auto &item : m_saveData->data()[Script::id].ObjectRange())
 			checkAutorun(item.second);
 	if (Proj.isLoaded())
 		for (auto &item : ProjData[Script::id].ObjectRange())
-			if (!Save.data()[Script::id].hasKey(item.first))
+			if (!m_saveData->data()[Script::id].hasKey(item.first))
 				checkAutorun(item.second);
 }
 
 void ScriptManager::checkAutorun(const sj::JSON &j)
 {
-	auto script = Save.get<Script>(j[ID::entityId].ToString());
+	auto script = m_saveData->get<Script>(j[ID::entityId].ToString());
 	if (script->getAutorun())
 		runScript(script);
 }

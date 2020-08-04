@@ -1,6 +1,6 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
 #include <SFML/System/FileInputStream.hpp>
@@ -199,9 +199,11 @@ bool ProjectData::fromJson(const json &j)
 			m_fonts.push_back(font);
 	}
 
+	GMan; // Make sure GameManager is initialized
 	_json = j;
 	_loaded = true;
-	Save.reset();
+	ActiveGame->reset();
+
 	return true;
 }
 

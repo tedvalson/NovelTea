@@ -1,6 +1,6 @@
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Object.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 
 namespace NovelTea
 {
@@ -81,7 +81,7 @@ std::string Verb::getActionText(std::vector<std::string> objectIds, std::string 
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
-		objects.push_back(Save.get<Object>(objectId));
+		objects.push_back(GSave.get<Object>(objectId));
 	return getActionText(objects, blankStr);
 }
 

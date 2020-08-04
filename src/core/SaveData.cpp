@@ -7,7 +7,6 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
-#include <NovelTea/Player.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
@@ -18,12 +17,6 @@ namespace NovelTea
 SaveData::SaveData()
 	: m_directory(".")
 {
-}
-
-SaveData &SaveData::instance()
-{
-	static SaveData obj;
-	return obj;
 }
 
 bool SaveData::isLoaded() const
@@ -73,15 +66,14 @@ const std::string &SaveData::filename() const
 	return m_filename;
 }
 
-
 std::string SaveData::getParentId(const std::string &entityType, const std::string &entityId)
 {
 	if (entityType.empty())
 		return std::string();
 
 	json j;
-	if (Save.data()[entityType].hasKey(entityId))
-		j = Save.data()[entityType][entityId];
+	if (data()[entityType].hasKey(entityId))
+		j = data()[entityType][entityId];
 	else
 		j = ProjData[entityType][entityId];
 	return j[1].ToString();
@@ -103,7 +95,6 @@ void SaveData::reset()
 		return;
 	m_json = sj::Object();
 	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
-	Player::instance().reset();
 
 	auto &jprops = m_json[ID::properties];
 	getProjectProps(jprops, Action::id);
@@ -197,7 +188,7 @@ void SaveData::set(std::shared_ptr<Entity> obj, const std::string &idName)
 		obj->setId(idName);
 	else if (obj->getId().empty())
 		return;
-	Save.data()[obj->entityId()][obj->getId()] = obj->toJson();
+	data()[obj->entityId()][obj->getId()] = obj->toJson();
 }
 
 } // namespace NovelTea

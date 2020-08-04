@@ -1,6 +1,5 @@
 #include "ScriptEdit.hpp"
-#include <NovelTea/ScriptManager.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <QWhatsThis>
 #include <QTextBlock>
 #include <QPainter>
@@ -229,7 +228,7 @@ public:
 
 	int lineWithError;
 	std::string errorMessage;
-	NovelTea::ScriptManager scriptManager;
+	NovelTea::Game game;
 };
 
 ScriptEdit::ScriptEdit(QWidget *parent)
@@ -622,8 +621,8 @@ bool ScriptEdit::checkErrors()
 	auto result = false;
 	try
 	{
-		d_ptr->scriptManager.reset();
-		d_ptr->scriptManager.runInClosure<T>(toPlainText().toStdString());
+		d_ptr->game.getScriptManager().reset();
+		d_ptr->game.getScriptManager().runInClosure<T>(toPlainText().toStdString());
 		d_ptr->lineWithError = -1;
 		result = true;
 	}

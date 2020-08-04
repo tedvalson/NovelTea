@@ -5,16 +5,15 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Entity.hpp>
 
-#define Save NovelTea::SaveData::instance()
-
 namespace NovelTea
 {
 
 class SaveData: public JsonSerializable
 {
+	friend class Game;
+protected:
+	SaveData();
 public:
-	static SaveData &instance();
-
 	bool isLoaded() const;
 
 	void saveToFile(const std::string &filename = std::string());
@@ -42,32 +41,29 @@ public:
 	bool load(int slot);
 	std::string getSlotFilename(int slot) const;
 
-	static void set(std::shared_ptr<Entity> obj, const std::string &idName = std::string());
+	void set(std::shared_ptr<Entity> obj, const std::string &idName = std::string());
 
 	template <typename T>
-	static bool exists(const std::string &idName)
+	bool exists(const std::string &idName)
 	{
 		if (idName.empty())
 			return false;
-		return (ProjData[T::id].hasKey(idName) || Save.data()[T::id].hasKey(idName));
+		return (ProjData[T::id].hasKey(idName) || data()[T::id].hasKey(idName));
 	}
 
 	template <typename T>
-	static std::shared_ptr<T> get(const std::string &idName)
+	std::shared_ptr<T> get(const std::string &idName)
 	{
 		auto result = std::make_shared<T>();
 		if (exists<T>(idName))
 		{
-			if (Save.data()[T::id].hasKey(idName))
-				result->fromJson(Save.data()[T::id][idName]);
+			if (data()[T::id].hasKey(idName))
+				result->fromJson(data()[T::id][idName]);
 			else
 				result->fromJson(ProjData[T::id][idName]);
 		}
 		return result;
 	}
-
-protected:
-	SaveData();
 
 private:
 	bool m_loaded = false;

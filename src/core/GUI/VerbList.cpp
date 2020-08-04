@@ -1,5 +1,5 @@
 #include <NovelTea/GUI/VerbList.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -109,12 +109,12 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 {
 	m_verbs.clear();
 
-	for (auto &item : Save.data()[Verb::id].ObjectRange())
+	for (auto &item : GSave.data()[Verb::id].ObjectRange())
 		addVerbOption(item.first);
 	for (auto &item : ProjData[Verb::id].ObjectRange())
 	{
 		auto verbId = item.first;
-		if (!Save.data()[Verb::id].hasKey(verbId))
+		if (!GSave.data()[Verb::id].hasKey(verbId))
 			addVerbOption(verbId);
 	}
 
@@ -259,7 +259,7 @@ void VerbList::addVerbOption(const std::string &verbId)
 	option.text.setFillColor(sf::Color::Black);
 	option.text.setFont(*Proj.getFont(0));
 
-	auto verb = Save.get<Verb>(verbId);
+	auto verb = GSave.get<Verb>(verbId);
 	option.text.setString(verb->getName());
 	m_verbs.push_back(option);
 }

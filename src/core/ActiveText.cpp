@@ -2,7 +2,7 @@
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <NovelTea/ProjectData.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -59,7 +59,7 @@ std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::St
 
 		auto idName = s.substring(midPos + 1, endPos - midPos - 1);
 		auto text = s.substring(startPos + 2, midPos - startPos - 2);
-		if (!SaveData::exists<Object>(idName))
+		if (!GSave.exists<Object>(idName))
 			idName.clear();
 		if (startPos != processedPos)
 			splitAndAppend(s.substring(processedPos, startPos - processedPos).toAnsiString(), "", v);

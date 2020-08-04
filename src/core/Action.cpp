@@ -1,6 +1,6 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Verb.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Game.hpp>
 
 namespace NovelTea
 {
@@ -53,7 +53,7 @@ void Action::setVerbObjectCombo(const json &j)
 			!j[1].IsArray() || j[1].IsEmpty())
 		return;
 
-	auto verb = Save.get<Verb>(j[0].ToString());
+	auto verb = GSave.get<Verb>(j[0].ToString());
 	if (!verb)
 		return;
 
@@ -101,7 +101,7 @@ std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vecto
 			}
 
 			if (match)
-				return Save.get<Action>(item.first);
+				return GSave.get<Action>(item.first);
 		}
 	}
 

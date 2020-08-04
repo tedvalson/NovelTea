@@ -1,24 +1,24 @@
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
-#include <NovelTea/SaveData.hpp>
 #include <NovelTea/Object.hpp>
 #include <string>
 
 namespace NovelTea
 {
 
-ObjectList::ObjectList()
+ObjectList::ObjectList(SaveData &saveData)
+	: m_saveData(&saveData)
 {
 }
 
 bool ObjectList::addId(const std::string &objectId)
 {
-	return add(Save.get<Object>(objectId));
+	return add(m_saveData->get<Object>(objectId));
 }
 
 bool ObjectList::removeId(const std::string &objectId)
 {
-	return remove(Save.get<Object>(objectId));
+	return remove(m_saveData->get<Object>(objectId));
 }
 
 bool ObjectList::add(std::shared_ptr<Object> object)
@@ -62,14 +62,14 @@ void ObjectList::attach(const std::string &type, const std::string &id)
 {
 	m_attachedType = type;
 	m_attachedId = id;
-	auto &j = Save.data()[ID::objectLocations][type][id];
+	auto &j = m_saveData->data()[ID::objectLocations][type][id];
 
 	// If no object in list, load from SaveData.
 	// Otherwise, save the existing ones.
 	if (m_objects.empty())
 	{
 		for (auto &jobjectId : j.ArrayRange())
-			m_objects.push_back(Save.get<Object>(jobjectId.ToString()));
+			m_objects.push_back(m_saveData->get<Object>(jobjectId.ToString()));
 	}
 	else
 		saveChanges();
@@ -85,7 +85,7 @@ void ObjectList::saveChanges()
 		if (!object->getId().empty())
 			jobjects.append(object->getId());
 
-	Save.data()[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
+	m_saveData->data()[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
 }
 
 } // namespace NovelTea

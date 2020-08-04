@@ -10,11 +10,15 @@ namespace NovelTea
 {
 
 Engine::Engine(EngineConfig config)
-: m_config(config)
-, m_stateStack(State::Context(m_config, m_scriptManager, m_data))
+	: m_config(config)
 {
-	m_stateStack.registerState<StateEditor>(StateID::Editor);
-	m_stateStack.registerState<StateMain>(StateID::Main);
+	m_game = std::make_shared<Game>();
+
+	auto stateStack = new StateStack(State::Context(m_config, *m_game, m_data));
+	m_stateStack = std::unique_ptr<StateStack>(stateStack);
+
+	m_stateStack->registerState<StateEditor>(StateID::Editor);
+	m_stateStack->registerState<StateMain>(StateID::Main);
 }
 
 void Engine::run()
@@ -55,14 +59,16 @@ void Engine::resize(size_t width, size_t height)
 
 void Engine::render(sf::RenderTarget &target)
 {
+	GMan.setActive(m_game);
 	target.clear();
 	target.setView(m_view);
 	target.draw(m_bg);
-	m_stateStack.render(target);
+	m_stateStack->render(target);
 }
 
 void Engine::update()
 {
+	GMan.setActive(m_game);
 	auto time = getSystemTimeMs();
 	auto elapsed = sf::milliseconds(time - m_lastTime);
 	auto delta = elapsed.asSeconds();
@@ -70,23 +76,25 @@ void Engine::update()
 	{
 		sf::sleep(sf::seconds(m_deltaPerFrame - delta));
 		m_lastTime = getSystemTimeMs();
-		m_stateStack.update(m_deltaPerFrame);
+		m_stateStack->update(m_deltaPerFrame);
 	}
 	else
 	{
 		m_lastTime = time;
-		m_stateStack.update(delta);
+		m_stateStack->update(delta);
 	}
 }
 
 void Engine::update(float deltaSeconds)
 {
+	GMan.setActive(m_game);
 	m_lastTime = getSystemTimeMs();
-	m_stateStack.update(deltaSeconds);
+	m_stateStack->update(deltaSeconds);
 }
 
 void Engine::processEvent(const sf::Event &event)
 {
+	GMan.setActive(m_game);
 	auto e = event;
 	sf::Vector2i pos;
 
@@ -123,12 +131,13 @@ void Engine::processEvent(const sf::Event &event)
 		e.mouseButton.y = coords.y;
 	}
 
-	m_stateStack.processEvent(e);
+	m_stateStack->processEvent(e);
 }
 
 void *Engine::processData(void *data)
 {
-	return m_stateStack.processData(data);
+	GMan.setActive(m_game);
+	return m_stateStack->processData(data);
 }
 
 size_t Engine::getSystemTimeMs()
@@ -136,6 +145,11 @@ size_t Engine::getSystemTimeMs()
 	auto t = steady_clock::now().time_since_epoch();
 	auto ts = duration_cast<milliseconds>(t);
 	return ts.count();
+}
+
+std::shared_ptr<Game> Engine::getGame()
+{
+	return m_game;
 }
 
 void Engine::initialize()
@@ -150,7 +164,7 @@ void Engine::initialize()
 
 	resize(m_config.width, m_config.height);
 
-	m_stateStack.pushState(m_config.initialState);
+	m_stateStack->pushState(m_config.initialState);
 }
 
 sf::Vector2f Engine::mapPixelToCoords(const sf::Vector2i &point) const
