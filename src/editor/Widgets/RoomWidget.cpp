@@ -6,8 +6,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/States/StateEditor.hpp>
-#include <NovelTea/SaveData.hpp>
-#include <NovelTea/Player.hpp>
+#include <NovelTea/Game.hpp>
 #include <QWizard>
 #include <QDebug>
 
@@ -16,7 +15,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	, ui(new Ui::RoomWidget)
 	, m_objectMenu(new QMenu)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	ui->preview->setMode(NovelTea::StateEditorMode::Room);
 	load();
@@ -68,12 +67,12 @@ void RoomWidget::updateRoom() const
 
 void RoomWidget::updatePreview()
 {
-	json jdata;
-	jdata["event"] = "text";
-	jdata["data"] = ui->scriptEdit->toPlainText().toStdString();
-
 	if (ui->scriptEdit->checkErrors<std::string>())
 	{
+		json jdata;
+		jdata["event"] = "text";
+		jdata["data"] = ui->scriptEdit->toPlainText().toStdString();
+
 		// Reset any changes made by previous script execution
 		GSave.reset();
 		if (m_room)

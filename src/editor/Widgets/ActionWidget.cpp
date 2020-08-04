@@ -12,7 +12,7 @@ ActionWidget::ActionWidget(const std::string &idName, QWidget *parent)
 : EditorTabWidget(parent)
 , ui(new Ui::ActionWidget)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	load();
 

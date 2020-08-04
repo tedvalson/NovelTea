@@ -17,6 +17,7 @@ public:
 		Object   = 2,
 		Action,
 		Dialogue,
+		Tests,
 		Script,
 		Settings,
 		Verb,
@@ -45,9 +46,9 @@ signals:
 	void loaded();
 	void modified();
 protected:
-	std::string _idName;
+	std::string m_idName;
 private:
-	bool _modified = false;
+	bool m_modified = false;
 };
 
 #endif // EDITORTABWIDGET_HPP

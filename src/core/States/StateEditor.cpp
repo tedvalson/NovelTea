@@ -1,4 +1,5 @@
 #include <NovelTea/States/StateEditor.hpp>
+#include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Engine.hpp>
@@ -84,6 +85,25 @@ void *StateEditor::processData(void *data)
 	if (event == "mode")
 	{
 		m_mode = static_cast<StateEditorMode>(jsonData["mode"].ToInt());
+	}
+	else if (event == "test")
+	{
+		auto strCallbackPtr = jsonData["callback"].ToString();
+		auto intCallbackPtr = strtoll(strCallbackPtr.c_str(), nullptr, 16);
+		auto callback = *reinterpret_cast<TestCallback*>(intCallbackPtr);
+
+		StateCallback stateCallback = [callback](void* data){
+			auto j = *reinterpret_cast<json*>(data);
+			return callback(j);
+		};
+
+		if (jsonData["type"] == "record")
+			getContext().data["testSteps"] = sj::Array();
+		else
+			getContext().data["testSteps"] = jsonData["steps"];
+
+		requestStackPop();
+		requestStackPush(StateID::Main, false, stateCallback);
 	}
 	else if (m_mode == StateEditorMode::Cutscene)
 	{

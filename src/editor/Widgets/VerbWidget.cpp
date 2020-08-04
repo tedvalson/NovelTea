@@ -8,7 +8,7 @@ VerbWidget::VerbWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::VerbWidget)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	load();
 

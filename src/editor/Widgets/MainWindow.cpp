@@ -8,6 +8,7 @@
 #include "ObjectWidget.hpp"
 #include "ScriptWidget.hpp"
 #include "VerbWidget.hpp"
+#include "TestsWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
 #include "Wizard/WizardPageActionSelect.hpp"
@@ -539,4 +540,10 @@ void MainWindow::on_actionClearParentSelection_triggered()
 		j[selectedIdName][NovelTea::ID::entityParentId] = "";
 		Proj.saveToFile();
 	}
+}
+
+void MainWindow::on_actionTests_triggered()
+{
+	auto w = new TestsWidget;
+	addEditorTab(w, true);
 }

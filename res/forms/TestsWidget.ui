@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TestsWidget</class>
+ <widget class="QWidget" name="TestsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>560</width>
+    <height>327</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="opaqueResize">
+      <bool>false</bool>
+     </property>
+     <property name="handleWidth">
+      <number>5</number>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <property name="spacing" stdset="0">
+      <number>2</number>
+     </property>
+     <property name="leftMargin" stdset="0">
+      <number>2</number>
+     </property>
+     <property name="topMargin" stdset="0">
+      <number>2</number>
+     </property>
+     <property name="rightMargin" stdset="0">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin" stdset="0">
+      <number>2</number>
+     </property>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="tabPosition">
+       <enum>QTabWidget::South</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabDescription">
+       <attribute name="title">
+        <string>Description</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QSplitter" name="splitterLeft">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="handleWidth">
+           <number>4</number>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <widget class="QWidget" name="horizontalLayoutWidget">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="spacing">
+             <number>1</number>
+            </property>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QToolBar" name="toolBarTests">
+                <property name="floatable">
+                 <bool>false</bool>
+                </property>
+                <addaction name="actionAddTest"/>
+                <addaction name="actionRemoveTest"/>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="listWidgetTests"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QToolBar" name="toolBarSteps">
+                <property name="floatable">
+                 <bool>false</bool>
+                </property>
+                <addaction name="actionAddStep"/>
+                <addaction name="actionRemoveStep"/>
+                <addaction name="actionRecordSteps"/>
+                <addaction name="actionRunSteps"/>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="listWidgetSteps"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabProperties">
+       <attribute name="title">
+        <string>Properties</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="verticalLayoutWidgetRight">
+      <layout class="QVBoxLayout" name="verticalLayoutRight">
+       <property name="spacing">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="NovelTeaWidget" name="preview" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>300</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionAddTest">
+   <property name="icon">
+    <iconset theme="list-add">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Add Test</string>
+   </property>
+  </action>
+  <action name="actionRemoveTest">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="list-remove">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Remove Test</string>
+   </property>
+  </action>
+  <action name="actionAddStep">
+   <property name="icon">
+    <iconset theme="list-add">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Add Step</string>
+   </property>
+  </action>
+  <action name="actionRemoveStep">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="list-remove">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Remove Step</string>
+   </property>
+  </action>
+  <action name="actionAddStepAction">
+   <property name="text">
+    <string>Action</string>
+   </property>
+  </action>
+  <action name="actionAddStepWait">
+   <property name="text">
+    <string>Wait</string>
+   </property>
+  </action>
+  <action name="actionRunSteps">
+   <property name="icon">
+    <iconset theme="media-playback-start"/>
+   </property>
+   <property name="text">
+    <string>Run Steps</string>
+   </property>
+  </action>
+  <action name="actionRecordSteps">
+   <property name="icon">
+    <iconset theme="media-record"/>
+   </property>
+   <property name="text">
+    <string>Record Steps</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NovelTeaWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/NovelTeaWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

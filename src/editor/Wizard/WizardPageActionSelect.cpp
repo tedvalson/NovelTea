@@ -78,6 +78,17 @@ void WizardPageActionSelect::setFilterRegExp(const QString &pattern)
 	ui->treeView->setFilterRegExp(pattern);
 }
 
+void WizardPageActionSelect::setLabel(const QString &message)
+{
+	if (message.isEmpty())
+	{
+		ui->label->hide();
+		return;
+	}
+	ui->label->show();
+	ui->label->setText(message);
+}
+
 void WizardPageActionSelect::allowCustomScript(bool allow)
 {
 	ui->radioCustom->setVisible(allow);
@@ -93,6 +104,24 @@ bool WizardPageActionSelect::isComplete() const
 {
 	return ((ui->radioExisting->isChecked() && currentIndex.parent().isValid()) ||
 			(ui->radioCustom->isChecked() && !ui->scriptEdit->toPlainText().isEmpty()));
+}
+
+std::string WizardPageActionSelect::getItemId(const QString &filterRegex, const QString &labelMessage)
+{
+	QWizard wizard;
+	wizard.setWindowTitle("Choose Project Entity");
+	auto page = new WizardPageActionSelect;
+	page->setFilterRegExp(filterRegex);
+	page->allowCustomScript(false);
+	page->setLabel(labelMessage);
+	wizard.addPage(page);
+	if (wizard.exec() == QDialog::Accepted)
+	{
+		auto itemIndex = page->getSelectedIndex();
+		auto treeItem = static_cast<TreeItem*>(itemIndex.internalPointer());
+		return treeItem->data(0).toString().toStdString();
+	}
+	return std::string();
 }
 
 void WizardPageActionSelect::timerEvent(QTimerEvent *)

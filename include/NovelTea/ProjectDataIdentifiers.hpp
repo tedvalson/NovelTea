@@ -38,6 +38,7 @@ namespace ID
 	const auto cutsceneSegBreak   = 1;
 	const auto textFormats        = "textformats";
 	const auto player             = "player";
+	const auto tests              = "tests";
 
 	// For SaveData
 	const auto variables          = "variables";

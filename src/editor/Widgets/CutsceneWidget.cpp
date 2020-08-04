@@ -34,7 +34,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	variantFactory(new QtVariantEditorFactory),
 	m_cutscenePlaying(false)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	ui->preview->setMode(NovelTea::StateEditorMode::Cutscene);
 	createMenus();
@@ -415,14 +415,16 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 	m_lastTimeMs = timeMs;
 }
 
-void CutsceneWidget::showEvent(QShowEvent *)
+void CutsceneWidget::showEvent(QShowEvent *event)
 {
+	EditorTabWidget::showEvent(event);
 	m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
 	timerId = startTimer(50);
 }
 
-void CutsceneWidget::hideEvent(QHideEvent *)
+void CutsceneWidget::hideEvent(QHideEvent *event)
 {
+	EditorTabWidget::hideEvent(event);
 	killTimer(timerId);
 }
 

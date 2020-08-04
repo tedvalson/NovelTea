@@ -12,7 +12,7 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::DialogueWidget)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	load();
 }

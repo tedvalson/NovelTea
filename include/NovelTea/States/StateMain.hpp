@@ -16,6 +16,8 @@ using json = sj::JSON;
 namespace NovelTea
 {
 
+typedef std::function<bool(const json&)> TestCallback;
+
 enum class Mode {
 	Nothing,
 	Cutscene,
@@ -34,12 +36,16 @@ public:
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);
 
+	void processTestSteps();
+	bool processAction(const std::string &verbId, const std::vector<std::string> &objectIds);
+
 	void gotoNextEntity();
 
 	void updateRoomText();
 
 private:
 	Mode m_mode;
+	bool m_testPlaybackMode;
 
 	ActiveText m_roomActiveText;
 	VerbList m_verbList;

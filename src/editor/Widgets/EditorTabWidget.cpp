@@ -14,17 +14,17 @@ EditorTabWidget::~EditorTabWidget()
 
 bool EditorTabWidget::isModified() const
 {
-	return _modified;
+	return m_modified;
 }
 
 const std::string &EditorTabWidget::idName() const
 {
-	return _idName;
+	return m_idName;
 }
 
 void EditorTabWidget::rename(const std::string &newIdName)
 {
-	_idName = newIdName;
+	m_idName = newIdName;
 }
 
 EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType entityType)
@@ -75,9 +75,9 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 
 void EditorTabWidget::save()
 {
-	if (_modified)
+	if (m_modified)
 	{
-		_modified = false;
+		m_modified = false;
 		saveData();
 		emit saved();
 	}
@@ -85,16 +85,16 @@ void EditorTabWidget::save()
 
 void EditorTabWidget::load()
 {
-	_modified = false;
+	m_modified = false;
 	loadData();
 	emit loaded();
 }
 
 void EditorTabWidget::setModified()
 {
-	if (!_modified)
+	if (!m_modified)
 	{
-		_modified = true;
+		m_modified = true;
 		emit modified();
 	}
 }

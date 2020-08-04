@@ -148,6 +148,7 @@
      <string>&amp;Project</string>
     </property>
     <addaction name="actionProjectSettings"/>
+    <addaction name="actionTests"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
@@ -291,6 +292,11 @@
   <action name="actionClearParentSelection">
    <property name="text">
     <string>Clear Parent Selection</string>
+   </property>
+  </action>
+  <action name="actionTests">
+   <property name="text">
+    <string>Tests</string>
    </property>
   </action>
  </widget>

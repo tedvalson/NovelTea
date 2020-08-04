@@ -22,9 +22,12 @@ public:
 	QModelIndex getSelectedIndex() const;
 
 	void setFilterRegExp(const QString &pattern);
+	void setLabel(const QString &message = QString());
 	void allowCustomScript(bool allow);
 
 	bool isComplete() const override;
+
+	static std::string getItemId(const QString &filterRegex, const QString &labelMessage = QString());
 
 protected:
 	void timerEvent(QTimerEvent*) override;

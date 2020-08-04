@@ -53,6 +53,12 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		setMode(saveEntryPoint);
 	else if (!projEntryPoint.IsEmpty())
 		setMode(projEntryPoint);
+
+	if (!getContext().data["testSteps"].IsEmpty())
+	{
+		m_testPlaybackMode = true;
+		processTestSteps();
+	}
 }
 
 void StateMain::render(sf::RenderTarget &target)
@@ -106,6 +112,41 @@ void StateMain::setMode(const json &jEntity)
 	setMode(mode, idName);
 }
 
+void StateMain::processTestSteps()
+{
+	auto jsteps = getContext().data["testSteps"];
+	for (int i = 0; i < jsteps.size(); ++i)
+	{
+		auto &jstep = jsteps[i];
+
+		// Skip through all cutscenes
+		while (m_mode == Mode::Cutscene)
+		{
+			update(0.001f * m_cutscene->getDelayMs());
+		}
+
+		auto type = jstep["type"].ToString();
+		if (type == "action")
+		{
+			std::vector<std::string> objectIds;
+			for (auto jobjectId : jstep["objects"].ArrayRange())
+				objectIds.push_back(jobjectId.ToString());
+			if (!processAction(jstep["verb"].ToString(), objectIds))
+			{
+				json j({
+					"success", false,
+					"index", i
+				});
+				runCallback(&j);
+				return;
+			}
+		}
+
+		if (m_mode != Mode::Cutscene)
+			gotoNextEntity();
+	}
+}
+
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
 	auto action = Action::find(verbId, objectIds);
@@ -136,6 +177,18 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 
 	if (success)
 	{
+		if (!m_testPlaybackMode)
+		{
+			auto jobjects = sj::Array();
+			for (auto &objectId : objectIds)
+				jobjects.append(objectId);
+			json jtestItem({
+				"type", "action",
+				"verb", verbId,
+				"objects", jobjects
+			});
+			runCallback(&jtestItem);
+		}
 		updateRoomText();
 	}
 	return success;

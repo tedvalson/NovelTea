@@ -10,7 +10,7 @@ ObjectWidget::ObjectWidget(const std::string &idName, QWidget *parent)
 	, variantManager(new QtVariantPropertyManager)
 	, variantFactory(new QtVariantEditorFactory)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	load();
 }

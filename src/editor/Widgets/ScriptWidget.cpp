@@ -8,7 +8,7 @@ ScriptWidget::ScriptWidget(const std::string &idName, QWidget *parent)
 : EditorTabWidget(parent)
 , ui(new Ui::ScriptWidget)
 {
-	_idName = idName;
+	m_idName = idName;
 	ui->setupUi(this);
 	load();
 }
