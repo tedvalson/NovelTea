@@ -15,6 +15,9 @@ namespace Ui {
 class RoomWidget;
 }
 
+class QCheckBox;
+class ActionSelectWidget;
+
 class RoomWidget : public EditorTabWidget
 {
 	Q_OBJECT
@@ -38,6 +41,9 @@ private:
 	void onListViewChanged();
 	void updateRoom() const;
 	void updatePreview();
+
+	void savePathDirection(json &path, const QCheckBox *checkBox, const ActionSelectWidget *actionSelect) const;
+	void loadPathDirection(const json &path, QCheckBox *checkBox, ActionSelectWidget *actionSelect);
 
 	void saveData() const override;
 	void loadData() override;

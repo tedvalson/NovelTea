@@ -18,12 +18,19 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 : State(stack, context, callback)
 , m_mode(Mode::Nothing)
 , m_testPlaybackMode(false)
+, m_roomTextChanging(false)
 , m_cutsceneSpeed(1.f)
 {
 	ScriptMan.reset();
 
 	m_actionBuilder.setPosition(10.f, 500.f);
 	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
+
+	m_navigation.setPosition(20.f, 500.f);
+	m_navigation.setScale(1.5f, 1.5f);
+	m_navigation.setCallback([this](const json &jentity){
+		getContext().game.pushNextEntityJson(jentity);
+	});
 
 	m_verbList.setSelectCallback([this](const std::string &verbId){
 		m_actionBuilder.setVerb(verbId);
@@ -63,22 +70,34 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 void StateMain::render(sf::RenderTarget &target)
 {
+	if (m_mode != Mode::Room && m_roomTextChanging)
+		target.draw(m_roomActiveTextFadeOut);
+
 	if (m_mode == Mode::Cutscene)
 	{
 		target.draw(m_cutsceneRenderer);
 	}
 	else if (m_mode == Mode::Room)
 	{
+		target.draw(m_roomActiveTextFadeOut);
 		target.draw(m_roomActiveText);
 		if (m_actionBuilder.isVisible())
 			target.draw(m_actionBuilder);
 		if (m_verbList.isVisible())
 			target.draw(m_verbList);
 	}
+
+	target.draw(m_navigation);
 }
 
 void StateMain::setMode(Mode mode, const std::string &idName)
 {
+	if (mode != Mode::Room)
+	{
+		updateRoomText("");
+		m_navigation.hide();
+	}
+
 	if (mode == Mode::Cutscene)
 	{
 		m_cutscene = GSave.get<Cutscene>(idName);
@@ -89,6 +108,10 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	{
 		getContext().game.setRoomId(idName);
 		updateRoomText();
+
+		auto room = getContext().game.getRoom();
+		m_navigation.setPaths(room->getPaths());
+		m_navigation.show();
 	}
 
 	m_mode = mode;
@@ -210,15 +233,32 @@ void StateMain::gotoNextEntity()
 	}
 }
 
-void StateMain::updateRoomText()
+void StateMain::updateRoomText(const std::string &newText)
 {
 	auto room = getContext().game.getRoom();
-	auto r = ScriptMan.runInClosure<std::string>(room->getDescription());
-	m_roomActiveText.setText(r);
+	auto text = newText;
+	if (text == " ")
+		text = ScriptMan.runInClosure<std::string>(room->getDescription());
+
+	m_roomTextChanging = true;
+	m_roomActiveTextFadeOut = m_roomActiveText;
+	m_roomActiveText.setText(text);
+
+	TweenEngine::Tween::from(m_roomActiveText, ActiveText::ALPHA, 0.5f)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_roomActiveTextFadeOut, ActiveText::ALPHA, 0.5f)
+		.target(0.f)
+		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+			m_roomTextChanging = false;
+		}).start(m_tweenManager);
 }
 
 bool StateMain::processEvent(const sf::Event &event)
 {
+	if (m_roomTextChanging)
+		return true;
+
 	if (m_mode == Mode::Cutscene)
 	{
 		if (event.type == sf::Event::MouseButtonReleased)
@@ -237,6 +277,7 @@ bool StateMain::processEvent(const sf::Event &event)
 				return false;
 
 		m_actionBuilder.processEvent(event);
+		m_navigation.processEvent(event);
 
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
@@ -275,10 +316,12 @@ bool StateMain::update(float delta)
 		}
 	}
 	else // if Mode::Nothing
-		gotoNextEntity();
+		if (!m_roomTextChanging)
+			gotoNextEntity();
 
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
+	m_navigation.update(delta);
 
 	m_tweenManager.update(delta);
 	return true;

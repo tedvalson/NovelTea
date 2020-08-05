@@ -33,10 +33,12 @@ public:
 
 	ADD_ACCESSOR(std::string, Description, m_description)
 	ADD_ACCESSOR(std::vector<RoomObject>, Objects, m_objects)
+	ADD_ACCESSOR(json, Paths, m_paths)
 
 private:
 	std::string m_description;
 	std::vector<RoomObject> m_objects;
+	json m_paths;
 
 	std::shared_ptr<ObjectList> m_objectList;
 };

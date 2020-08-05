@@ -9,6 +9,7 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
+#include <NovelTea/GUI/Navigation.hpp>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
@@ -16,7 +17,7 @@ using json = sj::JSON;
 namespace NovelTea
 {
 
-typedef std::function<bool(const json&)> TestCallback;
+using TestCallback = std::function<bool(const json&)>;
 
 enum class Mode {
 	Nothing,
@@ -41,15 +42,19 @@ public:
 
 	void gotoNextEntity();
 
-	void updateRoomText();
+	void updateRoomText(const std::string &newText = " ");
 
 private:
 	Mode m_mode;
 	bool m_testPlaybackMode;
 
 	ActiveText m_roomActiveText;
+	ActiveText m_roomActiveTextFadeOut;
+	bool m_roomTextChanging;
+
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
+	Navigation m_navigation;
 	std::string m_selectedObjectId;
 
 	std::shared_ptr<Cutscene> m_cutscene;

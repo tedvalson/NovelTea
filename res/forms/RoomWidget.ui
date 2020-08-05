@@ -22,10 +22,7 @@
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
-   <property name="spacing">
-    <number>2</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -151,6 +148,96 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabPaths">
+       <attribute name="title">
+        <string>Paths</string>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout">
+        <property name="fieldGrowthPolicy">
+         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+        </property>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="checkBoxNorth">
+          <property name="text">
+           <string>North</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="ActionSelectWidget" name="selectNorth" native="true"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="checkBoxNortheast">
+          <property name="text">
+           <string>Northeast</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QCheckBox" name="checkBoxNorthwest">
+          <property name="text">
+           <string>Northwest</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="checkBoxEast">
+          <property name="text">
+           <string>East</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QCheckBox" name="checkBoxSouth">
+          <property name="text">
+           <string>South</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QCheckBox" name="checkBoxSoutheast">
+          <property name="text">
+           <string>Southeast</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QCheckBox" name="checkBoxSouthwest">
+          <property name="text">
+           <string>Southwest</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QCheckBox" name="checkBoxWest">
+          <property name="text">
+           <string>West</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="ActionSelectWidget" name="selectNortheast" native="true"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="ActionSelectWidget" name="selectNorthwest" native="true"/>
+        </item>
+        <item row="3" column="1">
+         <widget class="ActionSelectWidget" name="selectEast" native="true"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="ActionSelectWidget" name="selectSouth" native="true"/>
+        </item>
+        <item row="5" column="1">
+         <widget class="ActionSelectWidget" name="selectSoutheast" native="true"/>
+        </item>
+        <item row="6" column="1">
+         <widget class="ActionSelectWidget" name="selectSouthwest" native="true"/>
+        </item>
+        <item row="7" column="1">
+         <widget class="ActionSelectWidget" name="selectWest" native="true"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabProperties">
        <attribute name="title">
         <string>Properties</string>
@@ -253,6 +340,12 @@
    <class>PropertyEditor</class>
    <extends>QWidget</extends>
    <header>Widgets/PropertyEditor.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ActionSelectWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/ActionSelectWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

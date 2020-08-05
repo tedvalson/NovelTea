@@ -8,6 +8,9 @@ namespace NovelTea
 Room::Room()
 : m_objectList(std::make_shared<ObjectList>())
 {
+	m_paths = sj::Array();
+	for (int i = 0; i < 8; ++i)
+		m_paths.append(sj::Array(false, sj::Array(-1, "")));
 }
 
 Room::~Room()
@@ -17,7 +20,7 @@ Room::~Room()
 
 size_t Room::jsonSize() const
 {
-	return 5;
+	return 6;
 }
 
 json Room::toJson() const
@@ -36,7 +39,8 @@ json Room::toJson() const
 		m_parentId,
 		m_properties,
 		m_description,
-		jobjects
+		jobjects,
+		m_paths
 	);
 	return j;
 }
@@ -47,6 +51,7 @@ void Room::loadJson(const json &j)
 	m_parentId = j[1].ToString();
 	m_properties = j[2];
 	m_description = j[3].ToString();
+	m_paths = j[5];
 	for (auto &jroomObject : j[4].ArrayRange())
 		m_objects.push_back({jroomObject[0].ToString(), jroomObject[1].ToBool()});
 

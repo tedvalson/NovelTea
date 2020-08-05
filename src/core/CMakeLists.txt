@@ -29,6 +29,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Utils.cpp
 	${SRCROOT}/Verb.cpp
 	${SRCROOT}/GUI/ActionBuilder.cpp
+	${SRCROOT}/GUI/Navigation.cpp
 	${SRCROOT}/GUI/NinePatch.cpp
 	${SRCROOT}/GUI/Scrollable.cpp
 	${SRCROOT}/GUI/ScrollBar.cpp

@@ -60,6 +60,18 @@ void RoomWidget::updateRoom() const
 			objectList->addId(item->text().toStdString());
 		objects.push_back({item->text().toStdString(), item->checkState() == Qt::Checked});
 	}
+
+	auto jpaths = sj::Array();
+	savePathDirection(jpaths[0], ui->checkBoxNorthwest, ui->selectNorthwest);
+	savePathDirection(jpaths[1], ui->checkBoxNorth,     ui->selectNorth);
+	savePathDirection(jpaths[2], ui->checkBoxNortheast, ui->selectNortheast);
+	savePathDirection(jpaths[3], ui->checkBoxWest,      ui->selectWest);
+	savePathDirection(jpaths[4], ui->checkBoxEast,      ui->selectEast);
+	savePathDirection(jpaths[5], ui->checkBoxSouthwest, ui->selectSouthwest);
+	savePathDirection(jpaths[6], ui->checkBoxSouth,     ui->selectSouth);
+	savePathDirection(jpaths[7], ui->checkBoxSoutheast, ui->selectSoutheast);
+
+	m_room->setPaths(jpaths);
 	m_room->setObjects(objects);
 	m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
 	m_room->setProperties(ui->propertyEditor->getValue());
@@ -86,6 +98,20 @@ void RoomWidget::updatePreview()
 
 		ui->preview->processData(jdata);
 	}
+}
+
+void RoomWidget::savePathDirection(json &path, const QCheckBox *checkBox, const ActionSelectWidget *actionSelect) const
+{
+	path[0] = checkBox->isChecked();
+	path[1] = actionSelect->getValue();
+}
+
+void RoomWidget::loadPathDirection(const json &path, QCheckBox *checkBox, ActionSelectWidget *actionSelect)
+{
+	checkBox->setChecked(path[0].ToBool());
+	actionSelect->setValue(path[1]);
+	MODIFIER(actionSelect, &ActionSelectWidget::valueChanged);
+	MODIFIER(checkBox, &QCheckBox::toggled);
 }
 
 void RoomWidget::saveData() const
@@ -120,6 +146,16 @@ void RoomWidget::loadData()
 
 	ui->propertyEditor->setValue(m_room->getProperties());
 	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescription()));
+
+	auto paths = m_room->getPaths();
+	loadPathDirection(paths[0], ui->checkBoxNorthwest, ui->selectNorthwest);
+	loadPathDirection(paths[1], ui->checkBoxNorth,     ui->selectNorth);
+	loadPathDirection(paths[2], ui->checkBoxNortheast, ui->selectNortheast);
+	loadPathDirection(paths[3], ui->checkBoxWest,      ui->selectWest);
+	loadPathDirection(paths[4], ui->checkBoxEast,      ui->selectEast);
+	loadPathDirection(paths[5], ui->checkBoxSouthwest, ui->selectSouthwest);
+	loadPathDirection(paths[6], ui->checkBoxSouth,     ui->selectSouth);
+	loadPathDirection(paths[7], ui->checkBoxSoutheast, ui->selectSoutheast);
 
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
