@@ -24,6 +24,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 {
 	ScriptMan.reset();
 
+	m_roomActiveText.setSize(sf::Vector2f(getContext().config.width, 0.f));
+	m_cutsceneRenderer.setSize(sf::Vector2f(getContext().config.width, 0.f));
+
 	m_actionBuilder.setPosition(10.f, 500.f);
 	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
 

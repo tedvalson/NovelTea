@@ -27,6 +27,9 @@ public:
 
 	bool isComplete() const;
 
+	void setSize(const sf::Vector2f &size);
+	sf::Vector2f getSize() const;
+
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
@@ -42,6 +45,7 @@ private:
 	std::vector<std::shared_ptr<ActiveText>> m_texts;
 	std::vector<std::shared_ptr<ActiveText>> m_textsOld;
 	sf::Vector2f m_cursorPos;
+	sf::Vector2f m_size;
 
 	sf::Time m_timePassed;
 	sf::Time m_timeToNext;

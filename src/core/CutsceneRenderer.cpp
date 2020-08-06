@@ -10,6 +10,7 @@ namespace NovelTea
 {
 
 CutsceneRenderer::CutsceneRenderer()
+: m_size(400.f, 400.f)
 {
 	setCutscene(std::make_shared<Cutscene>());
 }
@@ -82,6 +83,16 @@ bool CutsceneRenderer::isComplete() const
 	return m_isComplete;
 }
 
+void CutsceneRenderer::setSize(const sf::Vector2f &size)
+{
+	m_size = size;
+}
+
+sf::Vector2f CutsceneRenderer::getSize() const
+{
+	return m_size;
+}
+
 void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
@@ -147,6 +158,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
 			auto activeText = seg->getActiveText();
+			activeText->setSize(m_size);
 			activeText->setCursorStart(m_cursorPos);
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getDelay());
