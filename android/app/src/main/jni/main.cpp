@@ -10,8 +10,10 @@ int main(int argc, char *argv[])
 	window.setFramerateLimit(30);
 	
 	NovelTea::EngineConfig config;
-	config.width = 480;
-	config.height = 700;
+	config.width = window.getSize().x;
+	config.height = window.getSize().y;
+	if (config.height < config.width)
+		std::swap(config.width, config.height);
 	config.fps = 30;
 	config.initialState = NovelTea::StateID::Main;
 	auto engine = new NovelTea::Engine(config);
