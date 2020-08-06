@@ -1,5 +1,6 @@
 #include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ScriptManager.hpp>
@@ -88,6 +89,9 @@ void StateMain::render(sf::RenderTarget &target)
 	}
 
 	target.draw(m_navigation);
+
+	for (auto &notification : Notification::notifications)
+		target.draw(*notification);
 }
 
 void StateMain::setMode(Mode mode, const std::string &idName)
@@ -322,6 +326,7 @@ bool StateMain::update(float delta)
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
 	m_navigation.update(delta);
+	Notification::update(delta);
 
 	m_tweenManager.update(delta);
 	return true;

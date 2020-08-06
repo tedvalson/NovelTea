@@ -2,6 +2,7 @@
 #define NOVELTEA_TWEENABLEOBJECTS_H
 
 #include <TweenEngine/Tweenable.h>
+#include <NovelTea/GUI/NinePatch.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -201,6 +202,7 @@ protected:
 	}
 };
 
+typedef TweenColorTransformable<NinePatch> TweenNinePatch;
 typedef TweenColorTransformable<sf::Sprite> TweenSprite;
 typedef TweenShape<sf::Text> TweenText;
 
