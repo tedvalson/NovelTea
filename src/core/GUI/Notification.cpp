@@ -7,7 +7,7 @@ namespace NovelTea {
 
 // Static members
 std::shared_ptr<sf::Texture> Notification::m_texture = nullptr;
-float Notification::m_spawnPositionY = 240.f;
+sf::Vector2f Notification::m_spawnPosition;
 std::vector<std::unique_ptr<Notification>> Notification::notifications;
 
 
@@ -16,7 +16,6 @@ Notification::Notification()
 {
 	if (!m_texture)
 		m_texture = AssetManager<sf::Texture>::get("images/notification.9.png");
-	m_texture->setSmooth(false);
 	setTexture(m_texture.get());
 	getText().setCharacterSize(22);
 }
@@ -35,7 +34,7 @@ void Notification::update(float delta)
 		if ((*i)->m_markForDelete)
 		{
 			float offsetY = (*i)->getSize().y + NOTIFICATION_SPACING;
-			m_spawnPositionY += offsetY;
+			m_spawnPosition.y += offsetY;
 			for (auto j = i+1; j != notifications.end(); j++)
 			{
 				auto notification = j->get();
@@ -54,15 +53,20 @@ void Notification::update(float delta)
 }
 
 
-void Notification::spawn(sf::String message)
+void Notification::spawn(const std::string &message)
 {
 	auto notification = new Notification;
 	notification->setString(message);
-	notification->setPosition(round(200.f - notification->getSize().x / 2.f),
-							  round(m_spawnPositionY - notification->getSize().y - 4.f));
-	m_spawnPositionY -= NOTIFICATION_SPACING + notification->getSize().y;
+	notification->setPosition(round((m_spawnPosition.x - notification->getSize().x) / 2.f),
+							  round(m_spawnPosition.y - notification->getSize().y - 4.f));
+	m_spawnPosition.y -= NOTIFICATION_SPACING + notification->getSize().y;
 	notification->animate();
 	notifications.emplace_back(notification);
+}
+
+void Notification::setScreenSize(const sf::Vector2f &size)
+{
+	m_spawnPosition = size;
 }
 
 

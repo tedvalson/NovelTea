@@ -18,13 +18,14 @@ public:
 	void animate();
 
 	static void update(float delta);
-	static void spawn(sf::String message);
+	static void spawn(const std::string &message);
+	static void setScreenSize(const sf::Vector2f &size);
 
 	static std::vector<std::unique_ptr<Notification>> notifications;
 
 private:
 	static std::shared_ptr<sf::Texture> m_texture;
-	static float m_spawnPositionY;
+	static sf::Vector2f m_spawnPosition;
 
 	bool m_markForDelete;
 	TweenEngine::TweenManager m_tweenManager;

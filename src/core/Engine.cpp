@@ -1,6 +1,7 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/States/StateEditor.hpp>
+#include <NovelTea/GUI/Notification.hpp>
 #include <SFML/System/Time.hpp>
 #include <chrono>
 
@@ -13,6 +14,8 @@ Engine::Engine(EngineConfig config)
 	: m_config(config)
 {
 	m_game = std::make_shared<Game>();
+
+	Notification::setScreenSize(sf::Vector2f(config.width, config.height));
 
 	auto stateStack = new StateStack(State::Context(m_config, *m_game, m_data));
 	m_stateStack = std::unique_ptr<StateStack>(stateStack);
@@ -154,6 +157,7 @@ std::shared_ptr<Game> Engine::getGame()
 
 void Engine::initialize()
 {
+	GMan.setActive(m_game);
 	m_lastTime = getSystemTimeMs();
 	m_deltaPerFrame = 1.f / m_config.fps;
 	m_internalRatio = static_cast<float>(m_config.width) / m_config.height;

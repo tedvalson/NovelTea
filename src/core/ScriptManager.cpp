@@ -15,6 +15,7 @@
 #include <NovelTea/TextFragment.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/GUI/Notification.hpp>
 #include <SFML/System/FileInputStream.hpp>
 
 #include <fstream>
@@ -100,6 +101,7 @@ void ScriptManager::runScriptId(const std::string &scriptId)
 void ScriptManager::registerFunctions()
 {
 	dukglue_register_function(m_context, print, "print");
+	dukglue_register_function(m_context, Notification::spawn, "toast");
 }
 
 void ScriptManager::registerClasses()
