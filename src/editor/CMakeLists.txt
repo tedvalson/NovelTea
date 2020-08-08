@@ -37,6 +37,8 @@ set(UIFILES
 
 set(SRC
 	${SRCROOT}/main.cpp
+	${SRCROOT}/DialogueTreeItem.cpp
+	${SRCROOT}/DialogueTreeModel.cpp
 	${SRCROOT}/EditorUtils.cpp
 	${SRCROOT}/EntitySortFilterProxyModel.cpp
 	${SRCROOT}/EntityTreeView.cpp

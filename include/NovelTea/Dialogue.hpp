@@ -6,6 +6,8 @@
 namespace NovelTea
 {
 
+class DialogueSegment;
+
 class Dialogue : public Entity
 {
 public:
@@ -14,13 +16,20 @@ public:
 	json toJson() const override;
 	void loadJson(const json &j) override;
 
+	void clearSegments();
+	void addSegment(std::shared_ptr<DialogueSegment> segment);
+	std::vector<std::shared_ptr<DialogueSegment>> &segments();
+
 	static constexpr auto id = "dialogue";
 	const std::string entityId() const override {return id;}
 
-	ADD_ACCESSOR(std::string, Name, m_name)
+	ADD_ACCESSOR(int, RootIndex, m_rootIndex)
+	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
 
 private:
-	std::string m_name;
+	int m_rootIndex;
+	std::vector<std::shared_ptr<DialogueSegment>> m_segments;
+	json m_nextEntity;
 };
 
 } // namespace NovelTea

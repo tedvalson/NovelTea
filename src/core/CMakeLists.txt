@@ -11,6 +11,7 @@ set(SOURCE_FILES
 	${SRCROOT}/CutsceneSegment.cpp
 	${SRCROOT}/CutsceneTextSegment.cpp
 	${SRCROOT}/Dialogue.cpp
+	${SRCROOT}/DialogueSegment.cpp
 	${SRCROOT}/Engine.cpp
 	${SRCROOT}/Entity.cpp
 	${SRCROOT}/Game.cpp
