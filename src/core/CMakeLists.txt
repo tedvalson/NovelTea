@@ -27,6 +27,7 @@ set(SOURCE_FILES
 	${SRCROOT}/TextBlock.cpp
 	${SRCROOT}/TextFormat.cpp
 	${SRCROOT}/TextFragment.cpp
+	${SRCROOT}/Timer.cpp
 	${SRCROOT}/Utils.cpp
 	${SRCROOT}/Verb.cpp
 	${SRCROOT}/GUI/ActionBuilder.cpp

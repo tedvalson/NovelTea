@@ -4,6 +4,7 @@
 #include <NovelTea/Entity.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/Timer.hpp>
 #include <NovelTea/Utils.hpp>
 #include <queue>
 
@@ -21,6 +22,7 @@ class Game
 {
 public:
 	Game();
+	~Game();
 
 	void reset();
 
@@ -33,6 +35,7 @@ public:
 
 	ScriptManager &getScriptManager();
 	SaveData &getSaveData();
+	TimerManager &getTimerManager();
 
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(std::shared_ptr<Room>, Room, m_room)
@@ -44,6 +47,7 @@ private:
 	std::queue<std::shared_ptr<Entity>> m_entityQueue;
 
 	SaveData m_saveData;
+	TimerManager m_timerManager;
 	ScriptManager m_scriptManager;
 };
 

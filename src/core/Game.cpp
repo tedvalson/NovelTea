@@ -15,12 +15,20 @@ Game::Game()
 	reset();
 }
 
+Game::~Game()
+{
+	// TODO: Need to make sure active timers are destroyed first.
+	//       shared_ptrs here may not clean up when expected?
+	m_timerManager.reset();
+}
+
 void Game::reset()
 {
 	if (!Proj.isLoaded())
 		return;
 
 	m_saveData.reset();
+	m_timerManager.reset();
 	m_scriptManager.reset();
 
 	if (!m_room || m_room->getId().empty())
@@ -74,6 +82,11 @@ ScriptManager &Game::getScriptManager()
 SaveData &Game::getSaveData()
 {
 	return m_saveData;
+}
+
+TimerManager &Game::getTimerManager()
+{
+	return m_timerManager;
 }
 
 

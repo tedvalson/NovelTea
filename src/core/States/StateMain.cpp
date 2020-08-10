@@ -329,7 +329,10 @@ bool StateMain::update(float delta)
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
 	m_navigation.update(delta);
+
 	Notification::update(delta);
+	if (getContext().game.getTimerManager().update(delta))
+		updateRoomText();
 
 	m_tweenManager.update(delta);
 	return true;

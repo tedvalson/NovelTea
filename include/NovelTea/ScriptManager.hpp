@@ -42,6 +42,12 @@ public:
 		return run<T>("(function(){" + script + "})();");
 	}
 
+	template <typename T>
+	T call(const DukValue &func)
+	{
+		return dukglue_pcall<T>(m_context, func);
+	}
+
 	template <typename... Args>
 	void call(const std::string &script, const std::string &funcName, Args&&... args)
 	{

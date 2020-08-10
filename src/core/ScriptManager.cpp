@@ -13,6 +13,7 @@
 #include <NovelTea/CutsceneSegment.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
+#include <NovelTea/Timer.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/GUI/Notification.hpp>
@@ -130,6 +131,10 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &PropertyList::set, "set");
 	dukglue_register_method(m_context, &PropertyList::get, "get");
 
+	// Timer
+	dukglue_register_property(m_context, &Timer::getRepeat, &Timer::setRepeat, "repeat");
+	dukglue_register_property(m_context, &Timer::getDuration, &Timer::setDuration, "duration");
+
 	// Action
 	REGISTER_CONSTRUCTOR(Action);
 	REGISTER_ENTITY(Action);
@@ -184,6 +189,11 @@ void ScriptManager::registerGlobals()
 	// Script
 	dukglue_register_global(m_context, this, "Script");
 	dukglue_register_method(m_context, &ScriptManager::runScriptId, "run");
+
+	// TimerManager
+	dukglue_register_global(m_context, &m_game->getTimerManager(), "Timer");
+	dukglue_register_method(m_context, &TimerManager::start, "start");
+	dukglue_register_method(m_context, &TimerManager::startRepeat, "startRepeat");
 }
 
 void ScriptManager::runAutorunScripts()
