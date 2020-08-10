@@ -50,7 +50,12 @@ void ObjectList::clear()
 	saveChanges();
 }
 
-bool ObjectList::contains(const std::string &objectId)
+bool ObjectList::contains(const std::shared_ptr<Object> &object)
+{
+	return containsId(object->getId());
+}
+
+bool ObjectList::containsId(const std::string &objectId)
 {
 	for (auto &object : m_objects)
 		if (object->getId() == objectId)

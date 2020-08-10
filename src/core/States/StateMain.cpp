@@ -184,7 +184,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 	auto verb = GSave.get<Verb>(verbId);
 
 	for (auto &objectId : objectIds)
-		if (!ActiveGame->getRoom()->contains(objectId) && !ActiveGame->getObjectList()->contains(objectId))
+		if (!ActiveGame->getRoom()->containsId(objectId) && !ActiveGame->getObjectList()->containsId(objectId))
 			return false;
 
 	if (action)

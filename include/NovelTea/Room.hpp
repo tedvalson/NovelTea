@@ -21,7 +21,8 @@ public:
 	json toJson() const override;
 	void loadJson(const json &j) override;
 
-	bool contains(const std::string &objectId);
+	bool contains(const std::shared_ptr<Object> &object);
+	bool containsId(const std::string &objectId);
 
 	static json getProjectRoomObjects();
 

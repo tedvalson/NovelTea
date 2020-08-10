@@ -23,7 +23,8 @@ public:
 	bool remove(std::shared_ptr<Object> object);
 
 	void clear();
-	bool contains(const std::string &objectId);
+	bool contains(const std::shared_ptr<Object> &object);
+	bool containsId(const std::string &objectId);
 
 	void attach(const std::string &type, const std::string &id);
 	void saveChanges();

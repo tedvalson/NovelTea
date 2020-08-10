@@ -58,9 +58,14 @@ void Room::loadJson(const json &j)
 	m_objectList->attach(id, m_id);
 }
 
-bool Room::contains(const std::string &objectId)
+bool Room::contains(const std::shared_ptr<Object> &object)
 {
-	return m_objectList->contains(objectId);
+	return m_objectList->contains(object);
+}
+
+bool Room::containsId(const std::string &objectId)
+{
+	return m_objectList->containsId(objectId);
 }
 
 json Room::getProjectRoomObjects()
