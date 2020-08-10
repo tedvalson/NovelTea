@@ -24,14 +24,14 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 {
 	ScriptMan.reset();
 
-	m_roomActiveText.setSize(sf::Vector2f(getContext().config.width, 0.f));
-	m_cutsceneRenderer.setSize(sf::Vector2f(getContext().config.width, 0.f));
+	auto width = getContext().config.width;
+	auto height = getContext().config.height;
+	m_roomActiveText.setSize(sf::Vector2f(width, 0.f));
+	m_cutsceneRenderer.setSize(sf::Vector2f(width, 0.f));
 
-	m_actionBuilder.setPosition(10.f, 500.f);
-	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
-
-	m_navigation.setPosition(20.f, 500.f);
+	// Set all Navigation transforms before getGlobalBounds is called
 	m_navigation.setScale(1.5f, 1.5f);
+	m_navigation.setPosition(20.f, -20.f + height - m_navigation.getGlobalBounds().height);
 	m_navigation.setCallback([this](const json &jentity){
 		getContext().game.pushNextEntityJson(jentity);
 	});
@@ -50,6 +50,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		}
 	});
 
+	m_actionBuilder.setPosition(10.f, -10.f + height - m_navigation.getGlobalBounds().height - 120.f);
+	m_actionBuilder.setSize(sf::Vector2f(width - 20.f, 200.f));
 	m_actionBuilder.setCallback([this](bool confirmed){
 		if (confirmed)
 		{
@@ -57,6 +59,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		}
 		m_actionBuilder.hide();
 	});
+
+	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y - 4.f));
 
 	auto &saveEntryPoint = GSave.data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
@@ -99,6 +103,10 @@ void StateMain::render(sf::RenderTarget &target)
 
 void StateMain::setMode(Mode mode, const std::string &idName)
 {
+	m_roomActiveText.setHighlightId("");
+	m_actionBuilder.hide();
+	m_verbList.hide();
+
 	if (mode != Mode::Room)
 	{
 		updateRoomText("");

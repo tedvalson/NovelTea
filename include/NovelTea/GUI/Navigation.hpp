@@ -33,9 +33,13 @@ public:
 	void setPaths(const json &value);
 	const json &getPaths() const;
 
+	sf::FloatRect getLocalBounds() const;
+	sf::FloatRect getGlobalBounds() const;
+
 	void setCallback(NavigationCallback callback);
 
 protected:
+	void ensureUpdate() const;
 	void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
 	void setValues(int tweenType, float *newValues) override;
@@ -43,6 +47,9 @@ protected:
 
 private:
 	sf::Vector2f m_size;
+	mutable sf::FloatRect m_bounds;
+	mutable bool m_needsUpdate;
+
 	TweenEngine::TweenManager m_tweenManager;
 	float m_alpha;
 
@@ -52,7 +59,7 @@ private:
 
 	json m_paths;
 
-	std::vector<std::unique_ptr<TweenRectangleShape>> m_buttons;
+	mutable std::vector<std::unique_ptr<TweenRectangleShape>> m_buttons;
 
 	NavigationCallback m_callback;
 };

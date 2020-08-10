@@ -12,30 +12,22 @@ namespace NovelTea
 {
 
 Navigation::Navigation()
-: m_alpha(255.f)
+: m_needsUpdate(true)
+, m_alpha(255.f)
 , m_visible(false)
 , m_isHiding(false)
 , m_isShowing(false)
 , m_callback(nullptr)
 {
 	m_paths = sj::Array();
-	for (int i = 0; i < 9; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		int x = i % 3;
-		int y = i / 3;
-		if (x == 1 && y == 1)
-			continue;
 		auto button = new TweenRectangleShape;
-		button->setFillColor(sf::Color::Blue);
-		button->setSize(sf::Vector2f(32.f, 32.f));
-		button->setPosition(36.f * x, 36.f * y);
 		m_buttons.emplace_back(button);
 		m_paths.append(sj::Array(false, sj::Object()));
 	}
 
-	TweenEngine::Tween::set(*this, ALPHA)
-		.target(0.f)
-		.start(m_tweenManager);
+	setSize(sf::Vector2f(150.f, 150.f));
 }
 
 Navigation::~Navigation()
@@ -57,10 +49,13 @@ bool Navigation::processEvent(const sf::Event &event)
 			if (!m_paths[i][0].ToBool() || m_paths[i][1][0] == -1)
 				continue;
 			if (m_buttons[i]->getGlobalBounds().contains(p))
+			{
 				m_callback(m_paths[i][1]);
+				return true;
+			}
 		}
 	}
-	return true;
+	return false;
 }
 
 void Navigation::show()
@@ -98,6 +93,7 @@ bool Navigation::isVisible() const
 
 void Navigation::setSize(const sf::Vector2f &size)
 {
+	m_needsUpdate = true;
 	m_size = size;
 }
 
@@ -108,21 +104,20 @@ sf::Vector2f Navigation::getSize() const
 
 void Navigation::setPaths(const json &value)
 {
+	m_paths = value;
+
 	for (int i = 0; i < 8; ++i)
 	{
-		if (value[i][0].ToBool() && value[i][1][0].ToInt() != -1)
+		if (m_paths[i][0].ToBool() && m_paths[i][1][0].ToInt() != -1)
 		{
 			m_buttons[i]->setFillColor(sf::Color::Green);
 		} else {
 			m_buttons[i]->setFillColor(sf::Color::Blue);
 		}
 	}
-	m_paths = value;
 
 	// Reset alpha to reflect new button states
-	TweenEngine::Tween::set(*this, ALPHA)
-		.target(m_alpha)
-		.start(m_tweenManager);
+	setValues(ALPHA, &m_alpha);
 }
 
 const json &Navigation::getPaths() const
@@ -130,13 +125,51 @@ const json &Navigation::getPaths() const
 	return m_paths;
 }
 
+sf::FloatRect Navigation::getLocalBounds() const
+{
+	return m_bounds;
+}
+
+sf::FloatRect Navigation::getGlobalBounds() const
+{
+	ensureUpdate();
+	return getTransform().transformRect(m_bounds);
+}
+
 void Navigation::setCallback(NavigationCallback callback)
 {
 	m_callback = callback;
 }
 
+void Navigation::ensureUpdate() const
+{
+	if (!m_needsUpdate)
+		return;
+
+	int buttonIndex = 0;
+	for (int i = 0; i < 9; ++i)
+	{
+		int x = i % 3;
+		int y = i / 3;
+		if (x == 1 && y == 1)
+			continue;
+		auto &button = m_buttons[buttonIndex];
+		button->setSize(sf::Vector2f(32.f, 32.f));
+		button->setPosition(36.f * x, 36.f * y);
+		++buttonIndex;
+	}
+
+	m_bounds.left = getPosition().x;
+	m_bounds.top = getPosition().y;
+	m_bounds.width = 36.f * 3;
+	m_bounds.height = 36.f * 3;
+
+	m_needsUpdate = false;
+}
+
 void Navigation::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
+	ensureUpdate();
 	states.transform *= getTransform();
 	for (auto &button : m_buttons)
 		target.draw(*button, states);
