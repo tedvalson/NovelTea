@@ -1,9 +1,6 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
-#include <NovelTea/Action.hpp>
-#include <NovelTea/Verb.hpp>
-#include <NovelTea/Object.hpp>
 #include <TweenEngine/Tween.h>
 
 #include <iostream>
@@ -14,9 +11,6 @@ namespace NovelTea
 Navigation::Navigation()
 : m_needsUpdate(true)
 , m_alpha(255.f)
-, m_visible(false)
-, m_isHiding(false)
-, m_isShowing(false)
 , m_callback(nullptr)
 {
 	m_paths = sj::Array();
@@ -32,11 +26,6 @@ Navigation::Navigation()
 
 Navigation::~Navigation()
 {
-}
-
-void Navigation::update(float delta)
-{
-	m_tweenManager.update(delta);
 }
 
 bool Navigation::processEvent(const sf::Event &event)
@@ -56,39 +45,6 @@ bool Navigation::processEvent(const sf::Event &event)
 		}
 	}
 	return false;
-}
-
-void Navigation::show()
-{
-	if (!m_isShowing)
-	{
-		m_visible = true;
-		m_isShowing = true;
-		TweenEngine::Tween::to(*this, ALPHA, 1.f)
-			.target(255.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_isShowing = false;
-			}).start(m_tweenManager);
-	}
-}
-
-void Navigation::hide()
-{
-	if (!m_isHiding)
-	{
-		m_isHiding = true;
-		TweenEngine::Tween::to(*this, ALPHA, 0.5f)
-			.target(0.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_visible = false;
-				m_isHiding = false;
-			}).start(m_tweenManager);
-	}
-}
-
-bool Navigation::isVisible() const
-{
-	return m_visible;
 }
 
 void Navigation::setSize(const sf::Vector2f &size)
@@ -141,6 +97,23 @@ void Navigation::setCallback(NavigationCallback callback)
 	m_callback = callback;
 }
 
+void Navigation::setAlpha(float alpha)
+{
+	sf::Color color;
+	m_alpha = alpha;
+	float *newValues = &m_alpha;
+	for (int i = 0; i < m_buttons.size(); ++i)
+	{
+		float alphaMax = m_paths[i][0].ToBool() ? 255.f : 40.f;
+		SET_ALPHA(m_buttons[i]->getFillColor, m_buttons[i]->setFillColor, alphaMax);
+	}
+}
+
+float Navigation::getAlpha() const
+{
+	return m_alpha;
+}
+
 void Navigation::ensureUpdate() const
 {
 	if (!m_needsUpdate)
@@ -173,35 +146,6 @@ void Navigation::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	states.transform *= getTransform();
 	for (auto &button : m_buttons)
 		target.draw(*button, states);
-}
-
-void Navigation::setValues(int tweenType, float *newValues)
-{
-	switch (tweenType) {
-		case ALPHA: {
-			sf::Color color;
-			m_alpha = newValues[0];
-			for (int i = 0; i < m_buttons.size(); ++i)
-			{
-				float alphaMax = m_paths[i][0].ToBool() ? 255.f : 40.f;
-				SET_ALPHA(m_buttons[i]->getFillColor, m_buttons[i]->setFillColor, alphaMax);
-			}
-			break;
-		}
-		default:
-			TweenTransformable::setValues(tweenType, newValues);
-	}
-}
-
-int Navigation::getValues(int tweenType, float *returnValues)
-{
-	switch (tweenType) {
-	case ALPHA:
-			returnValues[0] = m_alpha;
-		return 1;
-	default:
-		return TweenTransformable::getValues(tweenType, returnValues);
-	}
 }
 
 } // namespace NovelTea

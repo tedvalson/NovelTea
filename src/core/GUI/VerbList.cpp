@@ -13,9 +13,6 @@ VerbList::VerbList()
 : m_scrollPos(0.f)
 , m_margin(10.f)
 , m_size(320.f, 400.f)
-, m_visible(false)
-, m_isHiding(false)
-, m_isShowing(false)
 , m_selectCallback(nullptr)
 , m_showHideCallback(nullptr)
 {
@@ -32,16 +29,13 @@ VerbList::VerbList()
 	std::vector<std::string> verbs;
 	setVerbs(verbs);
 
-	TweenEngine::Tween::set(*this, ALPHA)
-		.target(0.f)
-		.start(m_tweenManager);
-
+	setAlpha(0.f);
 }
 
 void VerbList::update(float delta)
 {
 	m_scrollBar.update(delta);
-	m_tweenManager.update(delta);
+	Hideable::update(delta);
 }
 
 bool VerbList::processEvent(const sf::Event &event)
@@ -68,41 +62,40 @@ bool VerbList::processEvent(const sf::Event &event)
 	return true;
 }
 
-void VerbList::show()
+void VerbList::show(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isShowing)
-	{
-		m_visible = true;
-		m_isShowing = true;
-		TweenEngine::Tween::to(*this, ALPHA, 0.4f)
-			.target(255.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_isShowing = false;
-				if (m_showHideCallback)
-					m_showHideCallback(true);
-			}).start(m_tweenManager);
+	Hideable::show(duration, tweenType, [this, callback](){
+		if (m_showHideCallback)
+			m_showHideCallback(true);
+		if (callback)
+			callback();
+	});
+}
+
+void VerbList::hide(float duration, int tweenType, HideableCallback callback)
+{
+	Hideable::hide(duration, tweenType, [this, callback](){
+		if (m_showHideCallback)
+			m_showHideCallback(false);
+		if (callback)
+			callback();
+	});
+}
+
+void VerbList::setAlpha(float alpha)
+{
+	sf::Color color;
+	float *newValues = &alpha;
+	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 230.f);
+	SET_ALPHA(m_scrollBar.getColor, m_scrollBar.setColor, 40.f);
+	for (auto &verb : m_verbs) {
+		SET_ALPHA(verb.text.getFillColor, verb.text.setFillColor, 255.f);
 	}
 }
 
-void VerbList::hide()
+float VerbList::getAlpha() const
 {
-	if (!m_isHiding)
-	{
-		m_isHiding = true;
-		TweenEngine::Tween::to(*this, ALPHA, 0.4f)
-			.target(0.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_visible = false;
-				m_isHiding = false;
-				if (m_showHideCallback)
-					m_showHideCallback(false);
-			}).start(m_tweenManager);
-	}
-}
-
-bool VerbList::isVisible() const
-{
-	return m_visible;
+	return m_bg.getFillColor().a / 230.f * 255.f;
 }
 
 void VerbList::setVerbs(const std::vector<std::string> &verbs)
@@ -217,34 +210,6 @@ void VerbList::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	}
 
 	target.setView(view);
-}
-
-void VerbList::setValues(int tweenType, float *newValues)
-{
-	switch (tweenType) {
-		case ALPHA: {
-			sf::Color color;
-			SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 230.f);
-			SET_ALPHA(m_scrollBar.getColor, m_scrollBar.setColor, 40.f);
-			for (auto &verb : m_verbs) {
-				SET_ALPHA(verb.text.getFillColor, verb.text.setFillColor, 255.f);
-			}
-			break;
-		}
-		default:
-			TweenTransformable::setValues(tweenType, newValues);
-	}
-}
-
-int VerbList::getValues(int tweenType, float *returnValues)
-{
-	switch (tweenType) {
-		case ALPHA:
-			returnValues[0] = m_bg.getFillColor().a / 200.f * 255.f;
-			return 1;
-		default:
-			return TweenTransformable::getValues(tweenType, returnValues);
-	}
 }
 
 void VerbList::repositionItems()

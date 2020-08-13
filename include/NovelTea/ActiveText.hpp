@@ -2,7 +2,7 @@
 #define NOVELTEA_ACTIVETEXT_HPP
 
 #include <NovelTea/JsonSerializable.hpp>
-#include <NovelTea/TweenObjects.hpp>
+#include <NovelTea/GUI/Hideable.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <vector>
@@ -13,11 +13,9 @@ namespace NovelTea
 
 class TextBlock;
 
-class ActiveText : public JsonSerializable, public sf::Drawable, public TweenTransformable<sf::Transformable>
+class ActiveText : public JsonSerializable, public sf::Drawable, public Hideable
 {
 public:
-	static const int ALPHA = 11;
-
 	struct Segment {
 		TweenText text;
 		std::string objectIdName;
@@ -47,15 +45,13 @@ public:
 	void setCursorStart(const sf::Vector2f &cursorPos);
 	const sf::Vector2f &getCursorEnd() const;
 
-	void setAlpha(float alpha);
-	float getAlpha() const;
+	void setAlpha(float alpha) override;
+	float getAlpha() const override;
 
 	std::vector<Segment> &getSegments();
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
-	void setValues(int tweenType, float *newValues) override;
-	int getValues(int tweenType, float *returnValues) override;
 	void ensureUpdate() const;
 
 private:

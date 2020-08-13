@@ -126,7 +126,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 
 		auto room = getContext().game.getRoom();
 		m_navigation.setPaths(room->getPaths());
-		m_navigation.show();
+		m_navigation.show(1.f);
 	}
 
 	m_mode = mode;

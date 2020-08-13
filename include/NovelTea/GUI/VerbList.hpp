@@ -3,7 +3,7 @@
 
 #include <NovelTea/GUI/Scrollable.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
-#include <NovelTea/TweenObjects.hpp>
+#include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/Utils.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Object.hpp>
@@ -17,19 +17,19 @@ namespace NovelTea
 using VerbSelectCallback = std::function<void(const std::string&)>;
 using VerbShowHideCallback = std::function<void(bool)>;
 
-class VerbList : public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>
+class VerbList : public sf::Drawable, public Scrollable, public Hideable
 {
 public:
-	static const int ALPHA = 11;
-
 	VerbList();
 
-	void update(float delta);
+	void update(float delta) override;
 	bool processEvent(const sf::Event& event);
 
-	void show();
-	void hide();
-	bool isVisible() const;
+	void show(float duration = 0.4f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
+	void hide(float duration = 0.4f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
+
+	void setAlpha(float alpha) override;
+	float getAlpha() const override;
 
 	void setVerbs(const std::vector<std::string> &verbs);
 	void setVerbs(const std::string &objectId);
@@ -48,9 +48,6 @@ public:
 protected:
 	void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-	void setValues(int tweenType, float *newValues) override;
-	int getValues(int tweenType, float *returnValues) override;
-
 	void repositionItems();
 	void addVerbOption(const std::string &verbId);
 
@@ -63,9 +60,6 @@ private:
 	float m_scrollPos;
 	float m_margin;
 	sf::Vector2f m_size;
-	bool m_visible;
-	bool m_isHiding;
-	bool m_isShowing;
 
 	ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
@@ -79,8 +73,6 @@ private:
 
 	VerbSelectCallback m_selectCallback;
 	VerbShowHideCallback m_showHideCallback;
-
-	TweenEngine::TweenManager m_tweenManager;
 };
 
 } // namespace NovelTea

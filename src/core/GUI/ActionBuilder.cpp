@@ -12,10 +12,7 @@ namespace NovelTea
 {
 
 ActionBuilder::ActionBuilder()
-: m_visible(false)
-, m_isHiding(false)
-, m_isShowing(false)
-, m_callback(nullptr)
+: m_callback(nullptr)
 {
 	m_buttonConfirm.setSize(sf::Vector2f(65.f, 65.f));
 	m_buttonConfirm.setFillColor(sf::Color::Green);
@@ -26,15 +23,6 @@ ActionBuilder::ActionBuilder()
 	TweenEngine::Tween::set(*this, ALPHA)
 		.target(0.f)
 		.start(m_tweenManager);
-}
-
-ActionBuilder::~ActionBuilder()
-{
-}
-
-void ActionBuilder::update(float delta)
-{
-	m_tweenManager.update(delta);
 }
 
 bool ActionBuilder::processEvent(const sf::Event &event)
@@ -56,37 +44,31 @@ bool ActionBuilder::processEvent(const sf::Event &event)
 	return true;
 }
 
-void ActionBuilder::show()
+void ActionBuilder::show(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isShowing)
-	{
-		m_visible = true;
-		m_isShowing = true;
-		TweenEngine::Tween::to(*this, ALPHA, 0.4f)
-			.target(255.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_isShowing = false;
-			}).start(m_tweenManager);
-	}
+	TweenEngine::Tween::from(*this, POSITION_Y, duration)
+		.target(getPosition().y + 30.f)
+		.start(m_tweenManager);
+	Hideable::show(duration, tweenType, callback);
 }
 
-void ActionBuilder::hide()
+void ActionBuilder::hide(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isHiding)
-	{
-		m_isHiding = true;
-		TweenEngine::Tween::to(*this, ALPHA, 0.4f)
-			.target(0.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_visible = false;
-				m_isHiding = false;
-			}).start(m_tweenManager);
-	}
+	Hideable::hide(duration, tweenType, callback);
 }
 
-bool ActionBuilder::isVisible() const
+void ActionBuilder::setAlpha(float alpha)
 {
-	return m_visible;
+	sf::Color color;
+	float *newValues = &alpha;
+	m_text.setAlpha(alpha);
+	SET_ALPHA(m_buttonCancel.getFillColor, m_buttonCancel.setFillColor, 255.f);
+	SET_ALPHA(m_buttonConfirm.getFillColor, m_buttonConfirm.setFillColor, 255.f);
+}
+
+float ActionBuilder::getAlpha() const
+{
+	return m_buttonCancel.getFillColor().a;
 }
 
 void ActionBuilder::setVerb(const std::string &verbId)
@@ -152,32 +134,6 @@ void ActionBuilder::draw(sf::RenderTarget &target, sf::RenderStates states) cons
 	target.draw(m_text, states);
 	target.draw(m_buttonConfirm, states);
 	target.draw(m_buttonCancel, states);
-}
-
-void ActionBuilder::setValues(int tweenType, float *newValues)
-{
-	switch (tweenType) {
-		case ALPHA: {
-			sf::Color color;
-			m_text.setAlpha(newValues[0]);
-			SET_ALPHA(m_buttonCancel.getFillColor, m_buttonCancel.setFillColor, 255.f);
-			SET_ALPHA(m_buttonConfirm.getFillColor, m_buttonConfirm.setFillColor, 255.f);
-			break;
-		}
-		default:
-			TweenTransformable::setValues(tweenType, newValues);
-	}
-}
-
-int ActionBuilder::getValues(int tweenType, float *returnValues)
-{
-	switch (tweenType) {
-	case ALPHA:
-			returnValues[0] = m_buttonCancel.getFillColor().a;
-		return 1;
-	default:
-		return TweenTransformable::getValues(tweenType, returnValues);
-	}
 }
 
 } // namespace NovelTea

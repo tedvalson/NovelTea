@@ -131,6 +131,8 @@ void ActiveText::setText(const std::string &text)
 
 	m_textBlocks.clear();
 	addBlock(block);
+
+	setAlpha(m_alpha);
 }
 
 const std::vector<std::shared_ptr<TextBlock>> &ActiveText::blocks() const
@@ -232,27 +234,6 @@ void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	target.draw(m_debugBorder, states);
 }
 
-void ActiveText::setValues(int tweenType, float *newValues)
-{
-	switch (tweenType) {
-		case ALPHA: {
-			setAlpha(newValues[0]);
-			break;
-		}
-		default:
-			TweenTransformable::setValues(tweenType, newValues);
-	}
-}
-
-int ActiveText::getValues(int tweenType, float *returnValues)
-{
-	switch (tweenType) {
-		case ALPHA:
-			returnValues[0] = getAlpha();
-			return 1;
-		default:
-			return TweenTransformable::getValues(tweenType, returnValues);
-	}
 }
 
 void ActiveText::ensureUpdate() const
