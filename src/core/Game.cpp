@@ -10,7 +10,7 @@ namespace NovelTea
 Game::Game()
 	: m_room(nullptr)
 	, m_objectList(nullptr)
-	, m_scriptManager(this, &m_saveData)
+	, m_scriptManager(this)
 {
 	reset();
 }

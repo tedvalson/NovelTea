@@ -44,10 +44,9 @@ namespace
 namespace NovelTea
 {
 
-ScriptManager::ScriptManager(Game *game, SaveData *saveData)
+ScriptManager::ScriptManager(Game *game)
 	: m_context(nullptr)
 	, m_game(game)
-	, m_saveData(saveData)
 {
 	reset();
 }
@@ -96,7 +95,7 @@ void ScriptManager::runScript(std::shared_ptr<Script> script)
 
 void ScriptManager::runScriptId(const std::string &scriptId)
 {
-	runScript(m_saveData->get<Script>(scriptId));
+	runScript(m_game->getSaveData().get<Script>(scriptId));
 }
 
 void ScriptManager::registerFunctions()
@@ -176,7 +175,7 @@ void ScriptManager::registerClasses()
 void ScriptManager::registerGlobals()
 {
 	// Save
-	dukglue_register_global(m_context, m_saveData, "Save");
+	dukglue_register_global(m_context, &m_game->getSaveData(), "Save");
 	dukglue_register_method(m_context, &SaveData::save, "saveSlot");
 	dukglue_register_method(m_context, &SaveData::load, "loadSlot");
 	dukglue_register_method(m_context, &SaveData::writeVariables, "writeVariables");
@@ -200,18 +199,18 @@ void ScriptManager::registerGlobals()
 
 void ScriptManager::runAutorunScripts()
 {
-	if (m_saveData->isLoaded())
-		for (auto &item : m_saveData->data()[Script::id].ObjectRange())
+	if (m_game->getSaveData().isLoaded())
+		for (auto &item : m_game->getSaveData().data()[Script::id].ObjectRange())
 			checkAutorun(item.second);
 	if (Proj.isLoaded())
 		for (auto &item : ProjData[Script::id].ObjectRange())
-			if (!m_saveData->data()[Script::id].hasKey(item.first))
+			if (!m_game->getSaveData().data()[Script::id].hasKey(item.first))
 				checkAutorun(item.second);
 }
 
 void ScriptManager::checkAutorun(const sj::JSON &j)
 {
-	auto script = m_saveData->get<Script>(j[ID::entityId].ToString());
+	auto script = m_game->getSaveData().get<Script>(j[ID::entityId].ToString());
 	if (script->getAutorun())
 		runScript(script);
 }

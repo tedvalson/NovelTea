@@ -8,7 +8,6 @@ namespace NovelTea
 {
 
 class Game;
-class SaveData;
 class Script;
 
 class ScriptManager
@@ -63,7 +62,7 @@ public:
 	}
 
 protected:
-	ScriptManager(Game *game, SaveData *saveData);
+	ScriptManager(Game *game);
 	~ScriptManager();
 	void registerFunctions();
 	void registerClasses();
@@ -75,7 +74,6 @@ protected:
 private:
 	duk_context *m_context;
 	Game *m_game;
-	SaveData *m_saveData;
 };
 
 } // namespace NovelTea
