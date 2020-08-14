@@ -1,5 +1,6 @@
 #include "DialogueTreeModel.hpp"
 #include "DialogueTreeItem.hpp"
+#include <NovelTea/Game.hpp>
 #include <QStringList>
 #include <QFont>
 #include <QIcon>
@@ -7,7 +8,7 @@
 
 DialogueTreeModel::DialogueTreeModel(QObject *parent)
 	: QAbstractItemModel(parent)
-	, m_rootItem(new DialogueTreeItem(""))
+	, m_rootItem(new DialogueTreeItem)
 {
 
 }
@@ -52,8 +53,8 @@ bool DialogueTreeModel::removeRows(int position, int rows, const QModelIndex &pa
 namespace {
 int saveNode(const std::shared_ptr<NovelTea::Dialogue> &dialogue, DialogueTreeItem *node)
 {
-	auto segment = std::make_shared<NovelTea::DialogueSegment>();
-	node->saveDialogueSegment(segment);
+	auto segment = node->getDialogueSegment();
+	segment->clearChildren();
 	for (int i = 0; i < node->childCount(); ++i)
 	{
 		int childId = saveNode(dialogue, node->child(i));
@@ -85,7 +86,7 @@ void DialogueTreeModel::loadDialogue(const std::shared_ptr<NovelTea::Dialogue> &
 	beginResetModel();
 
 	delete m_rootItem;
-	m_rootItem = new DialogueTreeItem("");
+	m_rootItem = new DialogueTreeItem;
 
 	// Add root node
 	addNode(dialogue, dialogue->getRootIndex(), m_rootItem);
@@ -107,6 +108,29 @@ bool DialogueTreeModel::changeParent(const QModelIndex &child, const QModelIndex
 	return false;
 }
 
+bool DialogueTreeModel::insertSegment(int row, const QModelIndex &parent, const std::shared_ptr<NovelTea::DialogueSegment> &segment)
+{
+	auto parentItem = getItem(parent);
+	bool success;
+
+	beginInsertRows(parent, row, row);
+	success = parentItem->insertSegment(row, 1, segment);
+	endInsertRows();
+
+	return success;
+}
+
+bool DialogueTreeModel::updateSegment(const QModelIndex &index, const std::shared_ptr<NovelTea::DialogueSegment> &segment)
+{
+	auto item = getItem(index);
+	auto oldSegment = item->getDialogueSegment();
+	if (*segment == *oldSegment)
+		return false;
+	item->setDialogueSegment(segment);
+	emit dataChanged(index, index);
+	return true;
+}
+
 DialogueTreeItem *DialogueTreeModel::getItem(const QModelIndex &index) const
 {
 	if (index.isValid()) {
@@ -123,6 +147,8 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 
 	auto item = getItem(index);
+	auto segment = item->getDialogueSegment();
+	auto type = segment->getType();
 
 	if (role == Qt::FontRole)
 	{
@@ -131,10 +157,34 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 			font.setItalic(true);
 		return font;
 	}
+	else if (role == Qt::ForegroundRole)
+	{
+		QBrush brush;
+		if (type == NovelTea::DialogueSegment::Player)
+			brush.setColor(Qt::blue);
+		else if (type == NovelTea::DialogueSegment::NPC)
+			brush.setColor(Qt::red);
+		else if (type == NovelTea::DialogueSegment::Link)
+			brush.setColor(Qt::gray);
+		return brush;
+	}
+	else if (role == Qt::BackgroundRole)
+	{
+		if (segment->getScriptedText())
+			return QBrush(Qt::yellow);
+	}
 	else if (role == Qt::DecorationRole)
 	{
-		if (index.column() == 1)
-			return QIcon::fromTheme("edit-undo");
+		if (segment->getScriptedText())
+		{
+			try {
+				auto result = ActiveGame->getScriptManager().runInClosure<std::string>(segment->getText());
+			} catch (std::exception &e) {
+				return QIcon::fromTheme("dialog-error");
+			}
+		}
+		if (segment->getConditionalEnabled())
+			return QIcon::fromTheme("emblem-important");
 	}
 	else if (role == Qt::DisplayRole)
 		return item->data(index.column());

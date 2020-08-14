@@ -2,14 +2,12 @@
 #define DIALOGUETREEITEM_HPP
 
 #include <NovelTea/DialogueSegment.hpp>
-#include <QList>
 #include <QVariant>
 
 class DialogueTreeItem
 {
 public:
-	explicit DialogueTreeItem(const std::string &title, DialogueTreeItem *parent = 0);
-	explicit DialogueTreeItem(const std::shared_ptr<NovelTea::DialogueSegment> &segment, DialogueTreeItem *parent = 0);
+	explicit DialogueTreeItem(const std::shared_ptr<NovelTea::DialogueSegment> &segment = std::make_shared<NovelTea::DialogueSegment>(), DialogueTreeItem *parent = 0);
 	~DialogueTreeItem();
 
 	void appendChild(DialogueTreeItem *child);
@@ -23,15 +21,16 @@ public:
 	DialogueTreeItem *parent();
 	void changeParent(DialogueTreeItem *parent);
 
-	void saveDialogueSegment(std::shared_ptr<NovelTea::DialogueSegment> segment) const;
-	void loadDialogueSegment(const std::shared_ptr<NovelTea::DialogueSegment> segment);
+	void setDialogueSegment(const std::shared_ptr<NovelTea::DialogueSegment> &segment);
+	const std::shared_ptr<NovelTea::DialogueSegment> &getDialogueSegment() const;
 
 	bool insertChildren(int position, int count, int columns);
 	bool removeChildren(int position, int count);
+	bool insertSegment(int position, int count, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 
 private:
 	QList<DialogueTreeItem*> childItems;
-	QList<QVariant> itemData;
+	std::shared_ptr<NovelTea::DialogueSegment> m_segment;
 	DialogueTreeItem *parentItem;
 };
 

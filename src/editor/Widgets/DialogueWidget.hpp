@@ -24,19 +24,31 @@ public:
 	QString tabText() const override;
 	Type getType() const override;
 
+protected:
+	void timerEvent(QTimerEvent*) override;
+
 private slots:
 	void on_treeView_pressed(const QModelIndex &index);
 	void on_actionAddObject_triggered();
+	void on_actionDelete_triggered();
+	void on_radioText_toggled(bool checked);
+	void on_plainTextEdit_textChanged();
+	void on_checkBoxConditional_toggled(bool checked);
+	void on_checkBoxScript_toggled(bool checked);
 
 private:
+	void fillItemSettings();
+	void checkIndexChange();
 	void saveData() const override;
 	void loadData() override;
 
 	Ui::DialogueWidget *ui;
 
 	DialogueTreeModel *m_treeModel;
-	DialogueTreeItem *m_selectedItem;
 	QMenu *m_menuTreeView;
+
+	DialogueTreeItem *m_selectedItem;
+	std::shared_ptr<NovelTea::DialogueSegment> m_selectedSegment;
 
 	std::shared_ptr<NovelTea::Dialogue> m_dialogue;
 };

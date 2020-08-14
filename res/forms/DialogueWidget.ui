@@ -86,6 +86,12 @@
            <verstretch>2</verstretch>
           </sizepolicy>
          </property>
+         <property name="rootIsDecorated">
+          <bool>false</bool>
+         </property>
+         <property name="expandsOnDoubleClick">
+          <bool>false</bool>
+         </property>
          <attribute name="headerVisible">
           <bool>false</bool>
          </attribute>
@@ -105,9 +111,9 @@
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="tabDescription">
+         <widget class="QWidget" name="tabText">
           <attribute name="title">
-           <string>Description</string>
+           <string>Text</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <property name="leftMargin">
@@ -145,14 +151,116 @@
                 <number>1</number>
                </property>
                <item>
-                <widget class="ScriptEdit" name="scriptEdit">
+                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QRadioButton" name="radioText">
+                   <property name="text">
+                    <string>Text</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="radioScript">
+                   <property name="text">
+                    <string>Script</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="ScriptEdit" name="scriptEditText">
                  <property name="lineWrapMode">
                   <enum>QPlainTextEdit::NoWrap</enum>
                  </property>
+                 <property name="placeholderText">
+                  <string>return &quot;Text&quot;;</string>
+                 </property>
                 </widget>
+               </item>
+               <item>
+                <widget class="QPlainTextEdit" name="plainTextEdit"/>
                </item>
               </layout>
              </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabConditional">
+          <attribute name="title">
+           <string>Conditional</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="checkBoxConditional">
+             <property name="text">
+              <string>Enable Conditional</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ScriptEdit" name="scriptEditConditional">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="placeholderText">
+              <string>return true;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabScript">
+          <attribute name="title">
+           <string>Script</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="checkBoxScript">
+             <property name="text">
+              <string>Run Script</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ScriptEdit" name="scriptEdit">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
           </layout>
@@ -177,16 +285,6 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
-            <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="tabProperties">
@@ -251,17 +349,14 @@
     <string>Add</string>
    </property>
   </action>
-  <action name="actionRemoveObject">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
+  <action name="actionDelete">
    <property name="icon">
-    <iconset theme="list-remove">
+    <iconset theme="edit-delete">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>Remove</string>
+    <string>Delete</string>
    </property>
   </action>
   <action name="actionView_Edit">
@@ -291,12 +386,6 @@
    <class>PropertyEditor</class>
    <extends>QWidget</extends>
    <header>Widgets/PropertyEditor.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QtTreePropertyBrowser</class>
-   <extends>QWidget</extends>
-   <header>Widgets/QtPropertyBrowser/qttreepropertybrowser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

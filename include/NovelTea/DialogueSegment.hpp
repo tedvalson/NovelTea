@@ -15,27 +15,38 @@ public:
 	enum Type {
 		Invalid   =-1,
 		Root      = 0,
-		Text      = 1,
-		Link      = 2,
+		NPC       = 1,
+		Player    = 2,
+		Link      = 3,
 	};
 
 	DialogueSegment();
+
+	bool operator==(const DialogueSegment &segment) const;
 
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
 	void appendChild(int id);
+	void clearChildren();
+
 	ADD_ACCESSOR(Type, Type, m_type)
+	ADD_ACCESSOR(bool, ConditionalEnabled, m_conditionalEnabled)
+	ADD_ACCESSOR(bool, ScriptedText, m_scriptedText)
+	ADD_ACCESSOR(bool, ScriptEnabled, m_scriptEnabled)
+	ADD_ACCESSOR(std::string, ConditionScript, m_conditionScript)
+	ADD_ACCESSOR(std::string, Script, m_script)
 	ADD_ACCESSOR(std::string, Text, m_text)
 	ADD_ACCESSOR(std::vector<int>, ChildrenIds, m_childrenIds)
 
-	static std::shared_ptr<DialogueSegment> createSegment(const json &j);
-
 private:
-	int m_id;
-//	int m_parentId;
-	int m_linkId;
 	Type m_type;
+	int m_linkId;
+	bool m_conditionalEnabled;
+	bool m_scriptedText;
+	bool m_scriptEnabled;
+	std::string m_conditionScript;
+	std::string m_script;
 	std::string m_text;
 	std::vector<int> m_childrenIds;
 };

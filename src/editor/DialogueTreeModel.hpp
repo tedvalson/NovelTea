@@ -22,8 +22,6 @@ public:
 	QVariant data(const QModelIndex &index, int role) const override;
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex &index) const override;
-//	QVariant headerData(int section, Qt::Orientation orientation,
-//						int role = Qt::DisplayRole) const override;
 	QModelIndex index(int row, int column,
 					  const QModelIndex &parent = QModelIndex()) const override;
 	QModelIndex parent(const QModelIndex &index) const override;
@@ -38,6 +36,9 @@ public:
 	void saveDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue) const;
 	void loadDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue);
 	bool changeParent(const QModelIndex &child, const QModelIndex &newParent);
+
+	bool insertSegment(int row, const QModelIndex &parent, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
+	bool updateSegment(const QModelIndex &index, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 
 private:
 	DialogueTreeItem *getItem(const QModelIndex &index) const;
