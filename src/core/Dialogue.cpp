@@ -61,6 +61,14 @@ void Dialogue::addSegment(std::shared_ptr<DialogueSegment> segment)
 	m_segments.push_back(segment);
 }
 
+std::shared_ptr<DialogueSegment> Dialogue::getSegment(int index, bool followLink) const
+{
+	auto segment = m_segments[index];
+	if (followLink && segment->getType() == DialogueSegment::Link)
+		segment = m_segments[segment->getLinkId()];
+	return segment;
+}
+
 std::vector<std::shared_ptr<DialogueSegment>> &Dialogue::segments()
 {
 	return m_segments;

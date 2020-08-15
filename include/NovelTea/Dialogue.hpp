@@ -18,6 +18,7 @@ public:
 
 	void clearSegments();
 	void addSegment(std::shared_ptr<DialogueSegment> segment);
+	std::shared_ptr<DialogueSegment> getSegment(int index, bool followLink = true) const;
 	std::vector<std::shared_ptr<DialogueSegment>> &segments();
 
 	static constexpr auto id = "dialogue";
