@@ -35,6 +35,11 @@ private slots:
 	void on_plainTextEdit_textChanged();
 	void on_checkBoxConditional_toggled(bool checked);
 	void on_checkBoxScript_toggled(bool checked);
+	void on_actionCopy_triggered();
+	void on_actionPaste_triggered();
+	void on_actionPasteAsLink_triggered();
+	void on_actionMoveUp_triggered();
+	void on_actionMoveDown_triggered();
 
 private:
 	void fillItemSettings();
@@ -47,8 +52,9 @@ private:
 	DialogueTreeModel *m_treeModel;
 	QMenu *m_menuTreeView;
 
+	QModelIndex m_copyIndex;
+
 	DialogueTreeItem *m_selectedItem;
-	std::shared_ptr<NovelTea::DialogueSegment> m_selectedSegment;
 
 	std::shared_ptr<NovelTea::Dialogue> m_dialogue;
 };

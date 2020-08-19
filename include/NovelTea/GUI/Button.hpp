@@ -48,6 +48,7 @@ public:
 	const sf::Color& getActiveColor() const;
 
 	void onClick(const std::function<void()>& callback);
+	void click();
 
 protected:
 	virtual int getValues(int tweenType, float *returnValues);

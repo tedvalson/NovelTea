@@ -6,6 +6,7 @@
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/CutsceneRenderer.hpp>
+#include <NovelTea/DialogueRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
@@ -60,6 +61,9 @@ private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;
 	float m_cutsceneSpeed;
+
+	std::shared_ptr<Dialogue> m_dialogue;
+	DialogueRenderer m_dialogueRenderer;
 
 	TweenEngine::TweenManager m_tweenManager;
 };

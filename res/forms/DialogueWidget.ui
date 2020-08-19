@@ -318,22 +318,6 @@
        <property name="spacing">
         <number>1</number>
        </property>
-       <item>
-        <widget class="NovelTeaWidget" name="preview" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>300</height>
-          </size>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -359,24 +343,43 @@
     <string>Delete</string>
    </property>
   </action>
-  <action name="actionView_Edit">
+  <action name="actionCopy">
    <property name="icon">
-    <iconset theme="edit-find">
+    <iconset theme="edit-copy">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>View / Edit</string>
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset theme="edit-paste">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionPasteAsLink">
+   <property name="text">
+    <string>Paste As Link</string>
+   </property>
+  </action>
+  <action name="actionMoveDown">
+   <property name="text">
+    <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionMoveUp">
+   <property name="text">
+    <string>Move Up</string>
    </property>
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>NovelTeaWidget</class>
-   <extends>QWidget</extends>
-   <header>Widgets/NovelTeaWidget.hpp</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ScriptEdit</class>
    <extends>QPlainTextEdit</extends>

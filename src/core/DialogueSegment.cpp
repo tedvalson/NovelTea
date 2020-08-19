@@ -1,21 +1,24 @@
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/Dialogue.hpp>
+#include <NovelTea/Game.hpp>
 
 namespace NovelTea
 {
 
 DialogueSegment::DialogueSegment()
-: m_type (Type::Invalid)
+: m_id(-1)
 , m_linkId(-1)
+, m_type(Type::Invalid)
 , m_conditionalEnabled(false)
 , m_scriptedText(false)
 , m_scriptEnabled(false)
 {
-	m_text = "[[nothing]]";
+	m_text = "";
 }
 
 bool DialogueSegment::operator==(const DialogueSegment &segment) const
 {
-	// Excludes childrenIds
+	// Excludes id and childrenIds
 	return m_type == segment.m_type &&
 			m_linkId == segment.m_linkId &&
 			m_conditionalEnabled == segment.m_conditionalEnabled &&
@@ -34,6 +37,53 @@ void DialogueSegment::appendChild(int id)
 void DialogueSegment::clearChildren()
 {
 	m_childrenIds.clear();
+}
+
+void DialogueSegment::runScript()
+{
+	if (!m_scriptEnabled)
+		return;
+	try {
+		ActiveGame->getScriptManager().runInClosure(m_script);
+	} catch (std::exception &e) {
+		std::cerr << "DialogueSegment::runScript() " << e.what() << std::endl;
+	}
+}
+
+bool DialogueSegment::conditionPasses(const std::string &dialogueId) const
+{
+	if (!m_conditionalEnabled || m_conditionScript.empty())
+		return true;
+	try {
+		auto script = m_conditionScript;
+		if (!dialogueId.empty())
+			script = "dialogue=Save.loadDialogue('"+dialogueId+"');\n" + m_conditionScript;
+		auto result = ActiveGame->getScriptManager().runInClosure<bool>(script);
+		return result;
+	} catch (std::exception &e) {
+		std::cerr << "DialogueSegment::conditionPasses() " << e.what() << std::endl;
+		return false;
+	}
+}
+
+std::string DialogueSegment::getText(bool *ok, const std::string &dialogueId) const
+{
+	try {
+		if (ok)
+			*ok = true;
+		if (m_scriptedText)
+		{
+			auto script = m_text;
+			if (!dialogueId.empty())
+				script = "dialogue=Save.loadDialogue('"+dialogueId+"');\n" + m_text;
+			return ActiveGame->getScriptManager().runInClosure<std::string>(script);
+		} else
+			return m_text;
+	} catch (std::exception &e) {
+		if (ok)
+			*ok = false;
+		return e.what();
+	}
 }
 
 json DialogueSegment::toJson() const

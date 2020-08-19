@@ -13,7 +13,6 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	, ui(new Ui::DialogueWidget)
 	, m_treeModel(new DialogueTreeModel)
 	, m_selectedItem(nullptr)
-	, m_selectedSegment(nullptr)
 	, m_menuTreeView(new QMenu)
 {
 	m_idName = idName;
@@ -23,6 +22,13 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 
 	m_menuTreeView->addAction(ui->actionAddObject);
 	m_menuTreeView->addAction(ui->actionDelete);
+	m_menuTreeView->addSeparator();
+	m_menuTreeView->addAction(ui->actionMoveUp);
+	m_menuTreeView->addAction(ui->actionMoveDown);
+	m_menuTreeView->addSeparator();
+	m_menuTreeView->addAction(ui->actionCopy);
+	m_menuTreeView->addAction(ui->actionPaste);
+	m_menuTreeView->addAction(ui->actionPasteAsLink);
 
 	ui->radioText->setChecked(true);
 
@@ -75,8 +81,6 @@ void DialogueWidget::loadData()
 
 	m_treeModel->loadDialogue(m_dialogue);
 	ui->treeView->expandToDepth(0);
-	for (auto i = 1; i < m_treeModel->columnCount(); ++i)
-		ui->treeView->hideColumn(i);
 	ui->propertyEditor->setValue(m_dialogue->getProperties());
 	fillItemSettings();
 
@@ -84,6 +88,7 @@ void DialogueWidget::loadData()
 	MODIFIER(m_treeModel, &QAbstractItemModel::dataChanged);
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsInserted);
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsRemoved);
+	MODIFIER(m_treeModel, &QAbstractItemModel::rowsMoved);
 }
 
 void DialogueWidget::on_treeView_pressed(const QModelIndex &index)
@@ -92,39 +97,20 @@ void DialogueWidget::on_treeView_pressed(const QModelIndex &index)
 	if (QApplication::mouseButtons() != Qt::RightButton)
 		return;
 
-	auto type = m_selectedSegment ? m_selectedSegment->getType() : DialogueSegment::Root;
+	auto row = index.row();
+	auto type = m_selectedItem ? m_selectedItem->getDialogueSegment()->getType() : DialogueSegment::Root;
+	auto copying = m_copyIndex.isValid();
+	auto isLink = type == DialogueSegment::Link;
 
-	ui->actionAddObject->setEnabled(type != DialogueSegment::Link);
+	ui->actionAddObject->setEnabled(!isLink);
 	ui->actionDelete->setEnabled(type != DialogueSegment::Root);
+	ui->actionMoveUp->setEnabled(row > 0);
+	ui->actionMoveDown->setEnabled(index.sibling(row+1, 0).isValid());
+	ui->actionCopy->setChecked(!isLink);
+	ui->actionPaste->setEnabled(!isLink && copying);
+	ui->actionPasteAsLink->setEnabled(!isLink && copying);
 
 	m_menuTreeView->popup(QCursor::pos());
-}
-
-void DialogueWidget::on_actionAddObject_triggered()
-{
-	auto index = ui->treeView->currentIndex();
-	auto type = m_selectedSegment ? m_selectedSegment->getType() : DialogueSegment::Root;
-
-	if (type == DialogueSegment::Link)
-		return;
-
-	auto newSegment = std::make_shared<DialogueSegment>();
-	if (type == DialogueSegment::Root || type == DialogueSegment::Player)
-	{
-		newSegment->setType(DialogueSegment::NPC);
-		newSegment->setText("NPC");
-	} else {
-		newSegment->setType(DialogueSegment::Player);
-		newSegment->setText("Player");
-	}
-
-	m_treeModel->insertSegment(0, index, newSegment);
-}
-
-void DialogueWidget::on_actionDelete_triggered()
-{
-	auto selectedIndex = ui->treeView->currentIndex();
-	m_treeModel->removeRow(selectedIndex.row(), selectedIndex.parent());
 }
 
 void DialogueWidget::on_radioText_toggled(bool checked)
@@ -147,25 +133,26 @@ void DialogueWidget::fillItemSettings()
 		return;
 	}
 
+	auto &selectedSegment = m_selectedItem->getDialogueSegment();
 	ui->tabText->setEnabled(true);
 	ui->tabConditional->setEnabled(true);
 	ui->tabScript->setEnabled(true);
 
-	if (m_selectedSegment->getScriptedText())
+	if (selectedSegment->getScriptedText())
 	{
 		ui->radioScript->setChecked(true);
 		ui->plainTextEdit->clear();
-		ui->scriptEditText->setPlainText(QString::fromStdString(m_selectedSegment->getText()));
+		ui->scriptEditText->setPlainText(QString::fromStdString(selectedSegment->getTextRaw()));
 	} else {
 		ui->radioText->setChecked(true);
 		ui->scriptEditText->clear();
-		ui->plainTextEdit->setPlainText(QString::fromStdString(m_selectedSegment->getText()));
+		ui->plainTextEdit->setPlainText(QString::fromStdString(selectedSegment->getTextRaw()));
 	}
 
-	ui->checkBoxConditional->setChecked(m_selectedSegment->getConditionalEnabled());
-	ui->scriptEditConditional->setPlainText(QString::fromStdString(m_selectedSegment->getConditionScript()));
-	ui->checkBoxScript->setChecked(m_selectedSegment->getScriptEnabled());
-	ui->scriptEdit->setPlainText(QString::fromStdString(m_selectedSegment->getScript()));
+	ui->checkBoxConditional->setChecked(selectedSegment->getConditionalEnabled());
+	ui->scriptEditConditional->setPlainText(QString::fromStdString(selectedSegment->getConditionScript()));
+	ui->checkBoxScript->setChecked(selectedSegment->getScriptEnabled());
+	ui->scriptEdit->setPlainText(QString::fromStdString(selectedSegment->getScript()));
 }
 
 void DialogueWidget::checkIndexChange()
@@ -174,36 +161,34 @@ void DialogueWidget::checkIndexChange()
 	auto selectedItem = static_cast<DialogueTreeItem*>(index.internalPointer());
 	if (!index.isValid() || !selectedItem->parent()->parent())
 		selectedItem = nullptr;
+	if (selectedItem && selectedItem->getLink())
+		selectedItem = selectedItem->getLink();
 
 	if (m_selectedItem != selectedItem)
 	{
 		m_selectedItem = selectedItem;
-		if (m_selectedItem)
-			m_selectedSegment = m_selectedItem->getDialogueSegment();
-		else
-			m_selectedSegment = nullptr;
 		fillItemSettings();
 	}
 	else if (m_selectedItem)
 	{
-		auto type = m_selectedSegment->getType();
-		m_selectedSegment = std::make_shared<DialogueSegment>();
-		m_selectedSegment->setType(type);
+		auto type = m_selectedItem->getDialogueSegment()->getType();
+		auto segment = std::make_shared<DialogueSegment>();
+		segment->setType(type);
 
 		if (ui->radioScript->isChecked())
 		{
-			m_selectedSegment->setScriptedText(true);
-			m_selectedSegment->setText(ui->scriptEditText->toPlainText().toStdString());
+			segment->setScriptedText(true);
+			segment->setTextRaw(ui->scriptEditText->toPlainText().toStdString());
 		} else {
-			m_selectedSegment->setScriptedText(false);
-			m_selectedSegment->setText(ui->plainTextEdit->toPlainText().toStdString());
+			segment->setScriptedText(false);
+			segment->setTextRaw(ui->plainTextEdit->toPlainText().toStdString());
 		}
-		m_selectedSegment->setConditionalEnabled(ui->checkBoxConditional->isChecked());
-		m_selectedSegment->setConditionScript(ui->scriptEditConditional->toPlainText().toStdString());
-		m_selectedSegment->setScriptEnabled(ui->checkBoxScript->isChecked());
-		m_selectedSegment->setScript(ui->scriptEdit->toPlainText().toStdString());
+		segment->setConditionalEnabled(ui->checkBoxConditional->isChecked());
+		segment->setConditionScript(ui->scriptEditConditional->toPlainText().toStdString());
+		segment->setScriptEnabled(ui->checkBoxScript->isChecked());
+		segment->setScript(ui->scriptEdit->toPlainText().toStdString());
 
-		if (m_treeModel->updateSegment(index, m_selectedSegment))
+		if (m_treeModel->updateSegment(index, segment))
 			std::cout << "updated seg" << std::endl;
 	}
 }
@@ -221,4 +206,63 @@ void DialogueWidget::on_checkBoxConditional_toggled(bool checked)
 void DialogueWidget::on_checkBoxScript_toggled(bool checked)
 {
 	ui->scriptEdit->setEnabled(checked);
+}
+
+void DialogueWidget::on_actionAddObject_triggered()
+{
+	auto index = ui->treeView->currentIndex();
+	auto type = m_selectedItem ? m_selectedItem->getDialogueSegment()->getType() : DialogueSegment::Root;
+	m_copyIndex = QModelIndex();
+
+	if (type == DialogueSegment::Link)
+		return;
+
+	auto newSegment = std::make_shared<DialogueSegment>();
+	if (type == DialogueSegment::Root || type == DialogueSegment::Player)
+	{
+		newSegment->setType(DialogueSegment::NPC);
+	} else {
+		newSegment->setType(DialogueSegment::Player);
+	}
+
+	m_treeModel->insertSegment(0, index, newSegment);
+	ui->treeView->setCurrentIndex(index.child(0,0));
+}
+
+void DialogueWidget::on_actionDelete_triggered()
+{
+	auto selectedIndex = ui->treeView->currentIndex();
+	m_copyIndex = QModelIndex();
+	m_treeModel->removeRow(selectedIndex.row(), selectedIndex.parent());
+}
+
+void DialogueWidget::on_actionCopy_triggered()
+{
+	m_copyIndex = ui->treeView->currentIndex();
+}
+
+void DialogueWidget::on_actionPaste_triggered()
+{
+
+}
+
+void DialogueWidget::on_actionPasteAsLink_triggered()
+{
+	auto index = ui->treeView->currentIndex();
+	m_treeModel->insertSegmentLink(m_copyIndex, index);
+	m_copyIndex = QModelIndex();
+}
+
+void DialogueWidget::on_actionMoveUp_triggered()
+{
+	auto index = ui->treeView->currentIndex();
+	auto row = index.row();
+	m_treeModel->moveRow(index.parent(), row, index.parent(), row-1);
+}
+
+void DialogueWidget::on_actionMoveDown_triggered()
+{
+	auto index = ui->treeView->currentIndex();
+	auto row = index.row();
+	m_treeModel->moveRow(index.parent(), row, index.parent(), row+2);
 }

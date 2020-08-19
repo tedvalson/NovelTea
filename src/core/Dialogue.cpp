@@ -58,6 +58,7 @@ void Dialogue::clearSegments()
 
 void Dialogue::addSegment(std::shared_ptr<DialogueSegment> segment)
 {
+	segment->setId(m_segments.size());
 	m_segments.push_back(segment);
 }
 

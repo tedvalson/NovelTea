@@ -32,11 +32,14 @@ public:
 					const QModelIndex &parent = QModelIndex()) override;
 	bool removeRows(int position, int rows,
 					const QModelIndex &parent = QModelIndex()) override;
+	bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+					const QModelIndex &destinationParent, int destinationChild) override;
 
 	void saveDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue) const;
 	void loadDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue);
 	bool changeParent(const QModelIndex &child, const QModelIndex &newParent);
 
+	bool insertSegmentLink(const QModelIndex &source, const QModelIndex &destParent);
 	bool insertSegment(int row, const QModelIndex &parent, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 	bool updateSegment(const QModelIndex &index, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 
@@ -44,6 +47,7 @@ private:
 	DialogueTreeItem *getItem(const QModelIndex &index) const;
 
 	DialogueTreeItem *m_rootItem;
+	std::string m_dialogueId;
 };
 
 #endif // DIALOGUETREEMODEL_HPP

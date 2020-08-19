@@ -142,7 +142,7 @@ void Button::autoSize()
 
 bool Button::processEvent(const sf::Event &event)
 {
-	if (event.type == sf::Event::TouchBegan)
+	if (event.type == sf::Event::MouseButtonPressed)
 	{
 		if (m_rect.contains(event.touch.x, event.touch.y))
 		{
@@ -152,7 +152,7 @@ bool Button::processEvent(const sf::Event &event)
 		}
 	}
 
-	if (event.type == sf::Event::TouchEnded)
+	if (event.type == sf::Event::MouseButtonReleased)
 	{
 		if (m_active) {
 			m_active = false;
@@ -163,7 +163,7 @@ bool Button::processEvent(const sf::Event &event)
 		}
 	}
 
-	if (event.type == sf::Event::TouchMoved)
+	if (event.type == sf::Event::MouseMoved)
 	{
 		if (m_active) {
 			if (!m_rect.contains(event.touch.x, event.touch.y)) {
@@ -193,8 +193,7 @@ void Button::ensureUpdate() const
 			m_size.x = contentSize.x + getTexture()->getSize().x - padding.width;
 			m_size.y = contentSize.y + getTexture()->getSize().y - padding.height;
 		} else {
-			m_size.x = contentSize.x - padding.width;
-			m_size.y = contentSize.y - padding.height;
+			m_size = NinePatch::getSize();
 		}
 
 		m_text.setOrigin(round(textBounds.left + textBounds.width/2),
@@ -223,6 +222,12 @@ void Button::ensureUpdate() const
 void Button::onClick(const std::function<void()>& callback)
 {
 	m_clickFunction = callback;
+}
+
+void Button::click()
+{
+	if (m_clickFunction)
+		m_clickFunction();
 }
 
 
@@ -279,8 +284,9 @@ void Button::setValues(int tweenType, float *newValues)
 
 sf::Text &Button::getText() const
 {
+	m_needsUpdate = true;
 	return m_text;
 }
 
 
-} // namespace gui3ds
+} // namespace NovelTea

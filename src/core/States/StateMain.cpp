@@ -28,6 +28,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto height = getContext().config.height;
 	m_roomActiveText.setSize(sf::Vector2f(width, 0.f));
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, 0.f));
+	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
 
 	// Set all Navigation transforms before getGlobalBounds is called
 	m_navigation.setScale(1.5f, 1.5f);
@@ -69,9 +70,19 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	else if (!projEntryPoint.IsEmpty())
 		setMode(projEntryPoint);
 
-	if (!getContext().data["testSteps"].IsEmpty())
+	if (getContext().data.hasKey("testSteps"))
 	{
 		m_testPlaybackMode = true;
+		m_testRecordMode = getContext().data["record"].ToBool();
+		if (m_testRecordMode)
+			m_dialogueRenderer.setDialogueCallback([this](int index){
+				json jtestItem({
+					"type", "dialogue",
+					"index", index
+				});
+				if (!m_testPlaybackMode)
+					runCallback(&jtestItem);
+			});
 		processTestSteps();
 	}
 }
@@ -84,6 +95,10 @@ void StateMain::render(sf::RenderTarget &target)
 	if (m_mode == Mode::Cutscene)
 	{
 		target.draw(m_cutsceneRenderer);
+	}
+	else if (m_mode == Mode::Dialogue)
+	{
+		target.draw(m_dialogueRenderer);
 	}
 	else if (m_mode == Mode::Room)
 	{
@@ -117,7 +132,11 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	{
 		m_cutscene = GSave.get<Cutscene>(idName);
 		m_cutsceneRenderer.setCutscene(m_cutscene);
-		getContext().game.pushNextEntityJson(m_cutscene->getNextEntity());
+	}
+	else if (mode == Mode::Dialogue)
+	{
+		m_dialogue = GSave.get<Dialogue>(idName);
+		m_dialogueRenderer.setDialogue(m_dialogue);
 	}
 	else if (mode == Mode::Room)
 	{
@@ -142,6 +161,8 @@ void StateMain::setMode(const json &jEntity)
 		mode = Mode::Cutscene;
 	else if (type == EntityType::Room)
 		mode = Mode::Room;
+	else if (type == EntityType::Dialogue)
+		mode = Mode::Dialogue;
 	else if (type == EntityType::CustomScript)
 	{
 		mode = Mode::Nothing;
@@ -179,10 +200,15 @@ void StateMain::processTestSteps()
 				return;
 			}
 		}
+		else if (type == "dialogue")
+		{
+			m_dialogueRenderer.processSelection(jstep["index"].ToInt());
+		}
 
 		if (m_mode != Mode::Cutscene)
 			gotoNextEntity();
 	}
+
 }
 
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
@@ -285,6 +311,10 @@ bool StateMain::processEvent(const sf::Event &event)
 			m_cutsceneSpeed = 10.f;
 		}
 	}
+	else if (m_mode == Mode::Dialogue)
+	{
+		m_dialogueRenderer.processEvent(event);
+	}
 	else if (m_mode == Mode::Room)
 	{
 		if (m_verbList.isVisible())
@@ -326,6 +356,15 @@ bool StateMain::update(float delta)
 	{
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
+		{
+			getContext().game.pushNextEntityJson(m_cutscene->getNextEntity());
+			gotoNextEntity();
+		}
+	}
+	else if (m_mode == Mode::Dialogue)
+	{
+		m_dialogueRenderer.update(delta);
+		if (m_dialogueRenderer.isComplete())
 		{
 			gotoNextEntity();
 		}

@@ -1,30 +1,32 @@
 #include "DialogueTreeItem.hpp"
 #include <NovelTea/Game.hpp>
 
-DialogueTreeItem::DialogueTreeItem(const std::shared_ptr<NovelTea::DialogueSegment> &segment, DialogueTreeItem *parent)
+DialogueTreeItem::DialogueTreeItem(const std::string &dialogueId, const std::shared_ptr<NovelTea::DialogueSegment> &segment, DialogueTreeItem *parent)
+: m_parentItem(parent)
+, m_linkItem(nullptr)
+, m_dialogueId(dialogueId)
 {
-	parentItem = parent;
 	setDialogueSegment(segment);
 }
 
 DialogueTreeItem::~DialogueTreeItem()
 {
-	qDeleteAll(childItems);
+	qDeleteAll(m_childItems);
 }
 
 void DialogueTreeItem::appendChild(DialogueTreeItem *item)
 {
-	childItems.append(item);
+	m_childItems.append(item);
 }
 
 DialogueTreeItem *DialogueTreeItem::child(int row)
 {
-	return childItems.value(row);
+	return m_childItems.value(row);
 }
 
 int DialogueTreeItem::childCount() const
 {
-	return childItems.count();
+	return m_childItems.count();
 }
 
 int DialogueTreeItem::columnCount() const
@@ -34,23 +36,21 @@ int DialogueTreeItem::columnCount() const
 
 QVariant DialogueTreeItem::data(int column) const
 {
+	auto segment = m_segment;
 	if (column == 0)
 	{
-		if (m_segment->getType() == NovelTea::DialogueSegment::Root)
+		if (m_linkItem)
+			segment = m_linkItem->getDialogueSegment();
+
+		if (segment->getType() == NovelTea::DialogueSegment::Root)
 			return "ROOT";
-		else if (m_segment->getScriptedText())
-		{
-			try {
-				auto result = ActiveGame->getScriptManager().runInClosure<std::string>(m_segment->getText());
-				return QString::fromStdString(result);
-			} catch (std::exception &e) {
-				auto result = QString::fromStdString(e.what());
-				result.truncate(result.indexOf("\n"));
-				return "ERROR: " + result;
-			}
-		}
+		else if (segment->getTextRaw().empty())
+			return "[SKIP]";
 		else
-			return QString::fromStdString(m_segment->getText()).replace("\n"," ");
+		{
+			auto text = segment->getText(nullptr, m_dialogueId);
+			return QString::fromStdString(text).replace("\n"," ");
+		}
 	}
 	else
 		return QString();
@@ -63,14 +63,34 @@ bool DialogueTreeItem::setData(int column, QVariant value)
 
 DialogueTreeItem *DialogueTreeItem::parent()
 {
-	return parentItem;
+	return m_parentItem;
 }
 
-void DialogueTreeItem::changeParent(DialogueTreeItem *parent)
+void DialogueTreeItem::moveItem(DialogueTreeItem *newParent, int newPosition)
 {
-	parentItem->childItems.takeAt(row());
-	parent->appendChild(this);
-	parentItem = parent;
+	if (m_parentItem == newParent)
+	{
+		if (row() < newPosition)
+			--newPosition;
+		m_parentItem->m_childItems.move(row(), newPosition);
+	} else {
+		m_parentItem->m_childItems.takeAt(row());
+		if (newPosition < 0 || newPosition > newParent->childCount())
+			newParent->appendChild(this);
+		else
+			newParent->insertItem(newPosition, this);
+		m_parentItem = newParent;
+	}
+}
+
+void DialogueTreeItem::setLink(DialogueTreeItem *link)
+{
+	m_linkItem = link;
+}
+
+DialogueTreeItem *DialogueTreeItem::getLink()
+{
+	return m_linkItem;
 }
 
 void DialogueTreeItem::setDialogueSegment(const std::shared_ptr<NovelTea::DialogueSegment> &segment)
@@ -90,32 +110,51 @@ bool DialogueTreeItem::insertChildren(int position, int count, int columns)
 
 bool DialogueTreeItem::removeChildren(int position, int count)
 {
-	if (position < 0 || position + count > childItems.size())
+	if (position < 0 || position + count > m_childItems.size())
 		return false;
 
 	for (int row = 0; row < count; ++row)
-		delete childItems.takeAt(position);
+		delete m_childItems.takeAt(position);
 
 	return true;
 }
 
 bool DialogueTreeItem::insertSegment(int position, int count, const std::shared_ptr<NovelTea::DialogueSegment> &segment)
 {
-	if (position < 0 || position > childItems.size())
+	if (position < 0 || position > m_childItems.size())
 		return false;
 
 	for (int row = 0; row < count; ++row) {
-		auto item = new DialogueTreeItem(segment, this);
-		childItems.insert(position, item);
+		auto item = new DialogueTreeItem(m_dialogueId, segment, this);
+		m_childItems.insert(position, item);
 	}
 
 	return true;
 }
 
+bool DialogueTreeItem::insertLink(int position, DialogueTreeItem *sourceItem)
+{
+	auto segment = std::make_shared<NovelTea::DialogueSegment>();
+	auto item = new DialogueTreeItem(m_dialogueId, segment, this);
+	segment->setType(NovelTea::DialogueSegment::Link);
+	item->m_linkItem = sourceItem;
+
+	m_childItems.insert(position, item);
+	return true;
+}
+
+bool DialogueTreeItem::insertItem(int position, DialogueTreeItem *item)
+{
+	if (position > m_childItems.size())
+		return false;
+	m_childItems.insert(position, item);
+	return true;
+}
+
 int DialogueTreeItem::row() const
 {
-	if (parentItem)
-		return parentItem->childItems.indexOf(const_cast<DialogueTreeItem*>(this));
+	if (m_parentItem)
+		return m_parentItem->m_childItems.indexOf(const_cast<DialogueTreeItem*>(this));
 
 	return 0;
 }
