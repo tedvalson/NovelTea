@@ -97,10 +97,8 @@ void *StateEditor::processData(void *data)
 			return callback(j);
 		};
 
-		if (jsonData["type"] == "record")
-			getContext().data["testSteps"] = sj::Array();
-		else
-			getContext().data["testSteps"] = jsonData["steps"];
+		getContext().data["testSteps"] = jsonData["steps"];
+		getContext().data["record"] = jsonData["record"];
 
 		requestStackPop();
 		requestStackPush(StateID::Main, false, stateCallback);

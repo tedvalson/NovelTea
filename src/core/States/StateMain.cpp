@@ -19,6 +19,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 : State(stack, context, callback)
 , m_mode(Mode::Nothing)
 , m_testPlaybackMode(false)
+, m_testRecordMode(false)
 , m_roomTextChanging(false)
 , m_cutsceneSpeed(1.f)
 {
@@ -34,6 +35,14 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_navigation.setScale(1.5f, 1.5f);
 	m_navigation.setPosition(20.f, -20.f + height - m_navigation.getGlobalBounds().height);
 	m_navigation.setCallback([this](const json &jentity){
+		if (m_testRecordMode)
+		{
+			json jtestItem({
+				"type", "room",
+				"room", jentity[1].ToString()
+			});
+			runCallback(&jtestItem);
+		}
 		getContext().game.pushNextEntityJson(jentity);
 	});
 
@@ -218,11 +227,20 @@ void StateMain::processTestSteps()
 		{
 			m_dialogueRenderer.processSelection(jstep["index"].ToInt());
 		}
+		else if (type == "room")
+		{
+			getContext().game.pushNextEntity(GSave.get<Room>(jstep["room"].ToString()));
+		}
+		else if (type == "wait")
+		{
+			update(0.001f * jstep["duration"].ToInt());
+		}
 
 		if (m_mode != Mode::Cutscene)
 			gotoNextEntity();
 	}
 
+	m_testPlaybackMode = false;
 }
 
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
@@ -255,7 +273,8 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 
 	if (success)
 	{
-		if (!m_testPlaybackMode)
+		// Don't record during playback to avoid dupliating all actions
+		if (m_testRecordMode && !m_testPlaybackMode)
 		{
 			auto jobjects = sj::Array();
 			for (auto &objectId : objectIds)
@@ -275,17 +294,22 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 void StateMain::gotoNextEntity()
 {
 	auto nextEntity = getContext().game.popNextEntity();
-	if (nextEntity)
+	if (!nextEntity)
 	{
-		auto mode = Mode::Nothing;
-		if (nextEntity->entityId() == Cutscene::id)
-			mode = Mode::Cutscene;
-		else if (nextEntity->entityId() == Room::id)
-			mode = Mode::Room;
-		else if (nextEntity->entityId() == Dialogue::id)
-			mode = Mode::Dialogue;
-		setMode(mode, nextEntity->getId());
+		if (m_mode != Mode::Room)
+			nextEntity = getContext().game.getRoom();
+		if (!nextEntity || nextEntity->getId().empty())
+			return;
 	}
+
+	auto mode = Mode::Nothing;
+	if (nextEntity->entityId() == Cutscene::id)
+		mode = Mode::Cutscene;
+	else if (nextEntity->entityId() == Room::id)
+		mode = Mode::Room;
+	else if (nextEntity->entityId() == Dialogue::id)
+		mode = Mode::Dialogue;
+	setMode(mode, nextEntity->getId());
 }
 
 void StateMain::updateRoomText(const std::string &newText)

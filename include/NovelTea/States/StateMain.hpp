@@ -52,6 +52,7 @@ protected:
 private:
 	Mode m_mode;
 	bool m_testPlaybackMode;
+	bool m_testRecordMode;
 
 	ActiveText m_roomActiveText;
 	ActiveText m_roomActiveTextFadeOut;

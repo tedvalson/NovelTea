@@ -95,6 +95,14 @@ void TestsWidget::addStepToList(const json &jstep, bool append)
 		int duration = jstep["duration"].ToInt();
 		text = "Wait: " + std::to_string(duration) + "ms";
 	}
+	else if (type == "room")
+	{
+		text = "Room: " + jstep["room"].ToString();
+	}
+	else if (type == "dialogue")
+	{
+		text = "Dialogue choice: " + std::to_string(jstep["index"].ToInt());
+	}
 
 	if (append)
 	{
@@ -132,6 +140,21 @@ bool TestsWidget::processCallbackData(const json &jdata)
 
 //	std::cout << "process step: " << jstep["type"].ToString() << std::endl;
 	return true;
+}
+
+void TestsWidget::processSteps(bool startRecording)
+{
+	resetListStyle();
+	ui->preview->reset();
+	auto &jsteps = m_json[m_selectedTestId];
+	auto j = json({
+		"event", "test",
+		"type", "playback",
+		"steps", jsteps,
+		"record", startRecording,
+		"callback", std::to_string(&m_callback),
+	});
+	ui->preview->processData(j);
 }
 
 void TestsWidget::saveData() const
@@ -232,28 +255,10 @@ void TestsWidget::on_listWidgetSteps_currentRowChanged(int currentRow)
 
 void TestsWidget::on_actionRunSteps_triggered()
 {
-	resetListStyle();
-	ui->preview->reset();
-//	auto jsteps = sj::Array();
-//	jsteps.append(0);
-	auto &jsteps = m_json[m_selectedTestId];
-	auto j = json({
-		"event", "test",
-		"type", "playback",
-		"steps", jsteps,
-		"callback", std::to_string(&m_callback),
-	});
-	ui->preview->processData(j);
+	processSteps(false);
 }
 
 void TestsWidget::on_actionRecordSteps_triggered()
 {
-	resetListStyle();
-	ui->preview->reset();
-	auto j = json({
-		"event", "test",
-		"type", "record",
-		"callback", std::to_string(&m_callback),
-	});
-	ui->preview->processData(j);
+	processSteps(true);
 }

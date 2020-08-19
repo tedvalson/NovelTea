@@ -31,6 +31,7 @@ public:
 protected:
 	void resetListStyle();
 	bool processCallbackData(const json &jdata);
+	void processSteps(bool startRecording);
 
 private slots:
 	void on_actionAddTest_triggered();
