@@ -115,7 +115,7 @@ std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
 {
 	for (auto &segment : m_segments)
 	{
-		if (segment.bounds.contains(point))
+		if (!segment.objectIdName.empty() && segment.bounds.contains(point))
 			return segment.objectIdName;
 	}
 	return std::string();
@@ -228,11 +228,6 @@ void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 	for (auto &segment : m_segments)
 		target.draw(segment.text, states);
-	for (auto &shape : m_debugSegmentShapes)
-		target.draw(shape, states);
-
-	target.draw(m_debugBorder, states);
-}
 
 }
 
@@ -277,7 +272,7 @@ void ActiveText::ensureUpdate() const
 
 			TweenText text;
 			text.setFont(*font);
-			text.setCharacterSize(format.size()*3);
+			text.setCharacterSize(format.size()*2);
 			text.setStyle(style);
 
 			text.setString(" ");
@@ -308,7 +303,12 @@ void ActiveText::ensureUpdate() const
 
 				text.setPosition(m_cursorPos);
 				m_cursorPos.x += text.getLocalBounds().width;
-				auto bounds = sf::FloatRect(text.getGlobalBounds().left, text.getGlobalBounds().top, text.getLocalBounds().width, text.getLocalBounds().height);
+				float padding = 6.f;
+				auto bounds = sf::FloatRect(
+							text.getGlobalBounds().left - padding,
+							text.getGlobalBounds().top - padding,
+							text.getLocalBounds().width + padding * 2,
+							text.getLocalBounds().height + padding * 2);
 
 				shape.setSize(sf::Vector2f(bounds.width, bounds.height));
 				shape.setPosition(bounds.left, bounds.top);
