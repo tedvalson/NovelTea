@@ -15,6 +15,8 @@
 namespace NovelTea
 {
 
+using MessageCallback = std::function<void(const std::vector<std::string> &messageArray, const DukValue &callback)>;
+
 class ObjectList;
 class Room;
 
@@ -29,9 +31,14 @@ public:
 	void setRoomId(const std::string &roomId);
 	const std::string &getRoomId() const;
 
+	DukValue prop(const std::string &key, const DukValue &defaultValue);
+	void setProp(const std::string &key, const DukValue &value);
+
 	void pushNextEntity(std::shared_ptr<Entity> entity);
 	void pushNextEntityJson(json jentity);
 	std::shared_ptr<Entity> popNextEntity();
+
+	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
 
 	ScriptManager &getScriptManager();
 	SaveData &getSaveData();
@@ -39,12 +46,16 @@ public:
 
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(std::shared_ptr<Room>, Room, m_room)
+	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
 
 private:
 	std::shared_ptr<ObjectList> m_objectList;
+	std::shared_ptr<PropertyList> m_propertyList;
 	std::shared_ptr<Room> m_room;
 	std::string m_roomId;
 	std::queue<std::shared_ptr<Entity>> m_entityQueue;
+
+	MessageCallback m_messageCallback;
 
 	SaveData m_saveData;
 	TimerManager m_timerManager;

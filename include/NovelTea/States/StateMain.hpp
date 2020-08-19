@@ -11,6 +11,7 @@
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
+#include <NovelTea/GUI/TextOverlay.hpp>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
@@ -45,6 +46,9 @@ public:
 
 	void updateRoomText(const std::string &newText = " ");
 
+protected:
+	void callOverlayFunc();
+
 private:
 	Mode m_mode;
 	bool m_testPlaybackMode;
@@ -56,7 +60,9 @@ private:
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
 	Navigation m_navigation;
+	TextOverlay m_textOverlay;
 	std::string m_selectedObjectId;
+	DukValue m_textOverlayFunc;
 
 	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;

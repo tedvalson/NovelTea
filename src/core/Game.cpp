@@ -8,10 +8,12 @@ namespace NovelTea
 {
 
 Game::Game()
-	: m_room(nullptr)
-	, m_objectList(nullptr)
+	: m_objectList(nullptr)
+	, m_propertyList(std::make_shared<PropertyList>())
+	, m_room(nullptr)
 	, m_scriptManager(this)
 {
+	m_messageCallback = [](const std::vector<std::string>&, const DukValue&){};
 	reset();
 }
 
@@ -50,6 +52,16 @@ const std::string &Game::getRoomId() const
 	return m_roomId;
 }
 
+DukValue Game::prop(const std::string &key, const DukValue &defaultValue)
+{
+	return m_propertyList->get(key, defaultValue);
+}
+
+void Game::setProp(const std::string &key, const DukValue &value)
+{
+	m_propertyList->set(key, value);
+}
+
 void Game::pushNextEntity(std::shared_ptr<Entity> entity)
 {
 	m_entityQueue.push(entity);
@@ -72,6 +84,18 @@ std::shared_ptr<Entity> Game::popNextEntity()
 	auto nextEntity = m_entityQueue.front();
 	m_entityQueue.pop();
 	return nextEntity;
+}
+
+//void Game::execMessageCallback(const std::string &message, const DukValue &callback)
+//{
+//	m_messageCallback(message, callback);
+//}
+
+void Game::execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback)
+{
+	for (auto &s : messageArray)
+		std::cout << "line: " << s << std::endl;
+	m_messageCallback(messageArray, callback);
 }
 
 ScriptManager &Game::getScriptManager()

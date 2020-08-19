@@ -63,6 +63,19 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y - 4.f));
 
+	m_textOverlay.setAlpha(0.f);
+	m_textOverlay.setSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
+	getContext().game.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
+		m_textOverlayFunc = callback;
+		if (!m_testPlaybackMode)
+		{
+			m_textOverlay.setTextArray(messageArray);
+			m_textOverlay.show();
+		}
+		else
+			callOverlayFunc();
+	});
+
 	auto &saveEntryPoint = GSave.data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
 	if (!saveEntryPoint.IsEmpty())
@@ -111,6 +124,7 @@ void StateMain::render(sf::RenderTarget &target)
 	}
 
 	target.draw(m_navigation);
+	target.draw(m_textOverlay);
 
 	for (auto &notification : Notification::notifications)
 		target.draw(*notification);
@@ -295,8 +309,25 @@ void StateMain::updateRoomText(const std::string &newText)
 		}).start(m_tweenManager);
 }
 
+void StateMain::callOverlayFunc()
+{
+	if (m_textOverlayFunc.type() != DukValue::UNDEFINED){
+		getContext().game.getScriptManager().call<void>(m_textOverlayFunc);
+		updateRoomText();
+	}
+}
+
 bool StateMain::processEvent(const sf::Event &event)
 {
+	if (m_textOverlay.isVisible())
+	{
+		if (m_textOverlay.processEvent(event))
+			m_textOverlay.hide(0.5f, TextOverlay::ALPHA, [this](){
+				callOverlayFunc();
+			});
+		return true;
+	}
+
 	if (m_roomTextChanging)
 		return true;
 
@@ -376,6 +407,7 @@ bool StateMain::update(float delta)
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
 	m_navigation.update(delta);
+	m_textOverlay.update(delta);
 
 	Notification::update(delta);
 	if (getContext().game.getTimerManager().update(delta))

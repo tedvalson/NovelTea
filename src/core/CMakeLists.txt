@@ -39,6 +39,7 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/Notification.cpp
 	${SRCROOT}/GUI/Scrollable.cpp
 	${SRCROOT}/GUI/ScrollBar.cpp
+	${SRCROOT}/GUI/TextOverlay.cpp
 	${SRCROOT}/GUI/VerbList.cpp
 	${SRCROOT}/States/State.cpp
 	${SRCROOT}/States/StateEditor.cpp
