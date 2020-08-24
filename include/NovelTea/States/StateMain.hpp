@@ -42,7 +42,7 @@ public:
 	void processTestSteps();
 	bool processAction(const std::string &verbId, const std::vector<std::string> &objectIds);
 
-	void gotoNextEntity();
+	bool gotoNextEntity();
 
 	void updateRoomText(const std::string &newText = " ");
 

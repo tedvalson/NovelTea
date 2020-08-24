@@ -29,6 +29,17 @@ bool Entity::fromJson(const json &j)
 	}
 }
 
+void Entity::setId(const std::string &id)
+{
+	m_id = id;
+	m_propertyList->attach(entityId(), id);
+}
+
+const std::string &Entity::getId() const
+{
+	return m_id;
+}
+
 const std::shared_ptr<PropertyList> &Entity::getPropertyList() const
 {
 	return m_propertyList;

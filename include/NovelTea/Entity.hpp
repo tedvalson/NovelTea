@@ -18,11 +18,13 @@ public:
 
 	bool fromJson(const json &j) override;
 
+	virtual void setId(const std::string &id);
+	const std::string &getId() const;
+
 	const std::shared_ptr<PropertyList> &getPropertyList() const;
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
 	void setProp(const std::string &key, const DukValue &value);
 
-	ADD_ACCESSOR(std::string, Id, m_id)
 	ADD_ACCESSOR(std::string, ParentId, m_parentId)
 	ADD_ACCESSOR(json, Properties, m_properties)
 

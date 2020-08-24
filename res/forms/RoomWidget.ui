@@ -238,6 +238,81 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabScripts">
+       <attribute name="title">
+        <string>Scripts</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QCheckBox" name="checkBoxBeforeEnter">
+          <property name="text">
+           <string>Before entering</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ScriptEdit" name="scriptEditBeforeEnter"/>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxAfterEnter">
+          <property name="text">
+           <string>After entering</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ScriptEdit" name="scriptEditAfterEnter"/>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxBeforeLeave">
+          <property name="text">
+           <string>Before leaving</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ScriptEdit" name="scriptEditBeforeLeave"/>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxAfterLeave">
+          <property name="text">
+           <string>After leaving</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ScriptEdit" name="scriptEditAfterLeave"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabProperties">
        <attribute name="title">
         <string>Properties</string>

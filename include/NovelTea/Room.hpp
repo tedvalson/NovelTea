@@ -32,12 +32,27 @@ public:
 	void setId(const std::string &idName) override;
 	const std::shared_ptr<ObjectList> &getObjectList() const;
 
-	ADD_ACCESSOR(std::string, Description, m_description)
+	std::string getDescription() const;
+
+	bool runScriptBeforeEnter() const;
+	void runScriptAfterEnter() const;
+	bool runScriptBeforeLeave() const;
+	void runScriptAfterLeave() const;
+
+	ADD_ACCESSOR(std::string, DescriptionRaw, m_descriptionRaw)
+	ADD_ACCESSOR(std::string, ScriptBeforeEnter, m_scriptBeforeEnter)
+	ADD_ACCESSOR(std::string, ScriptAfterEnter, m_scriptAfterEnter)
+	ADD_ACCESSOR(std::string, ScriptBeforeLeave, m_scriptBeforeLeave)
+	ADD_ACCESSOR(std::string, ScriptAfterLeave, m_scriptAfterLeave)
 	ADD_ACCESSOR(std::vector<RoomObject>, Objects, m_objects)
 	ADD_ACCESSOR(json, Paths, m_paths)
 
 private:
-	std::string m_description;
+	std::string m_descriptionRaw;
+	std::string m_scriptBeforeEnter;
+	std::string m_scriptAfterEnter;
+	std::string m_scriptBeforeLeave;
+	std::string m_scriptAfterLeave;
 	std::vector<RoomObject> m_objects;
 	json m_paths;
 

@@ -36,6 +36,10 @@ private slots:
 	void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 	void on_actionView_Edit_triggered();
 	void on_listWidget_currentRowChanged(int currentRow);
+	void on_checkBoxBeforeEnter_toggled(bool checked);
+	void on_checkBoxAfterEnter_toggled(bool checked);
+	void on_checkBoxBeforeLeave_toggled(bool checked);
+	void on_checkBoxAfterLeave_toggled(bool checked);
 
 private:
 	void onListViewChanged();

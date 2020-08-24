@@ -18,9 +18,14 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	m_idName = idName;
 	ui->setupUi(this);
 	ui->preview->setMode(NovelTea::StateEditorMode::Room);
-	load();
-
 	m_objectMenu->addAction(ui->actionView_Edit);
+
+	ui->scriptEditBeforeEnter->hide();
+	ui->scriptEditAfterEnter->hide();
+	ui->scriptEditBeforeLeave->hide();
+	ui->scriptEditAfterLeave->hide();
+
+	load();
 	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::onListViewChanged);
 }
 
@@ -71,9 +76,20 @@ void RoomWidget::updateRoom() const
 	savePathDirection(jpaths[6], ui->checkBoxSouth,     ui->selectSouth);
 	savePathDirection(jpaths[7], ui->checkBoxSoutheast, ui->selectSoutheast);
 
+#define SET_SCRIPT(name) \
+	if (ui->checkBox##name->isChecked()) \
+		m_room->setScript##name(ui->scriptEdit##name->toPlainText().toStdString()); \
+	else \
+		m_room->setScript##name("");
+
+	SET_SCRIPT(BeforeEnter);
+	SET_SCRIPT(AfterEnter);
+	SET_SCRIPT(BeforeLeave);
+	SET_SCRIPT(AfterLeave);
+
 	m_room->setPaths(jpaths);
 	m_room->setObjects(objects);
-	m_room->setDescription(ui->scriptEdit->toPlainText().toStdString());
+	m_room->setDescriptionRaw(ui->scriptEdit->toPlainText().toStdString());
 	m_room->setProperties(ui->propertyEditor->getValue());
 }
 
@@ -145,7 +161,16 @@ void RoomWidget::loadData()
 	}
 
 	ui->propertyEditor->setValue(m_room->getProperties());
-	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescription()));
+	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescriptionRaw()));
+
+	ui->scriptEditBeforeEnter->setPlainText(QString::fromStdString(m_room->getScriptBeforeEnter()));
+	ui->scriptEditAfterEnter->setPlainText(QString::fromStdString(m_room->getScriptAfterEnter()));
+	ui->scriptEditBeforeLeave->setPlainText(QString::fromStdString(m_room->getScriptBeforeLeave()));
+	ui->scriptEditAfterLeave->setPlainText(QString::fromStdString(m_room->getScriptAfterLeave()));
+	ui->checkBoxBeforeEnter->setChecked(!ui->scriptEditBeforeEnter->toPlainText().isEmpty());
+	ui->checkBoxAfterEnter->setChecked(!ui->scriptEditAfterEnter->toPlainText().isEmpty());
+	ui->checkBoxBeforeLeave->setChecked(!ui->scriptEditBeforeLeave->toPlainText().isEmpty());
+	ui->checkBoxAfterLeave->setChecked(!ui->scriptEditAfterLeave->toPlainText().isEmpty());
 
 	auto paths = m_room->getPaths();
 	loadPathDirection(paths[0], ui->checkBoxNorthwest, ui->selectNorthwest);
@@ -162,6 +187,15 @@ void RoomWidget::loadData()
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
 	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
+
+	MODIFIER(ui->checkBoxBeforeEnter, &QCheckBox::toggled);
+	MODIFIER(ui->scriptEditBeforeEnter, &ScriptEdit::textChanged);
+	MODIFIER(ui->checkBoxAfterEnter, &QCheckBox::toggled);
+	MODIFIER(ui->scriptEditAfterEnter, &ScriptEdit::textChanged);
+	MODIFIER(ui->checkBoxBeforeLeave, &QCheckBox::toggled);
+	MODIFIER(ui->scriptEditBeforeLeave, &ScriptEdit::textChanged);
+	MODIFIER(ui->checkBoxAfterLeave, &QCheckBox::toggled);
+	MODIFIER(ui->scriptEditAfterLeave, &ScriptEdit::textChanged);
 }
 
 void RoomWidget::on_actionAddObject_triggered()
@@ -228,4 +262,24 @@ void RoomWidget::on_actionView_Edit_triggered()
 void RoomWidget::on_listWidget_currentRowChanged(int currentRow)
 {
 	ui->actionRemoveObject->setEnabled(currentRow >= 0);
+}
+
+void RoomWidget::on_checkBoxBeforeEnter_toggled(bool checked)
+{
+	ui->scriptEditBeforeEnter->setVisible(checked);
+}
+
+void RoomWidget::on_checkBoxAfterEnter_toggled(bool checked)
+{
+	ui->scriptEditAfterEnter->setVisible(checked);
+}
+
+void RoomWidget::on_checkBoxBeforeLeave_toggled(bool checked)
+{
+	ui->scriptEditBeforeLeave->setVisible(checked);
+}
+
+void RoomWidget::on_checkBoxAfterLeave_toggled(bool checked)
+{
+	ui->scriptEditAfterLeave->setVisible(checked);
 }

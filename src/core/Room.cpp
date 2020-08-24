@@ -20,7 +20,7 @@ Room::~Room()
 
 size_t Room::jsonSize() const
 {
-	return 6;
+	return 10;
 }
 
 json Room::toJson() const
@@ -38,7 +38,11 @@ json Room::toJson() const
 		m_id,
 		m_parentId,
 		m_properties,
-		m_description,
+		m_descriptionRaw,
+		m_scriptBeforeEnter,
+		m_scriptAfterEnter,
+		m_scriptBeforeLeave,
+		m_scriptAfterLeave,
 		jobjects,
 		m_paths
 	);
@@ -50,9 +54,13 @@ void Room::loadJson(const json &j)
 	m_id = j[0].ToString();
 	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_description = j[3].ToString();
-	m_paths = j[5];
-	for (auto &jroomObject : j[4].ArrayRange())
+	m_descriptionRaw = j[3].ToString();
+	m_scriptBeforeEnter = j[4].ToString();
+	m_scriptAfterEnter = j[5].ToString();
+	m_scriptBeforeLeave = j[6].ToString();
+	m_scriptAfterLeave = j[7].ToString();
+	m_paths = j[9];
+	for (auto &jroomObject : j[8].ArrayRange())
 		m_objects.push_back({jroomObject[0].ToString(), jroomObject[1].ToBool()});
 
 	m_objectList->attach(id, m_id);
@@ -77,7 +85,7 @@ json Room::getProjectRoomObjects()
 		{
 			auto jroom = item.second;
 			auto jobjects = sj::Array();
-			for (auto &jroomObject : jroom[4].ArrayRange())
+			for (auto &jroomObject : jroom[8].ArrayRange())
 			{
 				bool placeInRoom = jroomObject[1].ToBool();
 				if (placeInRoom)
@@ -91,13 +99,48 @@ json Room::getProjectRoomObjects()
 
 void Room::setId(const std::string &idName)
 {
-	m_id = idName;
+	Entity::setId(idName);
 	m_objectList->attach(id, idName);
 }
 
 const std::shared_ptr<ObjectList> &Room::getObjectList() const
 {
 	return m_objectList;
+}
+
+std::string Room::getDescription() const
+{
+	try{
+		return ActiveGame->getScriptManager().runInClosure<std::string>(m_descriptionRaw);
+	} catch (std::exception &e) {
+
+	}
+}
+
+bool Room::runScriptBeforeEnter() const
+{
+	if (m_scriptBeforeEnter.empty())
+		return true;
+	return ActiveGame->getScriptManager().runInClosure<bool>(m_scriptBeforeEnter);
+}
+
+void Room::runScriptAfterEnter() const
+{
+	if (!m_scriptAfterEnter.empty())
+		ActiveGame->getScriptManager().runInClosure(m_scriptAfterEnter);
+}
+
+bool Room::runScriptBeforeLeave() const
+{
+	if (m_scriptBeforeLeave.empty())
+		return true;
+	return ActiveGame->getScriptManager().runInClosure<bool>(m_scriptBeforeLeave);
+}
+
+void Room::runScriptAfterLeave() const
+{
+	if (!m_scriptAfterLeave.empty())
+		ActiveGame->getScriptManager().runInClosure(m_scriptAfterLeave);
 }
 
 } // namespace NovelTea
