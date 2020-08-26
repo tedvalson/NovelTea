@@ -64,6 +64,8 @@ void DialogueWidget::saveData() const
 	{
 		m_treeModel->saveDialogue(m_dialogue);
 		m_dialogue->setProperties(ui->propertyEditor->getValue());
+		m_dialogue->setDefaultName(ui->lineEditDefaultName->text().toStdString());
+		m_dialogue->setNextEntity(ui->actionSelectWidget->getValue());
 		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
 	}
 }
@@ -82,6 +84,8 @@ void DialogueWidget::loadData()
 	m_treeModel->loadDialogue(m_dialogue);
 	ui->treeView->expandToDepth(0);
 	ui->propertyEditor->setValue(m_dialogue->getProperties());
+	ui->lineEditDefaultName->setText(QString::fromStdString(m_dialogue->getDefaultName()));
+	ui->actionSelectWidget->setValue(m_dialogue->getNextEntity());
 	fillItemSettings();
 
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
@@ -89,6 +93,8 @@ void DialogueWidget::loadData()
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsInserted);
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsRemoved);
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsMoved);
+	MODIFIER(ui->lineEditDefaultName, &QLineEdit::textChanged);
+	MODIFIER(ui->actionSelectWidget, &ActionSelectWidget::valueChanged);
 }
 
 void DialogueWidget::on_treeView_pressed(const QModelIndex &index)
@@ -174,6 +180,7 @@ void DialogueWidget::checkIndexChange()
 		auto type = m_selectedItem->getDialogueSegment()->getType();
 		auto segment = std::make_shared<DialogueSegment>();
 		segment->setType(type);
+		segment->setDialogue(m_dialogue.get());
 
 		if (ui->radioScript->isChecked())
 		{
@@ -218,11 +225,14 @@ void DialogueWidget::on_actionAddObject_triggered()
 		return;
 
 	auto newSegment = std::make_shared<DialogueSegment>();
-	if (type == DialogueSegment::Root || type == DialogueSegment::Player)
+	newSegment->setDialogue(m_dialogue.get());
+	if (type == DialogueSegment::Root || type == DialogueSegment::Option)
 	{
-		newSegment->setType(DialogueSegment::NPC);
+		newSegment->setType(DialogueSegment::Text);
+//		newSegment->setTextRaw("NPC");
 	} else {
-		newSegment->setType(DialogueSegment::Player);
+		newSegment->setType(DialogueSegment::Option);
+//		newSegment->setTextRaw("Player");
 	}
 
 	m_treeModel->insertSegment(0, index, newSegment);
@@ -265,4 +275,12 @@ void DialogueWidget::on_actionMoveDown_triggered()
 	auto index = ui->treeView->currentIndex();
 	auto row = index.row();
 	m_treeModel->moveRow(index.parent(), row, index.parent(), row+2);
+}
+
+void DialogueWidget::on_lineEditDefaultName_textChanged(const QString &arg1)
+{
+	m_dialogue->setDefaultName(arg1.toStdString());
+	// TODO: Better way to force update of visible items?
+	ui->treeView->hide();
+	ui->treeView->show();
 }

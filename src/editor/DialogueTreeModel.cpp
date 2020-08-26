@@ -237,7 +237,7 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 		if (segment->getScriptedText())
 		{
 			bool ok;
-			auto text = segment->getText(&ok, m_dialogueId);
+			auto text = segment->getText();
 			if (!ok)
 				return QIcon::fromTheme("dialog-error");
 		}

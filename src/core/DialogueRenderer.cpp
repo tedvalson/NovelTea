@@ -12,6 +12,7 @@ namespace NovelTea
 
 DialogueRenderer::DialogueRenderer()
 : m_callback(nullptr)
+, m_textLineIndex(-1)
 , m_size(400.f, 400.f)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
@@ -39,6 +40,17 @@ void DialogueRenderer::update(float delta)
 
 bool DialogueRenderer::processEvent(const sf::Event &event)
 {
+	if (event.type == sf::Event::MouseButtonPressed)
+	{
+		if (m_textLineIndex < m_textLines.size() - 1) {
+			changeLine(m_textLineIndex + 1);
+			return true;
+		}
+		if (m_buttons.empty()) {
+			changeSegment(m_nextForcedSegmentIndex);
+			return true;
+		}
+	}
 	for (auto &button : m_buttons)
 		button.processEvent(event);
 	return true;
@@ -46,6 +58,8 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 
 bool DialogueRenderer::processSelection(int buttonIndex)
 {
+	if (m_isComplete)
+		return false;
 	if (buttonIndex < 0 || buttonIndex >= m_buttons.size())
 		return false;
 	m_buttons[buttonIndex].click();
@@ -59,11 +73,16 @@ void DialogueRenderer::setDialogueCallback(DialogueCallback callback)
 
 void DialogueRenderer::changeSegment(int newSegmentIndex)
 {
+	if (newSegmentIndex < 0) {
+		m_isComplete = true;
+		return;
+	}
+
 	m_buttons.clear();
 	m_currentSegmentIndex = newSegmentIndex;
+	m_nextForcedSegmentIndex = -1;
 	std::shared_ptr<DialogueSegment> npcSegment = nullptr;
 	float posY;
-	auto middleY = m_size.y / 2.f - 100.f;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
 	startSegment->runScript();
 
@@ -71,12 +90,11 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 	for (auto childId : startSegment->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
-		if (!seg->conditionPasses(m_dialogue->getId()))
+		if (!seg->conditionPasses())
 			continue;
 
 		npcSegment = seg;
-		m_text.setText(npcSegment->getText(nullptr, m_dialogue->getId()));
-		m_text.setPosition(10.f, middleY - m_text.getCursorEnd().y - 60.f);
+		m_textLines = npcSegment->getTextMultiline();
 		break;
 	}
 	if (npcSegment)
@@ -87,15 +105,24 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 	}
 
 	// Get player options
-	posY = middleY;
+	posY = m_middleY;
 	int i = 0;
 	for (auto childId : npcSegment->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
-		if (!seg->conditionPasses(m_dialogue->getId()))
+		if (!seg->conditionPasses())
 			continue;
+		if (seg->getTextRaw().empty()) {
+			if (m_buttons.empty()) {
+				m_nextForcedSegmentIndex = childId;
+				if (npcSegment->getTextRaw().empty())
+					changeSegment(childId);
+				return;
+			} else
+				continue;
+		}
 		Button btn;
-		btn.setString(seg->getText(nullptr, m_dialogue->getId()));
+		btn.setString(seg->getText());
 		btn.setTexture(m_buttonTexture);
 		btn.setPosition(10.f, posY);
 		btn.setContentSize(m_size.x-30.f, 25.f);
@@ -112,6 +139,31 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		posY += btn.getSize().y + 2.f;
 		m_buttons.emplace_back(std::move(btn));
 	}
+
+	changeLine(0);
+}
+
+void DialogueRenderer::changeLine(int newLineIndex)
+{
+	if (newLineIndex + 1 > m_textLines.size())
+		return;
+	auto &line = m_textLines[newLineIndex];
+	m_textLineIndex = newLineIndex;
+	m_textOld = m_text;
+	m_text.setText(line.second);
+	m_text.setPosition(10.f, round(m_middleY - m_text.getCursorEnd().y - 60.f));
+	m_textName.setText(line.first);
+	m_textName.setPosition(5.f, m_text.getPosition().y - 40.f);
+
+	float duration = 1.5f;
+	m_text.setAlpha(0.f);
+	m_textOld.setAlpha(255.f);
+	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_text, ActiveText::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
 }
 
 bool DialogueRenderer::isComplete() const
@@ -122,6 +174,7 @@ bool DialogueRenderer::isComplete() const
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
+	m_middleY = m_size.y / 2.f - 100.f;
 }
 
 sf::Vector2f DialogueRenderer::getSize() const
@@ -135,6 +188,9 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 
 	target.draw(m_text, states);
 	target.draw(m_textOld, states);
+	target.draw(m_textName, states);
+	for (auto &button : m_buttonsOld)
+		target.draw(button, states);
 	for (auto &button : m_buttons)
 		target.draw(button, states);
 }

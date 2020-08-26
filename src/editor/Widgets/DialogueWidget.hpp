@@ -40,6 +40,7 @@ private slots:
 	void on_actionPasteAsLink_triggered();
 	void on_actionMoveUp_triggered();
 	void on_actionMoveDown_triggered();
+	void on_lineEditDefaultName_textChanged(const QString &arg1);
 
 private:
 	void fillItemSettings();

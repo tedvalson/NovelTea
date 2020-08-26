@@ -17,8 +17,8 @@ public:
 	enum Type {
 		Invalid   =-1,
 		Root      = 0,
-		NPC       = 1,
-		Player    = 2,
+		Text      = 1,
+		Option    = 2,
 		Link      = 3,
 	};
 
@@ -33,8 +33,11 @@ public:
 	void clearChildren();
 
 	void runScript();
-	bool conditionPasses(const std::string &dialogueId = std::string()) const;
-	std::string getText(bool *ok = nullptr, const std::string &dialogueId = std::string()) const;
+	bool conditionPasses() const;
+	std::string getText(bool *ok = nullptr) const;
+	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
+
+	void setDialogue(Dialogue *dialogue);
 
 	ADD_ACCESSOR(int, Id, m_id)
 	ADD_ACCESSOR(int, LinkId, m_linkId)
@@ -44,7 +47,7 @@ public:
 	ADD_ACCESSOR(bool, ScriptEnabled, m_scriptEnabled)
 	ADD_ACCESSOR(std::string, ConditionScript, m_conditionScript)
 	ADD_ACCESSOR(std::string, Script, m_script)
-	ADD_ACCESSOR(std::string, TextRaw, m_text)
+	ADD_ACCESSOR(std::string, TextRaw, m_textRaw)
 	ADD_ACCESSOR(std::vector<int>, ChildrenIds, m_childrenIds)
 
 private:
@@ -56,8 +59,9 @@ private:
 	bool m_scriptEnabled;
 	std::string m_conditionScript;
 	std::string m_script;
-	std::string m_text;
+	std::string m_textRaw;
 	std::vector<int> m_childrenIds;
+	Dialogue *m_dialogue;
 };
 
 } // namespace NovelTea

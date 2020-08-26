@@ -12,8 +12,9 @@ DialogueSegment::DialogueSegment()
 , m_conditionalEnabled(false)
 , m_scriptedText(false)
 , m_scriptEnabled(false)
+, m_dialogue(nullptr)
 {
-	m_text = "";
+
 }
 
 bool DialogueSegment::operator==(const DialogueSegment &segment) const
@@ -26,7 +27,7 @@ bool DialogueSegment::operator==(const DialogueSegment &segment) const
 			m_scriptEnabled == segment.m_scriptEnabled &&
 			m_conditionScript == segment.m_conditionScript &&
 			m_script == segment.m_script &&
-			m_text == segment.m_text;
+			m_textRaw == segment.m_textRaw;
 }
 
 void DialogueSegment::appendChild(int id)
@@ -50,14 +51,14 @@ void DialogueSegment::runScript()
 	}
 }
 
-bool DialogueSegment::conditionPasses(const std::string &dialogueId) const
+bool DialogueSegment::conditionPasses() const
 {
 	if (!m_conditionalEnabled || m_conditionScript.empty())
 		return true;
 	try {
 		auto script = m_conditionScript;
-		if (!dialogueId.empty())
-			script = "dialogue=Save.loadDialogue('"+dialogueId+"');\n" + m_conditionScript;
+		if (m_dialogue)
+			script = "dialogue=Save.loadDialogue('"+m_dialogue->getId()+"');\n" + m_conditionScript;
 		auto result = ActiveGame->getScriptManager().runInClosure<bool>(script);
 		return result;
 	} catch (std::exception &e) {
@@ -66,24 +67,75 @@ bool DialogueSegment::conditionPasses(const std::string &dialogueId) const
 	}
 }
 
-std::string DialogueSegment::getText(bool *ok, const std::string &dialogueId) const
+std::string DialogueSegment::getText(bool *ok) const
 {
 	try {
 		if (ok)
 			*ok = true;
 		if (m_scriptedText)
 		{
-			auto script = m_text;
-			if (!dialogueId.empty())
-				script = "dialogue=Save.loadDialogue('"+dialogueId+"');\n" + m_text;
+			auto script = m_textRaw;
+			if (m_dialogue)
+				script = "dialogue=Save.loadDialogue('"+m_dialogue->getId()+"');\n" + m_textRaw;
 			return ActiveGame->getScriptManager().runInClosure<std::string>(script);
 		} else
-			return m_text;
+			return m_textRaw;
 	} catch (std::exception &e) {
 		if (ok)
 			*ok = false;
 		return e.what();
 	}
+}
+
+std::pair<std::string,std::string> getLinePair(const std::string &line, const std::string &defaultName)
+{
+	auto result = std::make_pair(defaultName, line);
+	if (line[0] != '[')
+		return result;
+
+	auto p = line.find(']');
+	if (p == line.npos)
+		return result;
+
+	result.first = line.substr(1, p - 1);
+	result.second = line.substr(p + 1);
+	if (!result.second.empty() && result.second[0] == ' ')
+		result.second = result.second.substr(1);
+	return result;
+}
+
+std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultiline(bool *ok) const
+{
+	std::vector<std::pair<std::string,std::string>> result;
+	auto text = getText(ok);
+	auto defaultName = m_dialogue ? m_dialogue->getDefaultName() : "";
+	if (ok && !*ok) {
+		result.push_back(getLinePair(text, defaultName));
+		return result;
+	}
+
+	auto lines = split(text);
+	std::string buffer;
+	for (auto &line : lines)
+	{
+		if (line.empty()) {
+			result.push_back(getLinePair(buffer, defaultName));
+			buffer.clear();
+		}
+		else if (buffer.empty())
+			buffer += line;
+		else
+			buffer += "\n" + line;
+	}
+	if (!buffer.empty())
+		result.push_back(getLinePair(buffer, defaultName));
+
+	return result;
+}
+
+void DialogueSegment::setDialogue(Dialogue *dialogue)
+{
+	m_dialogue = dialogue;
 }
 
 json DialogueSegment::toJson() const
@@ -100,7 +152,7 @@ json DialogueSegment::toJson() const
 		m_scriptEnabled,
 		m_conditionScript,
 		m_script,
-		m_text,
+		m_textRaw,
 		jchildrenIds
 	);
 	return j;
@@ -118,7 +170,7 @@ bool DialogueSegment::fromJson(const json &j)
 	m_scriptEnabled = j[4].ToBool();
 	m_conditionScript = j[5].ToString();
 	m_script = j[6].ToString();
-	m_text = j[7].ToString();
+	m_textRaw = j[7].ToString();
 	m_childrenIds.clear();
 	for (auto &jchildId : j[8].ArrayRange())
 		m_childrenIds.push_back(jchildId.ToInt());

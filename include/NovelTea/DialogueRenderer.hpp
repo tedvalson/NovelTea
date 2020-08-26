@@ -33,6 +33,7 @@ public:
 	void setDialogueCallback(DialogueCallback callback);
 
 	void changeSegment(int newSegmentIndex);
+	void changeLine(int newLineIndex);
 
 	bool isComplete() const;
 
@@ -46,13 +47,19 @@ private:
 	std::shared_ptr<Dialogue> m_dialogue;
 	DialogueCallback m_callback;
 	int m_currentSegmentIndex;
+	int m_nextForcedSegmentIndex;
 	bool m_isComplete;
 
+	int m_textLineIndex;
+	std::vector<std::pair<std::string,std::string>> m_textLines;
+
 	std::vector<Button> m_buttons;
+	ActiveText m_textName;
 	ActiveText m_text;
 	ActiveText m_textOld;
 	sf::Vector2f m_size;
 	sf::Texture *m_buttonTexture;
+	float m_middleY;
 
 	TweenEngine::TweenManager m_tweenManager;
 };

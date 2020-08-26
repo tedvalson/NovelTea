@@ -15,7 +15,7 @@ Dialogue::Dialogue()
 
 size_t Dialogue::jsonSize() const
 {
-	return 6;
+	return 7;
 }
 
 json Dialogue::toJson() const
@@ -28,6 +28,7 @@ json Dialogue::toJson() const
 		m_id,
 		m_parentId,
 		m_properties,
+		m_defaultName,
 		m_nextEntity,
 		m_rootIndex,
 		jsegments
@@ -40,13 +41,15 @@ void Dialogue::loadJson(const json &j)
 	m_id = j[0].ToString();
 	m_parentId = j[1].ToString();
 	m_properties = j[2];
-	m_nextEntity = j[3];
-	m_rootIndex = j[4].ToInt();
+	m_defaultName = j[3].ToString();
+	m_nextEntity = j[4];
+	m_rootIndex = j[5].ToInt();
 	m_segments.clear();
-	for (auto &jsegment : j[5].ArrayRange())
+	for (auto &jsegment : j[6].ArrayRange())
 	{
 		auto segment = std::make_shared<DialogueSegment>();
 		segment->fromJson(jsegment);
+		segment->setDialogue(this);
 		m_segments.push_back(segment);
 	}
 }

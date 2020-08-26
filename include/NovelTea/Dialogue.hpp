@@ -25,11 +25,13 @@ public:
 	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(int, RootIndex, m_rootIndex)
+	ADD_ACCESSOR(std::string, DefaultName, m_defaultName)
 	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
 
 private:
 	int m_rootIndex;
 	std::vector<std::shared_ptr<DialogueSegment>> m_segments;
+	std::string m_defaultName;
 	json m_nextEntity;
 };
 
