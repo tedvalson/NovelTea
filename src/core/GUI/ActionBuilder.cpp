@@ -46,10 +46,13 @@ bool ActionBuilder::processEvent(const sf::Event &event)
 
 void ActionBuilder::show(float duration, int tweenType, HideableCallback callback)
 {
+	if (m_isShowing || isVisible())
+		return;
+
+	Hideable::show(duration, tweenType, callback);
 	TweenEngine::Tween::from(*this, POSITION_Y, duration)
 		.target(getPosition().y + 30.f)
 		.start(m_tweenManager);
-	Hideable::show(duration, tweenType, callback);
 }
 
 void ActionBuilder::hide(float duration, int tweenType, HideableCallback callback)

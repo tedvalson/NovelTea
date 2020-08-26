@@ -18,10 +18,12 @@ void Hideable::update(float delta)
 
 void Hideable::show(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isShowing)
+	if (!m_isShowing && !m_visible)
 	{
-		m_visible = true;
 		m_isShowing = true;
+		m_isHiding = false;
+		m_visible = true;
+		m_tweenManager.killAll();
 		TweenEngine::Tween::to(*this, tweenType, duration)
 			.target(255.f)
 			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this, callback](TweenEngine::BaseTween*){
@@ -34,9 +36,11 @@ void Hideable::show(float duration, int tweenType, HideableCallback callback)
 
 void Hideable::hide(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isHiding)
+	if (!m_isHiding && m_visible)
 	{
 		m_isHiding = true;
+		m_isShowing = false;
+		m_tweenManager.killAll();
 		TweenEngine::Tween::to(*this, tweenType, duration)
 			.target(0.f)
 			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this, callback](TweenEngine::BaseTween*){
@@ -63,9 +67,6 @@ void Hideable::setValues(int tweenType, float *newValues)
 	switch (tweenType) {
 		case ALPHA: {
 			setAlpha(newValues[0]);
-//			sf::Color color;
-//			m_alpha = newValues[0];
-//			SET_ALPHA(m_buttons[i]->getFillColor, m_buttons[i]->setFillColor, alphaMax);
 			break;
 		}
 		default:
