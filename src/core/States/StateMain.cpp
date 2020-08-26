@@ -31,6 +31,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, 0.f));
 	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
 
+	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
 	m_navigation.setScale(1.5f, 1.5f);
 	m_navigation.setPosition(20.f, -20.f + height - m_navigation.getGlobalBounds().height);
@@ -48,6 +49,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			GGame.pushNextEntityJson(jentity);
 	});
 
+	// VerbList setup
 	m_verbList.setSelectCallback([this](const std::string &verbId){
 		m_actionBuilder.setVerb(verbId);
 		m_actionBuilder.setObject(m_selectedObjectId, 0);
@@ -62,6 +64,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		}
 	});
 
+	// ActionBuilder setup
 	m_actionBuilder.setPosition(10.f, -10.f + height - m_navigation.getGlobalBounds().height - 120.f);
 	m_actionBuilder.setSize(sf::Vector2f(width - 20.f, 200.f));
 	m_actionBuilder.setCallback([this](bool confirmed){
@@ -72,8 +75,10 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		m_actionBuilder.hide();
 	});
 
+	// Notification setup
 	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y - 4.f));
 
+	// TextOverlay setup
 	m_textOverlay.setAlpha(0.f);
 	m_textOverlay.setSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
 	GGame.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
@@ -94,21 +99,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	else if (!projEntryPoint.IsEmpty())
 		setMode(projEntryPoint);
 
-	if (getContext().data.hasKey("testSteps"))
-	{
-		m_testPlaybackMode = true;
-		m_testRecordMode = getContext().data["record"].ToBool();
-		if (m_testRecordMode)
-			m_dialogueRenderer.setDialogueCallback([this](int index){
-				json jtestItem({
-					"type", "dialogue",
-					"index", index
-				});
-				if (!m_testPlaybackMode)
-					runCallback(&jtestItem);
-			});
-		processTestSteps();
-	}
+	processTestSteps();
 }
 
 void StateMain::render(sf::RenderTarget &target)
@@ -165,13 +156,16 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	}
 	else if (mode == Mode::Room)
 	{
-		GGame.getRoom()->runScriptAfterLeave();
-		GGame.setRoomId(idName);
-		updateRoomText();
-
 		auto room = GGame.getRoom();
-		room->runScriptAfterEnter();
-		m_navigation.setPaths(room->getPaths());
+		if (room->getId() != idName)
+		{
+			room->runScriptAfterLeave();
+			GGame.setRoomId(idName);
+			room = GGame.getRoom();
+			room->runScriptAfterEnter();
+			m_navigation.setPaths(room->getPaths());
+		}
+		updateRoomText();
 		m_navigation.show(1.f);
 	}
 
@@ -200,6 +194,21 @@ void StateMain::setMode(const json &jEntity)
 
 void StateMain::processTestSteps()
 {
+	if (!getContext().data.hasKey("testSteps"))
+		return;
+
+	m_testPlaybackMode = true;
+	m_testRecordMode = getContext().data["record"].ToBool();
+	if (m_testRecordMode)
+		m_dialogueRenderer.setDialogueCallback([this](int index){
+			json jtestItem({
+				"type", "dialogue",
+				"index", index
+			});
+			if (!m_testPlaybackMode)
+				runCallback(&jtestItem);
+		});
+
 	auto success = true;
 	auto jsteps = getContext().data["testSteps"];
 	for (int i = 0; i < jsteps.size(); ++i)
