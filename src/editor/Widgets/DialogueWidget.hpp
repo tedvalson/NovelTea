@@ -35,6 +35,7 @@ private slots:
 	void on_plainTextEdit_textChanged();
 	void on_checkBoxConditional_toggled(bool checked);
 	void on_checkBoxScript_toggled(bool checked);
+	void on_actionCut_triggered();
 	void on_actionCopy_triggered();
 	void on_actionPaste_triggered();
 	void on_actionPasteAsLink_triggered();
@@ -53,6 +54,7 @@ private:
 	DialogueTreeModel *m_treeModel;
 	QMenu *m_menuTreeView;
 
+	QModelIndex m_cutIndex;
 	QModelIndex m_copyIndex;
 
 	DialogueTreeItem *m_selectedItem;

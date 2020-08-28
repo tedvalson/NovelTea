@@ -26,6 +26,7 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	m_menuTreeView->addAction(ui->actionMoveUp);
 	m_menuTreeView->addAction(ui->actionMoveDown);
 	m_menuTreeView->addSeparator();
+	m_menuTreeView->addAction(ui->actionCut);
 	m_menuTreeView->addAction(ui->actionCopy);
 	m_menuTreeView->addAction(ui->actionPaste);
 	m_menuTreeView->addAction(ui->actionPasteAsLink);
@@ -105,6 +106,7 @@ void DialogueWidget::on_treeView_pressed(const QModelIndex &index)
 
 	auto row = index.row();
 	auto type = m_selectedItem ? m_selectedItem->getDialogueSegment()->getType() : DialogueSegment::Root;
+	auto cutting = m_cutIndex.isValid();
 	auto copying = m_copyIndex.isValid();
 	auto isLink = type == DialogueSegment::Link;
 
@@ -112,8 +114,9 @@ void DialogueWidget::on_treeView_pressed(const QModelIndex &index)
 	ui->actionDelete->setEnabled(type != DialogueSegment::Root);
 	ui->actionMoveUp->setEnabled(row > 0);
 	ui->actionMoveDown->setEnabled(index.sibling(row+1, 0).isValid());
+//	ui->actionCut->setChecked(!isLink);
 	ui->actionCopy->setChecked(!isLink);
-	ui->actionPaste->setEnabled(!isLink && copying);
+	ui->actionPaste->setEnabled(!isLink && (copying || cutting));
 	ui->actionPasteAsLink->setEnabled(!isLink && copying);
 
 	m_menuTreeView->popup(QCursor::pos());
@@ -219,6 +222,7 @@ void DialogueWidget::on_actionAddObject_triggered()
 {
 	auto index = ui->treeView->currentIndex();
 	auto type = m_selectedItem ? m_selectedItem->getDialogueSegment()->getType() : DialogueSegment::Root;
+	m_cutIndex = QModelIndex();
 	m_copyIndex = QModelIndex();
 
 	if (type == DialogueSegment::Link)
@@ -242,18 +246,32 @@ void DialogueWidget::on_actionAddObject_triggered()
 void DialogueWidget::on_actionDelete_triggered()
 {
 	auto selectedIndex = ui->treeView->currentIndex();
+	m_cutIndex = QModelIndex();
 	m_copyIndex = QModelIndex();
 	m_treeModel->removeRow(selectedIndex.row(), selectedIndex.parent());
+}
+
+void DialogueWidget::on_actionCut_triggered()
+{
+	m_cutIndex = ui->treeView->currentIndex();
+	m_copyIndex = QModelIndex();
 }
 
 void DialogueWidget::on_actionCopy_triggered()
 {
 	m_copyIndex = ui->treeView->currentIndex();
+	m_cutIndex = QModelIndex();
 }
 
 void DialogueWidget::on_actionPaste_triggered()
 {
-
+	auto index = ui->treeView->currentIndex();
+	if (m_copyIndex.isValid())
+		m_treeModel->copy(m_copyIndex, index);
+	else if (m_cutIndex.isValid())
+		m_treeModel->moveRow(m_cutIndex.parent(), m_cutIndex.row(), index, 0);
+	m_copyIndex = QModelIndex();
+	m_cutIndex = QModelIndex();
 }
 
 void DialogueWidget::on_actionPasteAsLink_triggered()
@@ -261,6 +279,7 @@ void DialogueWidget::on_actionPasteAsLink_triggered()
 	auto index = ui->treeView->currentIndex();
 	m_treeModel->insertSegmentLink(m_copyIndex, index);
 	m_copyIndex = QModelIndex();
+	m_cutIndex = QModelIndex();
 }
 
 void DialogueWidget::on_actionMoveUp_triggered()

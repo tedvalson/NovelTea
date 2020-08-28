@@ -46,7 +46,7 @@ QVariant DialogueTreeItem::data(int column) const
 			return "ROOT";
 		else if (segment->getTextRaw().empty())
 			return "[SKIP]";
-		else if (segment->getType() == NovelTea::DialogueSegment::Player)
+		else if (segment->getType() == NovelTea::DialogueSegment::Option)
 			return QString::fromStdString(segment->getText());
 		else
 		{
@@ -111,6 +111,20 @@ void DialogueTreeItem::setDialogueSegment(const std::shared_ptr<NovelTea::Dialog
 const std::shared_ptr<NovelTea::DialogueSegment> &DialogueTreeItem::getDialogueSegment() const
 {
 	return m_segment;
+}
+
+DialogueTreeItem *DialogueTreeItem::makeCopy(DialogueTreeItem *parentItem)
+{
+	auto segment = std::make_shared<NovelTea::DialogueSegment>();
+	*segment = *m_segment;
+	auto result = new DialogueTreeItem(m_dialogueId, segment, parentItem);
+	result->m_linkItem = m_linkItem;
+	for (auto &child : m_childItems)
+	{
+		auto childCopy = child->makeCopy(result);
+		result->appendChild(childCopy);
+	}
+	return result;
 }
 
 bool DialogueTreeItem::insertChildren(int position, int count, int columns)

@@ -146,6 +146,20 @@ bool DialogueTreeModel::changeParent(const QModelIndex &child, const QModelIndex
 	return false;
 }
 
+bool DialogueTreeModel::copy(const QModelIndex &source, const QModelIndex &destParent)
+{
+	auto parentItem = getItem(destParent);
+	auto sourceItem = getItem(source);
+	bool success;
+
+	beginInsertRows(destParent, 0, 0);
+	auto itemCopy = sourceItem->makeCopy(parentItem);
+	success = parentItem->insertItem(0, itemCopy);
+	endInsertRows();
+
+	return success;
+}
+
 bool DialogueTreeModel::insertSegmentLink(const QModelIndex &source, const QModelIndex &destParent)
 {
 	auto parentItem = getItem(destParent);
@@ -217,9 +231,9 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 	else if (role == Qt::ForegroundRole)
 	{
 		QBrush brush;
-		if (type == NovelTea::DialogueSegment::Player)
+		if (type == NovelTea::DialogueSegment::Option)
 			brush.setColor(Qt::blue);
-		else if (type == NovelTea::DialogueSegment::NPC)
+		else if (type == NovelTea::DialogueSegment::Text)
 			brush.setColor(Qt::red);
 		else if (type == NovelTea::DialogueSegment::Link)
 			brush.setColor(Qt::gray);
@@ -237,7 +251,7 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 		if (segment->getScriptedText())
 		{
 			bool ok;
-			auto text = segment->getText();
+			auto text = segment->getText(&ok);
 			if (!ok)
 				return QIcon::fromTheme("dialog-error");
 		}

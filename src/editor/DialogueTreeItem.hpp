@@ -27,6 +27,8 @@ public:
 	void setDialogueSegment(const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 	const std::shared_ptr<NovelTea::DialogueSegment> &getDialogueSegment() const;
 
+	DialogueTreeItem *makeCopy(DialogueTreeItem *parentItem = 0);
+
 	bool insertChildren(int position, int count, int columns);
 	bool removeChildren(int position, int count);
 	bool insertSegment(int position, int count, const std::shared_ptr<NovelTea::DialogueSegment> &segment);

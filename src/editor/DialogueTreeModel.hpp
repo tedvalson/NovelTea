@@ -39,6 +39,7 @@ public:
 	void loadDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue);
 	bool changeParent(const QModelIndex &child, const QModelIndex &newParent);
 
+	bool copy(const QModelIndex &source, const QModelIndex &destParent);
 	bool insertSegmentLink(const QModelIndex &source, const QModelIndex &destParent);
 	bool insertSegment(int row, const QModelIndex &parent, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 	bool updateSegment(const QModelIndex &index, const std::shared_ptr<NovelTea::DialogueSegment> &segment);

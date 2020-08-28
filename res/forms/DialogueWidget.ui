@@ -402,6 +402,14 @@
     <string>Move Up</string>
    </property>
   </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset theme="edit-cut"/>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
