@@ -13,8 +13,8 @@ VerbWidget::VerbWidget(const std::string &idName, QWidget *parent)
 	load();
 
 	MODIFIER(ui->lineEditName, &QLineEdit::textChanged);
-	MODIFIER(ui->scriptEditSuccess, &ScriptEdit::textChanged);
-	MODIFIER(ui->scriptEditFailure, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptEditDefault, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptEditConditional, &ScriptEdit::textChanged);
 	MODIFIER(ui->horizontalSlider, &QSlider::valueChanged);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
@@ -42,8 +42,8 @@ void VerbWidget::saveData() const
 		for (auto lineEdit : m_lineEdits)
 			actionStructure.push_back(lineEdit->text().toStdString());
 		m_verb->setName(ui->lineEditName->text().toStdString());
-		m_verb->setDefaultScriptSuccess(ui->scriptEditSuccess->toPlainText().toStdString());
-		m_verb->setDefaultScriptFailure(ui->scriptEditFailure->toPlainText().toStdString());
+		m_verb->setScriptDefault(ui->scriptEditDefault->toPlainText().toStdString());
+		m_verb->setScriptConditional(ui->scriptEditConditional->toPlainText().toStdString());
 		m_verb->setActionStructure(actionStructure);
 		m_verb->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Verb>(m_verb, idName());
@@ -64,8 +64,8 @@ void VerbWidget::loadData()
 	}
 
 	ui->lineEditName->setText(QString::fromStdString(m_verb->getName()));
-	ui->scriptEditSuccess->setPlainText(QString::fromStdString(m_verb->getDefaultScriptSuccess()));
-	ui->scriptEditFailure->setPlainText(QString::fromStdString(m_verb->getDefaultScriptFailure()));
+	ui->scriptEditDefault->setPlainText(QString::fromStdString(m_verb->getScriptDefault()));
+	ui->scriptEditConditional->setPlainText(QString::fromStdString(m_verb->getScriptConditional()));
 	ui->horizontalSlider->setValue(m_verb->getObjectCount());
 	ui->propertyEditor->setValue(m_verb->getProperties());
 	loadActionStructure();

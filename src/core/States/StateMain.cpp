@@ -282,15 +282,11 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 
 	if (action)
 	{
-		auto object = GSave.get<Object>(objectIds[0]);
-		auto s = "function f(object1,object2,object3,object4){"+action->getScript()+"}";
-		ScriptMan.call(s, "f", object);
+		ScriptMan.runActionScript(objectIds, action->getScript());
 	}
-	else if (!verb->getDefaultScriptSuccess().empty())
+	else if (!verb->getScriptDefault().empty())
 	{
-		auto object = GSave.get<Object>(objectIds[0]);
-		auto s = "function f(object1,object2,object3,object4){"+verb->getDefaultScriptSuccess()+"}";
-		ScriptMan.call(s, "f", object);
+		ScriptMan.runActionScript(objectIds, verb->getScriptDefault());
 	}
 	else
 	{

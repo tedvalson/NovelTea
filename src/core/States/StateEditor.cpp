@@ -49,11 +49,15 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 		{
 			auto action = m_actionBuilder.getAction();
 			auto verb = GSave.get<Verb>(m_actionBuilder.getVerb());
+			std::vector<std::string> objectIds;
+			objectIds.push_back(m_selectedObjectId);
 			if (action)
 			{
+				ScriptMan.runActionScript(objectIds, action->getScript());
 			}
-			else if (!verb->getDefaultScriptSuccess().empty())
+			else if (!verb->getScriptDefault().empty())
 			{
+				ScriptMan.runActionScript(objectIds, verb->getScriptDefault());
 			}
 		}
 		m_actionBuilder.hide();

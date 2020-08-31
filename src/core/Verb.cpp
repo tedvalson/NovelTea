@@ -28,8 +28,8 @@ json Verb::toJson() const
 		m_properties,
 		m_name,
 		m_objectCount,
-		m_defaultScriptSuccess,
-		m_defaultScriptFailure,
+		m_scriptDefault,
+		m_scriptConditional,
 		jactionStruct
 	);
 	return j;
@@ -42,12 +42,24 @@ void Verb::loadJson(const json &j)
 	m_properties = j[2];
 	m_name = j[3].ToString();
 	m_objectCount = j[4].ToInt();
-	m_defaultScriptSuccess = j[5].ToString();
-	m_defaultScriptFailure = j[6].ToString();
+	m_scriptDefault = j[5].ToString();
+	m_scriptConditional = j[6].ToString();
 
 	m_actionStructure.clear();
 	for (auto &jpart : j[7].ArrayRange())
 		m_actionStructure.push_back(jpart.ToString());
+}
+
+bool Verb::checkConditionScript(const std::string &objectId)
+{
+	if (m_scriptConditional.empty())
+		return true;
+	try {
+		auto script = "object=Save.loadObject('"+objectId+"');\n" + m_scriptConditional;
+		return ActiveGame->getScriptManager().runInClosure<bool>(script);
+	} catch (std::exception &e) {
+		return false;
+	}
 }
 
 std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr) const

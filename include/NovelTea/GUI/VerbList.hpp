@@ -31,7 +31,7 @@ public:
 	void setAlpha(float alpha) override;
 	float getAlpha() const override;
 
-	void setVerbs(const std::vector<std::string> &verbs);
+	void setVerbs(const std::vector<std::string> &verbIds);
 	void setVerbs(const std::string &objectId);
 
 	void setSelectCallback(VerbSelectCallback callback);

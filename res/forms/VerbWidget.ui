@@ -118,24 +118,24 @@
         <layout class="QHBoxLayout" name="layoutActionStructure"/>
        </item>
        <item>
-        <widget class="QLabel" name="labelDefaultSuccessScript">
+        <widget class="QLabel" name="labelDefaultScript">
          <property name="text">
-          <string>Default Success Script</string>
+          <string>Default Script</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="ScriptEdit" name="scriptEditSuccess"/>
+        <widget class="ScriptEdit" name="scriptEditDefault"/>
        </item>
        <item>
-        <widget class="QLabel" name="labelDefaultFailureScript">
+        <widget class="QLabel" name="labelConditionScript">
          <property name="text">
-          <string>Default Failure Script</string>
+          <string>Condition Script</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="ScriptEdit" name="scriptEditFailure"/>
+        <widget class="ScriptEdit" name="scriptEditConditional"/>
        </item>
       </layout>
      </widget>

@@ -20,21 +20,23 @@ public:
 	static constexpr auto id = "verb";
 	const std::string entityId() const override {return id;}
 
+	bool checkConditionScript(const std::string &objectId);
+
 	std::string getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr = "____") const;
 	std::string getActionText(std::vector<std::string> objectIds, std::string blankStr = "____") const;
 
 	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(int, ObjectCount, m_objectCount)
 	ADD_ACCESSOR(std::vector<std::string>, ActionStructure, m_actionStructure)
-	ADD_ACCESSOR(std::string, DefaultScriptSuccess, m_defaultScriptSuccess)
-	ADD_ACCESSOR(std::string, DefaultScriptFailure, m_defaultScriptFailure)
+	ADD_ACCESSOR(std::string, ScriptDefault, m_scriptDefault)
+	ADD_ACCESSOR(std::string, ScriptConditional, m_scriptConditional)
 
 private:
 	std::string m_name;
 	int m_objectCount;
 	std::vector<std::string> m_actionStructure;
-	std::string m_defaultScriptSuccess;
-	std::string m_defaultScriptFailure;
+	std::string m_scriptDefault;
+	std::string m_scriptConditional;
 };
 
 } // namespace NovelTea

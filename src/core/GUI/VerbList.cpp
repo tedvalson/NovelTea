@@ -98,18 +98,12 @@ float VerbList::getAlpha() const
 	return m_bg.getFillColor().a / 230.f * 255.f;
 }
 
-void VerbList::setVerbs(const std::vector<std::string> &verbs)
+void VerbList::setVerbs(const std::vector<std::string> &verbIds)
 {
 	m_verbs.clear();
 
-	for (auto &item : GSave.data()[Verb::id].ObjectRange())
-		addVerbOption(item.first);
-	for (auto &item : ProjData[Verb::id].ObjectRange())
-	{
-		auto verbId = item.first;
-		if (!GSave.data()[Verb::id].hasKey(verbId))
-			addVerbOption(verbId);
-	}
+	for (auto &verbId : verbIds)
+		addVerbOption(verbId);
 
 	float maxWidth = 0.f;
 	float posY = m_margin + 42.f * m_verbs.size();
@@ -128,8 +122,27 @@ void VerbList::setVerbs(const std::vector<std::string> &verbs)
 
 void VerbList::setVerbs(const std::string &objectId)
 {
-	std::vector<std::string> v;
-	setVerbs(v);
+	std::vector<std::string> verbIds;
+
+	for (auto &item : GSave.data()[Verb::id].ObjectRange())
+		verbIds.push_back(item.first);
+	for (auto &item : ProjData[Verb::id].ObjectRange())
+	{
+		auto verbId = item.first;
+		if (!GSave.data()[Verb::id].hasKey(verbId))
+			verbIds.push_back(verbId);
+	}
+
+	for (auto it = verbIds.begin(); it != verbIds.end();)
+	{
+		auto verb = GSave.get<Verb>(*it);
+		if (!verb->checkConditionScript(objectId))
+			verbIds.erase(it);
+		else
+			++it;
+	}
+
+	setVerbs(verbIds);
 }
 
 void VerbList::setSelectCallback(VerbSelectCallback callback)
