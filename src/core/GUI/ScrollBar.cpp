@@ -75,15 +75,14 @@ bool ScrollBar::processEvent(const sf::Event &event)
 		if (m_isTouching)
 		{
 			m_clockHide.restart();
-
-			if (!m_isScrolling && std::abs(m_startTouchPos.y - event.touch.y) > m_scrollTolerance)
+			if (!m_isScrolling && std::abs(m_startTouchPos.y - event.mouseButton.y) > m_scrollTolerance)
 				m_isScrolling = true;
 
-			float posDiff = m_lastTouchPos.y - event.touch.y;
+			float posDiff = m_lastTouchPos.y - event.mouseButton.y;
 			if (m_isScrolling)
 				setScrollRelative(-posDiff);
-			m_lastTouchPos.x = event.touch.x;
-			m_lastTouchPos.y = event.touch.y;
+			m_lastTouchPos.x = event.mouseButton.x;
+			m_lastTouchPos.y = event.mouseButton.y;
 
 			sf::Time timeDiff = m_clockVelocity.restart();
 			float v = m_veloctyModifer * -posDiff / (1 + timeDiff.asMilliseconds());
@@ -97,11 +96,11 @@ bool ScrollBar::processEvent(const sf::Event &event)
 	}
 	else if (event.type == sf::Event::MouseButtonPressed)
 	{
-		if (!m_isTouching && (m_dragRect == sf::FloatRect() || m_dragRect.contains(event.touch.x, event.touch.y)))
+		if (!m_isTouching && (m_dragRect == sf::FloatRect() || m_dragRect.contains(event.mouseButton.x, event.mouseButton.y)))
 		{
 			m_isTouching = true;
 			m_isScrolling = false;
-			m_startTouchPos = sf::Vector2i(event.touch.x, event.touch.y);
+			m_startTouchPos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
 			m_lastTouchPos = m_startTouchPos;
 			m_clockVelocity.restart();
 			m_velocity = 0.f;
@@ -293,10 +292,14 @@ bool ScrollBar::getAutoHide() const
 void ScrollBar::setScroll(float scrollPos)
 {
 	ensureUpdateScrollBar();
-	if (scrollPos > m_scrollPosMax)
+	// Reset velocity to end scrolling when limits met
+	if (scrollPos > m_scrollPosMax) {
 		scrollPos = m_scrollPosMax;
-	else if (scrollPos < m_scrollPosMin)
+		m_velocity = 0.f;
+	} else if (scrollPos < m_scrollPosMin) {
 		scrollPos = m_scrollPosMin;
+		m_velocity = 0.f;
+	}
 
 	m_scrollPos = scrollPos;
 	if (m_autoHide && m_scrollPosMin != m_scrollPosMax)

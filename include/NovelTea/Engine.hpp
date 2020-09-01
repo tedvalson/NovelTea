@@ -16,6 +16,7 @@ struct EngineConfig
 	size_t width = 1024;
 	size_t height = 720;
 	unsigned short fps = 30;
+	sf::Color backgroundColor = sf::Color(200.f, 200.f, 200.f);
 	StateID initialState;
 };
 

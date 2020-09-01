@@ -111,11 +111,15 @@ void Engine::processEvent(const sf::Event &event)
 		pos.y = e.touch.y;
 	}
 	else if (e.type == sf::Event::MouseButtonPressed ||
-			e.type == sf::Event::MouseButtonReleased ||
-			e.type == sf::Event::MouseMoved)
+			e.type == sf::Event::MouseButtonReleased)
 	{
 		pos.x = e.mouseButton.x;
 		pos.y = e.mouseButton.y;
+	}
+	else if (e.type == sf::Event::MouseMoved)
+	{
+		pos.x = e.mouseMove.x;
+		pos.y = e.mouseMove.y;
 	}
 
 	if (e.type == sf::Event::TouchBegan)
@@ -164,7 +168,7 @@ void Engine::initialize()
 	m_view.reset(sf::FloatRect(0, 0, m_config.width, m_config.height));
 
 	m_bg.setSize(sf::Vector2f(m_config.width, m_config.height));
-	m_bg.setFillColor(sf::Color::White);
+	m_bg.setFillColor(m_config.backgroundColor);
 
 	resize(m_config.width, m_config.height);
 
