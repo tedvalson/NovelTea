@@ -18,4 +18,32 @@ std::vector<std::string> split(const std::string &text, const std::string &delim
 	return result;
 }
 
+bool wrapText(sf::Text &text, float width)
+{
+	if (text.getLocalBounds().width <= width)
+		return false;
+
+	auto s = text.getString().toAnsiString();
+	auto words = split(s, " ");
+	auto processedWidth = 0.f;
+	int pos = 0;
+	std::string out;
+	for (auto &word : words)
+	{
+		auto p = text.findCharacterPos(pos + word.size());
+		if (p.x - processedWidth > width)
+		{
+			out += "\n" + word + " ";
+			pos += word.size() + 1;
+			processedWidth += p.x - processedWidth;
+		} else {
+			out += word + " ";
+			pos += word.size() + 1;
+		}
+	}
+
+	text.setString(out);
+	return true;
+}
+
 } // namespace NovelTea

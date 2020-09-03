@@ -51,8 +51,10 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 			return true;
 		}
 	}
+	// Need to break loop since button click could change m_buttons
 	for (auto &button : m_buttons)
-		button.processEvent(event);
+		if (button->getAlpha() == 255.f && !button->processEvent(event))
+			break;
 	return true;
 }
 
@@ -62,7 +64,7 @@ bool DialogueRenderer::processSelection(int buttonIndex)
 		return false;
 	if (buttonIndex < 0 || buttonIndex >= m_buttons.size())
 		return false;
-	m_buttons[buttonIndex].click();
+	m_buttons[buttonIndex]->click();
 	return true;
 }
 
@@ -78,11 +80,11 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		return;
 	}
 
+	m_buttonsOld = m_buttons;
 	m_buttons.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
 	std::shared_ptr<DialogueSegment> npcSegment = nullptr;
-	float posY;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
 	startSegment->runScript();
 
@@ -105,7 +107,6 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 	}
 
 	// Get player options
-	posY = m_middleY;
 	int i = 0;
 	for (auto childId : npcSegment->getChildrenIds())
 	{
@@ -121,24 +122,42 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 			} else
 				continue;
 		}
-		Button btn;
-		btn.setString(seg->getText());
-		btn.setTexture(m_buttonTexture);
-		btn.setPosition(10.f, posY);
-		btn.setContentSize(m_size.x-30.f, 25.f);
-		btn.setColor(sf::Color::Yellow);
-		btn.setActiveColor(sf::Color::Red);
-		btn.onClick([this, i, childId](){
+		auto btn = new Button;
+		auto str = seg->getText();
+		auto &text = btn->getText();
+		btn->setString(str);
+		btn->setCentered(false);
+		btn->setTexture(m_buttonTexture);
+		btn->setColor(sf::Color::Yellow);
+		btn->setActiveColor(sf::Color::Red);
+		btn->onClick([this, i, childId](){
 			if (m_callback)
 				m_callback(i);
 			changeSegment(childId);
 		});
-		btn.getText().setCharacterSize(20);
+		text.setCharacterSize(20);
+
+		if (wrapText(text, m_size.x-30.f))
+			str = text.getString().toAnsiString();
+		auto lineCount = 1 + std::count(str.begin(), str.end(), '\n');
+		btn->setContentSize(m_size.x-30.f, 25.f * lineCount);
 
 		++i;
-		posY += btn.getSize().y + 2.f;
-		m_buttons.emplace_back(std::move(btn));
+		m_buttons.emplace_back(btn);
 	}
+
+	m_tweenManager.killAll();
+	for (auto &button : m_buttons) {
+		TweenEngine::Tween::set(*button, Button::ALPHA)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
+	for (auto &button : m_buttonsOld) {
+		TweenEngine::Tween::to(*button, Button::ALPHA, 0.4f)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
+	m_tweenManager.update(0.0001f);
 
 	changeLine(0);
 }
@@ -150,12 +169,12 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	auto &line = m_textLines[newLineIndex];
 	m_textLineIndex = newLineIndex;
 	m_textOld = m_text;
-	m_text.setText(line.second);
-	m_text.setPosition(10.f, round(m_middleY - m_text.getCursorEnd().y - 60.f));
 	m_textName.setText(line.first);
-	m_textName.setPosition(5.f, m_text.getPosition().y - 40.f);
+	m_textName.setPosition(5.f, m_middleY);
+	m_text.setText(line.second);
+	m_text.setPosition(10.f, m_textName.getPosition().y + 30.f);
 
-	float duration = 1.5f;
+	float duration = 0.5f;
 	m_text.setAlpha(0.f);
 	m_textOld.setAlpha(255.f);
 	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
@@ -164,6 +183,17 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	TweenEngine::Tween::to(m_text, ActiveText::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
+
+	auto posY = m_text.getPosition().y + m_text.getCursorEnd().y + 45.f;
+	if (newLineIndex + 1 == m_textLines.size())
+		for (auto &button : m_buttons) {
+			button->setPosition(10.f, posY);
+			posY += button->getSize().y + 2.f;
+			TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
+				.target(255.f)
+				.delay(1.f)
+				.start(m_tweenManager);
+		}
 }
 
 bool DialogueRenderer::isComplete() const
@@ -174,7 +204,7 @@ bool DialogueRenderer::isComplete() const
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
-	m_middleY = m_size.y / 2.f - 100.f;
+	m_middleY = round(m_size.y / 8);
 }
 
 sf::Vector2f DialogueRenderer::getSize() const
@@ -190,9 +220,9 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	target.draw(m_textOld, states);
 	target.draw(m_textName, states);
 	for (auto &button : m_buttonsOld)
-		target.draw(button, states);
+		target.draw(*button, states);
 	for (auto &button : m_buttons)
-		target.draw(button, states);
+		target.draw(*button, states);
 }
 
 } // namespace NovelTea

@@ -53,7 +53,8 @@ private:
 	int m_textLineIndex;
 	std::vector<std::pair<std::string,std::string>> m_textLines;
 
-	std::vector<Button> m_buttons;
+	std::vector<std::shared_ptr<Button>> m_buttons;
+	std::vector<std::shared_ptr<Button>> m_buttonsOld;
 	ActiveText m_textName;
 	ActiveText m_text;
 	ActiveText m_textOld;

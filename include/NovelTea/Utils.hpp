@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_UTILS_HPP
 #define NOVELTEA_UTILS_HPP
 
+#include <SFML/Graphics/Text.hpp>
 #include <vector>
 #include <string>
 
@@ -17,6 +18,7 @@ namespace NovelTea
 {
 
 std::vector<std::string> split(const std::string &text, const std::string &delimiter = "\n");
+bool wrapText(sf::Text &text, float width);
 
 } // namespace NovelTea
 

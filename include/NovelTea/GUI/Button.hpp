@@ -12,10 +12,9 @@ namespace NovelTea {
 
 class Button : public TweenNinePatch {
 public:
-	static const int COLOR_RGB   = 11;
-	static const int COLOR_ALPHA = 12;
-	static const int CONTENT_X   = 13;
-	static const int TEXTCOLOR_ALPHA = 14;
+	static const int ALPHA       = 13;
+	static const int CONTENT_X   = 14;
+	static const int TEXTCOLOR_ALPHA = 15;
 
 	Button();
 
@@ -47,6 +46,12 @@ public:
 	void setActiveColor(const sf::Color& color);
 	const sf::Color& getActiveColor() const;
 
+	void setAlpha(float alpha);
+	float getAlpha() const;
+
+	void setCentered(bool center);
+	bool isCentered() const;
+
 	void onClick(const std::function<void()>& callback);
 	void click();
 
@@ -73,6 +78,8 @@ private:
 	mutable bool m_needsUpdate;
 	bool m_autoSize;
 	bool m_active;
+	bool m_centered;
+	float m_alpha;
 };
 
 } // namespace NovelTea

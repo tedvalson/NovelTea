@@ -7,9 +7,12 @@ namespace NovelTea
 
 Button::Button()
 : m_backgroundColor(sf::Color::White)
+, m_clickFunction(nullptr)
 , m_needsUpdate(true)
 , m_autoSize(true)
 , m_active(false)
+, m_centered(true)
+, m_alpha(255.f)
 {
 	m_text.setFont(*Proj.getFont(0));
 }
@@ -132,6 +135,34 @@ const sf::Color& Button::getActiveColor() const
 	return m_backgroundActiveColor;
 }
 
+void Button::setAlpha(float alpha)
+{
+	auto color = getColor();
+	alpha = std::max(std::min(alpha, 255.f), 0.f);
+	color.a = alpha;
+	setColor(color);
+	color = getTextColor();
+	color.a = alpha;
+	setTextColor(color);
+	m_alpha = alpha;
+}
+
+float Button::getAlpha() const
+{
+	return m_alpha;
+}
+
+void Button::setCentered(bool center)
+{
+	m_needsUpdate = true;
+	m_centered = center;
+}
+
+bool Button::isCentered() const
+{
+	return m_centered;
+}
+
 
 void Button::autoSize()
 {
@@ -185,9 +216,9 @@ void Button::ensureUpdate() const
 		if (m_autoSize)
 			NinePatch::setContentSize(sf::Vector2f(m_text.getLocalBounds().width, m_text.getLocalBounds().height));
 
+		sf::Vector2f contentSize = NinePatch::getContentSize();
 		sf::FloatRect textBounds = m_text.getLocalBounds();
 		sf::FloatRect padding = getPadding();
-		sf::Vector2f contentSize = NinePatch::getContentSize();
 
 		if (m_autoSize && getTexture()) {
 			m_size.x = contentSize.x + getTexture()->getSize().x - padding.width;
@@ -196,10 +227,15 @@ void Button::ensureUpdate() const
 			m_size = NinePatch::getSize();
 		}
 
-		m_text.setOrigin(round(textBounds.left + textBounds.width/2),
-						 round(textBounds.top + textBounds.height/2));
-		m_text.setPosition(round(padding.left + contentSize.x/2 + m_textOffset.x),
-						   round(padding.top + contentSize.y/2 + m_textOffset.y));
+		if (m_centered) {
+			m_text.setOrigin(round(textBounds.left + textBounds.width/2),
+							 round(textBounds.top + textBounds.height/2));
+			m_text.setPosition(round(padding.left + contentSize.x/2 + m_textOffset.x),
+							   round(padding.top + contentSize.y/2 + m_textOffset.y));
+		} else {
+			m_text.setOrigin(0.f, 0.f);
+			m_text.setPosition(padding.left + m_textOffset.x, padding.top + m_textOffset.y);
+		}
 
 		if (m_active) {
 			NinePatch::setColor(m_backgroundActiveColor);
@@ -241,6 +277,7 @@ int Button::getValues(int tweenType, float *returnValues)
 			returnValues[2] = color.b;
 			return 3;
 		}
+		case ALPHA: returnValues[0] = getAlpha(); return 1;
 		case COLOR_ALPHA: returnValues[0] = getColor().a; return 1;
 		case CONTENT_X: returnValues[0] = getContentSize().x; return 1;
 		case TEXTCOLOR_ALPHA: returnValues[0] = getTextColor().a; return 1;
@@ -253,6 +290,10 @@ int Button::getValues(int tweenType, float *returnValues)
 void Button::setValues(int tweenType, float *newValues)
 {
 	switch (tweenType) {
+		case ALPHA: {
+			setAlpha(newValues[0]);
+			break;
+		}
 		case COLOR_RGB: {
 			sf::Color color;
 			color.r = std::max(std::min(newValues[0], 255.f), 0.f);
