@@ -32,6 +32,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, 0.f));
 	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
+	m_inventory.setSize(sf::Vector2f(width, height));
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
@@ -49,6 +50,14 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		}
 		if (GGame.getRoom()->runScriptBeforeLeave() && room->runScriptBeforeEnter())
 			GGame.pushNextEntityJson(jentity);
+	});
+
+	// Inventory setup
+	m_inventory.setCallback([this](const std::string &objectId){
+		if (m_actionBuilder.isVisible()) {
+			m_actionBuilder.setObject(objectId);
+			m_actionBuilder.selectNextEmptyIndex();
+		}
 	});
 
 	// VerbList setup
@@ -128,6 +137,7 @@ void StateMain::render(sf::RenderTarget &target)
 
 	target.draw(m_navigation);
 	target.draw(m_textOverlay);
+	target.draw(m_inventory);
 
 	for (auto &notification : Notification::notifications)
 		target.draw(*notification);
@@ -143,6 +153,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	{
 		updateRoomText("");
 		m_navigation.hide();
+		m_inventory.hide();
 	}
 
 	if (mode == Mode::Cutscene)
@@ -168,6 +179,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		}
 		updateRoomText();
 		m_navigation.show(1.f);
+		m_inventory.show(1.f);
 	}
 
 	m_mode = mode;
@@ -406,6 +418,10 @@ bool StateMain::processEvent(const sf::Event &event)
 		m_navigation.processEvent(event);
 		if (m_actionBuilder.isVisible())
 			m_actionBuilder.processEvent(event);
+		if (m_inventory.processEvent(event))
+		{
+
+		}
 
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
@@ -464,6 +480,7 @@ bool StateMain::update(float delta)
 
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
+	m_inventory.update(delta);
 	m_navigation.update(delta);
 	m_textOverlay.update(delta);
 

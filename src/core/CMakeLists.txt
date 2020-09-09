@@ -34,6 +34,7 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/ActionBuilder.cpp
 	${SRCROOT}/GUI/Button.cpp
 	${SRCROOT}/GUI/Hideable.cpp
+	${SRCROOT}/GUI/Inventory.cpp
 	${SRCROOT}/GUI/Navigation.cpp
 	${SRCROOT}/GUI/NinePatch.cpp
 	${SRCROOT}/GUI/Notification.cpp

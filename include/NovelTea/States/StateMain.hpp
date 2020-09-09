@@ -10,6 +10,7 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
+#include <NovelTea/GUI/Inventory.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
 #include <NovelTea/GUI/TextOverlay.hpp>
 #include <NovelTea/json.hpp>
@@ -60,6 +61,7 @@ private:
 
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
+	Inventory m_inventory;
 	Navigation m_navigation;
 	TextOverlay m_textOverlay;
 	std::string m_selectedObjectId;
