@@ -27,14 +27,16 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	auto width = getContext().config.width;
 	auto height = getContext().config.height;
-	m_roomActiveText.setSize(sf::Vector2f(width, 0.f));
+	auto padding = 1.f / 16.f * width;
+	m_roomActiveText.setPosition(round(padding), round(padding));
+	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, 0.f));
 	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
-	m_navigation.setScale(1.5f, 1.5f);
-	m_navigation.setPosition(20.f, -20.f + height - m_navigation.getGlobalBounds().height);
+	m_navigation.setScale(1.2f, 1.2f);
+	m_navigation.setPosition(15.f, -15.f + height - m_navigation.getGlobalBounds().height);
 	m_navigation.setCallback([this](const json &jentity){
 		auto roomId = jentity[1].ToString();
 		auto room = GSave.get<Room>(roomId);
@@ -53,14 +55,15 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_verbList.setSelectCallback([this](const std::string &verbId){
 		m_actionBuilder.setVerb(verbId);
 		m_actionBuilder.setObject(m_selectedObjectId, 0);
+		m_actionBuilder.selectNextEmptyIndex();
 		m_verbList.hide();
 	});
 	m_verbList.setShowHideCallback([this](bool showing){
-		if (!showing)
-		{
+		if (!showing) {
 			m_roomActiveText.setHighlightId("");
-			if (!m_selectedObjectId.empty())
+			if (!m_selectedObjectId.empty() && m_actionBuilder.getObjects().size() > 1) {
 				m_actionBuilder.show();
+			}
 		}
 	});
 
@@ -69,9 +72,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_actionBuilder.setSize(sf::Vector2f(width - 20.f, 200.f));
 	m_actionBuilder.setCallback([this](bool confirmed){
 		if (confirmed)
-		{
 			processAction(m_actionBuilder.getVerb(), m_actionBuilder.getObjects());
-		}
 		m_actionBuilder.hide();
 	});
 
@@ -345,6 +346,7 @@ void StateMain::updateRoomText(const std::string &newText)
 
 	m_roomTextChanging = true;
 	m_roomActiveTextFadeOut = m_roomActiveText;
+	m_roomActiveTextFadeOut.setHighlightId("");
 	m_roomActiveText.setText(text);
 
 	m_roomActiveText.setAlpha(0.f);
@@ -401,8 +403,9 @@ bool StateMain::processEvent(const sf::Event &event)
 			if (!m_verbList.processEvent(event))
 				return false;
 
-		m_actionBuilder.processEvent(event);
 		m_navigation.processEvent(event);
+		if (m_actionBuilder.isVisible())
+			m_actionBuilder.processEvent(event);
 
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
@@ -414,9 +417,15 @@ bool StateMain::processEvent(const sf::Event &event)
 				if (!word.empty())
 				{
 					m_selectedObjectId = word;
-					m_verbList.setVerbs(word);
-					m_verbList.setPositionBounded(p, sf::FloatRect(0.f, 0.f, getContext().config.width, getContext().config.height));
-					m_verbList.show();
+					if (!m_actionBuilder.isVisible())
+					{
+						m_verbList.setVerbs(word);
+						m_verbList.setPositionBounded(p, sf::FloatRect(0.f, 0.f, getContext().config.width, getContext().config.height));
+						m_verbList.show();
+					} else {
+						m_actionBuilder.setObject(m_selectedObjectId);
+						m_actionBuilder.selectNextEmptyIndex();
+					}
 				}
 			}
 			else if (!m_verbList.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))

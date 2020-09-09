@@ -121,16 +121,21 @@ std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
 	return std::string();
 }
 
-void ActiveText::setText(const std::string &text)
+void ActiveText::setText(const std::string &text, const TextFormat &format)
 {
-	auto block = std::make_shared<TextBlock>();
-	auto fragment = std::make_shared<TextFragment>();
-
-	fragment->setText(text);
-	block->addFragment(fragment);
-
 	m_textBlocks.clear();
-	addBlock(block);
+
+	auto lines = split(text);
+	for (auto &line : lines)
+	{
+		auto block = std::make_shared<TextBlock>();
+		auto fragment = std::make_shared<TextFragment>();
+
+		fragment->setText(line);
+		fragment->setTextFormat(format);
+		block->addFragment(fragment);
+		addBlock(block);
+	}
 
 	setAlpha(m_alpha);
 }

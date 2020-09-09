@@ -29,6 +29,8 @@ public:
 	void attach(const std::string &type, const std::string &id);
 	void saveChanges();
 
+	std::vector<std::shared_ptr<Object>> objects() const;
+
 private:
 	std::string m_attachedType;
 	std::string m_attachedId;

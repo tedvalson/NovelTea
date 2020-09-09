@@ -3,6 +3,7 @@
 
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
+#include <NovelTea/TextFormat.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <vector>
@@ -29,7 +30,7 @@ public:
 	std::string toPlainText() const;
 	std::string objectFromPoint(const sf::Vector2f &point) const;
 
-	void setText(const std::string &text);
+	void setText(const std::string &text, const TextFormat &format = TextFormat());
 
 	const std::vector<std::shared_ptr<TextBlock>> &blocks() const;
 	void addBlock(std::shared_ptr<TextBlock> block, int index = -1);

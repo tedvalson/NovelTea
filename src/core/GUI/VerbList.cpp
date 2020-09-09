@@ -3,6 +3,7 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Transform.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -106,18 +107,20 @@ void VerbList::setVerbs(const std::vector<std::string> &verbIds)
 		addVerbOption(verbId);
 
 	float maxWidth = 0.f;
-	float posY = m_margin + 42.f * m_verbs.size();
+	float itemHeight = 38.f;
+	float posY = m_margin + itemHeight * 4;
 	for (auto &verb : m_verbs)
 		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
 
 	m_bounds = sf::FloatRect(0.f, 0.f, maxWidth + m_margin*2, posY + m_margin*2);
 	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY*2));
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY));
 	m_scrollBar.setPosition(m_bounds.width + 4.f, 0.f);
-	m_size.y = posY;
+	m_scrollAreaSize.y = itemHeight * m_verbs.size();
 
 	m_bg.setSize(sf::Vector2f(m_bounds.width, m_bounds.height));
 	repositionItems();
+	updateScrollSize();
 }
 
 void VerbList::setVerbs(const std::string &objectId)
@@ -129,8 +132,9 @@ void VerbList::setVerbs(const std::string &objectId)
 	for (auto &item : ProjData[Verb::id].ObjectRange())
 	{
 		auto verbId = item.first;
-		if (!GSave.data()[Verb::id].hasKey(verbId))
+		if (!GSave.data()[Verb::id].hasKey(verbId)) {
 			verbIds.push_back(verbId);
+		}
 	}
 
 	for (auto it = verbIds.begin(); it != verbIds.end();)
@@ -168,7 +172,7 @@ float VerbList::getScroll()
 
 const sf::Vector2f &VerbList::getScrollSize()
 {
-	return m_size;
+	return m_scrollAreaSize;
 }
 
 void VerbList::setPositionBounded(const sf::Vector2f &position, const sf::FloatRect &bounds)
@@ -231,17 +235,16 @@ void VerbList::repositionItems()
 	for (auto &verb : m_verbs)
 	{
 		verb.text.setPosition(m_margin, posY);
-		posY += 42.f;
+		posY += 38.f;
 	}
 //	m_size.y = posY - m_scrollPos;
-	updateScrollSize();
 }
 
 void VerbList::addVerbOption(const std::string &verbId)
 {
 	VerbOption option;
 	option.verbId = verbId;
-	option.text.setCharacterSize(40);
+	option.text.setCharacterSize(30);
 	option.text.setFillColor(sf::Color::Black);
 	option.text.setFont(*Proj.getFont(0));
 

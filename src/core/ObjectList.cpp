@@ -93,4 +93,9 @@ void ObjectList::saveChanges()
 	m_saveData->data()[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
 }
 
+std::vector<std::shared_ptr<Object> > ObjectList::objects() const
+{
+	return m_objects;
+}
+
 } // namespace NovelTea

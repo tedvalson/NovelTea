@@ -60,6 +60,7 @@ private:
 	float m_scrollPos;
 	float m_margin;
 	sf::Vector2f m_size;
+	sf::Vector2f m_scrollAreaSize;
 
 	ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
