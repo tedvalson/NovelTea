@@ -11,7 +11,7 @@ sf::Vector2f Notification::m_spawnPosition;
 std::vector<std::unique_ptr<Notification>> Notification::notifications;
 float Notification::m_spawnOffsetY = 0.f;
 float Notification::m_durationDefault = 5.f;
-float Notification::m_spacing = 4.f;
+float Notification::m_spacing = 2.f;
 
 
 Notification::Notification()
@@ -37,12 +37,12 @@ void Notification::update(float delta)
 		if ((*i)->m_markForDelete)
 		{
 			float offsetY = (*i)->getSize().y + m_spacing;
-			m_spawnOffsetY += offsetY;
+			m_spawnOffsetY -= offsetY;
 			for (auto j = i+1; j != notifications.end(); j++)
 			{
 				auto notification = j->get();
 				TweenEngine::Tween::to(*notification, POSITION_Y, 0.3f)
-					.target(notification->getPosition().y + offsetY)
+					.target(notification->getPosition().y - offsetY)
 					.start(notification->m_tweenManager);
 			}
 			notifications.erase(i);
@@ -60,15 +60,16 @@ void Notification::spawn(const std::string &message)
 	auto notification = new Notification;
 	notification->setString(message);
 	notification->setPosition(round((m_spawnPosition.x - notification->getSize().x) / 2.f),
-							  round(m_spawnPosition.y - notification->getSize().y + m_spawnOffsetY));
-	m_spawnOffsetY -= m_spacing + notification->getSize().y;
+							  round(m_spawnPosition.y + m_spawnOffsetY));
+	m_spawnOffsetY += m_spacing + notification->getSize().y;
 	notification->animate();
 	notifications.emplace_back(notification);
 }
 
 void Notification::setScreenSize(const sf::Vector2f &size)
 {
-	m_spawnPosition = size;
+	m_spawnPosition.x = size.x;
+	m_spawnPosition.y = 7.f;
 }
 
 

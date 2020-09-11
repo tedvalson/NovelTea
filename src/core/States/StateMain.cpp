@@ -86,7 +86,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 
 	// Notification setup
-	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y - 4.f));
+	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
 
 	// TextOverlay setup
 	m_textOverlay.setAlpha(0.f);
