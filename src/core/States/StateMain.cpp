@@ -53,10 +53,16 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 
 	// Inventory setup
-	m_inventory.setCallback([this](const std::string &objectId){
+	m_inventory.setCallback([this](const std::string &objectId, float posX, float posY){
 		if (m_actionBuilder.isVisible()) {
 			m_actionBuilder.setObject(objectId);
 			m_actionBuilder.selectNextEmptyIndex();
+		} else {
+			m_selectedObjectId = objectId;
+			m_verbList.setVerbs(objectId);
+			auto p = sf::Vector2f(posX - m_verbList.getLocalBounds().width, posY - m_verbList.getLocalBounds().height);
+			m_verbList.setPositionBounded(p, sf::FloatRect(0.f, 0.f, getContext().config.width, getContext().config.height));
+			m_verbList.show();
 		}
 	});
 
@@ -66,6 +72,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		m_actionBuilder.setObject(m_selectedObjectId, 0);
 		m_actionBuilder.selectNextEmptyIndex();
 		m_verbList.hide();
+		m_inventory.close();
 	});
 	m_verbList.setShowHideCallback([this](bool showing){
 		if (!showing) {
@@ -83,6 +90,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		if (confirmed)
 			processAction(m_actionBuilder.getVerb(), m_actionBuilder.getObjects());
 		m_actionBuilder.hide();
+		m_inventory.close();
 	});
 
 	// Notification setup
@@ -131,13 +139,13 @@ void StateMain::render(sf::RenderTarget &target)
 		target.draw(m_roomActiveText);
 		if (m_actionBuilder.isVisible())
 			target.draw(m_actionBuilder);
-		if (m_verbList.isVisible())
-			target.draw(m_verbList);
 	}
 
 	target.draw(m_navigation);
 	target.draw(m_textOverlay);
 	target.draw(m_inventory);
+	if (m_verbList.isVisible())
+		target.draw(m_verbList);
 
 	for (auto &notification : Notification::notifications)
 		target.draw(*notification);
@@ -411,21 +419,20 @@ bool StateMain::processEvent(const sf::Event &event)
 	}
 	else if (m_mode == Mode::Room)
 	{
-		if (m_verbList.isVisible())
-			if (!m_verbList.processEvent(event))
-				return false;
+		if (m_verbList.isVisible() && m_verbList.processEvent(event)) {
+			return false;
+		} else {
+			// Returns true if an object is clicked on
+			if (m_inventory.processEvent(event))
+				return true;
+		}
 
-		m_navigation.processEvent(event);
 		if (m_actionBuilder.isVisible())
 			m_actionBuilder.processEvent(event);
-		if (m_inventory.processEvent(event))
-		{
-
-		}
+		m_navigation.processEvent(event);
 
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
-			if (!m_verbList.isVisible())
 			{
 				auto p = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
 				auto word = m_roomActiveText.objectFromPoint(p);
@@ -442,12 +449,8 @@ bool StateMain::processEvent(const sf::Event &event)
 						m_actionBuilder.setObject(m_selectedObjectId);
 						m_actionBuilder.selectNextEmptyIndex();
 					}
-				}
-			}
-			else if (!m_verbList.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y))
-			{
-				m_selectedObjectId = "";
-				m_verbList.hide();
+				} else if (m_verbList.isVisible())
+					m_verbList.hide();
 			}
 		}
 	}

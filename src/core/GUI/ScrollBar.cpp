@@ -104,7 +104,7 @@ bool ScrollBar::processEvent(const sf::Event &event)
 			m_lastTouchPos = m_startTouchPos;
 			m_clockVelocity.restart();
 			m_velocity = 0.f;
-			return m_isScrolling;
+			return true;
 		}
 	}
 	else if (m_isTouching && event.type == sf::Event::MouseButtonReleased)

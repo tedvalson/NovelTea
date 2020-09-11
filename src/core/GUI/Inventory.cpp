@@ -78,8 +78,8 @@ bool Inventory::processEvent(const sf::Event &event)
 				auto &text = m_objectTexts[i];
 				text->setFillColor(sf::Color::Red);
 				if (m_callback)
-					m_callback(text->getString().toAnsiString());
-				break;
+					m_callback(text->getString().toAnsiString(), m_bg.getPosition().x, posY);
+				return true;
 			}
 			posY += m_itemHeight;
 		}
@@ -248,6 +248,7 @@ void Inventory::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 			m_view.reset(bounds);
 			m_view.setViewport(viewport);
+			m_scrollBar.setDragRect(bounds);
 		}
 
 		target.setView(m_view);

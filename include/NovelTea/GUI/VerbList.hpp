@@ -59,6 +59,7 @@ private:
 
 	float m_scrollPos;
 	float m_margin;
+	float m_itemHeight;
 	sf::Vector2f m_size;
 	sf::Vector2f m_scrollAreaSize;
 

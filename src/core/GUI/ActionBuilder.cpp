@@ -96,6 +96,7 @@ void ActionBuilder::setVerb(const std::string &verbId)
 {
 	m_verbId = verbId;
 	auto verb = GSave.get<Verb>(verbId);
+	m_selectedIndex = 0;
 	m_objectIds.resize(verb->getObjectCount());
 	for (auto &objectId : m_objectIds)
 		objectId.clear();

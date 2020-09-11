@@ -13,6 +13,7 @@ namespace NovelTea
 VerbList::VerbList()
 : m_scrollPos(0.f)
 , m_margin(10.f)
+, m_itemHeight(38.f)
 , m_size(320.f, 400.f)
 , m_selectCallback(nullptr)
 , m_showHideCallback(nullptr)
@@ -42,25 +43,32 @@ void VerbList::update(float delta)
 bool VerbList::processEvent(const sf::Event &event)
 {
 	if (m_scrollBar.processEvent(event))
-		return false;
-	if (m_isHiding)
 		return true;
+	if (m_isHiding)
+		return false;
 
 	if (event.type == sf::Event::MouseButtonReleased)
 	{
+		if (m_verbs.empty())
+			return false;
 		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
-		for (auto &verb : m_verbs)
+		if (!m_bg.getGlobalBounds().contains(p)) {
+			return false;
+		}
+		auto posY = m_verbs[0].text.getPosition().y + m_itemHeight;
+		for (auto i = 0; i < m_verbs.size(); ++i)
 		{
-			if (verb.text.getGlobalBounds().contains(p))
+			if (posY > p.y)
 			{
 				if (m_selectCallback)
-					m_selectCallback(verb.verbId);
-				return false;
+					m_selectCallback(m_verbs[i].verbId);
+				return true;
 			}
+			posY += m_itemHeight;
 		}
 	}
 
-	return true;
+	return false;
 }
 
 void VerbList::show(float duration, int tweenType, HideableCallback callback)
@@ -107,8 +115,7 @@ void VerbList::setVerbs(const std::vector<std::string> &verbIds)
 		addVerbOption(verbId);
 
 	float maxWidth = 0.f;
-	float itemHeight = 38.f;
-	float posY = m_margin + itemHeight * 4;
+	float posY = m_margin + m_itemHeight * 4;
 	for (auto &verb : m_verbs)
 		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
 
@@ -116,7 +123,8 @@ void VerbList::setVerbs(const std::vector<std::string> &verbIds)
 	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
 	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY));
 	m_scrollBar.setPosition(m_bounds.width + 4.f, 0.f);
-	m_scrollAreaSize.y = itemHeight * m_verbs.size();
+	m_scrollBar.setDragRect(getGlobalBounds());
+	m_scrollAreaSize.y = m_itemHeight * m_verbs.size();
 
 	m_bg.setSize(sf::Vector2f(m_bounds.width, m_bounds.height));
 	repositionItems();
@@ -181,6 +189,7 @@ void VerbList::setPositionBounded(const sf::Vector2f &position, const sf::FloatR
 	if (p.x + m_bounds.width > bounds.width)
 		p.x = bounds.width - m_bounds.width;
 	setPosition(p);
+	m_scrollBar.setDragRect(getGlobalBounds());
 }
 
 sf::FloatRect VerbList::getLocalBounds() const
@@ -235,7 +244,7 @@ void VerbList::repositionItems()
 	for (auto &verb : m_verbs)
 	{
 		verb.text.setPosition(m_margin, posY);
-		posY += 38.f;
+		posY += m_itemHeight;
 	}
 //	m_size.y = posY - m_scrollPos;
 }
