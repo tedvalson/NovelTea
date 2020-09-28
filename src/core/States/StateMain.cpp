@@ -30,9 +30,17 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto padding = 1.f / 16.f * width;
 	m_roomActiveText.setPosition(round(padding), round(padding));
 	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
-	m_cutsceneRenderer.setSize(sf::Vector2f(width, 0.f));
+	m_cutsceneRenderer.setMargin(round(padding));
+	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
 	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
 	m_inventory.setSize(sf::Vector2f(width, height));
+
+	m_cutsceneScrollbar.setPosition(width - 4.f, 4.f);
+	m_cutsceneScrollbar.setColor(sf::Color(0, 0, 0, 40));
+	m_cutsceneScrollbar.setAutoHide(false);
+	m_cutsceneScrollbar.attachObject(&m_cutsceneRenderer);
+	m_cutsceneScrollbar.setSize(sf::Vector2u(2, height - 8.f));
+	m_cutsceneScrollbar.setScrollAreaSize(sf::Vector2u(width, height - round(padding)*2));
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
@@ -128,6 +136,7 @@ void StateMain::render(sf::RenderTarget &target)
 	if (m_mode == Mode::Cutscene)
 	{
 		target.draw(m_cutsceneRenderer);
+		target.draw(m_cutsceneScrollbar);
 	}
 	else if (m_mode == Mode::Dialogue)
 	{
@@ -404,6 +413,8 @@ bool StateMain::processEvent(const sf::Event &event)
 
 	if (m_mode == Mode::Cutscene)
 	{
+		if (m_cutsceneScrollbar.processEvent(event))
+			return true;
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
 			m_cutsceneSpeed = 1.f;
@@ -411,6 +422,7 @@ bool StateMain::processEvent(const sf::Event &event)
 		else if (event.type == sf::Event::MouseButtonPressed)
 		{
 			m_cutsceneSpeed = 10.f;
+			m_cutsceneRenderer.click();
 		}
 	}
 	else if (m_mode == Mode::Dialogue)
@@ -462,6 +474,7 @@ bool StateMain::update(float delta)
 {
 	if (m_mode == Mode::Cutscene)
 	{
+		m_cutsceneScrollbar.update(delta);
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
 		{

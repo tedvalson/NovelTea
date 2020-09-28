@@ -49,14 +49,14 @@ size_t CutsceneSegment::getDelay() const
 	return m_delay;
 }
 
-void CutsceneSegment::setScriptOverride(bool override)
+void CutsceneSegment::setWaitForClick(bool waitForClick)
 {
-	m_scriptOverride = override;
+	m_waitForClick = waitForClick;
 }
 
-bool CutsceneSegment::getScriptOverride() const
+bool CutsceneSegment::getWaitForClick() const
 {
-	return m_scriptOverride;
+	return m_waitForClick;
 }
 
 void CutsceneSegment::setScriptOverrideName(const std::string &scriptName)

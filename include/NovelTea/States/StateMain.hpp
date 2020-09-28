@@ -70,6 +70,7 @@ private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;
 	float m_cutsceneSpeed;
+	ScrollBar m_cutsceneScrollbar;
 
 	std::shared_ptr<Dialogue> m_dialogue;
 	DialogueRenderer m_dialogueRenderer;

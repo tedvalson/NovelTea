@@ -28,8 +28,8 @@ public:
 	virtual void setDelay(size_t delay);
 	virtual size_t getDelay() const;
 
-	void setScriptOverride(bool override);
-	bool getScriptOverride() const;
+	void setWaitForClick(bool waitForClick);
+	bool getWaitForClick() const;
 
 	void setScriptOverrideName(const std::string &scriptName);
 	const std::string &getScriptOverrideName() const;
@@ -37,7 +37,7 @@ public:
 private:
 	size_t m_duration = 1000;
 	size_t m_delay = 1000;
-	bool m_scriptOverride = false;
+	bool m_waitForClick = false;
 	std::string m_scriptOverrideName;
 };
 

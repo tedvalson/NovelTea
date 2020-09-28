@@ -11,6 +11,8 @@ namespace NovelTea
 
 CutsceneRenderer::CutsceneRenderer()
 : m_size(400.f, 400.f)
+, m_skipWaitingForClick(false)
+, m_margin(10.f)
 {
 	setCutscene(std::make_shared<Cutscene>());
 }
@@ -20,21 +22,17 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 	m_cutscene = cutscene;
 	reset();
 
-	TweenEngine::Tween::mark()
-		.delay(0.001f * cutscene->getDelayMs())
-		.setCallback(TweenEngine::TweenCallback::BEGIN, [this](TweenEngine::BaseTween*){
-			m_isComplete = true;
-		})
-		.start(m_tweenManager);
 }
 
 void CutsceneRenderer::reset()
 {
 	m_isComplete = false;
+	m_isWaitingForClick = false;
 	m_segmentIndex = 0;
 	m_timePassed = sf::Time::Zero;
 	m_timeToNext = sf::Time::Zero;
 	m_cursorPos = sf::Vector2f();
+	m_scrollPos = 0.f;
 
 	m_texts.clear();
 	m_textsOld.clear();
@@ -57,6 +55,8 @@ void CutsceneRenderer::update(float delta)
 
 	while (timeDelta >= m_timeToNext)
 	{
+		if (m_isWaitingForClick)
+			break;
 		if (m_segmentIndex >= segments.size())
 			break;
 
@@ -73,8 +73,10 @@ void CutsceneRenderer::update(float delta)
 		while (segmentIndex != m_segmentIndex);
 	}
 
-	m_timePassed += timeDelta;
-	m_timeToNext -= timeDelta;
+	if (!m_isWaitingForClick) {
+		m_timePassed += timeDelta;
+		m_timeToNext -= timeDelta;
+	}
 	m_tweenManager.update(timeDelta.asSeconds());
 }
 
@@ -83,24 +85,60 @@ bool CutsceneRenderer::isComplete() const
 	return m_isComplete;
 }
 
-void CutsceneRenderer::setSize(const sf::Vector2f &size)
+bool CutsceneRenderer::isWaitingForClick() const
 {
-	m_size = size;
+	return m_isWaitingForClick;
 }
 
-sf::Vector2f CutsceneRenderer::getSize() const
+void CutsceneRenderer::click()
 {
-	return m_size;
+	if (m_isWaitingForClick) {
+		addSegmentToQueue(m_segmentIndex + 1);
+	}
+	m_isWaitingForClick = false;
+}
+
+void CutsceneRenderer::setScroll(float position)
+{
+	float minPos = m_size.y - m_margin*2 - m_scrollAreaSize.y - 40.f;
+	if (minPos > 0.f)
+		minPos = 0.f;
+	if (position < minPos)
+		m_scrollPos = minPos;
+	else
+		m_scrollPos = position;
+	repositionItems();
+}
+
+float CutsceneRenderer::getScroll()
+{
+	return m_scrollPos;
+}
+
+const sf::Vector2f &CutsceneRenderer::getScrollSize()
+{
+	return m_scrollAreaSize;
+}
+
+void CutsceneRenderer::repositionItems()
+{
+	m_scrollTransform = sf::Transform::Identity;
+	m_scrollTransform.translate(m_margin, m_margin + round(m_scrollPos));
 }
 
 void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
 
+	auto textStates = states;
+	auto textOldStates = states;
+	textStates.transform *= m_scrollTransform;
+	textOldStates.transform *= m_scrollTransformOld;
+
 	for (auto &text : m_texts)
-		target.draw(*text, states);
+		target.draw(*text, textStates);
 	for (auto &text : m_textsOld)
-		target.draw(*text, states);
+		target.draw(*text, textOldStates);
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
@@ -116,12 +154,16 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 		}).start(m_tweenManager);
 
 	activeText->setPosition(0.f, 0.f);
-	TweenEngine::Tween::set(*activeText, ActiveText::ALPHA)
-		.target(0.f)
-		.start(m_tweenManager);
-	TweenEngine::Tween::to(*activeText, ActiveText::ALPHA, duration)
-		.target(255.f)
-		.start(m_tweenManager);
+	activeText->setAlpha(0.f);
+
+	if (effect == CutsceneTextSegment::None) {
+		activeText->setAlpha(255.f);
+	}
+	else if (effect == CutsceneTextSegment::Fade) {
+		TweenEngine::Tween::to(*activeText, ActiveText::ALPHA, duration)
+			.target(255.f)
+			.start(m_tweenManager);
+	}
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *segment)
@@ -131,9 +173,22 @@ void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *seg
 
 	for (auto &text : m_textsOld)
 	{
-		TweenEngine::Tween::to(*text, ActiveText::POSITION_X, duration)
-			.target(0.f - text->getSize().x)
-			.start(m_tweenManager);
+		if (effect == CutscenePageBreakSegment::None) {
+			TweenEngine::Tween::set(*text, ActiveText::ALPHA)
+				.target(0.f)
+				.delay(duration)
+				.start(m_tweenManager);
+		}
+		else if (effect == CutscenePageBreakSegment::Fade) {
+			TweenEngine::Tween::to(*text, ActiveText::ALPHA, duration)
+				.target(0.f)
+				.start(m_tweenManager);
+		}
+		else if (effect == CutscenePageBreakSegment::ScrollLeft) {
+			TweenEngine::Tween::to(*text, ActiveText::POSITION_X, duration)
+				.target(-getPosition().x - text->getSize().x - m_margin)
+				.start(m_tweenManager);
+		}
 	}
 }
 
@@ -158,11 +213,15 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
 			auto activeText = seg->getActiveText();
-			activeText->setSize(m_size);
+			activeText->setSize(sf::Vector2f(m_size.x - m_margin*2, 0.f));
 			activeText->setCursorStart(m_cursorPos);
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getDelay());
 			startTransitionEffect(seg);
+			// TODO: no fixed val
+			m_scrollAreaSize.y = m_cursorPos.y + 40.f;
+			updateScrollSize();
+			repositionItems();
 		};
 	}
 	else if (type == CutsceneSegment::PageBreak)
@@ -174,6 +233,8 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		{
 			m_textsOld = m_texts;
 			m_texts.clear();
+			m_scrollTransformOld = m_scrollTransform;
+			setScroll(0.f);
 			m_timeToNext = sf::milliseconds(seg->getDelay());
 			m_cursorPos = sf::Vector2f();
 			startTransitionEffect(seg);
@@ -184,9 +245,15 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		// TODO: Throw error
 	}
 
-	endCallback = [this, segmentIndex](TweenEngine::BaseTween*)
+	endCallback = [this, segment, segmentIndex](TweenEngine::BaseTween*)
 	{
-		addSegmentToQueue(segmentIndex + 1);
+		if (m_skipWaitingForClick || !segment->getWaitForClick())
+			addSegmentToQueue(segmentIndex + 1);
+		else if (!m_skipWaitingForClick)
+			m_isWaitingForClick = true;
+
+		if (segmentIndex + 1 >= m_cutscene->segments().size())
+			m_isComplete = true;
 	};
 
 	TweenEngine::Tween::mark()

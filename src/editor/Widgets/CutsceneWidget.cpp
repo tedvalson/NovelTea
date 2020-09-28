@@ -17,7 +17,7 @@ Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 #define TRANSITION_EFFECT "Transition Effect"
 #define TRANSITION_DURATION "Transition Duration"
 #define SEGMENT_DELAY "Delay"
-#define SCRIPT_OVERRIDE "Script Override"
+#define WAIT_FOR_CLICK "Wait for click"
 #define SCRIPT_OVERRIDE_NAME "Variable or Function"
 #define FULLSCREEN "Full Screen"
 #define CAN_FAST_FORWARD "Can Fast-Forward"
@@ -118,7 +118,7 @@ void CutsceneWidget::fillPropertyEditor()
 
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
 		QStringList enumNames;
-		enumNames << "Fade" << "Scroll Up" << "Scroll Down" << "Nothing";
+		enumNames << "None" << "Fade";
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
 		prop->setValue(textSegment->getTransition());
 		ui->propertyBrowser->addProperty(prop);
@@ -144,7 +144,7 @@ void CutsceneWidget::fillPropertyEditor()
 
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
 		QStringList enumNames;
-		enumNames << "Fade" << "Scroll Up" << "Scroll Down" << "Nothing";
+		enumNames << "None" << "Fade" << "Scroll Left";
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
 		prop->setValue(pageBreakSegment->getTransition());
 		ui->propertyBrowser->addProperty(prop);
@@ -164,8 +164,8 @@ void CutsceneWidget::fillPropertyEditor()
 	prop->setAttribute(QLatin1String("singleStep"), 100);
 	ui->propertyBrowser->addProperty(prop);
 
-	prop = segmentsVariantManager->addProperty(QVariant::Bool, SCRIPT_OVERRIDE);
-	prop->setValue(segment->getScriptOverride());
+	prop = segmentsVariantManager->addProperty(QVariant::Bool, WAIT_FOR_CLICK);
+	prop->setValue(segment->getWaitForClick());
 	subProp = segmentsVariantManager->addProperty(QVariant::String, SCRIPT_OVERRIDE_NAME);
 	subProp->setValue(QString::fromStdString(segment->getScriptOverrideName()));
 	prop->addSubProperty(subProp);
@@ -216,7 +216,7 @@ void CutsceneWidget::checkIndexChange()
 		updateLoopValues();
 
 		if (!m_cutscenePlaying && !m_segmentLooping)
-			ui->horizontalSlider->setValue(m_loopStartMs);
+			ui->horizontalSlider->setValue(m_loopEndMs);
 
 		fillPropertyEditor();
 	}
@@ -340,8 +340,8 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		segment->setDuration(value.toInt());
 	else if (propertyName == SEGMENT_DELAY)
 		segment->setDelay(value.toInt());
-	else if (propertyName == SCRIPT_OVERRIDE)
-		segment->setScriptOverride(value.toBool());
+	else if (propertyName == WAIT_FOR_CLICK)
+		segment->setWaitForClick(value.toBool());
 	else if (propertyName == SCRIPT_OVERRIDE_NAME)
 		segment->setScriptOverrideName(value.toString().toStdString());
 
@@ -541,9 +541,12 @@ void CutsceneWidget::on_actionLoop_toggled(bool checked)
 {
 	if (m_cutscenePlaying)
 		ui->actionPlayPause->setChecked(false);
-	if (checked)
-		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
 	checkIndexChange();
 	ui->horizontalSlider->setEnabled(!checked);
 	m_segmentLooping = checked;
+
+	if (checked)
+		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
+	else
+		ui->horizontalSlider->setValue(m_loopEndMs);
 }

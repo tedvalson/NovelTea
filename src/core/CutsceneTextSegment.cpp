@@ -12,7 +12,7 @@ json CutsceneTextSegment::toJson() const
 {
 	json j = sj::Array(
 		static_cast<int>(type()),
-		getScriptOverride(),
+		getWaitForClick(),
 		getScriptOverrideName(),
 		m_transition,
 		getDuration(),
@@ -25,7 +25,7 @@ json CutsceneTextSegment::toJson() const
 
 bool CutsceneTextSegment::fromJson(const json &j)
 {
-	setScriptOverride(j[1].ToBool());
+	setWaitForClick(j[1].ToBool());
 	setScriptOverrideName(j[2].ToString());
 	m_transition = j[3].ToInt();
 	setDuration(j[4].ToInt());
@@ -49,26 +49,6 @@ void CutsceneTextSegment::setActiveText(const std::shared_ptr<ActiveText> &activ
 const std::shared_ptr<ActiveText> &CutsceneTextSegment::getActiveText() const
 {
 	return m_activeText;
-}
-
-void CutsceneTextSegment::setTransition(int transition)
-{
-	m_transition = transition;
-}
-
-int CutsceneTextSegment::getTransition() const
-{
-	return m_transition;
-}
-
-void CutsceneTextSegment::setBeginWithNewLine(bool beginWithNewLine)
-{
-	m_beginWithNewline = beginWithNewLine;
-}
-
-bool CutsceneTextSegment::getBeginWithNewLine() const
-{
-	return m_beginWithNewline;
 }
 
 } // namespace NovelTea

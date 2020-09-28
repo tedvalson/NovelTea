@@ -27,6 +27,14 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	text.setOutlineThickness(1.f);
 	text.setPosition(0.f, 450.f);
 
+	auto width = getContext().config.width;
+	auto height = getContext().config.height;
+	auto padding = 1.f / 16.f * width;
+	m_roomActiveText.setPosition(round(padding), round(padding));
+	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
+	m_cutsceneRenderer.setMargin(round(padding));
+	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
+
 	m_actionBuilder.setPosition(10.f, 500.f);
 	m_actionBuilder.setSize(sf::Vector2f(getContext().config.width - 20.f, 200.f));
 
@@ -114,7 +122,6 @@ void *StateEditor::processData(void *data)
 			auto cutscene = std::make_shared<Cutscene>();
 			cutscene->fromJson(jsonData["cutscene"]);
 			m_cutsceneRenderer.setCutscene(cutscene);
-			m_cutsceneRenderer.setPosition(10.f, 10.f);
 		}
 		else if (event == "setPlaybackTime")
 		{

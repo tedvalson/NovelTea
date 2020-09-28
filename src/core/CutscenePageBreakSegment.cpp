@@ -11,7 +11,7 @@ json CutscenePageBreakSegment::toJson() const
 {
 	auto j = sj::Array(
 		static_cast<int>(type()),
-		getScriptOverride(),
+		getWaitForClick(),
 		getScriptOverrideName(),
 		m_transition,
 		getDuration(),
@@ -22,7 +22,7 @@ json CutscenePageBreakSegment::toJson() const
 
 bool CutscenePageBreakSegment::fromJson(const json &j)
 {
-	setScriptOverride(j[1].ToBool());
+	setWaitForClick(j[1].ToBool());
 	setScriptOverrideName(j[2].ToString());
 	m_transition = j[3].ToInt();
 	setDuration(j[4].ToInt());
@@ -33,16 +33,6 @@ bool CutscenePageBreakSegment::fromJson(const json &j)
 CutsceneSegment::Type CutscenePageBreakSegment::type() const
 {
 	return CutsceneSegment::PageBreak;
-}
-
-void CutscenePageBreakSegment::setTransition(int transition)
-{
-	m_transition = transition;
-}
-
-int CutscenePageBreakSegment::getTransition() const
-{
-	return m_transition;
 }
 
 } // namespace NovelTea
