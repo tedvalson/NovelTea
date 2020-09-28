@@ -58,7 +58,6 @@ private:
 	bool m_isOpen;
 
 	mutable sf::Transform m_lastTransform;
-	mutable sf::Vector2u m_targetSize;
 	mutable sf::View m_view;
 
 	mutable Button m_button;

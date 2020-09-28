@@ -69,7 +69,6 @@ private:
 	sf::FloatRect m_bounds;
 
 	mutable sf::Transform m_lastTransform;
-	mutable sf::Vector2u m_targetSize;
 	mutable sf::View m_view;
 	std::vector<VerbOption> m_verbs;
 

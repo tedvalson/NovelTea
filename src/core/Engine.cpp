@@ -15,8 +15,6 @@ Engine::Engine(EngineConfig config)
 {
 	m_game = std::make_shared<Game>();
 
-	Notification::setScreenSize(sf::Vector2f(config.width, config.height));
-
 	auto stateStack = new StateStack(State::Context(m_config, *m_game, m_data));
 	m_stateStack = std::unique_ptr<StateStack>(stateStack);
 
@@ -63,10 +61,14 @@ void Engine::resize(size_t width, size_t height)
 void Engine::render(sf::RenderTarget &target)
 {
 	GMan.setActive(m_game);
+
+	m_renderTexture.clear(m_config.backgroundColor);
+	m_stateStack->render(m_renderTexture);
+	m_renderTexture.display();
+
 	target.clear();
 	target.setView(m_view);
-	target.draw(m_bg);
-	m_stateStack->render(target);
+	target.draw(m_sprite);
 }
 
 void Engine::update()
@@ -167,8 +169,11 @@ void Engine::initialize()
 	m_internalRatio = static_cast<float>(m_config.width) / m_config.height;
 	m_view.reset(sf::FloatRect(0, 0, m_config.width, m_config.height));
 
-	m_bg.setSize(sf::Vector2f(m_config.width, m_config.height));
-	m_bg.setFillColor(m_config.backgroundColor);
+	m_renderTexture.create(m_config.width, m_config.height);
+	m_renderTexture.setSmooth(true);
+	m_sprite.setTexture(m_renderTexture.getTexture(), true);
+
+	Notification::setScreenSize(sf::Vector2f(m_config.width, m_config.height));
 
 	resize(m_config.width, m_config.height);
 

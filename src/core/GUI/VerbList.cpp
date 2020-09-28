@@ -26,7 +26,8 @@ VerbList::VerbList()
 	m_scrollBar.setAutoHide(false);
 	m_scrollBar.attachObject(this);
 
-	m_bg.setFillColor(sf::Color(230, 230, 230, 0));
+	auto bgColor = sf::Color(230, 230, 230, 0);
+	m_bg.setFillColor(bgColor);
 
 	std::vector<std::string> verbs;
 	setVerbs(verbs);
@@ -46,15 +47,22 @@ bool VerbList::processEvent(const sf::Event &event)
 		return true;
 	if (m_isHiding)
 		return false;
+	if (m_verbs.empty())
+		return false;
 
-	if (event.type == sf::Event::MouseButtonReleased)
+	if (event.type == sf::Event::MouseButtonPressed)
 	{
-		if (m_verbs.empty())
-			return false;
 		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
-		if (!m_bg.getGlobalBounds().contains(p)) {
+		// Needs to return true so inventory menu knows to stay open
+		if (m_bg.getGlobalBounds().contains(p))
+			return true;
+	}
+	else if (event.type == sf::Event::MouseButtonReleased)
+	{
+		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
+		if (!m_bg.getGlobalBounds().contains(p))
 			return false;
-		}
+
 		auto posY = m_verbs[0].text.getPosition().y + m_itemHeight;
 		for (auto i = 0; i < m_verbs.size(); ++i)
 		{
@@ -210,19 +218,16 @@ void VerbList::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	target.draw(m_scrollBar, states);
 
 	auto view = target.getView();
-	if (m_targetSize != target.getSize() || m_lastTransform != transform)
+//	if (m_lastTransform != transform)
 	{
 		m_lastTransform = transform;
-		m_targetSize = target.getSize();
 		auto bounds = getGlobalBounds();
-		auto vp = target.getViewport(view);
-		auto ratio = view.getSize().x / vp.width;
 
 		sf::FloatRect viewport;
-		viewport.left = (bounds.left / ratio + vp.left) / m_targetSize.x;
-		viewport.top = (bounds.top / ratio + vp.top) / m_targetSize.y;
-		viewport.width = bounds.width / ratio / m_targetSize.x;
-		viewport.height = bounds.height / ratio / m_targetSize.y;
+		viewport.left = bounds.left / view.getSize().x;
+		viewport.top = bounds.top / view.getSize().y;
+		viewport.width = bounds.width / view.getSize().x;
+		viewport.height = bounds.height / view.getSize().y;
 
 		m_view.reset(bounds);
 		m_view.setViewport(viewport);

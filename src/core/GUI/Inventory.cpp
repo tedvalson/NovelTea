@@ -225,26 +225,24 @@ void Inventory::ensureUpdate() const
 void Inventory::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	ensureUpdate();
-	states.transform *= getTransform();
+	auto transform = getTransform();
+	states.transform *= transform;
 	target.draw(m_button, states);
 	if (m_isOpen)
 	{
 		target.draw(m_bg, states);
 
 		auto view = target.getView();
-	//	if (m_targetSize != target.getSize() || m_lastTransform != transform)
+//		if (m_lastTransform != transform)
 		{
-//			m_lastTransform = transform;
-			m_targetSize = target.getSize();
+			m_lastTransform = transform;
 			auto bounds = m_bg.getGlobalBounds();
-			auto vp = target.getViewport(view);
-			auto ratio = view.getSize().x / vp.width;
 
 			sf::FloatRect viewport;
-			viewport.left = (bounds.left / ratio + vp.left) / m_targetSize.x;
-			viewport.top = (bounds.top / ratio + vp.top) / m_targetSize.y;
-			viewport.width = bounds.width / ratio / m_targetSize.x;
-			viewport.height = bounds.height / ratio / m_targetSize.y;
+			viewport.left = bounds.left / view.getSize().x;
+			viewport.top = bounds.top / view.getSize().y;
+			viewport.width = bounds.width / view.getSize().x;
+			viewport.height = bounds.height / view.getSize().y;
 
 			m_view.reset(bounds);
 			m_view.setViewport(viewport);

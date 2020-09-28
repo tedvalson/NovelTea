@@ -3,7 +3,8 @@
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <NovelTea/States/StateStack.hpp>
 #include <queue>
@@ -48,7 +49,8 @@ private:
 	std::unique_ptr<StateStack> m_stateStack;
 
 	sf::View m_view;
-	sf::RectangleShape m_bg;
+	sf::Sprite m_sprite;
+	sf::RenderTexture m_renderTexture;
 	float m_internalRatio;
 	size_t m_width;
 	size_t m_height;
