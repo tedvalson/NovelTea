@@ -413,16 +413,16 @@ bool StateMain::processEvent(const sf::Event &event)
 
 	if (m_mode == Mode::Cutscene)
 	{
-		if (m_cutsceneScrollbar.processEvent(event))
+		if ((m_cutsceneRenderer.isComplete() || m_cutsceneRenderer.isWaitingForClick()) && m_cutsceneScrollbar.processEvent(event))
 			return true;
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
+			m_cutsceneRenderer.click();
 			m_cutsceneSpeed = 1.f;
 		}
 		else if (event.type == sf::Event::MouseButtonPressed)
 		{
 			m_cutsceneSpeed = 10.f;
-			m_cutsceneRenderer.click();
 		}
 	}
 	else if (m_mode == Mode::Dialogue)
