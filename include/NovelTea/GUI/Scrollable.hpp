@@ -20,11 +20,10 @@ public:
 protected:
 	void attachScrollbar(ScrollBar *scrollbar);
 	void detachScrollbar();
-	void updateScrollSize();
+	void updateScrollbar();
 
 private:
 	ScrollBar *m_scrollBar;
-	float m_scrollVal;
 };
 
 } // namespace NovelTea

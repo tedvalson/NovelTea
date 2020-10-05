@@ -136,7 +136,7 @@ void VerbList::setVerbs(const std::vector<std::string> &verbIds)
 
 	m_bg.setSize(sf::Vector2f(m_bounds.width, m_bounds.height));
 	repositionItems();
-	updateScrollSize();
+	updateScrollbar();
 }
 
 void VerbList::setVerbs(const std::string &objectId)

@@ -104,7 +104,7 @@ bool ScrollBar::processEvent(const sf::Event &event)
 			m_lastTouchPos = m_startTouchPos;
 			m_clockVelocity.restart();
 			m_velocity = 0.f;
-			return true;
+			return m_isScrolling;
 		}
 	}
 	else if (m_isTouching && event.type == sf::Event::MouseButtonReleased)
@@ -179,6 +179,7 @@ void ScrollBar::ensureUpdateScrollBar() const
 	{
 		const sf::Vector2f &size = obj->getScrollSize();
 		m_scrollSize += size.y;
+		m_scrollPos = obj->getScroll();
 	}
 	m_scrollPosMin = m_scrollAreaSize.y - m_scrollSize;
 

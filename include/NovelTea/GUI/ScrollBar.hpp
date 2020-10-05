@@ -63,7 +63,7 @@ private:
 	bool m_isHidden;
 	bool m_isTouching;
 	bool m_isScrolling;
-	float m_scrollPos;
+	mutable float m_scrollPos;
 	mutable float m_scrollPosMin;
 	mutable float m_scrollPosMax;
 	mutable float m_scrollSize;

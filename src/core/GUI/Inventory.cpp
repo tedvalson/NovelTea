@@ -141,7 +141,7 @@ void Inventory::repositionItems()
 		posY += m_itemHeight;
 	}
 	m_scrollAreaSize.y = posY - m_scrollPos - m_bg.getPosition().y + 10.f;
-	updateScrollSize();
+	updateScrollbar();
 }
 
 void Inventory::setScroll(float position)

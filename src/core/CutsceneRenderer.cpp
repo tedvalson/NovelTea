@@ -44,11 +44,6 @@ void CutsceneRenderer::reset()
 void CutsceneRenderer::update(float delta)
 {
 	auto segments = m_cutscene->segments();
-	if (m_segmentIndex >= segments.size())
-	{
-		m_tweenManager.update(delta);
-		return;
-	}
 
 	delta *= m_cutscene->getSpeedFactor();
 	auto timeDelta = sf::seconds(delta);
@@ -98,16 +93,31 @@ void CutsceneRenderer::click()
 	m_isWaitingForClick = false;
 }
 
-void CutsceneRenderer::setScroll(float position)
+void CutsceneRenderer::setScrollTween(float position, float duration)
 {
+	float targetPos;
 	float minPos = m_size.y - m_margin*2 - m_scrollAreaSize.y - 40.f;
 	if (minPos > 0.f)
 		minPos = 0.f;
 	if (position < minPos)
-		m_scrollPos = minPos;
+		targetPos = minPos;
 	else
-		m_scrollPos = position;
-	repositionItems();
+		targetPos = position;
+
+	if (duration == 0.f) {
+		m_scrollPos = targetPos;
+		updateScrollbar();
+		repositionItems();
+	} else {
+		TweenEngine::Tween::to(*this, _SCROLLPOS, duration)
+			.target(targetPos)
+			.start(m_tweenManager);
+	}
+}
+
+void CutsceneRenderer::setScroll(float position)
+{
+	setScrollTween(position, 0.f);
 }
 
 float CutsceneRenderer::getScroll()
@@ -220,7 +230,11 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			startTransitionEffect(seg);
 			// TODO: no fixed val
 			m_scrollAreaSize.y = m_cursorPos.y + 40.f;
-			updateScrollSize();
+			updateScrollbar();
+
+			if (m_cursorPos.y + 60.f > m_size.y - m_margin*2 - m_scrollPos) {
+				setScrollTween(-m_scrollAreaSize.y, 1.f);
+			}
 			repositionItems();
 		};
 	}
@@ -263,6 +277,31 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		.delay(timeToNext)
 		.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
 		.start(m_tweenManager);
+}
+
+void CutsceneRenderer::setValues(int tweenType, float *newValues)
+{
+	switch (tweenType) {
+		case _SCROLLPOS: {
+			m_scrollPos = newValues[0];
+			updateScrollbar();
+			repositionItems();
+			break;
+		}
+		default:
+			TweenTransformable::setValues(tweenType, newValues);
+	}
+}
+
+int CutsceneRenderer::getValues(int tweenType, float *returnValues)
+{
+	switch (tweenType) {
+	case _SCROLLPOS:
+			returnValues[0] = getScroll();
+		return 1;
+	default:
+		return TweenTransformable::getValues(tweenType, returnValues);
+	}
 }
 
 } // namespace NovelTea

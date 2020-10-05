@@ -6,7 +6,6 @@ namespace NovelTea
 
 Scrollable::Scrollable()
 : m_scrollBar(nullptr)
-, m_scrollVal(0.f)
 {
 
 }
@@ -27,7 +26,7 @@ void Scrollable::detachScrollbar()
 	m_scrollBar = nullptr;
 }
 
-void Scrollable::updateScrollSize()
+void Scrollable::updateScrollbar()
 {
 	if (m_scrollBar)
 		m_scrollBar->markDirty();

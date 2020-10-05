@@ -21,6 +21,8 @@ class ActiveText;
 class CutsceneRenderer : public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>
 {
 public:
+	static const int _SCROLLPOS = 11;
+
 	CutsceneRenderer();
 
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
@@ -31,6 +33,7 @@ public:
 	bool isWaitingForClick() const;
 	void click();
 
+	void setScrollTween(float position, float duration);
 	void setScroll(float position) override;
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
@@ -46,6 +49,9 @@ protected:
 	void startTransitionEffect(const CutsceneTextSegment *segment);
 	void startTransitionEffect(const CutscenePageBreakSegment *segment);
 	void addSegmentToQueue(size_t segmentIndex);
+
+	virtual void setValues(int tweenType, float *newValues) override;
+	virtual int getValues(int tweenType, float *returnValues) override;
 
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
