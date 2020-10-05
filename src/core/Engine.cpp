@@ -68,7 +68,7 @@ void Engine::render(sf::RenderTarget &target)
 
 	target.clear();
 	target.setView(m_view);
-	target.draw(m_sprite);
+	target.draw(m_sprite, sf::BlendNone);
 }
 
 void Engine::update()
