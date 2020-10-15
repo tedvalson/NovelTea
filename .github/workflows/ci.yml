@@ -24,7 +24,6 @@ jobs:
           
     - name: Setup Linux Environment
       if: ${{ runner.os == 'Linux' }}
-      continue-on-error: true
       run: |
         sudo apt install libxrandr-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev
         sudo apt install doxygen libgtest-dev
@@ -60,11 +59,24 @@ jobs:
         mkdir -p doc/github.io/docs
         cmake -DBUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML .
         cmake --build . --config Release --target install
+        zip --junk-paths test.zip bin/NovelTeaLauncher
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: test-artifact-${{ runner.os }}
+        path: test.zip
 
   release:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-    - name: Test
-      run: |
-        echo hi
+    - name: Download Linux artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: test-artifact-Linux
+
+    - name: Download macOS artifacts
+      uses: actions/download-artifact@v1
+      with:
+        name: test-artifact-macOS
