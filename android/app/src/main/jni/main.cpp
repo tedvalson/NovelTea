@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
 
-	Proj.loadFromFile("test.ntp");
-	Save.setDirectory(".");
+	std::string saveDir = getenv("EXTERNAL_STORAGE");
+	if (!saveDir.empty())
+		GSave.setDirectory(saveDir);
 
 	// We shouldn't try drawing to the screen while in background
 	// so we'll have to track that. You can do minor background
@@ -31,12 +32,18 @@ int main(int argc, char *argv[])
 	{
 		sf::Event event;
 
-		while (active ? window.pollEvent(event) : window.waitEvent(event))
+		while (window.isOpen() && (active ? window.pollEvent(event) : window.waitEvent(event)))
 		{
 			if (event.type == sf::Event::Closed)
 				window.close();
 			else if (event.type == sf::Event::Resized)
 				engine->resize(event.size.width, event.size.height);
+			// On Android MouseLeft/MouseEntered are (for now) triggered,
+			// whenever the app loses or gains focus.
+			else if (event.type == sf::Event::MouseLeft)
+				active = false;
+			else if (event.type == sf::Event::MouseEntered)
+				active = true;
 
 			engine->processEvent(event);
 		}
@@ -52,5 +59,5 @@ int main(int argc, char *argv[])
 	}
 	
 	delete engine;
-	return 0;
+	return EXIT_SUCCESS;
 }
