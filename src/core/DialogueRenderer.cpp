@@ -13,10 +13,10 @@ namespace NovelTea
 DialogueRenderer::DialogueRenderer()
 : m_callback(nullptr)
 , m_textLineIndex(-1)
-, m_size(400.f, 400.f)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	m_buttonTexture = texture.get();
+	setSize(sf::Vector2f(400.f, 400.f));
 	setDialogue(std::make_shared<Dialogue>());
 }
 
@@ -30,6 +30,7 @@ void DialogueRenderer::reset()
 {
 	m_isComplete = false;
 	m_tweenManager.killAll();
+	m_text.setText("");
 	changeSegment(m_dialogue->getRootIndex());
 }
 
@@ -204,6 +205,7 @@ bool DialogueRenderer::isComplete() const
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
+	m_text.setSize(size);
 	m_middleY = round(m_size.y / 8);
 }
 
