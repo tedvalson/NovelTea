@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
 
 	sf::RenderWindow window(screen, "");
 	window.setFramerateLimit(30);
+
+	Proj.loadFromFile("demo.ntp");
 	
 	NovelTea::EngineConfig config;
 	config.width = window.getSize().x;
