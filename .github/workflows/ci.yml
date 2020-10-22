@@ -67,6 +67,62 @@ jobs:
         name: test-artifact-${{ runner.os }}
         path: test.zip
 
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Cache Qt and SFML
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ github.workspace }}/Qt
+          SFML/install
+        key: ${{ runner.os }}-NovelTea
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        dir: ${{ github.workspace }}
+        cached: ${{ steps.cache.outputs.cache-hit }}
+
+    - name: Checkout SFML
+      if: ${{ !steps.cache.outputs.cache-hit }}
+      uses: actions/checkout@v2
+      with:
+        repository: SFML/SFML
+        path: SFML
+        ref: '9b596cc8d9240b240c391abb8c784fddbec4e0df'
+
+    - name: Compile SFML
+      if: ${{ !steps.cache.outputs.cache-hit }}
+      run: |
+        cd SFML
+        mkdir install
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install -DSFML_BUILD_FRAMEWORKS=FALSE -DBUILD_SHARED_LIBS=TRUE ..
+        cmake --build . --config Release --target install
+        cd ../..
+        
+    - name: Compile NovelTea
+      run: |
+        mkdir -p install/NovelTea
+        mkdir -p doc/github.io/docs
+        ls -l ./SFML/install/
+        cmake -DBUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/build .
+        cmake --build . --config Release --target install
+        zip --junk-paths test.zip bin/NovelTeaLauncher.exe bin/NovelTeaEditor.exe
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: test-artifact-${{ runner.os }}
+        path: test.zip
+
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -115,7 +171,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: test-artifact-android
-        path: app/build/outputs/apk/release/app-release-unsigned.apk
+        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
   release:
     runs-on: ubuntu-latest
