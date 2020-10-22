@@ -3,6 +3,7 @@
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/AssetManager.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -14,6 +15,12 @@ CutsceneRenderer::CutsceneRenderer()
 , m_skipWaitingForClick(false)
 , m_margin(10.f)
 {
+	auto fadeTexture = AssetManager<sf::Texture>::get("images/fade.png").get();
+	m_fadeRectTop.setTexture(fadeTexture);
+	m_fadeRectTop.setFillColor(sf::Color(200,200,200));
+	m_fadeRectBottom = m_fadeRectTop;
+	m_fadeRectTop.setRotation(180.f);
+
 	setCutscene(std::make_shared<Cutscene>());
 }
 
@@ -21,7 +28,6 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 {
 	m_cutscene = cutscene;
 	reset();
-
 }
 
 void CutsceneRenderer::reset()
@@ -134,6 +140,11 @@ void CutsceneRenderer::repositionItems()
 {
 	m_scrollTransform = sf::Transform::Identity;
 	m_scrollTransform.translate(m_margin, m_margin + round(m_scrollPos));
+
+	m_fadeRectBottom.setSize(sf::Vector2f(998.f, m_margin));
+	m_fadeRectTop.setSize(sf::Vector2f(998.f, m_margin));
+	m_fadeRectTop.setOrigin(m_fadeRectTop.getSize());
+	m_fadeRectBottom.setPosition(0.f, m_size.y - m_margin);
 }
 
 void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
@@ -149,6 +160,9 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 		target.draw(*text, textStates);
 	for (auto &text : m_textsOld)
 		target.draw(*text, textOldStates);
+
+	target.draw(m_fadeRectTop);
+	target.draw(m_fadeRectBottom);
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)

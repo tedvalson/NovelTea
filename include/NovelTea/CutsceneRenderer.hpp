@@ -71,6 +71,9 @@ private:
 	sf::Transform m_scrollTransform;
 	sf::Transform m_scrollTransformOld;
 
+	sf::RectangleShape m_fadeRectTop;
+	sf::RectangleShape m_fadeRectBottom;
+
 	sf::Time m_timePassed;
 	sf::Time m_timeToNext;
 
