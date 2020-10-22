@@ -213,12 +213,17 @@ void ActionBuilder::updateText()
 				objectStr = object->getName();
 				std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
 			}
+			tmpText.setSize(size);
 			tmpText.setText(objectStr, m_textFormat);
 			auto width = tmpText.getCursorEnd().x;
 			rect->setFillColor(m_emptyRectColor);
 			rect->setSize(sf::Vector2f(width, 35.f));
 
 			tmpText.setCursorStart(lastCursorPos);
+			if (lastCursorPos.y != tmpText.getCursorEnd().y) {
+				lastCursorPos = sf::Vector2f(0.f, tmpText.getCursorEnd().y);
+				tmpText.setCursorStart(lastCursorPos);
+			}
 			rect->setPosition(tmpText.getCursorEnd().x - width, tmpText.getCursorEnd().y + 4.f);
 			m_emptyRects.emplace_back(rect);
 			if (objectStr != blankStr)

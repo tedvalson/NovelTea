@@ -10,7 +10,7 @@ namespace NovelTea
 {
 
 ActiveText::ActiveText()
-	: m_size(sf::Vector2f(400.f, 400.f))
+	: m_size(sf::Vector2f(9999.f, 9999.f))
 	, m_alpha(255.f)
 {
 }
