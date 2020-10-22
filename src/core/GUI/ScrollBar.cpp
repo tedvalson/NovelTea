@@ -110,7 +110,7 @@ bool ScrollBar::processEvent(const sf::Event &event)
 	else if (m_isTouching && event.type == sf::Event::MouseButtonReleased)
 	{
 		m_isTouching = false;
-		return m_isScrolling;
+		return m_isScrolling || m_lastTouchPos != m_startTouchPos;
 	}
 	return false;
 }
@@ -135,8 +135,13 @@ void ScrollBar::update(float delta)
 	}
 
 	if (m_isScrolling)
+	{
 		for (auto &obj : m_scrollObjects)
 			obj->setScroll(m_scrollPos);
+		// If scrolling, and finger stops for a certain time, stop scroll
+		if (m_clockVelocity.getElapsedTime().asSeconds() > 0.1f)
+			m_isScrolling = false;
+	}
 
 	if (m_scrollPos > m_scrollPosMax)
 		setScroll(m_scrollPosMax);
