@@ -98,13 +98,18 @@ void ScriptManager::runScriptId(const std::string &scriptId)
 	runScript(m_game->getSaveData().get<Script>(scriptId));
 }
 
-void ScriptManager::runActionScript(const std::vector<std::string> &objectIds, const std::string &script)
+bool ScriptManager::runActionScript(const std::vector<std::string> &objectIds, const std::string &script)
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
 		objects.push_back(m_game->getSaveData().get<Object>(objectId));
-	auto s = "function f(object1,object2,object3,object4){"+script+"}";
-	call(s, "f", objects[0]);
+	auto s = "function f(object1,object2,object3,object4){\n"+script+"\nreturn true;}";
+	try {
+		return call<bool>(s, "f", objects[0]);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return false;
+	}
 }
 
 void ScriptManager::registerFunctions()

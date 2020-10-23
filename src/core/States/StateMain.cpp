@@ -302,7 +302,6 @@ void StateMain::processTestSteps()
 
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
-	auto success = true;
 	auto action = Action::find(verbId, objectIds);
 	auto verb = GSave.get<Verb>(verbId);
 
@@ -310,19 +309,20 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 		if (!GGame.getRoom()->containsId(objectId) && !GGame.getObjectList()->containsId(objectId))
 			return false;
 
+	auto success = ScriptMan.runActionScript(objectIds, ProjData[ID::scriptBeforeAction].ToString());
+	if (!success)
+		return false;
+
 	if (action)
-	{
-		ScriptMan.runActionScript(objectIds, action->getScript());
-	}
+		success = ScriptMan.runActionScript(objectIds, action->getScript());
 	else if (!verb->getScriptDefault().empty())
-	{
-		ScriptMan.runActionScript(objectIds, verb->getScriptDefault());
-	}
+		success = ScriptMan.runActionScript(objectIds, verb->getScriptDefault());
 	else
-	{
-		success = false;
-		std::cout << "Nothing happened." << std::endl;
-	}
+		success = ScriptMan.runActionScript(objectIds, ProjData[ID::scriptUndefinedAction].ToString());
+
+	if (!success)
+		return false;
+	success = ScriptMan.runActionScript(objectIds, ProjData[ID::scriptAfterAction].ToString());
 
 	if (success)
 	{

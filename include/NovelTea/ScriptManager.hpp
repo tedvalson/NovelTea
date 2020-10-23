@@ -19,7 +19,7 @@ public:
 	void runScript(std::shared_ptr<Script> script);
 	void runScriptId(const std::string &scriptId);
 
-	void runActionScript(const std::vector<std::string> &objectIds, const std::string &script);
+	bool runActionScript(const std::vector<std::string> &objectIds, const std::string &script);
 
 	inline void run(const std::string &script)
 	{

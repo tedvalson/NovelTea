@@ -28,6 +28,9 @@ namespace ID
 	const auto projectFonts       = "fonts";
 	const auto projectFontDefault = "fontDefault";
 	const auto entrypointEntity   = "entrypoint";
+	const auto scriptAfterAction  = "saa";
+	const auto scriptBeforeAction = "sba";
+	const auto scriptUndefinedAction = "sua";
 	const auto selectEntityType   = 0;
 	const auto selectEntityId     = 1;
 	const auto entityId           = 0;
