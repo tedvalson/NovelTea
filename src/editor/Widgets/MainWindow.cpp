@@ -83,7 +83,7 @@ bool MainWindow::loadProject(const QString &filename)
 
 bool MainWindow::reloadProject()
 {
-	loadProject(QString::fromStdString(Proj.filename()));
+	return loadProject(QString::fromStdString(Proj.filename()));
 }
 
 bool MainWindow::closeProject()
