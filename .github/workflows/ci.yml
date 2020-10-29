@@ -66,7 +66,9 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: test-artifact-${{ runner.os }}
-        path: bin/
+        path: |
+          bin/
+          res/assets/
 
   build-android:
     runs-on: ubuntu-latest
