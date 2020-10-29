@@ -61,11 +61,9 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 			objectIds.push_back(m_selectedObjectId);
 			if (action)
 			{
-				ScriptMan.runActionScript(objectIds, action->getScript());
 			}
 			else if (!verb->getScriptDefault().empty())
 			{
-				ScriptMan.runActionScript(objectIds, verb->getScriptDefault());
 			}
 		}
 		m_actionBuilder.hide();

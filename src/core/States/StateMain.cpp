@@ -309,20 +309,20 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 		if (!GGame.getRoom()->containsId(objectId) && !GGame.getObjectList()->containsId(objectId))
 			return false;
 
-	auto success = ScriptMan.runActionScript(objectIds, ProjData[ID::scriptBeforeAction].ToString());
+	auto success = ScriptMan.runActionScript(verbId, objectIds, ProjData[ID::scriptBeforeAction].ToString());
 	if (!success)
 		return false;
 
 	if (action)
-		success = ScriptMan.runActionScript(objectIds, action->getScript());
+		success = action->runScript();
 	else if (!verb->getScriptDefault().empty())
-		success = ScriptMan.runActionScript(objectIds, verb->getScriptDefault());
+		success = ScriptMan.runActionScript(verbId, objectIds, verb->getScriptDefault());
 	else
-		success = ScriptMan.runActionScript(objectIds, ProjData[ID::scriptUndefinedAction].ToString());
+		success = ScriptMan.runActionScript(verbId, objectIds, ProjData[ID::scriptUndefinedAction].ToString());
 
 	if (!success)
 		return false;
-	success = ScriptMan.runActionScript(objectIds, ProjData[ID::scriptAfterAction].ToString());
+	success = ScriptMan.runActionScript(verbId, objectIds, ProjData[ID::scriptAfterAction].ToString());
 
 	if (success)
 	{

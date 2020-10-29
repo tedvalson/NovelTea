@@ -98,14 +98,25 @@ void ScriptManager::runScriptId(const std::string &scriptId)
 	runScript(m_game->getSaveData().get<Script>(scriptId));
 }
 
-bool ScriptManager::runActionScript(const std::vector<std::string> &objectIds, const std::string &script)
+bool ScriptManager::runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script)
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
 		objects.push_back(m_game->getSaveData().get<Object>(objectId));
-	auto s = "function f(object1,object2,object3,object4){\n"+script+"\nreturn true;}";
+	auto verb = m_game->getSaveData().get<Verb>(verbId);
+	auto objectCount = objects.size();
+	auto s = "function f(verb,object1,object2,object3,object4){\n"+script+"\nreturn true;}";
 	try {
-		return call<bool>(s, "f", objects[0]);
+		if (objectCount == 0)
+			return call<bool>(s, "f", verb);
+		else if (objectCount == 1)
+			return call<bool>(s, "f", verb, objects[0]);
+		else if (objectCount == 2)
+			return call<bool>(s, "f", verb, objects[0], objects[1]);
+		else if (objectCount == 3)
+			return call<bool>(s, "f", verb, objects[0], objects[1], objects[2]);
+		else
+			return call<bool>(s, "f", verb, objects[0], objects[1], objects[2], objects[3]);
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return false;

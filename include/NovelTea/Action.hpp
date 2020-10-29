@@ -18,6 +18,8 @@ public:
 	void setVerbObjectCombo(const json &j);
 	json getVerbObjectCombo() const;
 
+	bool runScript();
+
 	static std::shared_ptr<Action> find(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	static constexpr auto id = "action";

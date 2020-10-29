@@ -75,6 +75,18 @@ json Action::getVerbObjectCombo() const
 	return j;
 }
 
+bool Action::runScript()
+{
+	if (m_script.empty())
+		return true;
+	if (!m_parentId.empty()) {
+		auto parentAction = GSave.get<Action>(m_parentId);
+		if (parentAction && !ActiveGame->getScriptManager().runActionScript(m_verbId, m_objectIds, parentAction->getScript()))
+			return false;
+	}
+	return ActiveGame->getScriptManager().runActionScript(m_verbId, m_objectIds, m_script);
+}
+
 std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
 	// TODO: check SaveData
