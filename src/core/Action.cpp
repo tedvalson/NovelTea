@@ -75,16 +75,21 @@ json Action::getVerbObjectCombo() const
 	return j;
 }
 
-bool Action::runScript()
+bool Action::runScript(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
 	if (m_script.empty())
 		return true;
 	if (!m_parentId.empty()) {
 		auto parentAction = GSave.get<Action>(m_parentId);
-		if (parentAction && !ActiveGame->getScriptManager().runActionScript(m_verbId, m_objectIds, parentAction->getScript()))
+		if (parentAction && !parentAction->runScript(verbId, objectIds))
 			return false;
 	}
-	return ActiveGame->getScriptManager().runActionScript(m_verbId, m_objectIds, m_script);
+	return ActiveGame->getScriptManager().runActionScript(verbId, objectIds, m_script);
+}
+
+bool Action::runScript()
+{
+	return runScript(m_verbId, m_objectIds);
 }
 
 std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vector<std::string> &objectIds)

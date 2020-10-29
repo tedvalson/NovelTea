@@ -19,6 +19,7 @@ public:
 	json getVerbObjectCombo() const;
 
 	bool runScript();
+	bool runScript(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	static std::shared_ptr<Action> find(const std::string &verbId, const std::vector<std::string> &objectIds);
 
