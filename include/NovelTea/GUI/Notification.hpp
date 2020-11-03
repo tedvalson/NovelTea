@@ -12,10 +12,10 @@ public:
 	Notification();
 	~Notification();
 
-	void animate(float duration = m_durationDefault);
+	void animate(float duration);
 
 	static void update(float delta);
-	static void spawn(const std::string &message);
+	static void spawn(const std::string &message, int durationMs = 0);
 	static void setScreenSize(const sf::Vector2f &size);
 
 	static std::vector<std::unique_ptr<Notification>> notifications;
@@ -24,9 +24,6 @@ private:
 	static std::shared_ptr<sf::Texture> m_texture;
 	static sf::Vector2f m_spawnPosition;
 	static float m_spawnOffsetY;
-
-	static float m_spacing;
-	static float m_durationDefault;
 
 	bool m_markForDelete;
 	TweenEngine::TweenManager m_tweenManager;

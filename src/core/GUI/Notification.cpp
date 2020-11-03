@@ -10,9 +10,13 @@ std::shared_ptr<sf::Texture> Notification::m_texture = nullptr;
 sf::Vector2f Notification::m_spawnPosition;
 std::vector<std::unique_ptr<Notification>> Notification::notifications;
 float Notification::m_spawnOffsetY = 0.f;
-float Notification::m_durationDefault = 5.f;
-float Notification::m_spacing = 2.f;
 
+namespace
+{
+	float spacing = 2.f;
+	int durationBaseDefault = 2000;
+	int durationPerLetter = 20;
+}
 
 Notification::Notification()
 : m_markForDelete(false)
@@ -36,7 +40,7 @@ void Notification::update(float delta)
 	{
 		if ((*i)->m_markForDelete)
 		{
-			float offsetY = (*i)->getSize().y + m_spacing;
+			float offsetY = (*i)->getSize().y + spacing;
 			m_spawnOffsetY -= offsetY;
 			for (auto j = i+1; j != notifications.end(); j++)
 			{
@@ -55,14 +59,16 @@ void Notification::update(float delta)
 }
 
 
-void Notification::spawn(const std::string &message)
+void Notification::spawn(const std::string &message, int durationMs)
 {
+	if (durationMs <= 0)
+		durationMs = durationBaseDefault + message.size() * durationPerLetter;
 	auto notification = new Notification;
 	notification->setString(message);
 	notification->setPosition(round((m_spawnPosition.x - notification->getSize().x) / 2.f),
 							  round(m_spawnPosition.y + m_spawnOffsetY));
-	m_spawnOffsetY += m_spacing + notification->getSize().y;
-	notification->animate();
+	m_spawnOffsetY += spacing + notification->getSize().y;
+	notification->animate(0.001f * durationMs);
 	notifications.emplace_back(notification);
 }
 

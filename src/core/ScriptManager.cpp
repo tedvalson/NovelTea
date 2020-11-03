@@ -126,7 +126,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 void ScriptManager::registerFunctions()
 {
 	dukglue_register_function(m_context, print, "print");
-	dukglue_register_function(m_context, Notification::spawn, "toast");
+	dukglue_register_function(m_context, Notification::spawn, "spawnNotification");
 }
 
 void ScriptManager::registerClasses()
@@ -157,6 +157,7 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &PropertyList::get, "get");
 
 	// Timer
+	dukglue_register_method(m_context, &Timer::kill, "kill");
 	dukglue_register_property(m_context, &Timer::getRepeat, &Timer::setRepeat, "repeat");
 	dukglue_register_property(m_context, &Timer::getDuration, &Timer::setDuration, "duration");
 
@@ -201,6 +202,7 @@ void ScriptManager::registerGlobals()
 {
 	// Save
 	dukglue_register_global(m_context, &m_game->getSaveData(), "Save");
+	dukglue_register_method(m_context, &SaveData::set, "saveEntity");
 	dukglue_register_method(m_context, &SaveData::save, "saveSlot");
 	dukglue_register_method(m_context, &SaveData::load, "loadSlot");
 	dukglue_register_method(m_context, &SaveData::writeVariables, "writeVariables");
