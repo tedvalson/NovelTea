@@ -238,6 +238,13 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		{
 			auto activeText = seg->getActiveText();
 			activeText->setSize(sf::Vector2f(m_size.x - m_margin*2, 0.f));
+			if (seg->getBeginWithNewLine()) {
+				m_cursorPos.x = 0.f;
+				m_cursorPos.y = m_scrollAreaSize.y - activeText->getLineSpacing();
+			}
+			m_cursorPos.x += seg->getOffsetX();
+			m_cursorPos.y += seg->getOffsetY();
+
 			activeText->setCursorStart(m_cursorPos);
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getDelay());

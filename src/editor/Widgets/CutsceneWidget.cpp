@@ -17,6 +17,7 @@ Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 #define TRANSITION_EFFECT "Transition Effect"
 #define TRANSITION_DURATION "Transition Duration"
 #define SEGMENT_DELAY "Delay"
+#define OFFSET "Offset"
 #define WAIT_FOR_CLICK "Wait for click"
 #define SCRIPT_OVERRIDE_NAME "Variable or Function"
 #define FULLSCREEN "Full Screen"
@@ -127,6 +128,10 @@ void CutsceneWidget::fillPropertyEditor()
 		prop->setValue(textSegment->getBeginWithNewLine());
 		ui->propertyBrowser->addProperty(prop);
 
+		prop = segmentsVariantManager->addProperty(QVariant::Point, OFFSET);
+		prop->setValue(QPoint(textSegment->getOffsetX(), textSegment->getOffsetY()));
+		ui->propertyBrowser->addProperty(prop);
+
 		auto showBrowser = [this]() {
 			ui->richTextEditor->hide();
 			ui->propertyBrowser->show();
@@ -166,9 +171,6 @@ void CutsceneWidget::fillPropertyEditor()
 
 	prop = segmentsVariantManager->addProperty(QVariant::Bool, WAIT_FOR_CLICK);
 	prop->setValue(segment->getWaitForClick());
-	subProp = segmentsVariantManager->addProperty(QVariant::String, SCRIPT_OVERRIDE_NAME);
-	subProp->setValue(QString::fromStdString(segment->getScriptOverrideName()));
-	prop->addSubProperty(subProp);
 	ui->propertyBrowser->addProperty(prop);
 
 	connect(segmentsVariantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::segmentPropertyChanged);
@@ -327,6 +329,11 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 			textSegment->setBeginWithNewLine(value.toBool());
 		else if (propertyName == TRANSITION_EFFECT)
 			textSegment->setTransition(value.toInt());
+		else if (propertyName == OFFSET) {
+			auto point = value.toPoint();
+			textSegment->setOffsetX(point.x());
+			textSegment->setOffsetY(point.y());
+		}
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
 	{

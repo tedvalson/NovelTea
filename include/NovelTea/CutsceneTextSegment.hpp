@@ -23,11 +23,15 @@ public:
 	void setActiveText(const std::shared_ptr<ActiveText> &activeText);
 	const std::shared_ptr<ActiveText> &getActiveText() const;
 
+	ADD_ACCESSOR(int, OffsetX, m_offsetX)
+	ADD_ACCESSOR(int, OffsetY, m_offsetY)
 	ADD_ACCESSOR(int, Transition, m_transition)
 	ADD_ACCESSOR(bool, BeginWithNewLine, m_beginWithNewline)
 
 private:
 	bool m_beginWithNewline = false;
+	int m_offsetX;
+	int m_offsetY;
 	int m_transition = Fade;
 	std::shared_ptr<ActiveText> m_activeText;
 };

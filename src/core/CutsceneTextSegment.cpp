@@ -17,6 +17,8 @@ json CutsceneTextSegment::toJson() const
 		m_transition,
 		getDuration(),
 		getDelay(),
+		getOffsetX(),
+		getOffsetY(),
 		m_beginWithNewline,
 		m_activeText->toJson()
 	);
@@ -30,9 +32,11 @@ bool CutsceneTextSegment::fromJson(const json &j)
 	m_transition = j[3].ToInt();
 	setDuration(j[4].ToInt());
 	setDelay(j[5].ToInt());
-	m_beginWithNewline = j[6].ToBool();
+	setOffsetX(j[6].ToInt());
+	setOffsetY(j[7].ToInt());
+	m_beginWithNewline = j[8].ToBool();
 	m_activeText = std::make_shared<ActiveText>();
-	m_activeText->fromJson(j[7]);
+	m_activeText->fromJson(j[9]);
 	return true;
 }
 
