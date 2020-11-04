@@ -14,6 +14,7 @@ namespace NovelTea
 {
 
 class Cutscene;
+class CutsceneSegment;
 class CutsceneTextSegment;
 class CutscenePageBreakSegment;
 class ActiveText;
@@ -55,6 +56,7 @@ protected:
 
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
+	std::shared_ptr<CutsceneSegment> m_currentSegment;
 	size_t m_segmentIndex;
 	bool m_isComplete;
 	bool m_isWaitingForClick;

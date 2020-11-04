@@ -32,6 +32,7 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 
 void CutsceneRenderer::reset()
 {
+	m_currentSegment = nullptr;
 	m_isComplete = false;
 	m_isWaitingForClick = false;
 	m_segmentIndex = 0;
@@ -94,9 +95,12 @@ bool CutsceneRenderer::isWaitingForClick() const
 void CutsceneRenderer::click()
 {
 	if (m_isWaitingForClick) {
+		m_isWaitingForClick = false;
 		addSegmentToQueue(m_segmentIndex + 1);
+	} else {
+		if (m_currentSegment && m_currentSegment->type() != CutsceneSegment::PageBreak)
+			update(m_timeToNext.asSeconds());
 	}
-	m_isWaitingForClick = false;
 }
 
 void CutsceneRenderer::setScrollTween(float position, float duration)
@@ -224,6 +228,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		return;
 
 	auto segment = segments[segmentIndex];
+	m_currentSegment = segment;
 	auto type = segment->type();
 
 	TweenEngine::TweenCallbackFunction beginCallback, endCallback;
