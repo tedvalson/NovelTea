@@ -2549,6 +2549,7 @@ void QtRichTextEditWidget::setRichTextEditor(RichTextEditor *widget)
 	m_widget = widget;
 	connect(widget, &RichTextEditor::saved, this, &QtRichTextEditWidget::setValue);
 	connect(widget, &RichTextEditor::saved, this, &QtRichTextEditWidget::valueChanged);
+	connect(widget, &RichTextEditor::changed, this, &QtRichTextEditWidget::valueChanged);
 }
 
 bool QtRichTextEditWidget::eventFilter(QObject *obj, QEvent *ev)

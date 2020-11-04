@@ -321,7 +321,6 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		if (propertyName == TEXT_TEXT)
 		{
 			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
-			ui->richTextEditor->setValue(activeText);
 			itemModel->setData(itemModel->index(selectedIndex, 1), QString::fromStdString(activeText->toPlainText()));
 			textSegment->setActiveText(activeText);
 		}

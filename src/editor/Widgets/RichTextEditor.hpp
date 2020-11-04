@@ -29,6 +29,7 @@ public:
 protected:
 	void fontChanged(const QFont &font);
 	void colorChanged(const QColor &color);
+	void timerEvent(QTimerEvent *event) override;
 
 private slots:
 	void on_actionFinish_triggered();
@@ -36,15 +37,19 @@ private slots:
 	void on_actionItalic_triggered();
 	void on_actionUnderline_triggered();
 	void on_textEdit_currentCharFormatChanged(const QTextCharFormat &format);
+	void on_spinBox_valueChanged(int arg1);
+	void on_textEdit_textChanged();
 
 signals:
 	void invoked();
 	void saved(const std::shared_ptr<NovelTea::ActiveText> &data);
+	void changed(const std::shared_ptr<NovelTea::ActiveText> &data);
 	void canceled();
 	
 private:
 	Ui::RichTextEditor *ui;
 	std::shared_ptr<NovelTea::ActiveText> m_activeText;
+	bool m_isChanged;
 };
 
 #endif // RICHTEXTEDITOR_HPP

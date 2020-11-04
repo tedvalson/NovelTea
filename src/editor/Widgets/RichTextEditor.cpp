@@ -9,11 +9,12 @@
 
 RichTextEditor::RichTextEditor(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::RichTextEditor)
+	ui(new Ui::RichTextEditor),
+	m_isChanged(false)
 {
 	ui->setupUi(this);
-
-	ui->textEdit->setText("test test test test");
+	ui->toolBarText->insertWidget(ui->actionFinish, ui->spinBox);
+	startTimer(1000);
 }
 
 RichTextEditor::~RichTextEditor()
@@ -39,6 +40,7 @@ void RichTextEditor::setValue(const std::shared_ptr<NovelTea::ActiveText> &text)
 {
 	auto doc = activeTextToDocument(text);
 	ui->textEdit->setDocument(doc);
+	m_isChanged = false;
 }
 
 std::shared_ptr<NovelTea::ActiveText> RichTextEditor::getValue() const
@@ -158,6 +160,15 @@ void RichTextEditor::colorChanged(const QColor &color)
 	QPixmap pix(16, 16);
 	pix.fill(color);
 //	actionTextColor->setIcon(pix);
+
+}
+
+void RichTextEditor::timerEvent(QTimerEvent *event)
+{
+	if (m_isChanged) {
+		m_isChanged = false;
+		emit changed(documentToActiveText(ui->textEdit->document()));
+	}
 }
 
 void RichTextEditor::on_actionFinish_triggered()
@@ -180,20 +191,40 @@ void RichTextEditor::on_actionBold_triggered()
 	QTextCharFormat fmt;
 	fmt.setFontWeight(ui->actionBold->isChecked() ? QFont::Bold : QFont::Normal);
 	mergeFormat(fmt);
+	m_isChanged = true;
 }
 
 void RichTextEditor::on_actionItalic_triggered()
 {
-
+	QTextCharFormat fmt;
+	fmt.setFontItalic(ui->actionItalic->isChecked());
+	mergeFormat(fmt);
+	m_isChanged = true;
 }
 
 void RichTextEditor::on_actionUnderline_triggered()
 {
-
+	QTextCharFormat fmt;
+	fmt.setFontUnderline(ui->actionUnderline->isChecked());
+	mergeFormat(fmt);
+	m_isChanged = true;
 }
 
 void RichTextEditor::on_textEdit_currentCharFormatChanged(const QTextCharFormat &format)
 {
 	fontChanged(format.font());
 	colorChanged(format.foreground().color());
+}
+
+void RichTextEditor::on_spinBox_valueChanged(int arg1)
+{
+	QTextCharFormat fmt;
+	fmt.setFontPointSize(arg1);
+	mergeFormat(fmt);
+	m_isChanged = true;
+}
+
+void RichTextEditor::on_textEdit_textChanged()
+{
+	m_isChanged = true;
 }

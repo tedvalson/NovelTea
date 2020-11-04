@@ -68,6 +68,9 @@ p, li { white-space: pre-wrap; }
      <addaction name="actionFinish"/>
     </widget>
    </item>
+   <item>
+    <widget class="QSpinBox" name="spinBox"/>
+   </item>
   </layout>
   <action name="actionBold">
    <property name="checkable">
