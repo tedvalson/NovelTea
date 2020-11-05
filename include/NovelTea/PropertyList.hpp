@@ -26,7 +26,8 @@ public:
 private:
 	std::string m_attachedType;
 	std::string m_attachedId;
-	sj::JSON m_properties;
+	sj::JSON m_projectProperties;
+	sj::JSON m_savedProperties;
 };
 
 } // namespace NovelTea

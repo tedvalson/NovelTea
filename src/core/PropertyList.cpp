@@ -8,7 +8,8 @@ namespace NovelTea
 {
 
 PropertyList::PropertyList()
-	: m_properties(sj::Object())
+	: m_projectProperties(sj::Object())
+	, m_savedProperties(sj::Object())
 {
 }
 
@@ -27,15 +28,16 @@ DukValue PropertyList::get(const std::string &key, const DukValue &defaultValue)
 		return parentPropertyList->get(key, defaultValue);
 	}
 
+	auto props = m_savedProperties.hasKey(key) ? &m_savedProperties : &m_projectProperties;
 	auto ctx = defaultValue.context();
 	auto fn = dukglue_peval<DukValue>(ctx, "_jsonGet");
-	auto result = dukglue_pcall<DukValue>(ctx, fn, m_properties.dump(), key);
+	auto result = dukglue_pcall<DukValue>(ctx, fn, props->dump(), key);
 	return (result.type() == DukValue::UNDEFINED) ? defaultValue : result;
 }
 
 void PropertyList::set(const std::string &key, const DukValue &value)
 {
-	auto &j = m_properties[key];
+	auto &j = m_savedProperties[key];
 
 	if (value.type() == DukValue::NUMBER)
 		j = value.as_double();
@@ -49,7 +51,7 @@ void PropertyList::set(const std::string &key, const DukValue &value)
 
 bool PropertyList::contains(const std::string &key) const
 {
-	return m_properties.hasKey(key);
+	return m_savedProperties.hasKey(key) || m_projectProperties.hasKey(key);
 }
 
 void PropertyList::attach(const std::string &type, const std::string &id)
@@ -57,10 +59,13 @@ void PropertyList::attach(const std::string &type, const std::string &id)
 	m_attachedType = type;
 	m_attachedId = id;
 
+	auto &jEntities = GSave.data()[ID::properties][type];
+	m_projectProperties = ProjData[type][id][ID::entityProperties];
+
 	// If no properties in list, load from SaveData.
 	// Otherwise, save the existing ones.
-	if (m_properties.IsEmpty())
-		m_properties = GSave.data()[ID::properties][type][id];
+	if (m_savedProperties.IsEmpty() && jEntities.hasKey(id))
+		m_savedProperties = jEntities[id];
 	else
 		saveChanges();
 }
@@ -70,7 +75,8 @@ void PropertyList::saveChanges()
 	if (m_attachedType.empty())
 		return;
 
-	GSave.data()[ID::properties][m_attachedType][m_attachedId] = m_properties;
+	if (!m_savedProperties.IsEmpty())
+		GSave.data()[ID::properties][m_attachedType][m_attachedId] = m_savedProperties;
 }
 
 } // namespace NovelTea

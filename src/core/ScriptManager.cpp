@@ -205,8 +205,6 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &SaveData::set, "saveEntity");
 	dukglue_register_method(m_context, &SaveData::save, "saveSlot");
 	dukglue_register_method(m_context, &SaveData::load, "loadSlot");
-	dukglue_register_method(m_context, &SaveData::writeVariables, "writeVariables");
-	dukglue_register_method(m_context, &SaveData::readVariables, "readVariables");
 
 	// Game
 	dukglue_register_global(m_context, m_game, "Game");

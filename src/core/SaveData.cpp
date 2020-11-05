@@ -79,31 +79,13 @@ std::string SaveData::getParentId(const std::string &entityType, const std::stri
 	return j[1].ToString();
 }
 
-void getProjectProps(json &j, const std::string &typeId)
-{
-	for (auto &item : ProjData[typeId].ObjectRange())
-	{
-		auto &jprops = item.second[ID::entityProperties];
-		if (!jprops.IsEmpty())
-			j[typeId][item.first] = jprops;
-	}
-}
-
 void SaveData::reset()
 {
 	if (!Proj.isLoaded())
 		return;
 	m_json = sj::Object();
 	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
-
-	auto &jprops = m_json[ID::properties];
-	getProjectProps(jprops, Action::id);
-	getProjectProps(jprops, Cutscene::id);
-	getProjectProps(jprops, Dialogue::id);
-	getProjectProps(jprops, Object::id);
-	getProjectProps(jprops, Room::id);
-	getProjectProps(jprops, Script::id);
-	getProjectProps(jprops, Verb::id);
+	m_json[ID::properties] = sj::Object();
 }
 
 json SaveData::toJson() const
@@ -130,31 +112,6 @@ const json &SaveData::data() const
 json &SaveData::data()
 {
 	return m_json;
-}
-
-void SaveData::writeVariables(const std::string &jsonData)
-{
-	auto j = json::Load(jsonData);
-	for (auto &item : j.ObjectRange())
-	{
-		m_json[ID::variables][item.first] = item.second;
-	}
-}
-
-std::string SaveData::readVariables(const std::string &jsonData)
-{
-	auto j = json::Load(jsonData);
-	auto result = sj::Object();
-	for (auto &v : j.ArrayRange())
-	{
-		auto varName = v.ToString();
-		auto d = m_json[ID::variables];
-		if (d.hasKey(varName))
-			result[varName] = d[varName];
-		else
-			result[varName] = nullptr;
-	}
-	return result.dump();
 }
 
 void SaveData::setDirectory(const std::string &path)

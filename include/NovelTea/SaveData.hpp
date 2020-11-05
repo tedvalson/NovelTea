@@ -31,9 +31,6 @@ public:
 	const json &data() const;
 	json &data();
 
-	void writeVariables(const std::string &jsonData);
-	std::string readVariables(const std::string &jsonData);
-
 	void setDirectory(const std::string &path);
 	const std::string &getDirectory() const;
 
@@ -61,6 +58,8 @@ public:
 				result->fromJson(data()[T::id][idName]);
 			else
 				result->fromJson(ProjData[T::id][idName]);
+		} else {
+			std::cerr << "Warning: Entity doesn't exist - " << T::id << " '" << idName << "'" << std::endl;
 		}
 		return result;
 	}
