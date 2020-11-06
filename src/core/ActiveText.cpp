@@ -11,6 +11,7 @@ namespace NovelTea
 
 ActiveText::ActiveText()
 	: m_size(sf::Vector2f(9999.f, 9999.f))
+	, m_lineSpacing(5.f)
 	, m_alpha(255.f)
 {
 }
@@ -224,6 +225,29 @@ float ActiveText::getTextWidth() const
 	return width;
 }
 
+sf::FloatRect ActiveText::getLocalBounds() const
+{
+	ensureUpdate();
+	return m_bounds;
+}
+
+sf::FloatRect ActiveText::getGlobalBounds() const
+{
+	ensureUpdate();
+	return getTransform().transformRect(m_bounds);
+}
+
+void ActiveText::setLineSpacing(float lineSpacing)
+{
+	m_needsUpdate = true;
+	m_lineSpacing = lineSpacing;
+}
+
+float ActiveText::getLineSpacing() const
+{
+	return m_lineSpacing;
+}
+
 void ActiveText::setCursorStart(const sf::Vector2f &cursorPos)
 {
 	m_needsUpdate = true;
@@ -277,13 +301,15 @@ void ActiveText::ensureUpdate() const
 	m_cursorPos = m_cursorStart;
 	m_segments.clear();
 	m_debugSegmentShapes.clear();
+	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y);
 
 	for (auto &block : blocks())
 	{
 		if (processedFirstBlock)
 		{
 			m_cursorPos.x = 0.f;
-			m_cursorPos.y += 30.f; // TODO: don't used fixed line height
+			m_bounds.height += 12.f*2 + m_lineSpacing;
+			m_cursorPos.y = m_bounds.height - 12.f + m_lineSpacing;
 		}
 		else
 			processedFirstBlock = true;
@@ -338,11 +364,17 @@ void ActiveText::ensureUpdate() const
 					if (newX > m_size.x && m_cursorPos.x > 0.f)
 					{
 						m_cursorPos.x = 0.f;
+						if (m_bounds.height == m_bounds.top)
+							m_cursorPos.y += text.getCharacterSize() + m_lineSpacing;
+						else
+							m_cursorPos.y = m_bounds.height - 12.f + m_lineSpacing;
 					}
 
 					text.setPosition(m_cursorPos);
 					m_cursorPos.x += text.getLocalBounds().width;
 
+					m_bounds.width = std::max(m_bounds.width, m_cursorPos.x);
+					m_bounds.height = std::max(m_bounds.height, m_cursorPos.y + text.getLocalBounds().height + padding*2);
 					auto bounds = sf::FloatRect(
 								text.getGlobalBounds().left - padding,
 								text.getGlobalBounds().top - padding,
@@ -363,7 +395,8 @@ void ActiveText::ensureUpdate() const
 	m_debugBorder.setFillColor(sf::Color::Transparent);
 	m_debugBorder.setOutlineColor(sf::Color::Red);
 	m_debugBorder.setOutlineThickness(2.f);
-	m_debugBorder.setSize(m_size);
+	m_debugBorder.setSize(sf::Vector2f(m_bounds.width, m_bounds.height - m_bounds.top));
+	m_debugBorder.setPosition(m_bounds.left, m_bounds.top);
 
 	m_needsUpdate = false;
 }

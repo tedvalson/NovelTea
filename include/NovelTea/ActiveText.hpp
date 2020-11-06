@@ -43,6 +43,12 @@ public:
 
 	float getTextWidth() const;
 
+	sf::FloatRect getLocalBounds() const;
+	sf::FloatRect getGlobalBounds() const;
+
+	void setLineSpacing(float lineSpacing);
+	float getLineSpacing() const;
+
 	void setCursorStart(const sf::Vector2f &cursorPos);
 	const sf::Vector2f &getCursorEnd() const;
 
@@ -59,10 +65,12 @@ private:
 	std::vector<std::shared_ptr<TextBlock>> m_textBlocks;
 	mutable std::vector<Segment> m_segments;
 	mutable sf::Vector2f m_cursorPos;
+	mutable sf::FloatRect m_bounds;
 	sf::Vector2f m_cursorStart;
 	sf::Vector2f m_size;
 	std::string m_string;
 	mutable bool m_needsUpdate = true;
+	float m_lineSpacing;
 	float m_alpha;
 
 	mutable sf::RectangleShape m_debugBorder;
