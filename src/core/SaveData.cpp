@@ -85,7 +85,22 @@ void SaveData::reset()
 		return;
 	m_json = sj::Object();
 	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
+	m_json[ID::roomDescriptions] = sj::Object();
 	m_json[ID::properties] = sj::Object();
+	resetRoomDescriptions();
+}
+
+std::string SaveData::roomDescription(const std::string &id, const std::string &newDescription)
+{
+	auto &j = m_json[ID::roomDescriptions];
+	auto prevDescription = j.hasKey(id) ? j[id].ToString(): "";
+	j[id] = newDescription;
+	return diff(prevDescription, newDescription);
+}
+
+void SaveData::resetRoomDescriptions()
+{
+	m_json[ID::roomDescriptions] = sj::Object();
 }
 
 json SaveData::toJson() const

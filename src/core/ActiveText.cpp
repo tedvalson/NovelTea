@@ -74,6 +74,32 @@ std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::St
 	return v;
 }
 
+std::vector<std::pair<bool, std::string>> getNewTextPairs(const sf::String &s)
+{
+	std::vector<std::pair<bool, std::string>> v;
+
+	size_t searchPos = 0,
+		   processedPos = 0,
+		   startPos;
+
+	while ((startPos = s.find("^[", searchPos)) != sf::String::InvalidPos)
+	{
+		auto endPos = s.find("]^", startPos);
+		if (endPos == sf::String::InvalidPos)
+			break;
+		auto text = s.substring(startPos + 2, endPos - startPos - 2);
+		if (startPos != processedPos)
+			v.emplace_back(false, s.substring(processedPos, startPos - processedPos));
+		v.emplace_back(true, text);
+		processedPos = searchPos = endPos + 2;
+	}
+
+	// Push remaining unprocessed string
+	if (processedPos < s.getSize())
+		v.emplace_back(false, s.substring(processedPos));
+	return v;
+}
+
 json ActiveText::toJson() const
 {
 	json j = sj::Array();
@@ -123,6 +149,8 @@ std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
 
 void ActiveText::setText(const std::string &text, const TextFormat &format)
 {
+	if (m_string == text)
+		return;
 	m_textBlocks.clear();
 
 	auto lines = split(text);
@@ -137,6 +165,7 @@ void ActiveText::setText(const std::string &text, const TextFormat &format)
 		addBlock(block);
 	}
 
+	m_string = text;
 	setAlpha(m_alpha);
 }
 
@@ -148,6 +177,7 @@ const std::vector<std::shared_ptr<TextBlock>> &ActiveText::blocks() const
 void ActiveText::addBlock(std::shared_ptr<TextBlock> block, int index)
 {
 	m_needsUpdate = true;
+	m_string.clear();
 	if (index < 0)
 		m_textBlocks.push_back(block);
 	else
@@ -223,6 +253,7 @@ float ActiveText::getAlpha() const
 
 std::vector<ActiveText::Segment> &ActiveText::getSegments()
 {
+	ensureUpdate();
 	return m_segments;
 }
 
@@ -241,6 +272,7 @@ void ActiveText::ensureUpdate() const
 	if (!m_needsUpdate)
 		return;
 
+	auto padding = 6.f;
 	auto processedFirstBlock = false;
 	m_cursorPos = m_cursorStart;
 	m_segments.clear();
@@ -269,58 +301,61 @@ void ActiveText::ensureUpdate() const
 			if (format.underline())
 				style |= sf::Text::Underlined;
 
-			auto textObjectPairs = getTextObjectPairs(frag->getText());
-
-
 			sf::RectangleShape shape;
-			shape.setFillColor(sf::Color(0, 0, 0, 50));
+			shape.setFillColor(sf::Color(0, 0, 0, 30));
 
-			TweenText text;
-			text.setFont(*font);
-			text.setCharacterSize(format.size()*2);
-			text.setStyle(style);
-
-			text.setString(" ");
-			auto spaceWidth = text.getLocalBounds().width;
-
-			for (auto &p : textObjectPairs)
+			auto newTextPairs = getNewTextPairs(frag->getText());
+			for (auto &newTextPair : newTextPairs)
 			{
-				// Don't start line with a space
-				if (p.first.empty())
+
+				auto textObjectPairs = getTextObjectPairs(newTextPair.second);
+
+				TweenText text;
+				text.setFont(*font);
+				text.setCharacterSize(format.size()*2); // TODO: standardize using pt size
+				text.setStyle(style);
+
+				text.setString(" ");
+				auto spaceWidth = text.getLocalBounds().width;
+
+				for (auto &textObjectPair : textObjectPairs)
 				{
-					if (m_cursorPos.x > 0)
-						m_cursorPos.x += spaceWidth;
-					continue;
+					// Don't start line with a space
+					if (textObjectPair.first.empty())
+					{
+						if (m_cursorPos.x > 0)
+							m_cursorPos.x += spaceWidth;
+						continue;
+					}
+
+					auto color = textObjectPair.second.empty() ? (newTextPair.first ? sf::Color::Red : sf::Color::Black) : sf::Color::Blue;
+					color.a = m_alpha;
+					text.setString(textObjectPair.first);
+					text.setFillColor(color);
+
+					auto newX = m_cursorPos.x + text.getLocalBounds().width;
+
+					if (newX > m_size.x && m_cursorPos.x > 0.f)
+					{
+						m_cursorPos.x = 0.f;
+					}
+
+					text.setPosition(m_cursorPos);
+					m_cursorPos.x += text.getLocalBounds().width;
+
+					auto bounds = sf::FloatRect(
+								text.getGlobalBounds().left - padding,
+								text.getGlobalBounds().top - padding,
+								text.getLocalBounds().width + padding * 2,
+								text.getLocalBounds().height + padding * 2);
+
+					shape.setSize(sf::Vector2f(bounds.width, bounds.height));
+					shape.setPosition(bounds.left, bounds.top);
+					m_debugSegmentShapes.push_back(shape);
+
+					bounds = getTransform().transformRect(bounds);
+					m_segments.push_back({text, textObjectPair.second, bounds});
 				}
-
-				auto color = p.second.empty() ? sf::Color::Black : sf::Color::Blue;
-				color.a = m_alpha;
-				text.setString(p.first);
-				text.setFillColor(color);
-
-				auto newX = m_cursorPos.x + text.getLocalBounds().width;
-
-				if (newX > m_size.x && m_cursorPos.x > 0.f)
-				{
-					m_cursorPos.x = 0.f;
-					m_cursorPos.y += text.getCharacterSize();//text.getLocalBounds().height;
-				}
-
-				text.setPosition(m_cursorPos);
-				m_cursorPos.x += text.getLocalBounds().width;
-				float padding = 6.f;
-				auto bounds = sf::FloatRect(
-							text.getGlobalBounds().left - padding,
-							text.getGlobalBounds().top - padding,
-							text.getLocalBounds().width + padding * 2,
-							text.getLocalBounds().height + padding * 2);
-
-				shape.setSize(sf::Vector2f(bounds.width, bounds.height));
-				shape.setPosition(bounds.left, bounds.top);
-				m_debugSegmentShapes.push_back(shape);
-
-				bounds = getTransform().transformRect(bounds);
-				m_segments.push_back({text, p.second, bounds});
 			}
 		}
 	}

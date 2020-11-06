@@ -46,4 +46,9 @@ bool wrapText(sf::Text &text, float width)
 	return true;
 }
 
+std::string diff(const std::string &oldString, const std::string &newString)
+{
+		return newString;
+}
+
 } // namespace NovelTea

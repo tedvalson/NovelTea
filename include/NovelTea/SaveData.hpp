@@ -25,6 +25,9 @@ public:
 	// Reset to conform to loaded project
 	void reset();
 
+	std::string roomDescription(const std::string &id, const std::string &newDescription);
+	void resetRoomDescriptions();
+
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 

@@ -61,6 +61,7 @@ private:
 	mutable sf::Vector2f m_cursorPos;
 	sf::Vector2f m_cursorStart;
 	sf::Vector2f m_size;
+	std::string m_string;
 	mutable bool m_needsUpdate = true;
 	float m_alpha;
 

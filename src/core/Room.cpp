@@ -110,8 +110,9 @@ const std::shared_ptr<ObjectList> &Room::getObjectList() const
 
 std::string Room::getDescription() const
 {
-	try{
-		return ActiveGame->getScriptManager().runInClosure<std::string>(m_descriptionRaw);
+	try {
+		auto newDescription = ActiveGame->getScriptManager().runInClosure<std::string>(m_descriptionRaw);
+		return GSave.roomDescription(m_id, newDescription);
 	} catch (std::exception &e) {
 
 	}

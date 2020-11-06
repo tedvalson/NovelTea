@@ -47,6 +47,7 @@ namespace ID
 	const auto variables          = "variables";
 	const auto entityQueue        = "entityQueue";
 	const auto objectLocations    = "objectLocations";
+	const auto roomDescriptions   = "roomDescriptions";
 	const auto properties         = "properties";
 
 } // namespace ID

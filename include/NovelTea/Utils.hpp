@@ -19,6 +19,7 @@ namespace NovelTea
 
 std::vector<std::string> split(const std::string &text, const std::string &delimiter = "\n");
 bool wrapText(sf::Text &text, float width);
+std::string diff(const std::string &oldString, const std::string &newString);
 
 } // namespace NovelTea
 
