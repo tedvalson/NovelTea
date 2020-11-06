@@ -43,6 +43,8 @@ void ActionSelectWidget::setValue(sj::JSON value)
 			idText = "<b>Room:</b> " + idText;
 		else if (type == NovelTea::EntityType::Script)
 			idText = "<b>Script:</b> " + idText;
+		else
+			idText = "<Nothing Selected>";
 
 		ui->label->setText(idText);
 	}

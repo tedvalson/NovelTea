@@ -15,6 +15,7 @@ WizardPageActionSelect::WizardPageActionSelect(QWidget *parent) :
 	ui->scriptEdit->hide();
 	ui->treeView->hide();
 
+	connect(ui->radioNone, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->radioExisting, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->radioCustom, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->treeView, &QTreeView::clicked, this, &QWizardPage::completeChanged);
@@ -37,9 +38,9 @@ void WizardPageActionSelect::setValue(sj::JSON value)
 		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::selectEntityId].ToString()));
 	}
 	else if (type != NovelTea::EntityType::Invalid)
-	{
 		ui->radioExisting->setChecked(true);
-	}
+	else
+		ui->radioNone->setChecked(true);
 }
 
 sj::JSON WizardPageActionSelect::getValue() const
@@ -102,7 +103,8 @@ void WizardPageActionSelect::allowCustomScript(bool allow)
 
 bool WizardPageActionSelect::isComplete() const
 {
-	return ((ui->radioExisting->isChecked() && currentIndex.parent().isValid()) ||
+	return (ui->radioNone->isChecked() ||
+			(ui->radioExisting->isChecked() && currentIndex.parent().isValid()) ||
 			(ui->radioCustom->isChecked() && !ui->scriptEdit->toPlainText().isEmpty()));
 }
 
@@ -148,5 +150,14 @@ void WizardPageActionSelect::on_radioCustom_toggled(bool checked)
 	{
 		ui->treeView->hide();
 		ui->scriptEdit->show();
+	}
+}
+
+void WizardPageActionSelect::on_radioNone_toggled(bool checked)
+{
+	if (checked)
+	{
+		ui->treeView->hide();
+		ui->scriptEdit->hide();
 	}
 }

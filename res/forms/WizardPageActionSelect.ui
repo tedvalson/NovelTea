@@ -25,6 +25,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QRadioButton" name="radioNone">
+     <property name="text">
+      <string>None</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QRadioButton" name="radioExisting">
      <property name="text">
       <string>Existing Content</string>
@@ -37,6 +44,19 @@
       <string>Custom Script</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="EntityTreeView" name="treeView"/>

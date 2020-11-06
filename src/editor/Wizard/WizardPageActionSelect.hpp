@@ -35,6 +35,7 @@ protected:
 private slots:
 	void on_radioExisting_toggled(bool checked);
 	void on_radioCustom_toggled(bool checked);
+	void on_radioNone_toggled(bool checked);
 
 private:
 	Ui::WizardPageActionSelect *ui;
