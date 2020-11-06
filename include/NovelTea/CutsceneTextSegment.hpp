@@ -30,8 +30,8 @@ public:
 
 private:
 	bool m_beginWithNewline = false;
-	int m_offsetX;
-	int m_offsetY;
+	int m_offsetX = 0;
+	int m_offsetY = 0;
 	int m_transition = Fade;
 	std::shared_ptr<ActiveText> m_activeText;
 };
