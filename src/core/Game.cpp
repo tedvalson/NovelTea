@@ -2,6 +2,8 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Dialogue.hpp>
+#include <NovelTea/Script.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -75,6 +77,10 @@ void Game::pushNextEntityJson(json jentity)
 		pushNextEntity(m_saveData.get<Cutscene>(idName));
 	else if (type == EntityType::Room)
 		pushNextEntity(m_saveData.get<Room>(idName));
+	else if (type == EntityType::Dialogue)
+		pushNextEntity(m_saveData.get<Dialogue>(idName));
+	else if (type == EntityType::Script)
+		pushNextEntity(m_saveData.get<Script>(idName));
 }
 
 std::shared_ptr<Entity> Game::popNextEntity()
