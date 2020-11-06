@@ -7,7 +7,7 @@ namespace NovelTea
 Hideable::Hideable()
 : m_isHiding(false)
 , m_isShowing(false)
-, m_visible(false)
+, m_visible(true)
 {
 }
 
