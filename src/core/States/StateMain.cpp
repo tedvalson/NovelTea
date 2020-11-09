@@ -32,7 +32,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
 	m_cutsceneRenderer.setMargin(round(padding));
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
-	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
 	m_inventory.setSize(sf::Vector2f(width, height));
 
 	m_cutsceneScrollbar.setPosition(width - 4.f, 4.f);
@@ -104,8 +103,12 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Notification setup
 	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
 
+	// Dialogue setup
+	m_dialogueRenderer.hide(0.f);
+	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
+
 	// TextOverlay setup
-	m_textOverlay.setAlpha(0.f);
+	m_textOverlay.hide(0.f);
 	m_textOverlay.setSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
 	GGame.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
 		m_textOverlayFunc = callback;
@@ -140,7 +143,6 @@ void StateMain::render(sf::RenderTarget &target)
 	}
 	else if (m_mode == Mode::Dialogue)
 	{
-		target.draw(m_dialogueRenderer);
 	}
 	else if (m_mode == Mode::Room)
 	{
@@ -150,6 +152,7 @@ void StateMain::render(sf::RenderTarget &target)
 			target.draw(m_actionBuilder);
 	}
 
+	target.draw(m_dialogueRenderer);
 	target.draw(m_navigation);
 	target.draw(m_textOverlay);
 	target.draw(m_inventory);
@@ -172,6 +175,8 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		m_navigation.hide();
 		m_inventory.hide();
 	}
+	if (mode != Mode::Dialogue)
+		m_dialogueRenderer.hide();
 
 	if (mode == Mode::Cutscene)
 	{
@@ -182,6 +187,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	{
 		m_dialogue = GSave.get<Dialogue>(idName);
 		m_dialogueRenderer.setDialogue(m_dialogue);
+		m_dialogueRenderer.show();
 	}
 	else if (mode == Mode::Room)
 	{
@@ -366,7 +372,7 @@ bool StateMain::gotoNextEntity()
 	return true;
 }
 
-void StateMain::updateRoomText(const std::string &newText)
+void StateMain::updateRoomText(const std::string &newText, float duration)
 {
 	auto room = GGame.getRoom();
 	auto text = newText;
@@ -379,10 +385,10 @@ void StateMain::updateRoomText(const std::string &newText)
 	m_roomActiveText.setText(text);
 
 	m_roomActiveText.setAlpha(0.f);
-	TweenEngine::Tween::to(m_roomActiveText, ActiveText::ALPHA, 0.5f)
+	TweenEngine::Tween::to(m_roomActiveText, ActiveText::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_roomActiveTextFadeOut, ActiveText::ALPHA, 0.5f)
+	TweenEngine::Tween::to(m_roomActiveTextFadeOut, ActiveText::ALPHA, duration)
 		.target(0.f)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
 			m_roomTextChanging = false;
@@ -472,6 +478,8 @@ bool StateMain::processEvent(const sf::Event &event)
 
 bool StateMain::update(float delta)
 {
+	m_dialogueRenderer.update(delta);
+
 	if (m_mode == Mode::Cutscene)
 	{
 		m_cutsceneScrollbar.update(delta);
@@ -484,9 +492,9 @@ bool StateMain::update(float delta)
 	}
 	else if (m_mode == Mode::Dialogue)
 	{
-		m_dialogueRenderer.update(delta);
 		if (m_dialogueRenderer.isComplete())
 		{
+			GGame.pushNextEntityJson(m_dialogue->getNextEntity());
 			gotoNextEntity();
 		}
 	}

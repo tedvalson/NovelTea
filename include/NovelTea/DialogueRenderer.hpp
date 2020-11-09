@@ -36,6 +36,8 @@ public:
 	void changeLine(int newLineIndex);
 
 	bool isComplete() const;
+	void show(float duration = 1.f);
+	void hide(float duration = 1.f);
 
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
@@ -56,10 +58,12 @@ private:
 	std::vector<std::shared_ptr<Button>> m_buttons;
 	std::vector<std::shared_ptr<Button>> m_buttonsOld;
 	ActiveText m_textName;
+	ActiveText m_textNameOld;
 	ActiveText m_text;
 	ActiveText m_textOld;
 	sf::Vector2f m_size;
 	sf::Texture *m_buttonTexture;
+	TweenNinePatch m_bg;
 	float m_middleY;
 
 	TweenEngine::TweenManager m_tweenManager;

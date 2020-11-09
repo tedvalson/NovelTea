@@ -45,7 +45,7 @@ public:
 
 	bool gotoNextEntity();
 
-	void updateRoomText(const std::string &newText = " ");
+	void updateRoomText(const std::string &newText = " ", float duration = 1.f);
 
 protected:
 	void callOverlayFunc();

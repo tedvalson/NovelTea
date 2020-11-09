@@ -16,6 +16,10 @@ DialogueRenderer::DialogueRenderer()
 {
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	m_buttonTexture = texture.get();
+
+	m_bg.setTexture(m_buttonTexture);
+	m_bg.setColor(sf::Color(0, 0, 0, 0));
+
 	setSize(sf::Vector2f(400.f, 400.f));
 	setDialogue(std::make_shared<Dialogue>());
 }
@@ -129,7 +133,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		btn->setString(str);
 		btn->setCentered(false);
 		btn->setTexture(m_buttonTexture);
-		btn->setColor(sf::Color::Yellow);
+		btn->setColor(sf::Color(180, 180, 180));
 		btn->setActiveColor(sf::Color::Red);
 		btn->onClick([this, i, childId](){
 			if (m_callback)
@@ -170,10 +174,9 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	auto &line = m_textLines[newLineIndex];
 	m_textLineIndex = newLineIndex;
 	m_textOld = m_text;
+	m_textNameOld = m_textName;
 	m_textName.setText(line.first);
-	m_textName.setPosition(5.f, m_middleY);
 	m_text.setText(line.second);
-	m_text.setPosition(10.f, m_textName.getPosition().y + 30.f);
 
 	float duration = 0.5f;
 	m_text.setAlpha(0.f);
@@ -185,7 +188,16 @@ void DialogueRenderer::changeLine(int newLineIndex)
 		.target(255.f)
 		.start(m_tweenManager);
 
-	auto posY = m_text.getPosition().y + m_text.getCursorEnd().y + 45.f;
+	m_textName.setAlpha(0.f);
+	m_textNameOld.setAlpha(255.f);
+	TweenEngine::Tween::to(m_textNameOld, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_textName, ActiveText::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
+
+	auto posY = m_text.getPosition().y + m_bg.getSize().y + 10.f;
 	if (newLineIndex + 1 == m_textLines.size())
 		for (auto &button : m_buttons) {
 			button->setPosition(10.f, posY);
@@ -202,11 +214,46 @@ bool DialogueRenderer::isComplete() const
 	return m_isComplete;
 }
 
+void DialogueRenderer::show(float duration)
+{
+	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
+		.target(30.f)
+		.start(m_tweenManager);
+}
+
+void DialogueRenderer::hide(float duration)
+{
+	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_textName, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_text, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	for (auto &button : m_buttons) {
+		TweenEngine::Tween::to(*button, Button::ALPHA, duration)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
+	for (auto &button : m_buttonsOld) {
+		TweenEngine::Tween::to(*button, Button::ALPHA, duration)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
+}
+
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
 	m_text.setSize(size);
 	m_middleY = round(m_size.y / 8);
+
+	m_textName.setPosition(5.f, m_middleY);
+	m_text.setPosition(10.f, m_textName.getPosition().y + 32.f);
+	m_bg.setPosition(5.f, m_textName.getPosition().y + 28.f);
+	m_bg.setSize(size.x - 10.f, 160.f);
 }
 
 sf::Vector2f DialogueRenderer::getSize() const
@@ -218,9 +265,11 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 {
 	states.transform *= getTransform();
 
+	target.draw(m_bg, states);
 	target.draw(m_text, states);
 	target.draw(m_textOld, states);
 	target.draw(m_textName, states);
+	target.draw(m_textNameOld, states);
 	for (auto &button : m_buttonsOld)
 		target.draw(*button, states);
 	for (auto &button : m_buttons)
