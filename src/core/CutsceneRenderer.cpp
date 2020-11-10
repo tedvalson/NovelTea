@@ -287,13 +287,15 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 
 	endCallback = [this, segment, segmentIndex](TweenEngine::BaseTween*)
 	{
-		if (m_skipWaitingForClick || !segment->getWaitForClick())
-			addSegmentToQueue(segmentIndex + 1);
-		else if (!m_skipWaitingForClick)
-			m_isWaitingForClick = true;
-
 		if (segmentIndex + 1 >= m_cutscene->segments().size())
 			m_isComplete = true;
+		else {
+			auto nextSegment = m_cutscene->segments()[segmentIndex+1];
+			if (m_skipWaitingForClick || !nextSegment->getWaitForClick())
+				addSegmentToQueue(segmentIndex + 1);
+			else if (!m_skipWaitingForClick)
+				m_isWaitingForClick = true;
+		}
 	};
 
 	TweenEngine::Tween::mark()
