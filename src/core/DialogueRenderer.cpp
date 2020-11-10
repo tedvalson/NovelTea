@@ -32,9 +32,12 @@ void DialogueRenderer::setDialogue(const std::shared_ptr<Dialogue> &dialogue)
 
 void DialogueRenderer::reset()
 {
+	hide(0.f);
+	m_tweenManager.update(0.1f);
+
 	m_isComplete = false;
-	m_tweenManager.killAll();
 	m_text.setText("");
+	m_textName.setText("");
 	changeSegment(m_dialogue->getRootIndex());
 }
 
@@ -85,6 +88,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		return;
 	}
 
+	m_tweenManager.killAll();
 	m_buttonsOld = m_buttons;
 	m_buttons.clear();
 	m_currentSegmentIndex = newSegmentIndex;
@@ -151,7 +155,6 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		m_buttons.emplace_back(btn);
 	}
 
-	m_tweenManager.killAll();
 	for (auto &button : m_buttons) {
 		TweenEngine::Tween::set(*button, Button::ALPHA)
 			.target(0.f)
@@ -223,13 +226,20 @@ void DialogueRenderer::show(float duration)
 
 void DialogueRenderer::hide(float duration)
 {
+	m_tweenManager.killAll();
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_textName, ActiveText::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_textNameOld, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_text, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
 	for (auto &button : m_buttons) {
