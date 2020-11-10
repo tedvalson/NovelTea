@@ -247,6 +247,7 @@ void StateMain::processTestSteps()
 
 	auto success = true;
 	auto jsteps = getContext().data["testSteps"];
+	m_cutsceneRenderer.setSkipWaitingForClick(true);
 	for (int i = 0; i < jsteps.size(); ++i)
 	{
 		auto &jstep = jsteps[i];
@@ -270,6 +271,7 @@ void StateMain::processTestSteps()
 		{
 			if (!m_dialogueRenderer.processSelection(jstep["index"].ToInt()))
 				success = false;
+			update(0.f);
 		}
 		else if (type == "room")
 		{
@@ -303,6 +305,7 @@ void StateMain::processTestSteps()
 		while (gotoNextEntity());
 	}
 
+	m_cutsceneRenderer.setSkipWaitingForClick(false);
 	m_testPlaybackMode = false;
 }
 
