@@ -5,6 +5,7 @@ namespace NovelTea
 
 CutscenePageBreakSegment::CutscenePageBreakSegment()
 {
+	setWaitForClick(true);
 }
 
 json CutscenePageBreakSegment::toJson() const
