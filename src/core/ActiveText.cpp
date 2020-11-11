@@ -170,6 +170,11 @@ void ActiveText::setText(const std::string &text, const TextFormat &format)
 	setAlpha(m_alpha);
 }
 
+std::string ActiveText::getText() const
+{
+	return m_string;
+}
+
 const std::vector<std::shared_ptr<TextBlock>> &ActiveText::blocks() const
 {
 	return m_textBlocks;

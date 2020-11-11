@@ -381,6 +381,8 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 	auto text = newText;
 	if (text == " ")
 		text = room->getDescription();
+	if (text == m_roomActiveText.getText())
+		return;
 
 	m_roomTextChanging = true;
 	m_roomActiveTextFadeOut = m_roomActiveText;

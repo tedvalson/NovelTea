@@ -31,6 +31,7 @@ public:
 	std::string objectFromPoint(const sf::Vector2f &point) const;
 
 	void setText(const std::string &text, const TextFormat &format = TextFormat());
+	std::string getText() const;
 
 	const std::vector<std::shared_ptr<TextBlock>> &blocks() const;
 	void addBlock(std::shared_ptr<TextBlock> block, int index = -1);
