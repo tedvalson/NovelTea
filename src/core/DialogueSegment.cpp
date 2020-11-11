@@ -45,7 +45,9 @@ void DialogueSegment::runScript()
 	if (!m_scriptEnabled)
 		return;
 	try {
-		ActiveGame->getScriptManager().runInClosure(m_script);
+		auto dialogue = GSave.get<Dialogue>(m_dialogue->getId());
+		auto script = "function _f(dialogue){\n" + m_script + "}";
+		ActiveGame->getScriptManager().call(script, "_f", dialogue);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::runScript() " << e.what() << std::endl;
 	}
@@ -55,12 +57,13 @@ bool DialogueSegment::conditionPasses() const
 {
 	if (!m_conditionalEnabled || m_conditionScript.empty())
 		return true;
+	else if (!m_dialogue)
+		return false;
+
 	try {
-		auto script = m_conditionScript;
-		if (m_dialogue)
-			script = "dialogue=Save.loadDialogue('"+m_dialogue->getId()+"');\n" + m_conditionScript;
-		auto result = ActiveGame->getScriptManager().runInClosure<bool>(script);
-		return result;
+		auto dialogue = GSave.get<Dialogue>(m_dialogue->getId());
+		auto script = "function _f(dialogue){\n" + m_conditionScript + "\nreturn false;}";
+		return ActiveGame->getScriptManager().call<bool>(script, "_f", dialogue);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::conditionPasses() " << e.what() << std::endl;
 		return false;
@@ -74,10 +77,9 @@ std::string DialogueSegment::getText(bool *ok) const
 			*ok = true;
 		if (m_scriptedText)
 		{
-			auto script = m_textRaw;
-			if (m_dialogue)
-				script = "dialogue=Save.loadDialogue('"+m_dialogue->getId()+"');\n" + m_textRaw;
-			return ActiveGame->getScriptManager().runInClosure<std::string>(script);
+			auto dialogue = GSave.get<Dialogue>(m_dialogue->getId());
+			auto script = "function _f(dialogue){\n" + m_textRaw + "\nreturn \"\";}";
+			return ActiveGame->getScriptManager().call<std::string>(script, "_f", dialogue);
 		} else
 			return m_textRaw;
 	} catch (std::exception &e) {

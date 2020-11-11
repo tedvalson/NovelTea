@@ -20,6 +20,7 @@ public:
 	void runScriptId(const std::string &scriptId);
 
 	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script);
+	bool runRoomScript(const std::string &roomId, const std::string &script);
 
 	inline void run(const std::string &script)
 	{

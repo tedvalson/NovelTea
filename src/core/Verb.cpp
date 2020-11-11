@@ -55,9 +55,11 @@ bool Verb::checkConditionScript(const std::string &objectId)
 	if (m_scriptConditional.empty())
 		return true;
 	try {
-		auto script = "object=Save.loadObject('"+objectId+"');\n" + m_scriptConditional;
-		return ActiveGame->getScriptManager().runInClosure<bool>(script);
+		auto object = GSave.get<Object>(objectId);
+		auto script = "function _f(object){\n" + m_scriptConditional + "\nreturn true;}";
+		return ActiveGame->getScriptManager().call<bool>(script, "_f", object);
 	} catch (std::exception &e) {
+		std::cerr << "Verb::checkConditionScript " << e.what() << std::endl;
 		return false;
 	}
 }

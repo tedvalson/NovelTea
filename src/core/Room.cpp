@@ -111,10 +111,13 @@ const std::shared_ptr<ObjectList> &Room::getObjectList() const
 std::string Room::getDescription() const
 {
 	try {
-		auto newDescription = ActiveGame->getScriptManager().runInClosure<std::string>(m_descriptionRaw);
+		auto room = ActiveGame->getSaveData().get<Room>(m_id);
+		auto script = "function _f(room){\n"+m_descriptionRaw+"\nreturn \"\";}";
+		auto newDescription = ActiveGame->getScriptManager().call<std::string>(script, "_f", room);
 		return GSave.roomDescription(m_id, newDescription);
 	} catch (std::exception &e) {
-
+		std::cerr << "Room::getDescription " << e.what() << std::endl;
+		return "You encountered a game error.\n" + std::string(e.what());
 	}
 }
 
@@ -122,26 +125,26 @@ bool Room::runScriptBeforeEnter() const
 {
 	if (m_scriptBeforeEnter.empty())
 		return true;
-	return ActiveGame->getScriptManager().runInClosure<bool>(m_scriptBeforeEnter);
+	return ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptBeforeEnter);
 }
 
 void Room::runScriptAfterEnter() const
 {
 	if (!m_scriptAfterEnter.empty())
-		ActiveGame->getScriptManager().runInClosure(m_scriptAfterEnter);
+		ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptAfterEnter);
 }
 
 bool Room::runScriptBeforeLeave() const
 {
 	if (m_scriptBeforeLeave.empty())
 		return true;
-	return ActiveGame->getScriptManager().runInClosure<bool>(m_scriptBeforeLeave);
+	return ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptBeforeLeave);
 }
 
 void Room::runScriptAfterLeave() const
 {
 	if (!m_scriptAfterLeave.empty())
-		ActiveGame->getScriptManager().runInClosure(m_scriptAfterLeave);
+		ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptAfterLeave);
 }
 
 } // namespace NovelTea

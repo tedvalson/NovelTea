@@ -123,6 +123,18 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 	}
 }
 
+bool ScriptManager::runRoomScript(const std::string &roomId, const std::string &script)
+{
+	auto room = m_game->getSaveData().get<Room>(roomId);
+	auto s = "function _f(room){\n"+script+"\nreturn true;}";
+	try {
+		return call<bool>(s, "_f", room);
+	} catch (std::exception &e) {
+		std::cerr << "runRoomScript (" << roomId << ") " << e.what() << std::endl;
+		return false;
+	}
+}
+
 void ScriptManager::registerFunctions()
 {
 	dukglue_register_function(m_context, print, "print");
