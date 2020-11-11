@@ -37,8 +37,12 @@ void ProjectData::newProject()
 		ID::projectAuthor, "Author Name",
 		ID::projectWebsite, "",
 		ID::scriptAfterAction, "",
-		ID::scriptBeforeAction, "",
+		ID::scriptBeforeAction, "return true;",
 		ID::scriptUndefinedAction, "return false;",
+		ID::scriptAfterLeave, "",
+		ID::scriptBeforeLeave, "return true;",
+		ID::scriptAfterEnter, "",
+		ID::scriptBeforeEnter, "return true;",
 		ID::textFormats, sj::Array(textFormat.toJson())
 	});
 

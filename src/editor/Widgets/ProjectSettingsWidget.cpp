@@ -29,9 +29,13 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	MODIFIER(ui->lineEditWebsite, &QLineEdit::textChanged);
 	MODIFIER(ui->buttonSetDefaultFont, &QPushButton::clicked);
 	MODIFIER(ui->actionSelect, &ActionSelectWidget::valueChanged);
-	MODIFIER(ui->scriptAfterEdit, &ScriptEdit::textChanged);
-	MODIFIER(ui->scriptBeforeEdit, &ScriptEdit::textChanged);
-	MODIFIER(ui->scriptUndefinedEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptAfterActionEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptBeforeActionEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptUndefinedActionEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptBeforeLeaveEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptAfterLeaveEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptBeforeEnterEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptAfterEnterEdit, &ScriptEdit::textChanged);
 }
 
 ProjectSettingsWidget::~ProjectSettingsWidget()
@@ -86,11 +90,16 @@ void ProjectSettingsWidget::saveData() const
 	j[ID::projectVersion] = ui->lineEditVersion->text().toStdString();
 	j[ID::projectAuthor] = ui->lineEditAuthor->text().toStdString();
 	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
-	j[ID::scriptAfterAction] = ui->scriptAfterEdit->toPlainText().toStdString();
-	j[ID::scriptBeforeAction] = ui->scriptBeforeEdit->toPlainText().toStdString();
-	j[ID::scriptUndefinedAction] = ui->scriptUndefinedEdit->toPlainText().toStdString();
-	j[ID::entrypointEntity] = ui->actionSelect->getValue();
 	j[ID::projectFontDefault] = defaultFontIndex;
+	j[ID::entrypointEntity] = ui->actionSelect->getValue();
+
+	j[ID::scriptAfterAction] = ui->scriptAfterActionEdit->toPlainText().toStdString();
+	j[ID::scriptBeforeAction] = ui->scriptBeforeActionEdit->toPlainText().toStdString();
+	j[ID::scriptUndefinedAction] = ui->scriptUndefinedActionEdit->toPlainText().toStdString();
+	j[ID::scriptBeforeLeave] = ui->scriptBeforeLeaveEdit->toPlainText().toStdString();
+	j[ID::scriptAfterLeave] = ui->scriptAfterLeaveEdit->toPlainText().toStdString();
+	j[ID::scriptBeforeEnter] = ui->scriptBeforeEnterEdit->toPlainText().toStdString();
+	j[ID::scriptAfterEnter] = ui->scriptAfterEnterEdit->toPlainText().toStdString();
 }
 
 void ProjectSettingsWidget::loadData()
@@ -104,9 +113,13 @@ void ProjectSettingsWidget::loadData()
 	auto entryPoint = j[ID::entrypointEntity];
 	ui->actionSelect->setValue(entryPoint);
 
-	ui->scriptAfterEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterAction].ToString()));
-	ui->scriptBeforeEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeAction].ToString()));
-	ui->scriptUndefinedEdit->setPlainText(QString::fromStdString(j[ID::scriptUndefinedAction].ToString()));
+	ui->scriptAfterActionEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterAction].ToString()));
+	ui->scriptBeforeActionEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeAction].ToString()));
+	ui->scriptUndefinedActionEdit->setPlainText(QString::fromStdString(j[ID::scriptUndefinedAction].ToString()));
+	ui->scriptAfterLeaveEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterLeave].ToString()));
+	ui->scriptBeforeLeaveEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeLeave].ToString()));
+	ui->scriptAfterEnterEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterEnter].ToString()));
+	ui->scriptBeforeEnterEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeEnter].ToString()));
 
 	ui->listFonts->clear();
 	ui->listFonts->addItem("DejaVu Serif");

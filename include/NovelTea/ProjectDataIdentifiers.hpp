@@ -31,6 +31,10 @@ namespace ID
 	const auto scriptAfterAction  = "saa";
 	const auto scriptBeforeAction = "sba";
 	const auto scriptUndefinedAction = "sua";
+	const auto scriptAfterEnter   = "sae";
+	const auto scriptBeforeEnter  = "sbe";
+	const auto scriptAfterLeave   = "sal";
+	const auto scriptBeforeLeave  = "sbl";
 	const auto selectEntityType   = 0;
 	const auto selectEntityId     = 1;
 	const auto entityId           = 0;

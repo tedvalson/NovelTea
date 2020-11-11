@@ -1,5 +1,6 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -123,6 +124,9 @@ std::string Room::getDescription() const
 
 bool Room::runScriptBeforeEnter() const
 {
+	auto script = ProjData[ID::scriptBeforeEnter].ToString();
+	if (!script.empty() && !ActiveGame->getScriptManager().runRoomScript(m_id, script))
+		return false;
 	if (m_scriptBeforeEnter.empty())
 		return true;
 	return ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptBeforeEnter);
@@ -130,12 +134,18 @@ bool Room::runScriptBeforeEnter() const
 
 void Room::runScriptAfterEnter() const
 {
+	auto script = ProjData[ID::scriptAfterEnter].ToString();
+	if (!script.empty())
+		ActiveGame->getScriptManager().runRoomScript(m_id, script);
 	if (!m_scriptAfterEnter.empty())
 		ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptAfterEnter);
 }
 
 bool Room::runScriptBeforeLeave() const
 {
+	auto script = ProjData[ID::scriptBeforeLeave].ToString();
+	if (!script.empty() && !ActiveGame->getScriptManager().runRoomScript(m_id, script))
+		return false;
 	if (m_scriptBeforeLeave.empty())
 		return true;
 	return ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptBeforeLeave);
@@ -143,6 +153,9 @@ bool Room::runScriptBeforeLeave() const
 
 void Room::runScriptAfterLeave() const
 {
+	auto script = ProjData[ID::scriptAfterLeave].ToString();
+	if (!script.empty())
+		ActiveGame->getScriptManager().runRoomScript(m_id, script);
 	if (!m_scriptAfterLeave.empty())
 		ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptAfterLeave);
 }
