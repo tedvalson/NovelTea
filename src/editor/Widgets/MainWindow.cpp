@@ -122,12 +122,11 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 	if (widget->isModified())
 	{
 		auto type = widget->getType();
-		// TODO: add type properly for context menu?
 		auto parent = treeModel->index(type);
 		if (treeModel->insertRow(0, parent))
 		{
 			treeModel->setData(treeModel->index(0, 0, parent), QString::fromStdString(widget->idName()));
-			treeModel->setData(treeModel->index(0, 1, parent), type);
+			treeModel->setData(treeModel->index(0, 1, parent), static_cast<int>(EditorTabWidget::tabTypeToEntityType(type)));
 		}
 		widget->save();
 		Proj.saveToFile();
@@ -299,7 +298,7 @@ void MainWindow::on_treeView_pressed(const QModelIndex &index)
 	selectedType = EditorTabWidget::entityTypeToTabType(static_cast<NovelTea::EntityType>(type.toInt()));
 	selectedIdName = item->data(0).toString().toStdString();
 
-	menuTreeView->popup(QCursor::pos());	
+	menuTreeView->popup(QCursor::pos());
 }
 
 void MainWindow::on_actionNewProject_triggered()

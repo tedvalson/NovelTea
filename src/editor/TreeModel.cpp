@@ -30,7 +30,7 @@ int TreeModel::columnCount(const QModelIndex &parent) const
 	if (parent.isValid())
 		return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
 	else
-		return rootItem->columnCount();
+		return 1;
 }
 
 bool TreeModel::insertRows(int position, int rows, const QModelIndex &parent)

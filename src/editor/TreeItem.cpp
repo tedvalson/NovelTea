@@ -4,7 +4,7 @@
 TreeItem::TreeItem(const QString &title, TreeItem *parent)
 {
 	parentItem = parent;
-	itemData << title;
+	itemData << title << -1;
 }
 
 TreeItem::TreeItem(const QList<QVariant> &data, TreeItem *parent)
