@@ -61,14 +61,11 @@ void ActionBuildWidget::refresh()
 
 	auto verbText = ui->comboVerb->currentText();
 	ui->comboVerb->clear();
-
-	for (auto i = 0; i < model->rowCount(verbModelIndex); ++i)
-		ui->comboVerb->addItem(model->index(i, 0, verbModelIndex).data().toString());
+	fillVerbs(model, verbModelIndex);
 	ui->comboVerb->setCurrentIndex(ui->comboVerb->findText(verbText));
 
 	m_objectStrings.clear();
-	for (auto i = 0; i < model->rowCount(objectModelIndex); ++i)
-		m_objectStrings << model->index(i, 0, objectModelIndex).data().toString();
+	fillObjects(model, objectModelIndex);
 }
 
 void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)
@@ -115,6 +112,22 @@ bool ActionBuildWidget::isValid() const
 		if (!Proj.get<NovelTea::Object>(comboBox->currentText().toStdString()))
 			return false;
 	return true;
+}
+
+void ActionBuildWidget::fillVerbs(const TreeModel *model, const QModelIndex &index)
+{
+	for (auto i = 0; i < model->rowCount(index); ++i)
+		fillVerbs(model, model->index(i, 0, index));
+	if (index.parent().isValid())
+		ui->comboVerb->addItem(index.data().toString());
+}
+
+void ActionBuildWidget::fillObjects(const TreeModel *model, const QModelIndex &index)
+{
+	for (auto i = 0; i < model->rowCount(index); ++i)
+		fillObjects(model, model->index(i, 0, index));
+	if (index.parent().isValid())
+		m_objectStrings << index.data().toString();
 }
 
 void ActionBuildWidget::comboBox_currentIndexChanged(const QString &value)

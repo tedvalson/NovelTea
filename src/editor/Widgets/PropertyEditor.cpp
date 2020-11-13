@@ -6,6 +6,22 @@
 #include <QMenu>
 #include <iostream>
 
+namespace {
+
+QString escape(const QString &s)
+{
+	auto result = s;
+	return result.replace("\n", "\\n").replace("\t", "\\t");
+}
+
+QString unescape(const QString &s)
+{
+	auto result = s;
+	return result.replace("\\n", "\n").replace("\\t", "\t");
+}
+
+}
+
 PropertyEditor::PropertyEditor(QWidget *parent)
 : QWidget(parent)
 , ui(new Ui::PropertyEditor)
@@ -56,7 +72,7 @@ void PropertyEditor::setValue(sj::JSON value)
 			auto val = QVariant();
 			auto type = QVariant::String;
 			if (jval.JSONType() == json::Class::String) {
-				val = QString::fromStdString(jval.ToString());
+				val = escape(QString::fromStdString(jval.ToString()));
 			} else if (jval.JSONType() == json::Class::Boolean) {
 				type = QVariant::Bool;
 				val = jval.ToBool();
@@ -117,7 +133,7 @@ void PropertyEditor::update()
 		auto type = m_variantManager->valueType(prop);
 		auto value = m_variantManager->value(prop);
 		if (type == QVariant::String)
-			m_value[name] = value.toString().toStdString();
+			m_value[name] = unescape(value.toString()).toStdString();
 		else if (type == QVariant::Double)
 			m_value[name] = value.toDouble();
 		else if (type == QVariant::Bool)

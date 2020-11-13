@@ -8,6 +8,7 @@
 namespace Ui {
 class ActionBuildWidget;
 }
+class TreeModel;
 
 class ActionBuildWidget : public QWidget
 {
@@ -32,6 +33,8 @@ signals:
 
 private:
 	bool isValid() const;
+	void fillVerbs(const TreeModel *model, const QModelIndex &index);
+	void fillObjects(const TreeModel *model, const QModelIndex &index);
 
 	Ui::ActionBuildWidget *ui;
 	sj::JSON m_value;
