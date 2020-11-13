@@ -28,6 +28,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto width = getContext().config.width;
 	auto height = getContext().config.height;
 	auto padding = 1.f / 16.f * width;
+	auto toolbarHeight = round(height * 2.f/9.f);
+	auto toolbarPadding = toolbarHeight / 10.f;
 	m_roomActiveText.setPosition(round(padding), round(padding));
 	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
 	m_cutsceneRenderer.setMargin(round(padding));
@@ -43,8 +45,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
-	m_navigation.setScale(1.2f, 1.2f);
-	m_navigation.setPosition(15.f, -15.f + height - m_navigation.getGlobalBounds().height);
+	m_navigation.setPosition(toolbarPadding, toolbarPadding + height - toolbarHeight);
 	m_navigation.setCallback([this](const json &jentity){
 		auto roomId = jentity[1].ToString();
 		auto room = GSave.get<Room>(roomId);

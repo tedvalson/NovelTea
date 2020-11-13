@@ -119,6 +119,9 @@ void Navigation::ensureUpdate() const
 	if (!m_needsUpdate)
 		return;
 
+	auto spacing = round(m_size.y / 20.f);
+	auto buttonSize = round((m_size.y - spacing*2) / 3.f);
+
 	int buttonIndex = 0;
 	for (int i = 0; i < 9; ++i)
 	{
@@ -127,15 +130,15 @@ void Navigation::ensureUpdate() const
 		if (x == 1 && y == 1)
 			continue;
 		auto &button = m_buttons[buttonIndex];
-		button->setSize(sf::Vector2f(32.f, 32.f));
-		button->setPosition(36.f * x, 36.f * y);
+		button->setSize(sf::Vector2f(buttonSize, buttonSize));
+		button->setPosition((buttonSize + spacing) * x, (buttonSize + spacing) * y);
 		++buttonIndex;
 	}
 
 	m_bounds.left = getPosition().x;
 	m_bounds.top = getPosition().y;
-	m_bounds.width = 36.f * 3;
-	m_bounds.height = 36.f * 3;
+	m_bounds.width = m_size.x;
+	m_bounds.height = m_size.y;
 
 	m_needsUpdate = false;
 }
