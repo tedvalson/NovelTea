@@ -29,7 +29,7 @@ enum class Mode {
 	Room,
 };
 
-class StateMain : public State
+class StateMain : public State, public Scrollable
 {
 public:
 	StateMain(StateStack& stack, Context& context, StateCallback callback);
@@ -40,6 +40,10 @@ public:
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);
 
+	void setScroll(float position) override;
+	float getScroll() override;
+	const sf::Vector2f &getScrollSize() override;
+
 	void processTestSteps();
 	bool processAction(const std::string &verbId, const std::vector<std::string> &objectIds);
 
@@ -49,15 +53,23 @@ public:
 
 protected:
 	void callOverlayFunc();
+	void repositionText();
 
 private:
 	Mode m_mode;
 	bool m_testPlaybackMode;
 	bool m_testRecordMode;
 
+	// Room
 	ActiveText m_roomActiveText;
 	ActiveText m_roomActiveTextFadeOut;
+	sf::View m_roomTextView;
+	float m_roomTextPadding;
 	bool m_roomTextChanging;
+
+	float m_scrollPos;
+	sf::Vector2f m_scrollAreaSize;
+	ScrollBar m_roomScrollbar;
 
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
@@ -67,11 +79,13 @@ private:
 	std::string m_selectedObjectId;
 	DukValue m_textOverlayFunc;
 
+	// Cutscene
 	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;
 	float m_cutsceneSpeed;
 	ScrollBar m_cutsceneScrollbar;
 
+	// Dialogue
 	std::shared_ptr<Dialogue> m_dialogue;
 	DialogueRenderer m_dialogueRenderer;
 

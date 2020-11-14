@@ -21,30 +21,44 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_testPlaybackMode(false)
 , m_testRecordMode(false)
 , m_roomTextChanging(false)
+, m_scrollPos(0.f)
 , m_cutsceneSpeed(1.f)
 {
 	ScriptMan.reset();
 
 	auto width = getContext().config.width;
 	auto height = getContext().config.height;
-	auto padding = 1.f / 16.f * width;
 	auto toolbarHeight = round(height * 2.f/9.f);
 	auto toolbarPadding = toolbarHeight / 10.f;
-	m_roomActiveText.setPosition(round(padding), round(padding));
-	m_roomActiveText.setSize(sf::Vector2f(width - padding*2, 0.f));
-	m_cutsceneRenderer.setMargin(round(padding));
+	m_roomTextPadding = round(1.f / 16.f * width);
+	m_roomActiveText.setSize(sf::Vector2f(width - m_roomTextPadding*2, 0.f));
+	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
 	m_inventory.setSize(sf::Vector2f(width, height));
 
+
+	// Room
+	m_roomScrollbar.setPosition(width - 4.f, 4.f);
+	m_roomScrollbar.setSize(sf::Vector2u(2, height - toolbarHeight - 8.f));
+	m_roomScrollbar.setScrollAreaSize(sf::Vector2u(width, height - toolbarHeight));
+	m_roomScrollbar.setDragRect(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight));
+	m_roomScrollbar.setColor(sf::Color(0, 0, 0, 40));
+	m_roomScrollbar.setAutoHide(false);
+	m_roomScrollbar.attachObject(this);
+	m_roomTextView.reset(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight));
+	m_roomTextView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, (height - toolbarHeight) / height));
+
+	// Cutscene
 	m_cutsceneScrollbar.setPosition(width - 4.f, 4.f);
 	m_cutsceneScrollbar.setColor(sf::Color(0, 0, 0, 40));
 	m_cutsceneScrollbar.setAutoHide(false);
 	m_cutsceneScrollbar.attachObject(&m_cutsceneRenderer);
 	m_cutsceneScrollbar.setSize(sf::Vector2u(2, height - 8.f));
-	m_cutsceneScrollbar.setScrollAreaSize(sf::Vector2u(width, height - round(padding)*2));
+	m_cutsceneScrollbar.setScrollAreaSize(sf::Vector2u(width, height - m_roomTextPadding*2));
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
+	m_navigation.setSize(sf::Vector2f(toolbarHeight - toolbarPadding*2, toolbarHeight - toolbarPadding*2));
 	m_navigation.setPosition(toolbarPadding, toolbarPadding + height - toolbarHeight);
 	m_navigation.setCallback([this](const json &jentity){
 		auto roomId = jentity[1].ToString();
@@ -110,7 +124,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	// TextOverlay setup
 	m_textOverlay.hide(0.f);
-	m_textOverlay.setSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
+	m_textOverlay.setSize(sf::Vector2f(width, height - toolbarHeight));
 	GGame.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
 		m_textOverlayFunc = callback;
 		if (!m_testPlaybackMode)
@@ -147,10 +161,14 @@ void StateMain::render(sf::RenderTarget &target)
 	}
 	else if (m_mode == Mode::Room)
 	{
+		auto view = target.getView();
+		target.setView(m_roomTextView);
 		target.draw(m_roomActiveTextFadeOut);
 		target.draw(m_roomActiveText);
 		if (m_actionBuilder.isVisible())
 			target.draw(m_actionBuilder);
+		target.setView(view);
+		target.draw(m_roomScrollbar);
 	}
 
 	target.draw(m_dialogueRenderer);
@@ -202,6 +220,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 			m_navigation.setPaths(room->getPaths());
 		}
 		updateRoomText();
+		setScroll(0.f);
 		m_navigation.show(1.f);
 		m_inventory.show(1.f);
 	}
@@ -227,6 +246,22 @@ void StateMain::setMode(const json &jEntity)
 	}
 
 	setMode(mode, idName);
+}
+
+void StateMain::setScroll(float position)
+{
+	m_scrollPos = round(position);
+	repositionText();
+}
+
+float StateMain::getScroll()
+{
+	return m_scrollPos;
+}
+
+const sf::Vector2f &StateMain::getScrollSize()
+{
+	return m_scrollAreaSize;
 }
 
 void StateMain::processTestSteps()
@@ -390,6 +425,10 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 	m_roomActiveTextFadeOut.setHighlightId("");
 	m_roomActiveText.setText(text);
 
+	m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
+	updateScrollbar();
+	repositionText();
+
 	m_roomActiveText.setAlpha(0.f);
 	TweenEngine::Tween::to(m_roomActiveText, ActiveText::ALPHA, duration)
 		.target(255.f)
@@ -407,6 +446,11 @@ void StateMain::callOverlayFunc()
 		ScriptMan.call<void>(m_textOverlayFunc);
 		updateRoomText();
 	}
+}
+
+void StateMain::repositionText()
+{
+	m_roomActiveText.setPosition(m_roomTextPadding, m_roomTextPadding + m_scrollPos);
 }
 
 bool StateMain::processEvent(const sf::Event &event)
@@ -454,6 +498,9 @@ bool StateMain::processEvent(const sf::Event &event)
 		if (m_actionBuilder.isVisible())
 			m_actionBuilder.processEvent(event);
 		m_navigation.processEvent(event);
+
+		if (m_roomScrollbar.processEvent(event))
+			return true;
 
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
@@ -508,6 +555,7 @@ bool StateMain::update(float delta)
 		if (!m_roomTextChanging)
 			gotoNextEntity();
 
+	m_roomScrollbar.update(delta);
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
 	m_inventory.update(delta);

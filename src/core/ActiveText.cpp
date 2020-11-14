@@ -142,8 +142,12 @@ std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
 {
 	for (auto &segment : m_segments)
 	{
-		if (!segment.objectIdName.empty() && segment.bounds.contains(point))
-			return segment.objectIdName;
+		if (!segment.objectIdName.empty())
+		{
+			auto bounds = getTransform().transformRect(segment.bounds);
+			if (bounds.contains(point))
+				return segment.objectIdName;
+		}
 	}
 	return std::string();
 }
@@ -390,7 +394,6 @@ void ActiveText::ensureUpdate() const
 					shape.setPosition(bounds.left, bounds.top);
 					m_debugSegmentShapes.push_back(shape);
 
-					bounds = getTransform().transformRect(bounds);
 					m_segments.push_back({text, textObjectPair.second, bounds});
 				}
 			}
