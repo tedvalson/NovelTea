@@ -95,9 +95,11 @@ void TestsWidget::addStepToList(const json &jstep, bool append)
 		int duration = jstep["duration"].ToInt();
 		text = "Wait: " + std::to_string(duration) + "ms";
 	}
-	else if (type == "room")
+	else if (type == "move")
 	{
-		text = "Room: " + jstep["room"].ToString();
+		auto direction = jstep["direction"].ToInt();
+		std::string dir = std::to_string(direction);
+		text = "Move: " + dir;
 	}
 	else if (type == "dialogue")
 	{

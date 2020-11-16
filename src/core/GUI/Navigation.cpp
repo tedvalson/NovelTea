@@ -35,11 +35,11 @@ bool Navigation::processEvent(const sf::Event &event)
 		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
 		for (int i = 0; i < m_buttons.size(); ++i)
 		{
-			if (!m_paths[i][0].ToBool() || m_paths[i][1][0] == -1)
+			if (!m_paths[i][0].ToBool() || m_paths[i][1][0].ToInt() == -1)
 				continue;
 			if (m_buttons[i]->getGlobalBounds().contains(p))
 			{
-				m_callback(m_paths[i][1]);
+				m_callback(i, m_paths[i][1]);
 				return true;
 			}
 		}

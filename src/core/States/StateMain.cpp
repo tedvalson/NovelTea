@@ -60,18 +60,15 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Set all Navigation transforms before getGlobalBounds is called
 	m_navigation.setSize(sf::Vector2f(toolbarHeight - toolbarPadding*2, toolbarHeight - toolbarPadding*2));
 	m_navigation.setPosition(toolbarPadding, toolbarPadding + height - toolbarHeight);
-	m_navigation.setCallback([this](const json &jentity){
-		auto roomId = jentity[1].ToString();
-		auto room = GSave.get<Room>(roomId);
+	m_navigation.setCallback([this](int direction, const json &jentity){
 		if (m_testRecordMode) {
 			json jtestItem({
-				"type", "room",
-				"room", roomId
+				"type", "move",
+				"direction", direction
 			});
 			runCallback(&jtestItem);
 		}
-		if (GGame.getRoom()->runScriptBeforeLeave() && room->runScriptBeforeEnter())
-			GGame.pushNextEntityJson(jentity);
+		GGame.pushNextEntityJson(jentity);
 	});
 
 	// Inventory setup
@@ -210,14 +207,16 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	}
 	else if (mode == Mode::Room)
 	{
+		auto nextRoom = GSave.get<Room>(idName);
 		auto room = GGame.getRoom();
+		if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter())
+			return;
 		if (room->getId() != idName)
 		{
 			room->runScriptAfterLeave();
-			GGame.setRoomId(idName);
-			room = GGame.getRoom();
-			room->runScriptAfterEnter();
-			m_navigation.setPaths(room->getPaths());
+			GGame.setRoom(nextRoom);
+			nextRoom->runScriptAfterEnter();
+			m_navigation.setPaths(nextRoom->getPaths());
 		}
 		updateRoomText();
 		setScroll(0.f);
@@ -309,12 +308,14 @@ void StateMain::processTestSteps()
 				success = false;
 			update(0.f);
 		}
-		else if (type == "room")
+		else if (type == "move")
 		{
-			auto room = GSave.get<Room>(jstep["room"].ToString());
-			if (room->getId().empty())
-				success = false;
-			GGame.pushNextEntity(room);
+			auto direction = jstep["direction"].ToInt();
+			auto &paths = m_navigation.getPaths();
+			auto &jentity = paths[direction][1];
+			success = (paths[direction][0].ToBool() && jentity[0].ToInt() != -1);
+			if (success)
+				GGame.pushNextEntityJson(jentity);
 		}
 		else if (type == "wait")
 		{

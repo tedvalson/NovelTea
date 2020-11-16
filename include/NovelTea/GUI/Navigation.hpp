@@ -9,7 +9,7 @@
 namespace NovelTea
 {
 
-using NavigationCallback = std::function<void(const json &jentity)>;
+using NavigationCallback = std::function<void(int direction, const json &jentity)>;
 
 class Navigation : public sf::Drawable, public Hideable
 {
