@@ -81,6 +81,11 @@ void Game::pushNextEntityJson(json jentity)
 		pushNextEntity(m_saveData.get<Dialogue>(idName));
 	else if (type == EntityType::Script)
 		pushNextEntity(m_saveData.get<Script>(idName));
+	else if (type == EntityType::CustomScript) {
+		auto script = std::make_shared<Script>();
+		script->setContent(idName);
+		pushNextEntity(script);
+	}
 }
 
 std::shared_ptr<Entity> Game::popNextEntity()

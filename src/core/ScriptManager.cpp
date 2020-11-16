@@ -84,13 +84,10 @@ void ScriptManager::reset()
 
 void ScriptManager::runScript(std::shared_ptr<Script> script)
 {
-	if (!script->getId().empty())
-	{
-		if (script->getGlobal())
-			run(script->getContent());
-		else
-			runInClosure(script->getContent());
-	}
+	if (script->getGlobal())
+		run(script->getContent());
+	else
+		runInClosure(script->getContent());
 }
 
 void ScriptManager::runScriptId(const std::string &scriptId)

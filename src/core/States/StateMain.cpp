@@ -8,6 +8,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/Script.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -239,9 +240,13 @@ void StateMain::setMode(const json &jEntity)
 		mode = Mode::Room;
 	else if (type == EntityType::Dialogue)
 		mode = Mode::Dialogue;
-	else if (type == EntityType::CustomScript)
-	{
-		mode = Mode::Nothing;
+	else if (type == EntityType::Script) {
+		ScriptMan.run(idName);
+		return;
+	}
+	else if (type == EntityType::CustomScript) {
+		ScriptMan.runInClosure(idName);
+		return;
 	}
 
 	setMode(mode, idName);
@@ -408,6 +413,11 @@ bool StateMain::gotoNextEntity()
 		mode = Mode::Room;
 	else if (nextEntity->entityId() == Dialogue::id)
 		mode = Mode::Dialogue;
+	else if (nextEntity->entityId() == Script::id) {
+		auto script = std::static_pointer_cast<Script>(nextEntity);
+		ScriptMan.runScript(script);
+		return true;
+	}
 	setMode(mode, nextEntity->getId());
 	return true;
 }
