@@ -113,7 +113,7 @@ std::string Room::getDescription() const
 {
 	try {
 		auto room = ActiveGame->getSaveData().get<Room>(m_id);
-		auto script = "function _f(room){\n"+m_descriptionRaw+"\nreturn \"\";}";
+		auto script = "function _f(room){text='';\n"+m_descriptionRaw+"\nreturn text;}";
 		auto newDescription = ActiveGame->getScriptManager().call<std::string>(script, "_f", room);
 		return GSave.roomDescription(m_id, newDescription);
 	} catch (std::exception &e) {

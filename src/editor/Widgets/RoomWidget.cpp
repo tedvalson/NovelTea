@@ -95,11 +95,13 @@ void RoomWidget::updateRoom() const
 
 void RoomWidget::updatePreview()
 {
-	if (ui->scriptEdit->checkErrors<std::string>())
+	auto script = ui->scriptEdit->toPlainText().toStdString();
+	script = "text='';\n" + script + "\nreturn text;";
+	if (ui->scriptEdit->checkErrors<std::string>(script))
 	{
 		json jdata;
 		jdata["event"] = "text";
-		jdata["data"] = ui->scriptEdit->toPlainText().toStdString();
+		jdata["data"] = script;
 
 		// Reset any changes made by previous script execution
 		GSave.reset();

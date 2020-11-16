@@ -616,13 +616,17 @@ void ScriptEdit::mark(const QString &str, Qt::CaseSensitivity sens)
 }
 
 template <typename T>
-bool ScriptEdit::checkErrors()
+bool ScriptEdit::checkErrors(const std::string &script)
 {
 	auto result = false;
 	try
 	{
 		d_ptr->game.getScriptManager().reset();
-		d_ptr->game.getScriptManager().runInClosure<T>(toPlainText().toStdString());
+		if (script.empty())
+			d_ptr->game.getScriptManager().runInClosure<T>(toPlainText().toStdString());
+		else
+			d_ptr->game.getScriptManager().runInClosure<T>(script);
+
 		d_ptr->lineWithError = -1;
 		result = true;
 	}
@@ -635,7 +639,7 @@ bool ScriptEdit::checkErrors()
 	return result;
 }
 
-template bool ScriptEdit::checkErrors<std::string>();
+template bool ScriptEdit::checkErrors<std::string>(const std::string &script);
 
 bool ScriptEdit::event(QEvent *event)
 {

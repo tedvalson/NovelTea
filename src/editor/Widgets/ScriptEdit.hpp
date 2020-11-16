@@ -20,7 +20,7 @@ public:
 	~ScriptEdit();
 
 	template <typename T>
-	bool checkErrors();
+	bool checkErrors(const std::string &script = std::string());
 
 	void setColor(SyntaxHighlighter::ColorComponent component, const QColor &color);
 
