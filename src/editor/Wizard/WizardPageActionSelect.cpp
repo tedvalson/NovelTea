@@ -19,7 +19,7 @@ WizardPageActionSelect::WizardPageActionSelect(QWidget *parent) :
 	connect(ui->radioExisting, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->radioCustom, &QRadioButton::toggled, this, &QWizardPage::completeChanged);
 	connect(ui->treeView, &QTreeView::clicked, this, &QWizardPage::completeChanged);
-	connect(ui->scriptEdit, &QTextEdit::textChanged, this, &QWizardPage::completeChanged);
+	connect(ui->scriptEdit, &ScriptEdit::textChanged, this, &QWizardPage::completeChanged);
 
 	startTimer(50);
 }
@@ -35,7 +35,7 @@ void WizardPageActionSelect::setValue(sj::JSON value)
 	if (type == NovelTea::EntityType::CustomScript)
 	{
 		ui->radioCustom->setChecked(true);
-		ui->scriptEdit->setText(QString::fromStdString(value[NovelTea::ID::selectEntityId].ToString()));
+		ui->scriptEdit->setPlainText(QString::fromStdString(value[NovelTea::ID::selectEntityId].ToString()));
 	}
 	else if (type != NovelTea::EntityType::Invalid)
 		ui->radioExisting->setChecked(true);

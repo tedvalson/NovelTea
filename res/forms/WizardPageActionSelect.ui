@@ -62,7 +62,7 @@
     <widget class="EntityTreeView" name="treeView"/>
    </item>
    <item>
-    <widget class="QTextEdit" name="scriptEdit"/>
+    <widget class="ScriptEdit" name="scriptEdit"/>
    </item>
   </layout>
  </widget>
@@ -71,6 +71,11 @@
    <class>EntityTreeView</class>
    <extends>QTreeView</extends>
    <header>EntityTreeView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Widgets/ScriptEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>
