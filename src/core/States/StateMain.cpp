@@ -37,6 +37,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
 	m_inventory.setSize(sf::Vector2f(width, height));
 
+	m_bgToolbar.setSize(sf::Vector2f(width, toolbarHeight));
+	m_bgToolbar.setPosition(0.f, height - toolbarHeight);
+	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 
 	// Room
 	m_roomScrollbar.setPosition(width - 4.f, 4.f);
@@ -170,6 +173,7 @@ void StateMain::render(sf::RenderTarget &target)
 	}
 
 	target.draw(m_dialogueRenderer);
+	target.draw(m_bgToolbar);
 	target.draw(m_navigation);
 	target.draw(m_textOverlay);
 	target.draw(m_inventory);
@@ -189,8 +193,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	if (mode != Mode::Room)
 	{
 		updateRoomText("");
-		m_navigation.hide();
-		m_inventory.hide();
+		hideToolbar();
 	}
 	if (mode != Mode::Dialogue)
 		m_dialogueRenderer.hide();
@@ -219,10 +222,9 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 			nextRoom->runScriptAfterEnter();
 			m_navigation.setPaths(nextRoom->getPaths());
 		}
+		showToolbar();
 		updateRoomText();
 		setScroll(0.f);
-		m_navigation.show(1.f);
-		m_inventory.show(1.f);
 	}
 
 	m_mode = mode;
@@ -250,6 +252,24 @@ void StateMain::setMode(const json &jEntity)
 	}
 
 	setMode(mode, idName);
+}
+
+void StateMain::showToolbar()
+{
+	m_navigation.show(1.f);
+	m_inventory.show(1.f);
+	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, 1.f)
+		.target(50.f)
+		.start(m_tweenManager);
+}
+
+void StateMain::hideToolbar()
+{
+	m_navigation.hide();
+	m_inventory.hide();
+	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, 1.f)
+		.target(0.f)
+		.start(m_tweenManager);
 }
 
 void StateMain::setScroll(float position)

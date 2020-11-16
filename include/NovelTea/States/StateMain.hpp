@@ -40,6 +40,9 @@ public:
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);
 
+	void showToolbar();
+	void hideToolbar();
+
 	void setScroll(float position) override;
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
@@ -71,6 +74,7 @@ private:
 	sf::Vector2f m_scrollAreaSize;
 	ScrollBar m_roomScrollbar;
 
+	TweenRectangleShape m_bgToolbar;
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
 	Inventory m_inventory;
