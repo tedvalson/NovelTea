@@ -14,19 +14,52 @@ TextOverlay::TextOverlay()
 , m_nextStringIndex(0)
 {
 	m_bg.setFillColor(sf::Color(240.f, 240.f, 240.f));
+	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
+	m_scrollBar.setAutoHide(false);
+	m_scrollBar.attachObject(this);
 	setSize(sf::Vector2f(150.f, 150.f));
 }
 
+// Returns true when it's time to close the overlay
 bool TextOverlay::processEvent(const sf::Event &event)
 {
 	if (m_isShowing)
 		return false;
-	if (event.type == sf::Event::MouseButtonPressed)
+	if (m_scrollBar.processEvent(event))
+		return false;
+	if (event.type == sf::Event::MouseButtonReleased)
 	{
 //		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
 		return gotoNextString();
 	}
 	return false;
+}
+
+void TextOverlay::update(float delta)
+{
+	m_scrollBar.update(delta);
+	Hideable::update(delta);
+}
+
+void TextOverlay::setScroll(float position)
+{
+	m_scrollPos = round(position);
+	repositionText();
+}
+
+float TextOverlay::getScroll()
+{
+	return m_scrollPos;
+}
+
+const sf::Vector2f &TextOverlay::getScrollSize()
+{
+	return m_scrollAreaSize;
+}
+
+void TextOverlay::repositionText()
+{
+	m_text.setPosition(m_padding, m_padding + m_scrollPos);
 }
 
 void TextOverlay::show(float duration, int tweenType, HideableCallback callback)
@@ -38,10 +71,9 @@ void TextOverlay::show(float duration, int tweenType, HideableCallback callback)
 
 void TextOverlay::setText(const std::string &text)
 {
-	m_strings.clear();
-	m_strings.push_back(text);
-	m_nextStringIndex = 0;
-	m_text.setText("");
+	std::vector<std::string> strings;
+	strings.push_back(text);
+	setTextArray(strings);
 }
 
 void TextOverlay::setTextArray(const std::vector<std::string> &textArray)
@@ -49,6 +81,8 @@ void TextOverlay::setTextArray(const std::vector<std::string> &textArray)
 	m_strings = textArray;
 	m_nextStringIndex = 0;
 	m_text.setText("");
+	if (isVisible() && !isShowing())
+		gotoNextString();
 }
 
 void TextOverlay::setAlpha(float alpha)
@@ -67,11 +101,18 @@ float TextOverlay::getAlpha() const
 
 void TextOverlay::setSize(const sf::Vector2f &size)
 {
-	auto padding = 1.f / 8.f * size.x;
+	m_padding = 1.f / 8.f * size.x;
 	m_needsUpdate = true;
+
+	m_view.reset(sf::FloatRect(0.f, 0.f, size.x, size.y));
+
 	m_bg.setSize(size);
-	m_text.setSize(sf::Vector2f(size.x - padding * 2.f, size.y));
-	m_text.setPosition(padding, padding);
+	m_text.setSize(sf::Vector2f(size.x - m_padding * 2.f, size.y));
+
+	m_scrollBar.setPosition(size.x - 4.f, 4.f);
+	m_scrollBar.setSize(sf::Vector2u(2, size.y - 8.f));
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(size.x, size.y));
+
 	m_size = size;
 }
 
@@ -108,6 +149,10 @@ bool TextOverlay::gotoNextString(HideableCallback callback)
 	m_text.setText(m_strings[m_nextStringIndex]);
 	m_text.setAlpha(0.f);
 
+	setScroll(0.f);
+	m_scrollAreaSize.y = m_padding*2 + m_text.getLocalBounds().height;
+	updateScrollbar();
+
 	TweenEngine::Tween::to(m_oldText, ActiveText::ALPHA, 0.5f)
 		.target(0.f)
 		.start(m_tweenManager);
@@ -124,11 +169,19 @@ bool TextOverlay::gotoNextString(HideableCallback callback)
 
 void TextOverlay::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
+	auto view = target.getView();
 	ensureUpdate();
 	states.transform *= getTransform();
+	m_view.setViewport(sf::FloatRect(0.f, 0.f, 1.f, m_size.y / target.getSize().y));
+
 	target.draw(m_bg, states);
+
+	target.setView(m_view);
 	target.draw(m_oldText, states);
 	target.draw(m_text, states);
+	target.setView(view);
+
+	target.draw(m_scrollBar, states);
 }
 
 } // namespace NovelTea

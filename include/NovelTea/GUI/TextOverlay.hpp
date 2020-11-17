@@ -2,6 +2,7 @@
 #define NOVELTEA_TEXTOVERLAY_HPP
 
 #include <NovelTea/GUI/Hideable.hpp>
+#include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/Utils.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <SFML/Window/Event.hpp>
@@ -10,12 +11,18 @@
 namespace NovelTea
 {
 
-class TextOverlay : public sf::Drawable, public Hideable
+class TextOverlay : public sf::Drawable, public Hideable, public Scrollable
 {
 public:
 	TextOverlay();
 
 	bool processEvent(const sf::Event& event);
+	void update(float delta) override;
+
+	void setScroll(float position) override;
+	float getScroll() override;
+	const sf::Vector2f &getScrollSize() override;
+	void repositionText();
 
 	void show(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
 
@@ -46,6 +53,12 @@ private:
 	TweenRectangleShape m_bg;
 	ActiveText m_text;
 	ActiveText m_oldText;
+
+	float m_padding;
+	float m_scrollPos;
+	sf::Vector2f m_scrollAreaSize;
+	ScrollBar m_scrollBar;
+	mutable sf::View m_view;
 
 	size_t m_nextStringIndex;
 	std::vector<std::string> m_strings;
