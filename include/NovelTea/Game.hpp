@@ -29,7 +29,6 @@ public:
 	void reset();
 
 	void setRoomId(const std::string &roomId);
-	const std::string &getRoomId() const;
 
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
 	void setProp(const std::string &key, const DukValue &value);
@@ -37,6 +36,10 @@ public:
 	void pushNextEntity(std::shared_ptr<Entity> entity);
 	void pushNextEntityJson(json jentity);
 	std::shared_ptr<Entity> popNextEntity();
+
+	void save(int slot);
+	bool load(int slot);
+	void syncToSave();
 
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
 

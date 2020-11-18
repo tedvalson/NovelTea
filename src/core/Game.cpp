@@ -11,7 +11,7 @@ namespace NovelTea
 
 Game::Game()
 	: m_objectList(nullptr)
-	, m_propertyList(std::make_shared<PropertyList>())
+	, m_propertyList(nullptr)
 	, m_room(nullptr)
 	, m_scriptManager(this)
 {
@@ -34,24 +34,13 @@ void Game::reset()
 	m_saveData.reset();
 	m_timerManager.reset();
 	m_scriptManager.reset();
-
-	if (!m_room || m_room->getId().empty())
-		m_room = std::make_shared<Room>();
-	else
-		m_room = m_saveData.get<Room>(m_room->getId());
-	m_objectList = std::make_shared<ObjectList>(m_saveData);
-	m_objectList->attach("player", "inv");
+	syncToSave();
 }
 
 void Game::setRoomId(const std::string &roomId)
 {
 	m_roomId = roomId;
 	m_room = m_saveData.get<Room>(roomId);
-}
-
-const std::string &Game::getRoomId() const
-{
-	return m_roomId;
 }
 
 DukValue Game::prop(const std::string &key, const DukValue &defaultValue)
@@ -95,6 +84,32 @@ std::shared_ptr<Entity> Game::popNextEntity()
 	auto nextEntity = m_entityQueue.front();
 	m_entityQueue.pop();
 	return nextEntity;
+}
+
+void Game::save(int slot)
+{
+	m_saveData.data()[ID::entrypointEntity] = sj::Array(
+		static_cast<int>(EntityType::Room),
+		ActiveGame->getRoom()->getId()
+	);
+	m_saveData.save(slot);
+}
+
+bool Game::load(int slot)
+{
+	if (!m_saveData.load(slot))
+		return false;
+	syncToSave();
+	return true;
+}
+
+void Game::syncToSave()
+{
+	m_room = std::make_shared<Room>();
+	m_objectList = std::make_shared<ObjectList>(m_saveData);
+	m_objectList->attach("player", "inv");
+	m_propertyList = std::make_shared<PropertyList>();
+	m_propertyList->attach("game", "globals");
 }
 
 //void Game::execMessageCallback(const std::string &message, const DukValue &callback)

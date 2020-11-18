@@ -212,8 +212,6 @@ void ScriptManager::registerGlobals()
 	// Save
 	dukglue_register_global(m_context, &m_game->getSaveData(), "Save");
 	dukglue_register_method(m_context, &SaveData::set, "saveEntity");
-	dukglue_register_method(m_context, &SaveData::save, "saveSlot");
-	dukglue_register_method(m_context, &SaveData::load, "loadSlot");
 	dukglue_register_method(m_context, &SaveData::resetRoomDescriptions, "resetRoomDescriptions");
 
 	// Game
@@ -222,6 +220,8 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::execMessageCallback, "message");
 	dukglue_register_method(m_context, &Game::prop, "prop");
 	dukglue_register_method(m_context, &Game::setProp, "setProp");
+	dukglue_register_method(m_context, &Game::save, "save");
+	dukglue_register_method(m_context, &Game::load, "load");
 	dukglue_register_property(m_context, &Game::getObjectList, nullptr, "inventory");
 	dukglue_register_property(m_context, &Game::getRoom, &Game::setRoom, "room");
 
