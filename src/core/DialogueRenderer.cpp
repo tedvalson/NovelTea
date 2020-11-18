@@ -127,7 +127,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 				m_nextForcedSegmentIndex = childId;
 				if (npcSegment->getTextRaw().empty())
 					changeSegment(childId);
-				return;
+				break;
 			} else
 				continue;
 		}
