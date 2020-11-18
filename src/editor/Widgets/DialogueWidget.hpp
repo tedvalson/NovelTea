@@ -42,6 +42,8 @@ private slots:
 	void on_actionMoveUp_triggered();
 	void on_actionMoveDown_triggered();
 	void on_lineEditDefaultName_textChanged(const QString &arg1);
+	void on_treeView_expanded(const QModelIndex &index);
+	void on_treeView_collapsed(const QModelIndex &index);
 
 private:
 	void fillItemSettings();

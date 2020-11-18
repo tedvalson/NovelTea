@@ -198,8 +198,10 @@ void DialogueWidget::checkIndexChange()
 		segment->setScriptEnabled(ui->checkBoxScript->isChecked());
 		segment->setScript(ui->scriptEdit->toPlainText().toStdString());
 
-		if (m_treeModel->updateSegment(index, segment))
+		if (m_treeModel->updateSegment(index, segment)) {
 			std::cout << "updated seg" << std::endl;
+			ui->treeView->resizeColumnToContents(0);
+		}
 	}
 }
 
@@ -302,4 +304,14 @@ void DialogueWidget::on_lineEditDefaultName_textChanged(const QString &arg1)
 	// TODO: Better way to force update of visible items?
 	ui->treeView->hide();
 	ui->treeView->show();
+}
+
+void DialogueWidget::on_treeView_expanded(const QModelIndex &index)
+{
+	ui->treeView->resizeColumnToContents(0);
+}
+
+void DialogueWidget::on_treeView_collapsed(const QModelIndex &index)
+{
+	ui->treeView->resizeColumnToContents(0);
 }
