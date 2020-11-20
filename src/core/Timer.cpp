@@ -65,23 +65,27 @@ void TimerManager::reset()
 bool TimerManager::update(float delta)
 {
 	auto result = false;
-	for (auto it = m_timers.begin(); it != m_timers.end();)
-	{
-		if ((*it)->update(delta))
+
+	// Perform two separate for loops in case some
+	// timers create more timers.
+	for (auto timer : m_timers)
+		if (timer->update(delta))
 			result = true;
+
+	for (auto it = m_timers.begin(); it != m_timers.end();)
 		if ((*it)->isComplete())
 			m_timers.erase(it);
 		else
 			++it;
-	}
+
 	return result;
 }
 
 std::shared_ptr<Timer> TimerManager::start(int duration, const DukValue &func)
 {
 	auto timer = std::make_shared<Timer>(func);
-	m_timers.push_back(timer);
 	timer->setDuration(duration);
+	m_timers.push_back(timer);
 	return timer;
 }
 
