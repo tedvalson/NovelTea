@@ -13,6 +13,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Dialogue.cpp
 	${SRCROOT}/DialogueRenderer.cpp
 	${SRCROOT}/DialogueSegment.cpp
+	${SRCROOT}/Diff.cpp
 	${SRCROOT}/Engine.cpp
 	${SRCROOT}/Entity.cpp
 	${SRCROOT}/Game.cpp

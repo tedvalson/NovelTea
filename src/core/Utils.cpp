@@ -18,6 +18,16 @@ std::vector<std::string> split(const std::string &text, const std::string &delim
 	return result;
 }
 
+std::string join(const std::vector<std::string> &words, const std::string &delimiter)
+{
+	if (words.empty())
+		return "";
+	std::string result;
+	for (auto &word : words)
+		result += delimiter + word;
+	return result.substr(delimiter.size());
+}
+
 bool wrapText(sf::Text &text, float width)
 {
 	if (text.getLocalBounds().width <= width)
@@ -44,11 +54,6 @@ bool wrapText(sf::Text &text, float width)
 
 	text.setString(out);
 	return true;
-}
-
-std::string diff(const std::string &oldString, const std::string &newString)
-{
-		return newString;
 }
 
 } // namespace NovelTea
