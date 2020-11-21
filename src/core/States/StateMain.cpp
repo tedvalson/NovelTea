@@ -213,10 +213,12 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	{
 		auto nextRoom = GSave.get<Room>(idName);
 		auto room = GGame.getRoom();
-		if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter())
-			return;
 		if (room->getId() != idName)
 		{
+			if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
+				updateRoomText();
+				return;
+			}
 			room->runScriptAfterLeave();
 			GGame.setRoom(nextRoom);
 			nextRoom->runScriptAfterEnter();
