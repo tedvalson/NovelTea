@@ -4,6 +4,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/Diff.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
 namespace NovelTea
@@ -170,7 +171,7 @@ void ActiveText::setText(const std::string &text, const TextFormat &format)
 		addBlock(block);
 	}
 
-	m_string = text;
+	m_string = stripDiff(text);
 	setAlpha(m_alpha);
 }
 

@@ -122,11 +122,19 @@ std::string diff(const std::string &oldString, const std::string &newString)
 	if (startNew)
 		result += "]^";
 
-//	std::cout << result << std::endl;
-//	std::cout << snapDiffToWord(result) << std::endl;
-//	std::cout << removeNestedDiff(snapDiffToWord(result)) << std::endl;
 	return removeNestedDiff(snapDiffToWord(result));
-//	return result;
+}
+
+std::string stripDiff(const std::string &diffString)
+{
+	auto result = diffString;
+	auto pos = 0;
+	while ((pos = result.find("^[", pos)) != result.npos)
+		result.erase(pos, 2);
+	pos = 0;
+	while ((pos = result.find("]^", pos)) != result.npos)
+		result.erase(pos, 2);
+	return result;
 }
 
 } // namespace NovelTea

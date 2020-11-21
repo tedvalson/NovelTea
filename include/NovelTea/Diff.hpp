@@ -7,6 +7,7 @@ namespace NovelTea
 {
 
 std::string diff(const std::string &oldString, const std::string &newString);
+std::string stripDiff(const std::string &diffString);
 
 } // namespace NovelTea
 
