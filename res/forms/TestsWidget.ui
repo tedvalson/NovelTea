@@ -155,7 +155,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="listWidgetSteps"/>
+               <widget class="QListWidget" name="listWidgetSteps">
+                <property name="dragDropMode">
+                 <enum>QAbstractItemView::InternalMove</enum>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -272,7 +276,9 @@
   </action>
   <action name="actionRunSteps">
    <property name="icon">
-    <iconset theme="media-playback-start"/>
+    <iconset theme="media-playback-start">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Run Steps</string>
@@ -280,7 +286,9 @@
   </action>
   <action name="actionRecordSteps">
    <property name="icon">
-    <iconset theme="media-record"/>
+    <iconset theme="media-record">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Record Steps</string>

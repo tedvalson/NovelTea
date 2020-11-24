@@ -23,6 +23,8 @@ TestsWidget::TestsWidget(QWidget *parent)
 	ui->actionAddStep->setMenu(m_menuAdd);
 	auto buttonAdd = static_cast<QToolButton*>(ui->toolBarSteps->widgetForAction(ui->actionAddStep));
 	buttonAdd->setPopupMode(QToolButton::InstantPopup);
+
+	connect(ui->listWidgetSteps->model(), &QAbstractItemModel::rowsMoved, this, &TestsWidget::on_rowsMoved);
 }
 
 TestsWidget::~TestsWidget()
@@ -235,7 +237,7 @@ void TestsWidget::on_actionAddStepWait_triggered()
 		"type", "wait",
 		"duration", duration
 	});
-	addStep(j);
+	addStep(j, true);
 }
 
 void TestsWidget::on_listWidgetTests_currentRowChanged(int currentRow)
@@ -263,4 +265,13 @@ void TestsWidget::on_actionRunSteps_triggered()
 void TestsWidget::on_actionRecordSteps_triggered()
 {
 	processSteps(true);
+}
+
+void TestsWidget::on_rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow)
+{
+	setModified();
+	auto &jtest = m_json[m_selectedTestId];
+	auto &jsource = jtest[sourceStart];
+	jtest.insert(destinationRow, jsource);
+	jtest.erase((sourceStart < destinationRow) ? sourceStart : sourceStart+1);
 }

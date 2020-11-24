@@ -45,6 +45,7 @@ private slots:
 	void on_actionRecordSteps_triggered();
 
 private:
+	void on_rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow);
 	void saveData() const override;
 	void loadData() override;
 
