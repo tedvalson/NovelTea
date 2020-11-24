@@ -164,6 +164,7 @@ std::shared_ptr<Game> Engine::getGame()
 void Engine::initialize()
 {
 	GMan.setActive(m_game);
+	m_game->initialize();
 	m_lastTime = getSystemTimeMs();
 	m_deltaPerFrame = 1.f / m_config.fps;
 	m_internalRatio = static_cast<float>(m_config.width) / m_config.height;

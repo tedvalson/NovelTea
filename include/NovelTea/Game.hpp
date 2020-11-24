@@ -26,6 +26,7 @@ public:
 	Game();
 	~Game();
 
+	void initialize();
 	void reset();
 
 	void setRoomId(const std::string &roomId);

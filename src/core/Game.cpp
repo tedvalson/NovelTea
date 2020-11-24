@@ -16,7 +16,6 @@ Game::Game()
 	, m_scriptManager(this)
 {
 	m_messageCallback = [](const std::vector<std::string>&, const DukValue&){};
-	reset();
 }
 
 Game::~Game()
@@ -24,6 +23,12 @@ Game::~Game()
 	// TODO: Need to make sure active timers are destroyed first.
 	//       shared_ptrs here may not clean up when expected?
 	m_timerManager.reset();
+}
+
+// Game must be active before initialized
+void Game::initialize()
+{
+	reset();
 }
 
 void Game::reset()
@@ -107,8 +112,8 @@ void Game::syncToSave()
 {
 	m_room = std::make_shared<Room>();
 	m_objectList = std::make_shared<ObjectList>(m_saveData);
-	m_objectList->attach("player", "inv");
 	m_propertyList = std::make_shared<PropertyList>();
+	m_objectList->attach("player", "inv");
 	m_propertyList->attach("game", "globals");
 }
 
