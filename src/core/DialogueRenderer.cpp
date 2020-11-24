@@ -66,8 +66,15 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 	return true;
 }
 
+void DialogueRenderer::processLines()
+{
+	while (m_buttons.empty() && !isComplete())
+		changeSegment(m_nextForcedSegmentIndex);
+}
+
 bool DialogueRenderer::processSelection(int buttonIndex)
 {
+	processLines();
 	if (m_isComplete)
 		return false;
 	if (buttonIndex < 0 || buttonIndex >= m_buttons.size())

@@ -29,6 +29,7 @@ public:
 	void update(float delta);
 	bool processEvent(const sf::Event &event);
 
+	void processLines();
 	bool processSelection(int buttonIndex);
 	void setDialogueCallback(DialogueCallback callback);
 

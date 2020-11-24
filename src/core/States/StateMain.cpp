@@ -313,14 +313,36 @@ void StateMain::processTestSteps()
 	for (int i = 0; i < jsteps.size(); ++i)
 	{
 		auto &jstep = jsteps[i];
-
-		// Skip through all cutscenes
-		while (m_mode == Mode::Cutscene)
-		{
-			update(0.001f * m_cutscene->getDelayMs());
-		}
-
 		auto type = jstep["type"].ToString();
+
+		auto waiting = (type == "wait");
+		auto waitTimeLeft = 0.f;
+		if (waiting)
+			waitTimeLeft = 0.001f * jstep["duration"].ToInt();
+
+		do {
+			if (m_mode == Mode::Cutscene) {
+				m_cutsceneRenderer.update(0.001f * m_cutscene->getDelayMs());
+				if (m_cutsceneRenderer.isComplete())
+					GGame.pushNextEntityJson(m_cutscene->getNextEntity());
+			}
+			else if (m_mode == Mode::Dialogue) {
+				m_dialogueRenderer.processLines();
+				if (m_dialogueRenderer.isComplete())
+					GGame.pushNextEntityJson(m_dialogue->getNextEntity());
+				else
+					break;
+			}
+
+			if (waiting && waitTimeLeft > 0.f) {
+				if (GGame.getTimerManager().update(0.01f))
+					updateRoomText();
+				waitTimeLeft -= 0.01f;
+			}
+		}
+		while (gotoNextEntity() || (waitTimeLeft > 0.f));
+
+
 		if (type == "action")
 		{
 			std::vector<std::string> objectIds;
@@ -333,7 +355,6 @@ void StateMain::processTestSteps()
 		{
 			if (!m_dialogueRenderer.processSelection(jstep["index"].ToInt()))
 				success = false;
-			update(0.f);
 		}
 		else if (type == "move")
 		{
@@ -344,10 +365,6 @@ void StateMain::processTestSteps()
 			if (success)
 				GGame.pushNextEntityJson(jentity);
 		}
-		else if (type == "wait")
-		{
-			update(0.001f * jstep["duration"].ToInt());
-		}
 
 		if (!success)
 		{
@@ -357,16 +374,8 @@ void StateMain::processTestSteps()
 			});
 			runCallback(&j);
 			std::cout << "FAILED" << std::endl;
-			return;
+			break;
 		}
-
-		do {
-			if (m_mode == Mode::Cutscene)
-				break;
-			else if (m_mode == Mode::Dialogue && !m_dialogueRenderer.isComplete())
-				break;
-		}
-		while (gotoNextEntity());
 	}
 
 	m_cutsceneRenderer.setSkipWaitingForClick(false);
