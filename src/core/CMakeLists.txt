@@ -45,8 +45,10 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/VerbList.cpp
 	${SRCROOT}/States/State.cpp
 	${SRCROOT}/States/StateEditor.cpp
+	${SRCROOT}/States/StateIntro.cpp
 	${SRCROOT}/States/StateMain.cpp
 	${SRCROOT}/States/StateStack.cpp
+	${SRCROOT}/States/StateTitleScreen.cpp
 	
 	${PROJECT_SOURCE_DIR}/external/duktape.c
 	${TWEEN_ENGINE_SOURCE}

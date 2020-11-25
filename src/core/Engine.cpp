@@ -1,6 +1,8 @@
 #include <NovelTea/Engine.hpp>
-#include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/States/StateEditor.hpp>
+#include <NovelTea/States/StateIntro.hpp>
+#include <NovelTea/States/StateMain.hpp>
+#include <NovelTea/States/StateTitleScreen.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <SFML/System/Time.hpp>
 #include <chrono>
@@ -19,7 +21,9 @@ Engine::Engine(EngineConfig config)
 	m_stateStack = std::unique_ptr<StateStack>(stateStack);
 
 	m_stateStack->registerState<StateEditor>(StateID::Editor);
+	m_stateStack->registerState<StateIntro>(StateID::Intro);
 	m_stateStack->registerState<StateMain>(StateID::Main);
+	m_stateStack->registerState<StateTitleScreen>(StateID::TitleScreen);
 }
 
 void Engine::run()

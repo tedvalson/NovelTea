@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 	config.width = 480;
 	config.height = 700;
 	config.fps = 30;
-	config.initialState = NovelTea::StateID::Main;
+	config.initialState = NovelTea::StateID::Intro;
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
 	while (window.isOpen())
