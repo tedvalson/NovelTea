@@ -70,6 +70,17 @@ const sf::Vector2f& Button::getSize() const
 	return m_size;
 }
 
+void Button::setPadding(const sf::FloatRect &padding)
+{
+	m_needsUpdate = true;
+	m_padding = padding;
+}
+
+const sf::FloatRect &Button::getPadding() const
+{
+	return m_padding;
+}
+
 
 void Button::setString(const sf::String& string)
 {
@@ -137,14 +148,8 @@ const sf::Color& Button::getActiveColor() const
 
 void Button::setAlpha(float alpha)
 {
-	auto color = getColor();
-	alpha = std::max(std::min(alpha, 255.f), 0.f);
-	color.a = alpha;
-	setColor(color);
-	color = getTextColor();
-	color.a = alpha;
-	setTextColor(color);
 	m_alpha = alpha;
+	m_needsUpdate = true;
 }
 
 float Button::getAlpha() const
@@ -214,11 +219,13 @@ void Button::ensureUpdate() const
 	if (m_needsUpdate)
 	{
 		if (m_autoSize)
-			NinePatch::setContentSize(sf::Vector2f(m_text.getLocalBounds().width, m_text.getLocalBounds().height));
+			NinePatch::setContentSize(sf::Vector2f(
+				m_text.getLocalBounds().width + m_padding.left + m_padding.width,
+				m_text.getLocalBounds().height + m_padding.top + m_padding.height));
 
 		sf::Vector2f contentSize = NinePatch::getContentSize();
 		sf::FloatRect textBounds = m_text.getLocalBounds();
-		sf::FloatRect padding = getPadding();
+		sf::FloatRect padding = NinePatch::getPadding();
 
 		if (m_autoSize && getTexture()) {
 			m_size.x = contentSize.x + getTexture()->getSize().x - padding.width;
@@ -234,15 +241,15 @@ void Button::ensureUpdate() const
 							   round(padding.top + contentSize.y/2 + m_textOffset.y));
 		} else {
 			m_text.setOrigin(0.f, 0.f);
-			m_text.setPosition(padding.left + m_textOffset.x, padding.top + m_textOffset.y);
+			m_text.setPosition(padding.left + m_padding.left + m_textOffset.x, padding.top + m_padding.top + m_textOffset.y);
 		}
 
 		if (m_active) {
-			NinePatch::setColor(m_backgroundActiveColor);
-			m_text.setFillColor(m_textActiveColor);
+			NinePatch::setColor(applyAlpha(m_backgroundActiveColor));
+			m_text.setFillColor(applyAlpha(m_textActiveColor));
 		} else {
-			NinePatch::setColor(m_backgroundColor);
-			m_text.setFillColor(m_textColor);
+			NinePatch::setColor(applyAlpha(m_backgroundColor));
+			m_text.setFillColor(applyAlpha(m_textColor));
 		}
 
 		m_needsUpdate = false;
@@ -252,6 +259,13 @@ void Button::ensureUpdate() const
 	m_rect.top = getPosition().y;
 	m_rect.width = m_size.x;
 	m_rect.height = m_size.y;
+}
+
+sf::Color Button::applyAlpha(const sf::Color &color) const
+{
+	auto c = color;
+	c.a *= m_alpha / 255.f;
+	return c;
 }
 
 
