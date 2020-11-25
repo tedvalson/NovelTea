@@ -2,6 +2,7 @@
 #define NOVELTEA_STATETITLESCREEN_HPP
 
 #include <NovelTea/States/State.hpp>
+#include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/TweenObjects.hpp>
@@ -26,8 +27,10 @@ public:
 private:
 	float m_alpha;
 	Button m_buttonStart;
+	Button m_buttonSettings;
 	TweenRectangleShape m_bg;
-	TweenText m_text;
+	ActiveText m_textTitle;
+	ActiveText m_textAuthor;
 	TweenEngine::TweenManager m_tweenManager;
 };
 
