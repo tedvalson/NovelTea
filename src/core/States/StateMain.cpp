@@ -43,14 +43,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	// Room
 	m_roomScrollbar.setPosition(width - 4.f, 4.f);
-	m_roomScrollbar.setSize(sf::Vector2u(2, height - toolbarHeight - 8.f));
-	m_roomScrollbar.setScrollAreaSize(sf::Vector2u(width, height - toolbarHeight));
-	m_roomScrollbar.setDragRect(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight));
 	m_roomScrollbar.setColor(sf::Color(0, 0, 0, 40));
 	m_roomScrollbar.setAutoHide(false);
 	m_roomScrollbar.attachObject(this);
-	m_roomTextView.reset(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight));
-	m_roomTextView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, (height - toolbarHeight) / height));
 
 	// Cutscene
 	m_cutsceneScrollbar.setPosition(width - 4.f, 4.f);
@@ -101,20 +96,29 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		if (!showing) {
 			m_roomActiveText.setHighlightId("");
 			if (!m_selectedObjectId.empty() && m_actionBuilder.getObjects().size() > 1) {
-				m_actionBuilder.show();
+				TweenEngine::Tween::to(*this, ACTION_BUILDER, 0.4f)
+					.target(1.f)
+					.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+						m_actionBuilder.show();
+					})
+					.start(m_tweenManager);
 			}
 		}
 	});
 
 	// ActionBuilder setup
-	m_actionBuilder.setPosition(10.f, -10.f + height - m_navigation.getGlobalBounds().height - 120.f);
-	m_actionBuilder.setSize(sf::Vector2f(width - 20.f, 200.f));
+	m_actionBuilder.setSize(sf::Vector2f(width - 20.f, 1.f / 4.f * height));
 	m_actionBuilder.setCallback([this](bool confirmed){
 		if (confirmed)
 			processAction(m_actionBuilder.getVerb(), m_actionBuilder.getObjects());
-		m_actionBuilder.hide();
+		m_actionBuilder.hide(0.4f, ActionBuilder::ALPHA, [this](){
+			TweenEngine::Tween::to(*this, ACTION_BUILDER, 0.4f)
+				.target(0.f)
+				.start(m_tweenManager);
+		});
 		m_inventory.close();
 	});
+	setActionBuilderShowPos(0.f);
 
 	// Notification setup
 	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
@@ -166,9 +170,9 @@ void StateMain::render(sf::RenderTarget &target)
 		target.setView(m_roomTextView);
 		target.draw(m_roomActiveTextFadeOut);
 		target.draw(m_roomActiveText);
+		target.setView(view);
 		if (m_actionBuilder.isVisible())
 			target.draw(m_actionBuilder);
-		target.setView(view);
 		target.draw(m_roomScrollbar);
 	}
 
@@ -187,7 +191,11 @@ void StateMain::render(sf::RenderTarget &target)
 void StateMain::setMode(Mode mode, const std::string &idName)
 {
 	m_roomActiveText.setHighlightId("");
-	m_actionBuilder.hide();
+	m_actionBuilder.hide(0.4f, ActionBuilder::ALPHA, [this](){
+		TweenEngine::Tween::to(*this, ACTION_BUILDER, 0.4f)
+			.target(0.f)
+			.start(m_tweenManager);
+	});
 	m_verbList.hide();
 
 	if (mode != Mode::Room)
@@ -226,7 +234,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		}
 		showToolbar();
 		updateRoomText();
-		setScroll(0.f);
+		m_roomScrollbar.setScroll(0.f);
 	}
 
 	m_mode = mode;
@@ -288,6 +296,23 @@ float StateMain::getScroll()
 const sf::Vector2f &StateMain::getScrollSize()
 {
 	return m_scrollAreaSize;
+}
+
+int StateMain::getValues(int tweenType, float *returnValues)
+{
+	switch (tweenType) {
+	case ACTION_BUILDER:
+		returnValues[0] = m_actionBuilderShowPos;
+		return 1;
+	default:
+		return -1;
+	}
+}
+
+void StateMain::setValues(int tweenType, float *newValues)
+{
+	if (tweenType == ACTION_BUILDER)
+		setActionBuilderShowPos(newValues[0]);
 }
 
 void StateMain::processTestSteps()
@@ -469,7 +494,6 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 
 	m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
 	updateScrollbar();
-	repositionText();
 
 	m_roomActiveText.setAlpha(0.f);
 	TweenEngine::Tween::to(m_roomActiveText, ActiveText::ALPHA, duration)
@@ -480,6 +504,27 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
 			m_roomTextChanging = false;
 		}).start(m_tweenManager);
+}
+
+void StateMain::setActionBuilderShowPos(float position)
+{
+	auto width = getContext().config.width;
+	auto height = getContext().config.height;
+	auto toolbarHeight = m_bgToolbar.getSize().y;
+	auto pos = position * m_actionBuilder.getSize().y;
+
+	m_actionBuilder.setPosition(10.f, height - toolbarHeight - pos);
+
+	m_roomScrollbar.setSize(sf::Vector2u(2, height - toolbarHeight - pos - 8.f));
+	m_roomScrollbar.setScrollAreaSize(sf::Vector2u(width, height - toolbarHeight - pos));
+	m_roomScrollbar.setDragRect(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight - pos));
+	updateScrollbar();
+	m_roomScrollbar.setScroll(m_scrollPos);
+
+	m_roomTextView.reset(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight - pos));
+	m_roomTextView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, (height - toolbarHeight - pos) / height));
+
+	m_actionBuilderShowPos = position;
 }
 
 void StateMain::callOverlayFunc()

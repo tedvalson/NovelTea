@@ -19,12 +19,18 @@ ActionBuilder::ActionBuilder()
 	m_emptyRectAlpha = 40.f;
 	m_emptyRectColor = sf::Color(0.f, 0.f, 200.f, m_emptyRectAlpha);
 
-	m_buttonCancel.setSize(sf::Vector2f(45.f, 45.f));
-	m_buttonCancel.setFillColor(sf::Color::Red);
+	m_buttonCancel.getText().setFont(*Proj.getFont(1));
+	m_buttonCancel.setString(L"\uf00d");
+	m_buttonCancel.setTextColor(sf::Color(255, 0, 0, 200));
+	m_buttonCancel.setTextActiveColor(sf::Color(255, 0, 0, 240));
+	m_buttonCancel.setColor(sf::Color(0, 0, 0, 30));
+	m_buttonCancel.setActiveColor(sf::Color(0, 0, 0, 50));
+	m_buttonCancel.onClick([this](){
+		if (m_callback)
+			m_callback(false);
+	});
 
 	m_textFormat.size(16);
-
-	m_textCancel.setFont(*Proj.getFont(1));
 
 	setAlpha(0.f);
 }
@@ -37,6 +43,8 @@ void ActionBuilder::update(float delta)
 
 bool ActionBuilder::processEvent(const sf::Event &event)
 {
+	m_buttonCancel.processEvent(event);
+
 	if (event.type == sf::Event::MouseButtonPressed)
 	{
 		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
@@ -48,12 +56,6 @@ bool ActionBuilder::processEvent(const sf::Event &event)
 				setSelectedIndex(i);
 				return true;
 			}
-		}
-
-		if (m_buttonCancel.getGlobalBounds().contains(p))
-		{
-			if (m_callback)
-				m_callback(false);
 		}
 	}
 	return true;
@@ -84,12 +86,12 @@ void ActionBuilder::setAlpha(float alpha)
 	for (auto &rect : m_emptyRects) {
 		SET_ALPHA(rect->getFillColor, rect->setFillColor, m_emptyRectAlpha);
 	}
-	SET_ALPHA(m_buttonCancel.getFillColor, m_buttonCancel.setFillColor, 255.f);
+	m_buttonCancel.setAlpha(alpha);
 }
 
 float ActionBuilder::getAlpha() const
 {
-	return m_buttonCancel.getFillColor().a;
+	return m_buttonCancel.getAlpha();
 }
 
 void ActionBuilder::setVerb(const std::string &verbId)
@@ -141,7 +143,11 @@ std::shared_ptr<Action> ActionBuilder::getAction() const
 void ActionBuilder::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
-	m_buttonCancel.setPosition(size.x - 50.f, 0.f);
+
+	m_buttonWidth = size.y / 8;
+	m_buttonCancel.setPosition(size.x - m_buttonWidth * 1.2f, 0.f);
+	m_buttonCancel.setContentSize(m_buttonWidth, m_buttonWidth);
+	m_buttonCancel.getText().setCharacterSize(m_buttonWidth * 0.9f);
 }
 
 sf::Vector2f ActionBuilder::getSize() const
@@ -191,8 +197,9 @@ void ActionBuilder::updateText()
 	auto &actionStructure = verb->getActionStructure();
 
 	auto alpha = getAlpha();
-	auto size = sf::Vector2f(m_size.x - 55.f, m_size.y);
+	auto size = sf::Vector2f(m_size.x, m_size.y);
 	auto lastCursorPos = sf::Vector2f();
+	auto offsetY = m_buttonWidth * 1.3f;
 
 	m_tweenManager.killAll();
 	m_texts.clear();
@@ -224,7 +231,7 @@ void ActionBuilder::updateText()
 				lastCursorPos = sf::Vector2f(0.f, tmpText.getCursorEnd().y);
 				tmpText.setCursorStart(lastCursorPos);
 			}
-			rect->setPosition(tmpText.getCursorEnd().x - width, tmpText.getCursorEnd().y + 4.f);
+			rect->setPosition(tmpText.getCursorEnd().x - width, offsetY + tmpText.getCursorEnd().y + 4.f);
 			m_emptyRects.emplace_back(rect);
 			if (objectStr != blankStr)
 				s = objectStr + " " + s;
@@ -235,6 +242,7 @@ void ActionBuilder::updateText()
 		}
 
 		auto text = new ActiveText;
+		text->setPosition(0.f, offsetY);
 		text->setSize(size);
 		text->setAlpha(alpha);
 		text->setCursorStart(lastCursorPos);
@@ -254,7 +262,6 @@ void ActionBuilder::draw(sf::RenderTarget &target, sf::RenderStates states) cons
 	for (auto &text : m_texts)
 		target.draw(*text, states);
 	target.draw(m_buttonCancel, states);
-	target.draw(m_textCancel, states);
 }
 
 } // namespace NovelTea

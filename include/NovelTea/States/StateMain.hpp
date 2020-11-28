@@ -29,9 +29,11 @@ enum class Mode {
 	Room,
 };
 
-class StateMain : public State, public Scrollable
+class StateMain : public State, public Scrollable, public TweenEngine::Tweenable
 {
 public:
+	static const int ACTION_BUILDER = 1;
+
 	StateMain(StateStack& stack, Context& context, StateCallback callback);
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
@@ -47,12 +49,16 @@ public:
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
 
+	int getValues(int tweenType, float *returnValues) override;
+	void setValues(int tweenType, float *newValues) override;
+
 	void processTestSteps();
 	bool processAction(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	bool gotoNextEntity();
 
 	void updateRoomText(const std::string &newText = " ", float duration = 1.f);
+	void setActionBuilderShowPos(float position);
 
 protected:
 	void callOverlayFunc();
@@ -92,6 +98,8 @@ private:
 	// Dialogue
 	std::shared_ptr<Dialogue> m_dialogue;
 	DialogueRenderer m_dialogueRenderer;
+
+	float m_actionBuilderShowPos;
 
 	TweenEngine::TweenManager m_tweenManager;
 };

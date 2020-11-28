@@ -2,6 +2,7 @@
 #define NOVELTEA_ACTIONBUILDER_HPP
 
 #include <NovelTea/GUI/Hideable.hpp>
+#include <NovelTea/GUI/Button.hpp>
 #include <NovelTea/Utils.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <SFML/Window/Event.hpp>
@@ -64,8 +65,8 @@ private:
 	TweenEngine::TweenManager m_tweenManager;
 	size_t m_selectedIndex;
 
-	TweenRectangleShape m_buttonCancel;
-	TweenText m_textCancel;
+	Button m_buttonCancel;
+	float m_buttonWidth;
 
 	std::string m_verbId;
 	std::vector<std::string> m_objectIds;
