@@ -70,15 +70,15 @@ const sf::Vector2f& Button::getSize() const
 	return m_size;
 }
 
-void Button::setPadding(const sf::FloatRect &padding)
+void Button::setExtraPadding(const sf::FloatRect &padding)
 {
 	m_needsUpdate = true;
-	m_padding = padding;
+	m_extraPadding = padding;
 }
 
-const sf::FloatRect &Button::getPadding() const
+const sf::FloatRect &Button::getExtraPadding() const
 {
-	return m_padding;
+	return m_extraPadding;
 }
 
 
@@ -220,8 +220,8 @@ void Button::ensureUpdate() const
 	{
 		if (m_autoSize)
 			NinePatch::setContentSize(sf::Vector2f(
-				m_text.getLocalBounds().width + m_padding.left + m_padding.width,
-				m_text.getLocalBounds().height + m_padding.top + m_padding.height));
+				m_text.getLocalBounds().width + m_extraPadding.left + m_extraPadding.width,
+				m_text.getLocalBounds().height + m_extraPadding.top + m_extraPadding.height));
 
 		sf::Vector2f contentSize = NinePatch::getContentSize();
 		sf::FloatRect textBounds = m_text.getLocalBounds();
@@ -241,7 +241,7 @@ void Button::ensureUpdate() const
 							   round(padding.top + contentSize.y/2 + m_textOffset.y));
 		} else {
 			m_text.setOrigin(0.f, 0.f);
-			m_text.setPosition(padding.left + m_padding.left + m_textOffset.x, padding.top + m_padding.top + m_textOffset.y);
+			m_text.setPosition(padding.left + m_extraPadding.left + m_textOffset.x, padding.top + m_extraPadding.top + m_textOffset.y);
 		}
 
 		if (m_active) {

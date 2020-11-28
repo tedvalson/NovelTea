@@ -29,8 +29,8 @@ public:
 	const sf::Vector2f& getContentSize() const;
 	const sf::Vector2f& getSize() const;
 
-	void setPadding(const sf::FloatRect& padding);
-	const sf::FloatRect &getPadding() const;
+	void setExtraPadding(const sf::FloatRect& padding);
+	const sf::FloatRect &getExtraPadding() const;
 
 	void setString(const sf::String& string);
 	const sf::String& getString() const;
@@ -71,7 +71,7 @@ private:
 	mutable sf::Vector2f m_size;
 	mutable sf::FloatRect m_rect;
 	mutable sf::Text m_text;
-	sf::FloatRect m_padding;
+	sf::FloatRect m_extraPadding;
 
 	sf::Vector2f m_textOffset;
 	sf::Color m_textColor;
