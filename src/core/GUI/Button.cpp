@@ -1,6 +1,7 @@
-#include <cmath>
 #include <NovelTea/GUI/Button.hpp>
+#include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ProjectData.hpp>
+#include <cmath>
 
 namespace NovelTea
 {
@@ -14,6 +15,9 @@ Button::Button()
 , m_centered(true)
 , m_alpha(255.f)
 {
+	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
+	setTexture(texture.get());
+
 	m_text.setFont(*Proj.getFont(0));
 }
 
@@ -27,6 +31,10 @@ void Button::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 	if (!m_text.getString().isEmpty())
 		target.draw(m_text, states);
+
+	auto p = states.transform.transformPoint(0.f, 0.f);
+	m_rect = sf::FloatRect(p.x, p.y, m_size.x, m_size.y);
+	states.transform.transformRect(m_rect);
 }
 
 
@@ -255,10 +263,6 @@ void Button::ensureUpdate() const
 		m_needsUpdate = false;
 	}
 
-	m_rect.left = getPosition().x;
-	m_rect.top = getPosition().y;
-	m_rect.width = m_size.x;
-	m_rect.height = m_size.y;
 }
 
 sf::Color Button::applyAlpha(const sf::Color &color) const

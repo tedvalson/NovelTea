@@ -20,21 +20,19 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 	format.bold(true);
 	m_textTitle.setSize(sf::Vector2f(0.95f * width, height));
 	m_textTitle.setText(ProjData[ID::projectName].ToString(), format);
-	m_textTitle.setPosition(0.05f * width, 0.05f * width);
+	m_textTitle.setPosition(round(0.05f * width), round(0.05f * width));
 
 	// Author
 	format.color(sf::Color(120, 120, 120));
 	format.size(8);
 	format.bold(false);
 	m_textAuthor.setSize(sf::Vector2f(0.9f * width, height));
-	m_textAuthor.setPosition(0.05 * width, (0.1f * width) + m_textTitle.getLocalBounds().height);
+	m_textAuthor.setPosition(round(0.05 * width), round((0.1f * width) + m_textTitle.getLocalBounds().height));
 	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), format);
 
 	// Buttons
-	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	m_buttonStart.getText().setFont(*Proj.getFont(0));
 	m_buttonStart.getText().setCharacterSize(45.f);
-	m_buttonStart.setTexture(texture.get());
 	m_buttonStart.setString("Start");
 	m_buttonStart.setTextColor(sf::Color(80, 80, 80));
 	m_buttonStart.setActiveColor(sf::Color(0, 0, 0, 50));
