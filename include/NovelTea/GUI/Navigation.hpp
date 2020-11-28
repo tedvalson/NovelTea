@@ -9,6 +9,8 @@
 namespace NovelTea
 {
 
+class Button;
+
 using NavigationCallback = std::function<void(int direction, const json &jentity)>;
 
 class Navigation : public sf::Drawable, public Hideable
@@ -45,7 +47,7 @@ private:
 	float m_alpha;
 	json m_paths;
 
-	mutable std::vector<std::unique_ptr<TweenRectangleShape>> m_buttons;
+	mutable std::vector<std::unique_ptr<Button>> m_buttons;
 
 	NavigationCallback m_callback;
 };

@@ -1,5 +1,6 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
+#include <NovelTea/GUI/Button.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
 
@@ -14,12 +15,31 @@ Navigation::Navigation()
 , m_callback(nullptr)
 {
 	m_paths = sj::Array();
+
+	auto font = Proj.getFont(1);
 	for (int i = 0; i < 8; ++i)
 	{
-		auto button = new TweenRectangleShape;
+		auto button = new Button;
+		button->getText().setFont(*font);
+		button->setString(L"\uf062");
+		button->setColor(sf::Color::Transparent);
+		button->onClick([this, i](){
+			if (!m_paths[i][0].ToBool() || m_paths[i][1][0].ToInt() == -1)
+				return;
+			m_callback(i, m_paths[i][1]);
+		});
+
 		m_buttons.emplace_back(button);
 		m_paths.append(sj::Array(false, sj::Object()));
 	}
+
+	m_buttons[0]->getText().setRotation(-45.f);
+	m_buttons[2]->getText().setRotation(45.f);
+	m_buttons[3]->getText().setRotation(-90.f);
+	m_buttons[4]->getText().setRotation(90.f);
+	m_buttons[5]->getText().setRotation(-135.f);
+	m_buttons[6]->getText().setRotation(180.f);
+	m_buttons[7]->getText().setRotation(135.f);
 
 	setSize(sf::Vector2f(150.f, 150.f));
 }
@@ -30,20 +50,9 @@ Navigation::~Navigation()
 
 bool Navigation::processEvent(const sf::Event &event)
 {
-	if (event.type == sf::Event::MouseButtonPressed)
-	{
-		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
-		for (int i = 0; i < m_buttons.size(); ++i)
-		{
-			if (!m_paths[i][0].ToBool() || m_paths[i][1][0].ToInt() == -1)
-				continue;
-			if (m_buttons[i]->getGlobalBounds().contains(p))
-			{
-				m_callback(i, m_paths[i][1]);
-				return true;
-			}
-		}
-	}
+	for (auto &button : m_buttons)
+		button->processEvent(event);
+
 	return false;
 }
 
@@ -66,9 +75,13 @@ void Navigation::setPaths(const json &value)
 	{
 		if (m_paths[i][0].ToBool() && m_paths[i][1][0].ToInt() != -1)
 		{
-			m_buttons[i]->setFillColor(sf::Color::Green);
+			m_buttons[i]->setActiveColor(sf::Color(0, 0, 0, 20));
+			m_buttons[i]->setTextColor(sf::Color(0, 255, 0, 220));
+			m_buttons[i]->setTextActiveColor(sf::Color(0, 255, 0, 255));
 		} else {
-			m_buttons[i]->setFillColor(sf::Color::Blue);
+			m_buttons[i]->setActiveColor(sf::Color::Transparent);
+			m_buttons[i]->setTextColor(sf::Color(0, 0, 0, 20));
+			m_buttons[i]->setTextActiveColor(sf::Color(0, 0, 0, 20));
 		}
 	}
 
@@ -99,14 +112,9 @@ void Navigation::setCallback(NavigationCallback callback)
 
 void Navigation::setAlpha(float alpha)
 {
-	sf::Color color;
 	m_alpha = alpha;
-	float *newValues = &m_alpha;
-	for (int i = 0; i < m_buttons.size(); ++i)
-	{
-		float alphaMax = m_paths[i][0].ToBool() ? 255.f : 40.f;
-		SET_ALPHA(m_buttons[i]->getFillColor, m_buttons[i]->setFillColor, alphaMax);
-	}
+	for (auto &button : m_buttons)
+		button->setAlpha(alpha);
 }
 
 float Navigation::getAlpha() const
@@ -121,6 +129,7 @@ void Navigation::ensureUpdate() const
 
 	auto spacing = round(m_size.y / 20.f);
 	auto buttonSize = round((m_size.y - spacing*2) / 3.f);
+	auto padding = m_buttons[0]->getPadding();
 
 	int buttonIndex = 0;
 	for (int i = 0; i < 9; ++i)
@@ -130,7 +139,8 @@ void Navigation::ensureUpdate() const
 		if (x == 1 && y == 1)
 			continue;
 		auto &button = m_buttons[buttonIndex];
-		button->setSize(sf::Vector2f(buttonSize, buttonSize));
+		button->getText().setCharacterSize(0.8f * buttonSize);
+		button->setContentSize(sf::Vector2f(buttonSize - padding.left - padding.width, buttonSize - padding.top - padding.height));
 		button->setPosition((buttonSize + spacing) * x, (buttonSize + spacing) * y);
 		++buttonIndex;
 	}
