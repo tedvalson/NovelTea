@@ -25,6 +25,7 @@ public:
 	void repositionText();
 
 	void show(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
+	void hide(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
 
 	void setText(const std::string &text);
 	void setTextArray(const std::vector<std::string> &textArray);

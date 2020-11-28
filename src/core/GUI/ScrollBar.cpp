@@ -117,6 +117,7 @@ bool ScrollBar::processEvent(const sf::Event &event)
 
 void ScrollBar::update(float delta)
 {
+	ensureUpdateScrollBar();
 	if (m_autoHide && m_clockHide.getElapsedTime() > sf::seconds(3.f))
 		hide();
 
@@ -310,6 +311,9 @@ void ScrollBar::setScroll(float scrollPos)
 	m_scrollPos = scrollPos;
 	if (m_autoHide && m_scrollPosMin != m_scrollPosMax)
 		show();
+
+	for (auto &obj : m_scrollObjects)
+		obj->setScroll(m_scrollPos);
 
 	setPosition(m_position);
 }

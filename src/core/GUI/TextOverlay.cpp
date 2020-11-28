@@ -69,6 +69,17 @@ void TextOverlay::show(float duration, int tweenType, HideableCallback callback)
 	});
 }
 
+void TextOverlay::hide(float duration, int tweenType, HideableCallback callback)
+{
+	Hideable::hide(duration, tweenType, [this, callback](){
+		// Reset scrollbar positioning
+		m_scrollAreaSize.y = 0.f;
+		updateScrollbar();
+		if (callback)
+			callback();
+	});
+}
+
 void TextOverlay::setText(const std::string &text)
 {
 	std::vector<std::string> strings;
@@ -149,7 +160,7 @@ bool TextOverlay::gotoNextString(HideableCallback callback)
 	m_text.setText(m_strings[m_nextStringIndex]);
 	m_text.setAlpha(0.f);
 
-	setScroll(0.f);
+	m_scrollBar.setScroll(0.f);
 	m_scrollAreaSize.y = m_padding*2 + m_text.getLocalBounds().height;
 	updateScrollbar();
 
@@ -169,6 +180,8 @@ bool TextOverlay::gotoNextString(HideableCallback callback)
 
 void TextOverlay::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
+	if (!isVisible())
+		return;
 	auto view = target.getView();
 	ensureUpdate();
 	states.transform *= getTransform();
