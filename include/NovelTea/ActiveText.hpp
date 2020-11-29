@@ -17,9 +17,13 @@ class TextBlock;
 class ActiveText : public JsonSerializable, public sf::Drawable, public Hideable
 {
 public:
+
+	static const int HIGHLIGHTS = 12;
+
 	struct Segment {
-		TweenText text;
+		bool objectExists;
 		std::string objectIdName;
+		TweenText text;
 		sf::FloatRect bounds;
 	};
 
@@ -56,9 +60,15 @@ public:
 	void setAlpha(float alpha) override;
 	float getAlpha() const override;
 
+	void setHighlightFactor(float highlightFactor);
+	float getHighlightFactor() const;
+
 	std::vector<Segment> &getSegments();
 
 protected:
+	virtual void setValues(int tweenType, float *newValues) override;
+	virtual int getValues(int tweenType, float *returnValues) override;
+
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	void ensureUpdate() const;
 
@@ -73,6 +83,7 @@ private:
 	mutable bool m_needsUpdate = true;
 	float m_lineSpacing;
 	float m_alpha;
+	float m_highlightFactor;
 
 	mutable sf::RectangleShape m_debugBorder;
 	mutable std::vector<sf::RectangleShape> m_debugSegmentShapes;

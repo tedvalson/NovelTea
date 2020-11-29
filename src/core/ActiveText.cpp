@@ -4,6 +4,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/Room.hpp>
 #include <NovelTea/Diff.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -14,6 +15,7 @@ ActiveText::ActiveText()
 	: m_size(sf::Vector2f(9999.f, 9999.f))
 	, m_lineSpacing(5.f)
 	, m_alpha(255.f)
+	, m_highlightFactor(1.f)
 {
 }
 
@@ -155,8 +157,6 @@ std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
 
 void ActiveText::setText(const std::string &text, const TextFormat &format)
 {
-	if (m_string == text)
-		return;
 	m_textBlocks.clear();
 
 	auto lines = split(text);
@@ -173,6 +173,7 @@ void ActiveText::setText(const std::string &text, const TextFormat &format)
 
 	m_string = stripDiff(text);
 	setAlpha(m_alpha);
+	setHighlightFactor(m_highlightFactor);
 }
 
 std::string ActiveText::getText() const
@@ -285,10 +286,56 @@ float ActiveText::getAlpha() const
 	return m_alpha;
 }
 
+void ActiveText::setHighlightFactor(float highlightFactor)
+{
+	m_highlightFactor = highlightFactor;
+
+	for (auto &segment : m_segments)
+	{
+		if (!segment.objectIdName.empty())
+		{
+			sf::Color color;
+			if (segment.objectExists)
+				color = sf::Color(0, 0, highlightFactor * 255, m_alpha);
+			else
+				color = sf::Color(highlightFactor * 155, 0, highlightFactor * 255, m_alpha);
+			segment.text.setFillColor(color);
+		}
+	}
+}
+
+float ActiveText::getHighlightFactor() const
+{
+	return m_highlightFactor;
+}
+
 std::vector<ActiveText::Segment> &ActiveText::getSegments()
 {
 	ensureUpdate();
 	return m_segments;
+}
+
+void ActiveText::setValues(int tweenType, float *newValues)
+{
+	switch (tweenType) {
+		case HIGHLIGHTS: {
+			setHighlightFactor(newValues[0]);
+			break;
+		}
+		default:
+			Hideable::setValues(tweenType, newValues);
+	}
+}
+
+int ActiveText::getValues(int tweenType, float *returnValues)
+{
+	switch (tweenType) {
+	case HIGHLIGHTS:
+			returnValues[0] = getHighlightFactor();
+		return 1;
+	default:
+		return Hideable::getValues(tweenType, returnValues);
+	}
 }
 
 void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
@@ -364,7 +411,13 @@ void ActiveText::ensureUpdate() const
 						continue;
 					}
 
-					auto color = textObjectPair.second.empty() ? (newTextPair.first ? sf::Color::Red : sf::Color::Black) : sf::Color::Blue;
+					auto objectId = textObjectPair.second;
+					auto objectExists = false;
+					auto color = (newTextPair.first ? sf::Color::Red : format.color());
+					if (!objectId.empty()) {
+						objectExists = ActiveGame->getRoom()->containsId(objectId) ||
+									  ActiveGame->getObjectList()->containsId(objectId);
+					}
 					color.a = m_alpha;
 					text.setString(textObjectPair.first);
 					text.setFillColor(color);
@@ -395,7 +448,7 @@ void ActiveText::ensureUpdate() const
 					shape.setPosition(bounds.left, bounds.top);
 					m_debugSegmentShapes.push_back(shape);
 
-					m_segments.push_back({text, textObjectPair.second, bounds});
+					m_segments.push_back({objectExists, textObjectPair.second, text, bounds});
 				}
 			}
 		}

@@ -100,6 +100,7 @@ private:
 
 	float m_actionBuilderShowPos;
 
+	TweenEngine::Tween *m_highlightTween;
 	TweenEngine::TweenManager m_tweenManager;
 };
 

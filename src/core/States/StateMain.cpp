@@ -24,6 +24,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_roomTextChanging(false)
 , m_scrollPos(0.f)
 , m_cutsceneSpeed(1.f)
+, m_highlightTween(nullptr)
 {
 	ScriptMan.reset();
 
@@ -482,6 +483,7 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 {
 	auto room = GGame.getRoom();
 	auto text = newText;
+	auto firstVisit = !GSave.data()[ID::roomDescriptions].hasKey(room->getId());
 	if (text == " ")
 		text = room->getDescription();
 	if (text == m_roomActiveText.getText())
@@ -504,6 +506,13 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
 			m_roomTextChanging = false;
 		}).start(m_tweenManager);
+
+	if (m_highlightTween)
+		m_highlightTween->free();
+	auto highlightDuration = firstVisit ? 3.f + 1.f / 100.f * text.size() : 0.f;
+	m_roomActiveText.setHighlightFactor(0.f);
+	m_highlightTween = &TweenEngine::Tween::to(m_roomActiveText, ActiveText::HIGHLIGHTS, highlightDuration).target(1.f);
+	m_highlightTween->start();
 }
 
 void StateMain::setActionBuilderShowPos(float position)
@@ -652,6 +661,8 @@ bool StateMain::update(float delta)
 	if (GGame.getTimerManager().update(delta))
 		updateRoomText();
 
+	if (m_highlightTween)
+		m_highlightTween->update(delta);
 	m_tweenManager.update(delta);
 	return true;
 }
