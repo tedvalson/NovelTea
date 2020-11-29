@@ -26,9 +26,11 @@ Inventory::Inventory()
 
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	m_button.getText().setFont(*Proj.getFont(1));
+	m_button.getText().setCharacterSize(50.f);
 	m_button.setTexture(texture.get());
-	m_button.setString(L"\uf290");
-	m_button.setActiveColor(sf::Color::Yellow);
+	m_button.setString(L"\uf0b1");
+	m_button.setActiveColor(sf::Color(0, 0, 0, 50));
+	m_button.setColor(sf::Color(0, 0, 0, 30));
 	m_button.onClick([this](){
 		if (isOpen())
 			close();
@@ -49,7 +51,7 @@ bool Inventory::processEvent(const sf::Event &event)
 {
 	if (isOpen() && m_scrollBar.processEvent(event))
 		return false;
-	if (!m_button.processEvent(event))
+	if (m_button.processEvent(event))
 		return false;
 	if (!isOpen())
 		return false;
@@ -123,9 +125,11 @@ void Inventory::refreshItems()
 		m_objectTexts.emplace_back(text);
 	}
 
-	m_button.setPosition(m_size.x - m_button.getSize().x - 3.f, m_size.y - m_button.getSize().y - 3.f);
+	auto padding = round(m_size.y / 30.f);
+	m_button.setContentSize(100.f, 100.f);
+	m_button.setPosition(m_size.x - m_button.getSize().x - padding, m_size.y - m_button.getSize().y - padding);
 	m_bg.setSize(sf::Vector2f(maxWidth + m_margin*2 + 4.f, 150.f));
-	m_bg.setPosition(m_size.x - m_bg.getSize().x, m_button.getPosition().y - m_bg.getSize().y);
+	m_bg.setPosition(m_size.x - m_bg.getSize().x - padding, m_button.getPosition().y - m_bg.getSize().y);
 	m_scrollBar.setSize(sf::Vector2u(2, m_bg.getSize().y));
 	m_scrollBar.setPosition(m_size.x - 4.f, m_bg.getPosition().y);
 	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, 150.f));
@@ -193,14 +197,7 @@ void Inventory::setCallback(InventoryCallback callback)
 
 void Inventory::setAlpha(float alpha)
 {
-	sf::Color color;
 	m_alpha = alpha;
-	float *newValues = &m_alpha;
-//	for (int i = 0; i < m_buttons.size(); ++i)
-//	{
-//		float alphaMax = m_paths[i][0].ToBool() ? 255.f : 40.f;
-//		SET_ALPHA(m_buttons[i]->getFillColor, m_buttons[i]->setFillColor, alphaMax);
-//	}
 	m_button.setAlpha(alpha);
 }
 

@@ -61,7 +61,7 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 	}
 	// Need to break loop since button click could change m_buttons
 	for (auto &button : m_buttons)
-		if (button->getAlpha() == 255.f && !button->processEvent(event))
+		if (button->getAlpha() == 255.f && button->processEvent(event))
 			break;
 	return true;
 }

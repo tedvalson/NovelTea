@@ -184,6 +184,7 @@ void Button::autoSize()
 }
 
 
+// Returns true when it successfully interacts with button in any way
 bool Button::processEvent(const sf::Event &event)
 {
 	if (event.type == sf::Event::MouseButtonPressed)
@@ -192,7 +193,7 @@ bool Button::processEvent(const sf::Event &event)
 		{
 			m_active = true;
 			m_needsUpdate = true;
-			return false;
+			return true;
 		}
 	}
 
@@ -203,7 +204,7 @@ bool Button::processEvent(const sf::Event &event)
 			m_needsUpdate = true;
 			if (m_clickFunction)
 				m_clickFunction();
-			return false;
+			return true;
 		}
 	}
 
@@ -214,11 +215,11 @@ bool Button::processEvent(const sf::Event &event)
 				m_active = false;
 				m_needsUpdate = true;
 			}
-			return false;
+			return true;
 		}
 	}
 
-	return true;
+	return false;
 }
 
 
