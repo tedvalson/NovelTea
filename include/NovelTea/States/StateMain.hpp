@@ -81,6 +81,9 @@ private:
 	ScrollBar m_roomScrollbar;
 
 	TweenRectangleShape m_bgToolbar;
+	Button m_buttonSettings;
+	Button m_buttonTextLog;
+
 	VerbList m_verbList;
 	ActionBuilder m_actionBuilder;
 	Inventory m_inventory;

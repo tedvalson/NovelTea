@@ -68,6 +68,26 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_bgToolbar.setSize(sf::Vector2f(width, toolbarHeight));
 	m_bgToolbar.setPosition(0.f, height - toolbarHeight);
 	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
+	m_buttonSettings.setContentSize(40.f, 40.f);
+	m_buttonSettings.getText().setFont(*Proj.getFont(1));
+	m_buttonSettings.getText().setCharacterSize(30.f);
+	m_buttonSettings.setString(L"\uf013");
+	m_buttonSettings.setColor(sf::Color::Transparent);
+	m_buttonSettings.setActiveColor(sf::Color(0, 0, 0, 30));
+	m_buttonSettings.setTextColor(sf::Color(0, 0, 0, 200));
+	m_buttonSettings.setTextActiveColor(sf::Color(0, 0, 0, 255));
+	m_buttonSettings.setPosition(width - toolbarPadding - 130.f - m_buttonSettings.getSize().x*2, height - m_buttonSettings.getSize().y - toolbarPadding);
+	m_buttonSettings.onClick([this](){
+		requestStackPush(StateID::Settings);
+	});
+
+	m_buttonTextLog = m_buttonSettings;
+	m_buttonTextLog.setString(L"\uf02d");
+	m_buttonTextLog.move(m_buttonSettings.getSize().x, 0.f);
+	m_buttonTextLog.onClick([this](){
+		requestStackPush(StateID::TextLog);
+	});
+
 	// Inventory setup
 	m_inventory.hide(0.f);
 	m_inventory.setSize(sf::Vector2f(width, height));
@@ -178,6 +198,8 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_dialogueRenderer);
 	target.draw(m_bgToolbar);
 	target.draw(m_navigation);
+	target.draw(m_buttonSettings);
+	target.draw(m_buttonTextLog);
 	target.draw(m_textOverlay);
 	target.draw(m_inventory);
 	if (m_verbList.isVisible())
@@ -551,6 +573,9 @@ void StateMain::repositionText()
 
 bool StateMain::processEvent(const sf::Event &event)
 {
+	if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
+		return true;
+
 	if (m_textOverlay.isVisible())
 	{
 		if (m_textOverlay.processEvent(event))
