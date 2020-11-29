@@ -40,9 +40,19 @@ bool Timer::isComplete() const
 	return m_completed;
 }
 
+int Timer::getTimePassed() const
+{
+	return m_secondsPassed * 1000;
+}
+
 void Timer::kill()
 {
 	m_completed = true;
+}
+
+void Timer::setTimePassed(int timeMs)
+{
+	m_secondsPassed = 0.001f * timeMs;
 }
 
 void Timer::exec()
@@ -69,7 +79,7 @@ bool TimerManager::update(float delta)
 	// Perform two separate for loops in case some
 	// timers create more timers.
 	for (auto timer : m_timers)
-		if (timer->update(delta))
+		if (timer && timer->update(delta))
 			result = true;
 
 	for (auto it = m_timers.begin(); it != m_timers.end();)

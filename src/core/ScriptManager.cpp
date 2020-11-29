@@ -169,6 +169,7 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &Timer::kill, "kill");
 	dukglue_register_property(m_context, &Timer::getRepeat, &Timer::setRepeat, "repeat");
 	dukglue_register_property(m_context, &Timer::getDuration, &Timer::setDuration, "duration");
+	dukglue_register_property(m_context, &Timer::getTimePassed, &Timer::setTimePassed, "timePassed");
 
 	// Action
 	REGISTER_CONSTRUCTOR(Action);
@@ -223,7 +224,7 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::save, "save");
 	dukglue_register_method(m_context, &Game::load, "load");
 	dukglue_register_property(m_context, &Game::getObjectList, nullptr, "inventory");
-	dukglue_register_property(m_context, &Game::getRoom, &Game::setRoom, "room");
+	dukglue_register_property(m_context, &Game::getRoom, nullptr, "room");
 
 	// Script
 	dukglue_register_global(m_context, this, "Script");

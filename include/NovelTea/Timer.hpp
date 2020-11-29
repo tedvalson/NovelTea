@@ -18,6 +18,9 @@ public:
 	bool isComplete() const;
 	void kill();
 
+	void setTimePassed(int timeMs);
+	int getTimePassed() const;
+
 	ADD_ACCESSOR(bool, Repeat, m_repeat)
 	ADD_ACCESSOR(int, Duration, m_duration)
 
