@@ -31,15 +31,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto height = getContext().config.height;
 	auto toolbarHeight = round(height * 2.f/9.f);
 	auto toolbarPadding = toolbarHeight / 10.f;
-	m_roomTextPadding = round(1.f / 16.f * width);
-	m_roomActiveText.setSize(sf::Vector2f(width - m_roomTextPadding*2, 0.f));
-	m_cutsceneRenderer.setMargin(m_roomTextPadding);
-	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
-	m_inventory.setSize(sf::Vector2f(width, height));
 
-	m_bgToolbar.setSize(sf::Vector2f(width, toolbarHeight));
-	m_bgToolbar.setPosition(0.f, height - toolbarHeight);
-	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 
 	// Room
 	m_roomScrollbar.setPosition(width - 4.f, 4.f);
@@ -48,15 +40,15 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_roomScrollbar.attachObject(this);
 
 	// Cutscene
-	m_cutsceneScrollbar.setPosition(width - 4.f, 4.f);
-	m_cutsceneScrollbar.setColor(sf::Color(0, 0, 0, 40));
-	m_cutsceneScrollbar.setAutoHide(false);
-	m_cutsceneScrollbar.attachObject(&m_cutsceneRenderer);
-	m_cutsceneScrollbar.setSize(sf::Vector2u(2, height - 8.f));
-	m_cutsceneScrollbar.setScrollAreaSize(sf::Vector2u(width, height - m_roomTextPadding*2));
+	m_roomTextPadding = round(1.f / 16.f * width);
+	m_roomActiveText.setLineSpacing(5.f);
+	m_roomActiveText.setSize(sf::Vector2f(width - m_roomTextPadding*2, 0.f));
+	m_cutsceneRenderer.setMargin(m_roomTextPadding);
+	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
+	m_navigation.hide(0.f);
 	m_navigation.setSize(sf::Vector2f(toolbarHeight - toolbarPadding*2, toolbarHeight - toolbarPadding*2));
 	m_navigation.setPosition(toolbarPadding, toolbarPadding + height - toolbarHeight);
 	m_navigation.setCallback([this](int direction, const json &jentity){
@@ -70,7 +62,14 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		GGame.pushNextEntityJson(jentity);
 	});
 
+	// Toolbar
+	auto padding = round(width / 30.f);
+	m_bgToolbar.setSize(sf::Vector2f(width, toolbarHeight));
+	m_bgToolbar.setPosition(0.f, height - toolbarHeight);
+	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 	// Inventory setup
+	m_inventory.hide(0.f);
+	m_inventory.setSize(sf::Vector2f(width, height));
 	m_inventory.setCallback([this](const std::string &objectId, float posX, float posY){
 		if (m_actionBuilder.isVisible()) {
 			m_actionBuilder.setObject(objectId);
@@ -159,7 +158,6 @@ void StateMain::render(sf::RenderTarget &target)
 	if (m_mode == Mode::Cutscene)
 	{
 		target.draw(m_cutsceneRenderer);
-		target.draw(m_cutsceneScrollbar);
 	}
 	else if (m_mode == Mode::Dialogue)
 	{
@@ -556,7 +554,7 @@ bool StateMain::processEvent(const sf::Event &event)
 
 	if (m_mode == Mode::Cutscene)
 	{
-		if ((m_cutsceneRenderer.isComplete() || m_cutsceneRenderer.isWaitingForClick()) && m_cutsceneScrollbar.processEvent(event))
+		if ((m_cutsceneRenderer.isComplete() || m_cutsceneRenderer.isWaitingForClick()) && m_cutsceneRenderer.processEvent(event))
 			return true;
 		if (event.type == sf::Event::MouseButtonReleased)
 		{
@@ -622,7 +620,6 @@ bool StateMain::update(float delta)
 
 	if (m_mode == Mode::Cutscene)
 	{
-		m_cutsceneScrollbar.update(delta);
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
 		{

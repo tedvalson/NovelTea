@@ -2,7 +2,7 @@
 #define NOVELTEA_CUTSCENERENDERER_HPP
 
 #include <NovelTea/TweenObjects.hpp>
-#include <NovelTea/GUI/Scrollable.hpp>
+#include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/Utils.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <SFML/Graphics/Drawable.hpp>
@@ -22,12 +22,12 @@ class ActiveText;
 class CutsceneRenderer : public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>
 {
 public:
-	static const int _SCROLLPOS = 11;
-
 	CutsceneRenderer();
 
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
 	void reset();
+
+	bool processEvent(const sf::Event &event);
 	void update(float delta);
 
 	bool isComplete() const;
@@ -51,9 +51,6 @@ protected:
 	void startTransitionEffect(const CutscenePageBreakSegment *segment);
 	void addSegmentToQueue(size_t segmentIndex);
 
-	virtual void setValues(int tweenType, float *newValues) override;
-	virtual int getValues(int tweenType, float *returnValues) override;
-
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	std::shared_ptr<CutsceneSegment> m_currentSegment;
@@ -69,6 +66,7 @@ private:
 	float m_margin;
 
 	float m_scrollPos;
+	ScrollBar m_scrollBar;
 	sf::Vector2f m_scrollAreaSize;
 	sf::Transform m_scrollTransform;
 	sf::Transform m_scrollTransformOld;

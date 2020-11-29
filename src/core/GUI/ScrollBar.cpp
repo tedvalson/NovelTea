@@ -210,6 +210,9 @@ void ScrollBar::setValues(int tweenType, float *newValues)
 			m_scrollBar.setColor(color);
 			break;
 		}
+		case SCROLLPOS:
+			setScroll(newValues[0]);
+			break;
 		default:
 			TweenTransformable::setValues(tweenType, newValues);
 	}
@@ -220,6 +223,9 @@ int ScrollBar::getValues(int tweenType, float *returnValues)
 	switch (tweenType) {
 		case ALPHA:
 			returnValues[0] = m_scrollBar.getColor().a;
+			return 1;
+		case SCROLLPOS:
+			returnValues[0] = m_scrollPos;
 			return 1;
 		default:
 			return TweenTransformable::getValues(tweenType, returnValues);

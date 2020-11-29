@@ -17,6 +17,7 @@ class ScrollBar : public sf::Drawable, public TweenTransformable<sf::Transformab
 {
 public:
 	static const int ALPHA = 11; // for tweening
+	static const int SCROLLPOS = 12;
 
 	ScrollBar();
 	~ScrollBar();

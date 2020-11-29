@@ -21,6 +21,10 @@ CutsceneRenderer::CutsceneRenderer()
 	m_fadeRectBottom = m_fadeRectTop;
 	m_fadeRectTop.setRotation(180.f);
 
+	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
+	m_scrollBar.setAutoHide(false);
+	m_scrollBar.attachObject(this);
+
 	setCutscene(std::make_shared<Cutscene>());
 }
 
@@ -48,9 +52,16 @@ void CutsceneRenderer::reset()
 	addSegmentToQueue(0);
 }
 
+bool CutsceneRenderer::processEvent(const sf::Event &event)
+{
+	return m_scrollBar.processEvent(event);
+}
+
 void CutsceneRenderer::update(float delta)
 {
 	auto segments = m_cutscene->segments();
+
+	m_scrollBar.update(delta);
 
 	delta *= m_cutscene->getSpeedFactor();
 	auto timeDelta = sf::seconds(delta);
@@ -106,7 +117,7 @@ void CutsceneRenderer::click()
 void CutsceneRenderer::setScrollTween(float position, float duration)
 {
 	float targetPos;
-	float minPos = m_size.y - m_margin*2 - m_scrollAreaSize.y - 40.f;
+	float minPos = m_size.y - m_margin*2 - m_scrollAreaSize.y;
 	if (minPos > 0.f)
 		minPos = 0.f;
 	if (position < minPos)
@@ -119,7 +130,7 @@ void CutsceneRenderer::setScrollTween(float position, float duration)
 		updateScrollbar();
 		repositionItems();
 	} else {
-		TweenEngine::Tween::to(*this, _SCROLLPOS, duration)
+		TweenEngine::Tween::to(m_scrollBar, ScrollBar::SCROLLPOS, duration)
 			.target(targetPos)
 			.start(m_tweenManager);
 	}
@@ -167,6 +178,7 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 
 	target.draw(m_fadeRectTop);
 	target.draw(m_fadeRectBottom);
+	target.draw(m_scrollBar);
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
@@ -222,6 +234,10 @@ void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *seg
 
 void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 {
+	m_scrollBar.setPosition(m_size.x - 4.f, 4.f);
+	m_scrollBar.setSize(sf::Vector2u(2, m_size.y - 8.f));
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(m_size.x, m_size.y - m_margin*2));
+
 	m_segmentIndex = segmentIndex;
 	auto segments = m_cutscene->segments();
 	if (segmentIndex >= segments.size())
@@ -241,11 +257,14 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
+			// This gives some padding at the bottom for text
+			auto scrollAreaMargin = m_margin * 2;
+
 			auto activeText = seg->getActiveText();
 			activeText->setSize(sf::Vector2f(m_size.x - m_margin*2, 0.f));
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
-				m_cursorPos.y = m_scrollAreaSize.y - activeText->getLineSpacing();
+				m_cursorPos.y = m_scrollAreaSize.y - activeText->getLineSpacing() - scrollAreaMargin;
 			}
 			m_cursorPos.x += seg->getOffsetX();
 			m_cursorPos.y += seg->getOffsetY();
@@ -254,8 +273,8 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getDelay());
 			startTransitionEffect(seg);
-			// TODO: no fixed val
-			m_scrollAreaSize.y = m_cursorPos.y + 40.f;
+
+			m_scrollAreaSize.y = activeText->getLocalBounds().height + scrollAreaMargin;
 			updateScrollbar();
 
 			if (m_cursorPos.y + 60.f > m_size.y - m_margin*2 - m_scrollPos) {
@@ -305,31 +324,6 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		.delay(timeToNext)
 		.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
 		.start(m_tweenManager);
-}
-
-void CutsceneRenderer::setValues(int tweenType, float *newValues)
-{
-	switch (tweenType) {
-		case _SCROLLPOS: {
-			m_scrollPos = newValues[0];
-			updateScrollbar();
-			repositionItems();
-			break;
-		}
-		default:
-			TweenTransformable::setValues(tweenType, newValues);
-	}
-}
-
-int CutsceneRenderer::getValues(int tweenType, float *returnValues)
-{
-	switch (tweenType) {
-	case _SCROLLPOS:
-			returnValues[0] = getScroll();
-		return 1;
-	default:
-		return TweenTransformable::getValues(tweenType, returnValues);
-	}
 }
 
 } // namespace NovelTea
