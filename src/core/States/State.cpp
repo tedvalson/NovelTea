@@ -54,6 +54,33 @@ bool State::runCallback(void *data)
 	return false;
 }
 
+void State::setAlpha(float alpha)
+{
+	m_alpha = alpha;
+}
+
+float State::getAlpha() const
+{
+	return m_alpha;
+}
+
+int State::getValues(int tweenType, float *returnValues)
+{
+	switch (tweenType) {
+	case ALPHA:
+		returnValues[0] = m_alpha;
+		return 1;
+	default:
+		return -1;
+	}
+}
+
+void State::setValues(int tweenType, float *newValues)
+{
+	if (tweenType == ALPHA)
+		setAlpha(newValues[0]);
+}
+
 State::Context State::getContext() const
 {
 	return m_context;

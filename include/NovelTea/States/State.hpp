@@ -3,6 +3,7 @@
 
 #include "StateIdentifiers.hpp"
 #include <SFML/Window/Event.hpp>
+#include <TweenEngine/Tweenable.h>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/json.hpp>
 #include <functional>
@@ -24,9 +25,11 @@ class StateStack;
 
 typedef std::function<bool(void*)> StateCallback;
 
-class State
+class State : public TweenEngine::Tweenable
 {
 public:
+	static const int ALPHA = 1;
+
 	typedef std::unique_ptr<State> Ptr;
 
 	struct Context
@@ -44,6 +47,11 @@ public:
 	virtual bool update(float delta) = 0;
 	virtual bool processEvent(const sf::Event& event) = 0;
 
+	virtual void setAlpha(float alpha);
+	float getAlpha() const;
+	virtual int getValues(int tweenType, float *returnValues) override;
+	virtual void setValues(int tweenType, float *newValues) override;
+
 	virtual void *processData(void *data);
 
 	void requestStackPush(StateID stateID, bool renderAlone = false, StateCallback callback = nullptr);
@@ -55,6 +63,7 @@ public:
 	Context getContext() const;
 
 private:
+	float        m_alpha;
 	StateStack*  m_stack;
 	Context      m_context;
 	StateCallback m_callback;

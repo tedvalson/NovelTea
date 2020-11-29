@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <NovelTea/States/State.hpp>
-#include <TweenEngine/TweenManager.h>
+#include <TweenEngine/Tween.h>
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/CutsceneRenderer.hpp>
 #include <NovelTea/DialogueRenderer.hpp>
@@ -29,10 +29,10 @@ enum class Mode {
 	Room,
 };
 
-class StateMain : public State, public Scrollable, public TweenEngine::Tweenable
+class StateMain : public State, public Scrollable
 {
 public:
-	static const int ACTION_BUILDER = 1;
+	static const int ACTION_BUILDER = 2;
 
 	StateMain(StateStack& stack, Context& context, StateCallback callback);
 	bool processEvent(const sf::Event &event) override;

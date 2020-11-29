@@ -42,7 +42,7 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 	m_buttonStart.onClick([this](){
 		if (m_tweenManager.getRunningTweensCount() > 0)
 			return;
-		TweenEngine::Tween::to(*this, ALPHA, 2.f)
+		TweenEngine::Tween::to(*this, ALPHA, 1.f)
 			.target(0.f)
 			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
 				requestStackClear();
@@ -84,24 +84,7 @@ void StateTitleScreen::setAlpha(float alpha)
 	m_textAuthor.setAlpha(alpha);
 	m_buttonStart.setAlpha(alpha);
 	m_buttonSettings.setAlpha(alpha);
-	m_alpha = alpha;
-}
-
-int StateTitleScreen::getValues(int tweenType, float *returnValues)
-{
-	switch (tweenType) {
-	case ALPHA:
-		returnValues[0] = m_alpha;
-		return 1;
-	default:
-		return -1;
-	}
-}
-
-void StateTitleScreen::setValues(int tweenType, float *newValues)
-{
-	if (tweenType == ALPHA)
-		setAlpha(newValues[0]);
+	State::setAlpha(alpha);
 }
 
 bool StateTitleScreen::processEvent(const sf::Event &event)

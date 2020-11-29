@@ -303,7 +303,7 @@ int StateMain::getValues(int tweenType, float *returnValues)
 		returnValues[0] = m_actionBuilderShowPos;
 		return 1;
 	default:
-		return -1;
+		return State::getValues(tweenType, returnValues);
 	}
 }
 
@@ -311,6 +311,8 @@ void StateMain::setValues(int tweenType, float *newValues)
 {
 	if (tweenType == ACTION_BUILDER)
 		setActionBuilderShowPos(newValues[0]);
+	else
+		State::setValues(tweenType, newValues);
 }
 
 void StateMain::processTestSteps()

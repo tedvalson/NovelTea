@@ -10,22 +10,17 @@
 namespace NovelTea
 {
 
-class StateTitleScreen : public State, public TweenEngine::Tweenable
+class StateTitleScreen : public State
 {
 public:
-	static const int ALPHA = 1;
-
 	StateTitleScreen(StateStack& stack, Context& context, StateCallback callback);
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
 
-	void setAlpha(float alpha);
-	virtual int getValues(int tweenType, float *returnValues) override;
-	virtual void setValues(int tweenType, float *newValues) override;
+	void setAlpha(float alpha) override;
 
 private:
-	float m_alpha;
 	Button m_buttonStart;
 	Button m_buttonSettings;
 	TweenRectangleShape m_bg;
