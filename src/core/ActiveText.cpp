@@ -354,11 +354,12 @@ void ActiveText::ensureUpdate() const
 		return;
 
 	auto padding = 6.f;
+	float lineHeight = 24.f; // TODO: Don't use fixed value
 	auto processedFirstBlock = false;
 	m_cursorPos = m_cursorStart;
 	m_segments.clear();
 	m_debugSegmentShapes.clear();
-	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y);
+	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y + lineHeight);
 
 	for (auto &block : blocks())
 	{
@@ -367,10 +368,9 @@ void ActiveText::ensureUpdate() const
 
 		if (processedFirstBlock)
 		{
-			float lineHeight = 24.f; // TODO: Don't use fixed value
 			m_cursorPos.x = 0.f;
+			m_cursorPos.y = m_bounds.height;
 			m_bounds.height += lineHeight + m_lineSpacing;
-			m_cursorPos.y += lineHeight + m_lineSpacing;
 		}
 		else
 			processedFirstBlock = true;
@@ -414,6 +414,7 @@ void ActiveText::ensureUpdate() const
 						continue;
 					}
 
+					auto string = textObjectPair.first;
 					auto objectId = textObjectPair.second;
 					auto objectExists = false;
 					auto color = (newTextPair.first ? sf::Color::Red : format.color());
@@ -422,24 +423,27 @@ void ActiveText::ensureUpdate() const
 									  ActiveGame->getObjectList()->containsId(objectId);
 					}
 					color.a = m_alpha;
-					text.setString(textObjectPair.first);
+					text.setString(string);
 					text.setFillColor(color);
 					lineMaxCharacterSize = std::max(lineMaxCharacterSize, text.getCharacterSize());
 
-					auto newX = m_cursorPos.x + text.getLocalBounds().width;
+					// Hack to prevent these chars from wrapping by themselves.
+					const std::string specialChars = ".,!?";
+					auto isSpecialChar = (string.size() == 1 && specialChars.find(string) != specialChars.npos);
 
-					if (newX > m_size.x && m_cursorPos.x > 0.f)
+					auto newX = m_cursorPos.x + text.getLocalBounds().width;
+					if (newX > m_size.x && m_cursorPos.x > 0.f && !isSpecialChar)
 					{
 						m_cursorPos.x = 0.f;
 						m_cursorPos.y += lineMaxCharacterSize + m_lineSpacing;
-						lineMaxCharacterSize = 0;
+						lineMaxCharacterSize = text.getCharacterSize();
 					}
 
 					text.setPosition(m_cursorPos);
 					m_cursorPos.x += text.getLocalBounds().width;
 
 					m_bounds.width = std::max(m_bounds.width, m_cursorPos.x);
-					m_bounds.height = std::max(m_bounds.height, m_cursorPos.y + text.getLocalBounds().height + padding*2);
+					m_bounds.height = std::max(m_bounds.height, m_cursorPos.y + lineMaxCharacterSize + m_lineSpacing);
 					auto bounds = sf::FloatRect(
 								text.getGlobalBounds().left - padding,
 								text.getGlobalBounds().top - padding,
