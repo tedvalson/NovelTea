@@ -14,8 +14,8 @@ float Notification::m_spawnOffsetY = 0.f;
 namespace
 {
 	float spacing = 2.f;
-	int durationBaseDefault = 2000;
-	int durationPerLetter = 20;
+	int durationBaseDefault = 3000;
+	int durationPerLetter = 30;
 }
 
 Notification::Notification()
@@ -25,6 +25,8 @@ Notification::Notification()
 		m_texture = AssetManager<sf::Texture>::get("images/notification.9.png");
 	setTexture(m_texture.get());
 	getText().setCharacterSize(22);
+	setExtraPadding(sf::FloatRect(8.f, 0.f, 5.f, 10.f));
+	setCentered(false);
 }
 
 
