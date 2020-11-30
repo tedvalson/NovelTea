@@ -72,6 +72,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	m_buttonSettings.getText().setFont(*Proj.getFont(1));
 	m_buttonSettings.getText().setCharacterSize(30.f);
 	m_buttonSettings.setString(L"\uf013");
+	m_buttonSettings.setAlpha(0.f);
 	m_buttonSettings.setColor(sf::Color::Transparent);
 	m_buttonSettings.setActiveColor(sf::Color(0, 0, 0, 30));
 	m_buttonSettings.setTextColor(sf::Color(0, 0, 0, 200));
@@ -289,6 +290,12 @@ void StateMain::showToolbar()
 {
 	m_navigation.show(1.f);
 	m_inventory.show(1.f);
+	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, 1.f)
+		.target(255.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, 1.f)
+		.target(255.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, 1.f)
 		.target(50.f)
 		.start(m_tweenManager);
@@ -298,6 +305,12 @@ void StateMain::hideToolbar()
 {
 	m_navigation.hide();
 	m_inventory.hide();
+	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, 1.f)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, 1.f)
+		.target(0.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, 1.f)
 		.target(0.f)
 		.start(m_tweenManager);
@@ -573,9 +586,6 @@ void StateMain::repositionText()
 
 bool StateMain::processEvent(const sf::Event &event)
 {
-	if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
-		return true;
-
 	if (m_textOverlay.isVisible())
 	{
 		if (m_textOverlay.processEvent(event))
@@ -616,6 +626,8 @@ bool StateMain::processEvent(const sf::Event &event)
 				return true;
 		}
 
+		if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
+			return true;
 		if (m_actionBuilder.isVisible())
 			m_actionBuilder.processEvent(event);
 		m_navigation.processEvent(event);
