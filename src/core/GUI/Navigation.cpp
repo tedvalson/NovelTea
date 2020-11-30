@@ -76,8 +76,8 @@ void Navigation::setPaths(const json &value)
 		if (m_paths[i][0].ToBool() && m_paths[i][1][0].ToInt() != -1)
 		{
 			m_buttons[i]->setActiveColor(sf::Color(0, 0, 0, 20));
-			m_buttons[i]->setTextColor(sf::Color(0, 255, 0, 220));
-			m_buttons[i]->setTextActiveColor(sf::Color(0, 255, 0, 255));
+			m_buttons[i]->setTextColor(sf::Color(0, 0, 0, 190));
+			m_buttons[i]->setTextActiveColor(sf::Color(0, 0, 0, 245));
 		} else {
 			m_buttons[i]->setActiveColor(sf::Color::Transparent);
 			m_buttons[i]->setTextColor(sf::Color(0, 0, 0, 20));
