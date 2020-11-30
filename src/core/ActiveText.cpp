@@ -362,11 +362,15 @@ void ActiveText::ensureUpdate() const
 
 	for (auto &block : blocks())
 	{
+		// Keep largest char size for current line
+		auto lineMaxCharacterSize = 0u;
+
 		if (processedFirstBlock)
 		{
+			float lineHeight = 24.f; // TODO: Don't use fixed value
 			m_cursorPos.x = 0.f;
-			m_bounds.height += 12.f*2 + m_lineSpacing;
-			m_cursorPos.y = m_bounds.height - 12.f + m_lineSpacing;
+			m_bounds.height += lineHeight + m_lineSpacing;
+			m_cursorPos.y += lineHeight + m_lineSpacing;
 		}
 		else
 			processedFirstBlock = true;
@@ -390,7 +394,6 @@ void ActiveText::ensureUpdate() const
 			auto newTextPairs = getNewTextPairs(frag->getText());
 			for (auto &newTextPair : newTextPairs)
 			{
-
 				auto textObjectPairs = getTextObjectPairs(newTextPair.second);
 
 				TweenText text;
@@ -421,16 +424,15 @@ void ActiveText::ensureUpdate() const
 					color.a = m_alpha;
 					text.setString(textObjectPair.first);
 					text.setFillColor(color);
+					lineMaxCharacterSize = std::max(lineMaxCharacterSize, text.getCharacterSize());
 
 					auto newX = m_cursorPos.x + text.getLocalBounds().width;
 
 					if (newX > m_size.x && m_cursorPos.x > 0.f)
 					{
 						m_cursorPos.x = 0.f;
-						if (m_bounds.height == m_bounds.top)
-							m_cursorPos.y += text.getCharacterSize() + m_lineSpacing;
-						else
-							m_cursorPos.y = m_bounds.height - 12.f + m_lineSpacing;
+						m_cursorPos.y += lineMaxCharacterSize + m_lineSpacing;
+						lineMaxCharacterSize = 0;
 					}
 
 					text.setPosition(m_cursorPos);
