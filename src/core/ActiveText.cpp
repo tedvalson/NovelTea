@@ -1,4 +1,5 @@
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/AssetManager.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <NovelTea/ProjectData.hpp>
@@ -6,17 +7,33 @@
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Diff.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
 
 namespace NovelTea
 {
 
 ActiveText::ActiveText()
-	: m_size(sf::Vector2f(9999.f, 9999.f))
+	: m_size(1024.f, 1024.f)
 	, m_lineSpacing(5.f)
 	, m_alpha(255.f)
 	, m_highlightFactor(1.f)
+	, m_fadeAcrossPosition(1.f)
+	, m_renderTexture(nullptr)
 {
+	auto texture = AssetManager<sf::Texture>::get("images/fade.png");
+	texture->setSmooth(true);
+	m_shape.setFillColor(sf::Color::Transparent);
+	m_shapeFade.setTexture(texture.get(), true);
+	m_shapeFade.setSize(sf::Vector2f(300.f, 40.f));
+	m_shapeFade.setOrigin(0.f, 40.f);
+	m_shapeFade.setRotation(90.f);
+}
+
+void ActiveText::createRenderTexture()
+{
+	m_shape.setSize(m_size);
+	m_renderTexture = std::make_shared<sf::RenderTexture>();
+	m_renderTexture->create(m_size.x, 512); // TODO: Avoid fixed size
+	m_sprite.setTexture(m_renderTexture->getTexture(), true);
 }
 
 void splitAndAppend(const std::string &text, const std::string &idName, std::vector<std::pair<std::string, std::string>> &pairs)
@@ -200,6 +217,8 @@ void ActiveText::setSize(const sf::Vector2f &size)
 {
 	m_needsUpdate = true;
 	m_size = size;
+	if (m_renderTexture)
+		createRenderTexture();
 }
 
 sf::Vector2f ActiveText::getSize() const
@@ -309,6 +328,49 @@ float ActiveText::getHighlightFactor() const
 	return m_highlightFactor;
 }
 
+void ActiveText::setFadeAcrossPosition(float position)
+{
+	m_fadeAcrossPosition = position;
+	if (position == 1.f) {
+		if (m_renderTexture)
+			m_renderTexture = nullptr;
+	} else {
+		if (!m_renderTexture)
+			createRenderTexture();
+
+		auto fadeLength = getFadeAcrossLength();
+		auto pos = m_fadeAcrossPosition * fadeLength;
+		auto p = 0.f;
+
+		m_fadeItemIndex = 0;
+		for (auto &line : m_linePositions)
+		{
+			p += line.x + m_shapeFade.getSize().y;
+			if (p > pos) {
+				m_shape.setPosition(line.x - p + pos, line.y);
+				m_shapeFade.setPosition(m_shape.getPosition());
+				m_shape.move(m_shapeFade.getSize().y, 0.f);
+				break;
+			}
+			m_fadeItemIndex++;
+		}
+	}
+}
+
+float ActiveText::getFadeAcrossPosition() const
+{
+	return m_fadeAcrossPosition;
+}
+
+float ActiveText::getFadeAcrossLength() const
+{
+	ensureUpdate();
+	auto len = 0.f;
+	for (auto &linePos : m_linePositions)
+		len += linePos.x + m_shapeFade.getSize().y;
+	return len;
+}
+
 std::vector<ActiveText::Segment> &ActiveText::getSegments()
 {
 	ensureUpdate();
@@ -318,10 +380,12 @@ std::vector<ActiveText::Segment> &ActiveText::getSegments()
 void ActiveText::setValues(int tweenType, float *newValues)
 {
 	switch (tweenType) {
-		case HIGHLIGHTS: {
+		case HIGHLIGHTS:
 			setHighlightFactor(newValues[0]);
 			break;
-		}
+		case FADEACROSS:
+			setFadeAcrossPosition(newValues[0]);
+			break;
 		default:
 			Hideable::setValues(tweenType, newValues);
 	}
@@ -331,7 +395,10 @@ int ActiveText::getValues(int tweenType, float *returnValues)
 {
 	switch (tweenType) {
 	case HIGHLIGHTS:
-			returnValues[0] = getHighlightFactor();
+		returnValues[0] = getHighlightFactor();
+		return 1;
+	case FADEACROSS:
+		returnValues[0] = getFadeAcrossPosition();
 		return 1;
 	default:
 		return Hideable::getValues(tweenType, returnValues);
@@ -343,9 +410,36 @@ void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	ensureUpdate();
 	states.transform *= getTransform();
 
-	for (auto &segment : m_segments)
-		target.draw(segment.text, states);
+	if (m_renderTexture)
+	{
+		auto posY = 0.f;
+		auto lineIndex = 0;
+		m_renderTexture->clear(sf::Color::Transparent);
+		for (auto &segment : m_segments)
+		{
+			auto p = segment.text.getPosition().y;
+			if (p > posY) {
+				posY = p;
+				lineIndex++;
+			}
+			if (lineIndex == m_fadeItemIndex)
+				m_renderTexture->draw(segment.text, sf::BlendNone);
+			else if (lineIndex > m_fadeItemIndex)
+				break;
+			else
+				target.draw(segment.text, states);
+		}
+		m_renderTexture->draw(m_shape, sf::BlendMultiply);
+		m_renderTexture->draw(m_shapeFade, sf::BlendMultiply);
+		m_renderTexture->display();
+		target.draw(m_sprite, states);
+	}
+	else
+	{
+		for (auto &segment : m_segments)
+			target.draw(segment.text, states);
 
+	}
 }
 
 void ActiveText::ensureUpdate() const
@@ -358,6 +452,7 @@ void ActiveText::ensureUpdate() const
 	auto processedFirstBlock = false;
 	m_cursorPos = m_cursorStart;
 	m_segments.clear();
+	m_linePositions.clear();
 	m_debugSegmentShapes.clear();
 	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y + lineHeight);
 
@@ -434,6 +529,7 @@ void ActiveText::ensureUpdate() const
 					auto newX = m_cursorPos.x + text.getLocalBounds().width;
 					if (newX > m_size.x && m_cursorPos.x > 0.f && !isSpecialChar)
 					{
+						m_linePositions.push_back(m_cursorPos);
 						m_cursorPos.x = 0.f;
 						m_cursorPos.y += lineMaxCharacterSize + m_lineSpacing;
 						lineMaxCharacterSize = text.getCharacterSize();
@@ -458,6 +554,7 @@ void ActiveText::ensureUpdate() const
 				}
 			}
 		}
+		m_linePositions.push_back(m_cursorPos);
 	}
 
 	m_debugBorder.setFillColor(sf::Color::Transparent);

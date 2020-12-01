@@ -6,6 +6,7 @@
 #include <NovelTea/TextFormat.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
 #include <vector>
 #include <memory>
 
@@ -17,8 +18,8 @@ class TextBlock;
 class ActiveText : public JsonSerializable, public sf::Drawable, public Hideable
 {
 public:
-
 	static const int HIGHLIGHTS = 12;
+	static const int FADEACROSS = 13;
 
 	struct Segment {
 		bool objectExists;
@@ -28,6 +29,8 @@ public:
 	};
 
 	ActiveText();
+	void createRenderTexture();
+
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
@@ -63,6 +66,10 @@ public:
 	void setHighlightFactor(float highlightFactor);
 	float getHighlightFactor() const;
 
+	void setFadeAcrossPosition(float position);
+	float getFadeAcrossPosition() const;
+	float getFadeAcrossLength() const;
+
 	std::vector<Segment> &getSegments();
 
 protected:
@@ -75,6 +82,7 @@ protected:
 private:
 	std::vector<std::shared_ptr<TextBlock>> m_textBlocks;
 	mutable std::vector<Segment> m_segments;
+	mutable std::vector<sf::Vector2f> m_linePositions;
 	mutable sf::Vector2f m_cursorPos;
 	mutable sf::FloatRect m_bounds;
 	sf::Vector2f m_cursorStart;
@@ -84,6 +92,13 @@ private:
 	float m_lineSpacing;
 	float m_alpha;
 	float m_highlightFactor;
+
+	float m_fadeAcrossPosition;
+	int m_fadeItemIndex;
+	mutable std::shared_ptr<sf::RenderTexture> m_renderTexture;
+	sf::Sprite m_sprite;
+	TweenRectangleShape m_shape;
+	TweenRectangleShape m_shapeFade;
 
 	mutable sf::RectangleShape m_debugBorder;
 	mutable std::vector<sf::RectangleShape> m_debugSegmentShapes;

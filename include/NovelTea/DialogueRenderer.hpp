@@ -2,7 +2,7 @@
 #define NOVELTEA_DIALOGUERENDERER_HPP
 
 #include <NovelTea/TweenObjects.hpp>
-#include <TweenEngine/TweenManager.h>
+#include <TweenEngine/Tween.h>
 #include <NovelTea/ActiveText.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Window/Event.hpp>
@@ -67,6 +67,7 @@ private:
 	TweenNinePatch m_bg;
 	float m_middleY;
 
+	TweenEngine::Tween *m_fadeTween;
 	TweenEngine::TweenManager m_tweenManager;
 };
 

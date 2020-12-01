@@ -13,6 +13,7 @@ namespace NovelTea
 DialogueRenderer::DialogueRenderer()
 : m_callback(nullptr)
 , m_textLineIndex(-1)
+, m_fadeTween(nullptr)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	m_buttonTexture = texture.get();
@@ -50,6 +51,12 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 {
 	if (event.type == sf::Event::MouseButtonPressed)
 	{
+		if (m_text.getFadeAcrossPosition() < 1.f) {
+			if (m_fadeTween)
+				m_fadeTween->kill();
+			m_text.setFadeAcrossPosition(1.f);
+			return true;
+		}
 		if (m_textLineIndex < m_textLines.size() - 1) {
 			changeLine(m_textLineIndex + 1);
 			return true;
@@ -183,20 +190,23 @@ void DialogueRenderer::changeLine(int newLineIndex)
 		return;
 	auto &line = m_textLines[newLineIndex];
 	m_textLineIndex = newLineIndex;
+	m_text.setFadeAcrossPosition(1.f);
 	m_textOld = m_text;
 	m_textNameOld = m_textName;
 	m_textName.setText(line.first);
 	m_text.setText(line.second);
 
-	float duration = 0.5f;
-	m_text.setAlpha(0.f);
+	float duration = 0.3f;
+	m_text.setFadeAcrossPosition(0.f);
+	m_text.setAlpha(255.f);
 	m_textOld.setAlpha(255.f);
 	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_text, ActiveText::ALPHA, duration)
-		.target(255.f)
-		.start(m_tweenManager);
+	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f)
+		.ease(TweenEngine::TweenEquations::easeInOutLinear)
+		.target(1.f);
+	m_fadeTween->start(m_tweenManager);
 
 	m_textName.setAlpha(0.f);
 	m_textNameOld.setAlpha(255.f);
@@ -264,11 +274,11 @@ void DialogueRenderer::hide(float duration)
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
-	m_text.setSize(size);
+	m_text.setSize(sf::Vector2f(size.x - 40.f, size.y));
 	m_middleY = round(m_size.y / 8);
 
 	m_textName.setPosition(5.f, m_middleY);
-	m_text.setPosition(10.f, m_textName.getPosition().y + 32.f);
+	m_text.setPosition(20.f, m_textName.getPosition().y + 36.f);
 	m_bg.setPosition(5.f, m_textName.getPosition().y + 28.f);
 	m_bg.setSize(size.x - 10.f, 160.f);
 }
