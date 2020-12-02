@@ -39,7 +39,6 @@ void DialogueRenderer::reset()
 	m_isComplete = false;
 	m_text.setText("");
 	m_textName.setText("");
-	changeSegment(m_dialogue->getRootIndex());
 }
 
 void DialogueRenderer::update(float delta)
@@ -53,8 +52,7 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 	{
 		if (m_text.getFadeAcrossPosition() < 1.f) {
 			if (m_fadeTween)
-				m_fadeTween->kill();
-			m_text.setFadeAcrossPosition(1.f);
+				m_fadeTween->update(9999.f);
 			return true;
 		}
 		if (m_textLineIndex < m_textLines.size() - 1) {
@@ -206,7 +204,17 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f)
 		.ease(TweenEngine::TweenEquations::easeInOutLinear)
 		.target(1.f);
-	m_fadeTween->start(m_tweenManager);
+	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+		auto posY = m_text.getPosition().y + m_bg.getSize().y + 10.f;
+		if (m_textLineIndex + 1 == m_textLines.size())
+			for (auto &button : m_buttons) {
+				button->setPosition(10.f, posY);
+				posY += button->getSize().y + 2.f;
+				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
+					.target(255.f)
+					.start(m_tweenManager);
+			}
+	}).start(m_tweenManager);
 
 	m_textName.setAlpha(0.f);
 	m_textNameOld.setAlpha(255.f);
@@ -216,17 +224,6 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	TweenEngine::Tween::to(m_textName, ActiveText::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
-
-	auto posY = m_text.getPosition().y + m_bg.getSize().y + 10.f;
-	if (newLineIndex + 1 == m_textLines.size())
-		for (auto &button : m_buttons) {
-			button->setPosition(10.f, posY);
-			posY += button->getSize().y + 2.f;
-			TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
-				.target(255.f)
-				.delay(1.f)
-				.start(m_tweenManager);
-		}
 }
 
 bool DialogueRenderer::isComplete() const
@@ -238,6 +235,9 @@ void DialogueRenderer::show(float duration)
 {
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(30.f)
+		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+			changeSegment(m_dialogue->getRootIndex());
+		})
 		.start(m_tweenManager);
 }
 
