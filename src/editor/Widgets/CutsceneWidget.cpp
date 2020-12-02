@@ -104,7 +104,7 @@ void CutsceneWidget::fillPropertyEditor()
 
 	segmentsVariantManager->disconnect();
 
-	QtVariantProperty *prop, *subProp;
+	QtVariantProperty *prop;
 	auto segment = m_cutscene->segments()[selectedIndex];
 //	auto segment = itemModel->index(selectedIndex, 2).data().value<std::shared_ptr<NovelTea::CutsceneSegment>>();
 	auto type = segment->type();
@@ -119,7 +119,7 @@ void CutsceneWidget::fillPropertyEditor()
 
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::enumTypeId(), TRANSITION_EFFECT);
 		QStringList enumNames;
-		enumNames << "None" << "Fade";
+		enumNames << "None" << "Fade" << "FadeAcross";
 		prop->setAttribute(QLatin1String("enumNames"), enumNames);
 		prop->setValue(textSegment->getTransition());
 		ui->propertyBrowser->addProperty(prop);
@@ -472,6 +472,8 @@ void CutsceneWidget::updateLoopValues()
 
 	m_loopStartMs = m_cutscene->getDelayMs(selectedIndex) / m_cutscene->getSpeedFactor();
 	m_loopEndMs = m_loopStartMs + segment->getDuration() / m_cutscene->getSpeedFactor();
+	if (m_loopEndMs > m_loopStartMs)
+		m_loopEndMs--;
 	if (m_loopEndMs > max)
 		m_loopEndMs = max;
 }
@@ -508,6 +510,8 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 			}
 		}
 	}
+	else if (value > m_loopEndMs)
+		value = m_loopEndMs;
 
 	if (m_cutscenePlaying)
 		return;

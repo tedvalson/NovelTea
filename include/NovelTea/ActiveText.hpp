@@ -94,7 +94,7 @@ private:
 	float m_highlightFactor;
 
 	float m_fadeAcrossPosition;
-	int m_fadeItemIndex;
+	int m_fadeLineIndex;
 	mutable std::shared_ptr<sf::RenderTexture> m_renderTexture;
 	sf::Sprite m_sprite;
 	TweenRectangleShape m_shape;

@@ -17,6 +17,7 @@ ActiveText::ActiveText()
 	, m_alpha(255.f)
 	, m_highlightFactor(1.f)
 	, m_fadeAcrossPosition(1.f)
+	, m_fadeLineIndex(0)
 	, m_renderTexture(nullptr)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/fade.png");
@@ -330,6 +331,7 @@ float ActiveText::getHighlightFactor() const
 
 void ActiveText::setFadeAcrossPosition(float position)
 {
+	ensureUpdate();
 	m_fadeAcrossPosition = position;
 	if (position == 1.f) {
 		if (m_renderTexture)
@@ -342,7 +344,7 @@ void ActiveText::setFadeAcrossPosition(float position)
 		auto pos = m_fadeAcrossPosition * fadeLength;
 		auto p = 0.f;
 
-		m_fadeItemIndex = 0;
+		m_fadeLineIndex = 0;
 		for (auto &line : m_linePositions)
 		{
 			p += line.x + m_shapeFade.getSize().y;
@@ -352,7 +354,7 @@ void ActiveText::setFadeAcrossPosition(float position)
 				m_shape.move(m_shapeFade.getSize().y, 0.f);
 				break;
 			}
-			m_fadeItemIndex++;
+			m_fadeLineIndex++;
 		}
 	}
 }
@@ -408,11 +410,13 @@ int ActiveText::getValues(int tweenType, float *returnValues)
 void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	ensureUpdate();
+	if (m_segments.empty())
+		return;
 	states.transform *= getTransform();
 
 	if (m_renderTexture)
 	{
-		auto posY = 0.f;
+		auto posY = m_segments[0].text.getPosition().y;
 		auto lineIndex = 0;
 		m_renderTexture->clear(sf::Color::Transparent);
 		for (auto &segment : m_segments)
@@ -422,9 +426,9 @@ void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 				posY = p;
 				lineIndex++;
 			}
-			if (lineIndex == m_fadeItemIndex)
+			if (lineIndex == m_fadeLineIndex)
 				m_renderTexture->draw(segment.text, sf::BlendNone);
-			else if (lineIndex > m_fadeItemIndex)
+			else if (lineIndex > m_fadeLineIndex)
 				break;
 			else
 				target.draw(segment.text, states);

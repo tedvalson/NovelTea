@@ -13,6 +13,7 @@ public:
 	enum TransitionEffect {
 		None = 0,
 		Fade = 1,
+		FadeAcross,
 	};
 
 	CutsceneTextSegment();

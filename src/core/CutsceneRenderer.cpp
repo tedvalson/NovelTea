@@ -11,8 +11,8 @@ namespace NovelTea
 {
 
 CutsceneRenderer::CutsceneRenderer()
-: m_size(400.f, 400.f)
-, m_skipWaitingForClick(false)
+: m_skipWaitingForClick(false)
+, m_size(400.f, 400.f)
 , m_margin(10.f)
 {
 	auto fadeTexture = AssetManager<sf::Texture>::get("images/fade.png").get();
@@ -194,14 +194,18 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 		}).start(m_tweenManager);
 
 	activeText->setPosition(0.f, 0.f);
-	activeText->setAlpha(0.f);
 
-	if (effect == CutsceneTextSegment::None) {
-		activeText->setAlpha(255.f);
-	}
-	else if (effect == CutsceneTextSegment::Fade) {
+	if (effect == CutsceneTextSegment::Fade) {
+		activeText->setAlpha(0.f);
 		TweenEngine::Tween::to(*activeText, ActiveText::ALPHA, duration)
 			.target(255.f)
+			.start(m_tweenManager);
+	}
+	else if (effect == CutsceneTextSegment::FadeAcross) {
+		activeText->setFadeAcrossPosition(0.f);
+		TweenEngine::Tween::to(*activeText, ActiveText::FADEACROSS, duration)
+			.ease(TweenEngine::TweenEquations::easeInOutLinear)
+			.target(1.f)
 			.start(m_tweenManager);
 	}
 }
@@ -261,10 +265,10 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			auto scrollAreaMargin = m_margin * 2;
 
 			auto activeText = seg->getActiveText();
-			activeText->setSize(sf::Vector2f(m_size.x - m_margin*2, 0.f));
+			activeText->setSize(sf::Vector2f(m_size.x - m_margin*2, m_size.y));
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
-				m_cursorPos.y = m_scrollAreaSize.y - activeText->getLineSpacing() - scrollAreaMargin;
+				m_cursorPos.y = m_scrollAreaSize.y - scrollAreaMargin;
 			}
 			m_cursorPos.x += seg->getOffsetX();
 			m_cursorPos.y += seg->getOffsetY();
