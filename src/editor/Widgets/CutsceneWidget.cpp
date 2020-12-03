@@ -460,8 +460,9 @@ void CutsceneWidget::updateLoopValues()
 	auto segment = m_cutscene->segments()[selectedIndex];
 	auto max = ui->horizontalSlider->maximum();
 
+	auto endMs = std::min(segment->getDuration(), segment->getDelay());
 	m_loopStartMs = m_cutscene->getDelayMs(selectedIndex) / m_cutscene->getSpeedFactor();
-	m_loopEndMs = m_loopStartMs + segment->getDuration() / m_cutscene->getSpeedFactor();
+	m_loopEndMs = m_loopStartMs + endMs / m_cutscene->getSpeedFactor();
 	if (m_loopEndMs > m_loopStartMs)
 		m_loopEndMs--;
 	if (m_loopEndMs > max)
