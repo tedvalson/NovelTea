@@ -59,6 +59,7 @@ void SFMLWidget::showEvent(QShowEvent *)
 
 	_timer.start();
 	_lastTime = getTimeMs();
+	setActive();
 }
 
 void SFMLWidget::hideEvent(QHideEvent *)
