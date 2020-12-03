@@ -28,7 +28,6 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	EditorTabWidget(parent),
 	ui(new Ui::CutsceneWidget),
 	menuAdd(nullptr),
-	itemModel(new QStandardItemModel(0, 2, parent)),
 	selectedIndex(-1),
 	segmentsVariantManager(new QtVariantPropertyManager),
 	settingsVariantManager(new QtVariantPropertyManager),
@@ -41,16 +40,8 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	createMenus();
 	load();
 
-	itemModel->setHeaderData(0, Qt::Horizontal, QObject::tr("Action"));
-	itemModel->setHeaderData(1, Qt::Horizontal, QObject::tr("Value"));
-	ui->treeView->setModel(itemModel);
-	ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	ui->treeView->header()->setSectionHidden(2, true);
-	ui->treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-	ui->treeView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
-	ui->treeView->header()->setSectionResizeMode(2, QHeaderView::Fixed);
-
 	ui->richTextEditor->hide();
+	connect(ui->listWidget->model(), &QAbstractItemModel::rowsMoved, this, &CutsceneWidget::on_rowsMoved);
 }
 
 CutsceneWidget::~CutsceneWidget()
@@ -59,7 +50,6 @@ CutsceneWidget::~CutsceneWidget()
 	delete settingsVariantManager;
 	delete segmentsVariantManager;
 	delete menuAdd;
-	delete itemModel;
 	delete ui;
 }
 
@@ -106,7 +96,6 @@ void CutsceneWidget::fillPropertyEditor()
 
 	QtVariantProperty *prop;
 	auto segment = m_cutscene->segments()[selectedIndex];
-//	auto segment = itemModel->index(selectedIndex, 2).data().value<std::shared_ptr<NovelTea::CutsceneSegment>>();
 	auto type = segment->type();
 
 	if (type == NovelTea::ID::cutsceneSegText)
@@ -209,8 +198,7 @@ void CutsceneWidget::fillSettingsPropertyEditor()
 
 void CutsceneWidget::checkIndexChange()
 {
-
-	int index = ui->treeView->currentIndex().row();
+	int index = ui->listWidget->currentRow();
 	if (selectedIndex != index)
 	{
 		selectedIndex = index;
@@ -229,18 +217,18 @@ void CutsceneWidget::checkIndexChange()
 void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment, bool addToInternalObject, int index)
 {
 	auto type = segment->type();
-	QStandardItem *item = nullptr;
+	QListWidgetItem *item = nullptr;
 	QString text;
 
 	if (type == NovelTea::CutsceneSegment::Text)
 	{
 		auto seg = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
-		item = new QStandardItem(QIcon::fromTheme("font"), "Text");
 		text = QString::fromStdString(seg->getActiveText()->toPlainText());
+		item = new QListWidgetItem(QIcon::fromTheme("format"), text);
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
 	{
-		item = new QStandardItem(QIcon::fromTheme("document-new"), "Page Break");
+		item = new QListWidgetItem(QIcon::fromTheme("document-new"), "Page Break");
 	}
 
 	if (!item)
@@ -248,19 +236,17 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 
 	if (index < 0)
 	{
-		index = itemModel->rowCount();
-		itemModel->appendRow(item);
+		ui->listWidget->addItem(item);
 		if (addToInternalObject)
 			m_cutscene->segments().push_back(segment);
 	}
 	else
 	{
-		itemModel->insertRow(index, item);
+		ui->listWidget->insertItem(index, item);
 		if (addToInternalObject)
 			m_cutscene->segments().insert(m_cutscene->segments().begin() + index, segment);
 	}
 
-	itemModel->setData(itemModel->index(index, 1), text);
 	if (addToInternalObject)
 		updateCutscene();
 }
@@ -277,8 +263,8 @@ void CutsceneWidget::saveData() const
 void CutsceneWidget::loadData()
 {
 	m_cutscene = Proj.get<NovelTea::Cutscene>(idName());
-	itemModel->disconnect();
-	itemModel->removeRows(0, itemModel->rowCount());
+	ui->listWidget->model()->disconnect();
+	ui->listWidget->clear();
 
 	qDebug() << "Loading cutscene data... " << QString::fromStdString(idName());
 
@@ -296,9 +282,9 @@ void CutsceneWidget::loadData()
 	fillSettingsPropertyEditor();
 	updateCutscene();
 
-	MODIFIER(itemModel, &QStandardItemModel::dataChanged);
-	MODIFIER(itemModel, &QStandardItemModel::rowsRemoved);
-	MODIFIER(itemModel, &QStandardItemModel::rowsInserted);
+	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
+	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
+	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
 
@@ -321,7 +307,7 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		if (propertyName == TEXT_TEXT)
 		{
 			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
-			itemModel->setData(itemModel->index(selectedIndex, 1), QString::fromStdString(activeText->toPlainText()));
+			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText()));
 			textSegment->setActiveText(activeText);
 		}
 		else if (propertyName == TEXT_NEWLINE)
@@ -368,6 +354,15 @@ void CutsceneWidget::settingPropertyChanged(QtProperty *property, const QVariant
 	updateCutscene();
 }
 
+void CutsceneWidget::on_rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow)
+{
+	auto &segments = m_cutscene->segments();
+	segments.insert(segments.begin() + destinationRow, segments[sourceStart]);
+	segments.erase(segments.begin() + ((sourceStart < destinationRow) ? sourceStart : sourceStart+1));
+	setModified();
+	updateCutscene();
+}
+
 void CutsceneWidget::on_actionAddText_triggered()
 {
 	addItem(std::make_shared<NovelTea::CutsceneTextSegment>());
@@ -376,11 +371,6 @@ void CutsceneWidget::on_actionAddText_triggered()
 void CutsceneWidget::on_actionAddPageBreak_triggered()
 {
 	addItem(std::make_shared<NovelTea::CutscenePageBreakSegment>());
-}
-
-void CutsceneWidget::on_treeView_pressed(const QModelIndex &index)
-{
-	checkIndexChange();
 }
 
 void CutsceneWidget::timerEvent(QTimerEvent *event)
@@ -482,10 +472,14 @@ void CutsceneWidget::on_actionRemoveSegment_triggered()
 {
 	auto &segments = m_cutscene->segments();
 	segments.erase(segments.begin() + selectedIndex);
-	itemModel->removeRow(selectedIndex);
+	delete ui->listWidget->takeItem(selectedIndex);
 	// Trigger change even for unselected index (-1)
 	selectedIndex = -2;
 	checkIndexChange();
+	// Force a redraw
+	ui->listWidget->hide();
+	ui->listWidget->show();
+	updateCutscene();
 }
 
 void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
@@ -501,7 +495,7 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 			{
 				if (selectedIndex != i)
 				{
-					ui->treeView->setCurrentIndex(itemModel->index(i,0));
+					ui->listWidget->setCurrentRow(i);
 					selectedIndex = i;
 					updateLoopValues();
 					fillPropertyEditor();
@@ -559,4 +553,9 @@ void CutsceneWidget::on_actionLoop_toggled(bool checked)
 		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
 	else
 		ui->horizontalSlider->setValue(m_loopEndMs);
+}
+
+void CutsceneWidget::on_listWidget_clicked(const QModelIndex &index)
+{
+	checkIndexChange();
 }

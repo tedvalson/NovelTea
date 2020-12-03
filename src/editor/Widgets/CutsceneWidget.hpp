@@ -5,7 +5,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <QWidget>
 #include <QMenu>
-#include <QStandardItemModel>
+#include <QListWidgetItem>
 #include <NovelTea/json.hpp>
 #include "QtPropertyBrowser/qtpropertymanager.h"
 #include "QtPropertyBrowser/qtvariantproperty.h"
@@ -31,12 +31,12 @@ public:
 private slots:
 	void on_actionAddText_triggered();
 	void on_actionAddPageBreak_triggered();
-	void on_treeView_pressed(const QModelIndex &index);
 	void on_actionRemoveSegment_triggered();
 	void on_horizontalSlider_valueChanged(int value);
 	void on_actionPlayPause_toggled(bool checked);
 	void on_actionStop_triggered();
 	void on_actionLoop_toggled(bool checked);
+	void on_listWidget_clicked(const QModelIndex &index);
 
 protected:
 	void timerEvent(QTimerEvent*) override;
@@ -59,10 +59,11 @@ private:
 	void segmentPropertyChanged(QtProperty *property, const QVariant &value);
 	void settingPropertyChanged(QtProperty *property, const QVariant &value);
 
+	void on_rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow);
+
 	Ui::CutsceneWidget *ui;
 
 	QMenu *menuAdd;
-	QStandardItemModel *itemModel;
 	int selectedIndex;
 	int timerId;
 
