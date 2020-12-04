@@ -3,6 +3,7 @@
 
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
+#include <NovelTea/GUI/Icon/IconGlow.hpp>
 #include <NovelTea/Utils.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <SFML/Graphics/Drawable.hpp>
@@ -58,6 +59,8 @@ private:
 	bool m_isComplete;
 	bool m_isWaitingForClick;
 	bool m_skipWaitingForClick;
+
+	IconGlow m_icon;
 
 	std::vector<std::shared_ptr<ActiveText>> m_texts;
 	std::vector<std::shared_ptr<ActiveText>> m_textsOld;

@@ -25,6 +25,10 @@ CutsceneRenderer::CutsceneRenderer()
 	m_scrollBar.setAutoHide(false);
 	m_scrollBar.attachObject(this);
 
+	auto &text = m_icon.getText();
+	text.setString(L"\uf138");
+	text.setFillColor(sf::Color(120, 120, 120, 0));
+
 	setCutscene(std::make_shared<Cutscene>());
 }
 
@@ -47,6 +51,7 @@ void CutsceneRenderer::reset()
 
 	m_texts.clear();
 	m_textsOld.clear();
+	m_icon.hide(0.f);
 	m_tweenManager.killAll();
 
 	addSegmentToQueue(0);
@@ -61,6 +66,7 @@ void CutsceneRenderer::update(float delta)
 {
 	auto segments = m_cutscene->segments();
 
+	m_icon.update(delta);
 	m_scrollBar.update(delta);
 
 	delta *= m_cutscene->getSpeedFactor();
@@ -107,6 +113,7 @@ void CutsceneRenderer::click()
 {
 	if (m_isWaitingForClick) {
 		m_isWaitingForClick = false;
+		m_icon.hide(0.4f);
 		addSegmentToQueue(m_segmentIndex + 1);
 	} else {
 		if (m_currentSegment && m_currentSegment->type() != CutsceneSegment::PageBreak)
@@ -179,6 +186,7 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	target.draw(m_fadeRectTop);
 	target.draw(m_fadeRectBottom);
 	target.draw(m_scrollBar);
+	target.draw(m_icon);
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
@@ -300,6 +308,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			setScroll(0.f);
 			m_timeToNext = sf::milliseconds(seg->getDelay());
 			m_cursorPos = sf::Vector2f();
+			m_scrollAreaSize.y = m_margin * 2;
 			startTransitionEffect(seg);
 		};
 	}
@@ -316,8 +325,12 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			auto nextSegment = m_cutscene->segments()[segmentIndex+1];
 			if (m_skipWaitingForClick || !nextSegment->getWaitForClick())
 				addSegmentToQueue(segmentIndex + 1);
-			else if (!m_skipWaitingForClick)
+			else if (!m_skipWaitingForClick) {
 				m_isWaitingForClick = true;
+				auto posY = std::min(m_cursorPos.y + m_margin*3, m_size.y - m_margin * 2);
+				m_icon.setPosition(m_size.x / 2, posY);
+				m_icon.show(2.f);
+			}
 		}
 	};
 
@@ -328,6 +341,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		.delay(timeToNext)
 		.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
 		.start(m_tweenManager);
+	repositionItems();
 }
 
 } // namespace NovelTea
