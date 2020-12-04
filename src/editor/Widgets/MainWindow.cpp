@@ -485,7 +485,17 @@ void MainWindow::on_actionPlayGame_triggered()
 {
 	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
 	QStringList args;
-	args << "editor";
+	if (ui->tabWidget->currentIndex() != -1)
+	{
+		auto widget = qobject_cast<EditorTabWidget*>(ui->tabWidget->currentWidget());
+		auto type = EditorTabWidget::tabTypeToEntityType(widget->getType());
+		if (type != NovelTea::EntityType::Invalid)
+		{
+			args << "entity";
+			args << QString::number(static_cast<int>(type));
+			args << QString::fromStdString(widget->idName());
+		}
+	}
 	QProcess::execute(launcherPath, args);
 }
 
