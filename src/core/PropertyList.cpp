@@ -54,6 +54,20 @@ bool PropertyList::contains(const std::string &key) const
 	return m_savedProperties.hasKey(key) || m_projectProperties.hasKey(key);
 }
 
+void PropertyList::setValue(const std::string &key, const sj::JSON &value)
+{
+	m_savedProperties[key] = value;
+	saveChanges();
+}
+
+const sj::JSON &PropertyList::getValue(const std::string &key) const
+{
+	if (m_savedProperties.hasKey(key))
+		return m_savedProperties[key];
+	else
+		return m_projectProperties[key];
+}
+
 void PropertyList::attach(const std::string &type, const std::string &id)
 {
 	m_attachedType = type;
@@ -77,6 +91,14 @@ void PropertyList::saveChanges()
 
 	if (!m_savedProperties.IsEmpty())
 		GSave.data()[ID::properties][m_attachedType][m_attachedId] = m_savedProperties;
+}
+
+void PropertyList::sync()
+{
+	if (!m_attachedType.empty()) {
+		m_savedProperties = sj::Object();
+		attach(m_attachedType, m_attachedId);
+	}
 }
 
 } // namespace NovelTea

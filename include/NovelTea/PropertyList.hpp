@@ -20,8 +20,12 @@ public:
 	void set(const std::string &key, const DukValue &value);
 	bool contains(const std::string &key) const;
 
+	void setValue(const std::string &key, const sj::JSON &value);
+	const sj::JSON &getValue(const std::string &key) const;
+
 	void attach(const std::string &type, const std::string &id);
 	void saveChanges();
+	void sync();
 
 private:
 	std::string m_attachedType;
