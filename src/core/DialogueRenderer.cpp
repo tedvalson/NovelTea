@@ -39,6 +39,7 @@ void DialogueRenderer::reset()
 	m_isComplete = false;
 	m_text.setText("");
 	m_textName.setText("");
+	m_nextForcedSegmentIndex = m_dialogue->getRootIndex();
 }
 
 void DialogueRenderer::update(float delta)
@@ -100,6 +101,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		return;
 	}
 
+	m_dialogue->getPropertyList()->sync();
 	m_tweenManager.killAll();
 	m_buttonsOld = m_buttons;
 	m_buttons.clear();
@@ -114,6 +116,8 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 	{
 		auto seg = m_dialogue->getSegment(childId);
 		if (!seg->conditionPasses())
+			continue;
+		if (seg->getShowOnce() && m_dialogue->segmentShown(childId))
 			continue;
 
 		npcSegment = seg;
@@ -134,9 +138,13 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		auto seg = m_dialogue->getSegment(childId);
 		if (!seg->conditionPasses())
 			continue;
+		if (seg->getShowOnce() && m_dialogue->getSegmentHasShown(childId))
+			continue;
 		if (seg->getTextRaw().empty()) {
 			if (m_buttons.empty()) {
 				m_nextForcedSegmentIndex = childId;
+				if (seg->getShowOnce())
+					m_dialogue->setSegmentHasShown(childId);
 				if (npcSegment->getTextRaw().empty())
 					changeSegment(childId);
 				break;
@@ -151,9 +159,11 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		btn->setTexture(m_buttonTexture);
 		btn->setColor(sf::Color(180, 180, 180));
 		btn->setActiveColor(sf::Color::Red);
-		btn->onClick([this, i, childId](){
+		btn->onClick([this, seg, i, childId](){
 			if (m_callback)
 				m_callback(i);
+			if (seg->getShowOnce())
+				m_dialogue->setSegmentHasShown(childId);
 			changeSegment(childId);
 		});
 		text.setCharacterSize(20);
@@ -204,7 +214,8 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f)
 		.ease(TweenEngine::TweenEquations::easeInOutLinear)
 		.target(1.f);
-	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*)
+	{
 		auto posY = m_text.getPosition().y + m_bg.getSize().y + 10.f;
 		if (m_textLineIndex + 1 == m_textLines.size())
 			for (auto &button : m_buttons) {

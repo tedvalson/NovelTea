@@ -169,6 +169,13 @@
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBoxShowOnce">
+                   <property name="text">
+                    <string>Show Once</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </item>
                <item>
@@ -404,7 +411,9 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset theme="edit-cut"/>
+    <iconset theme="edit-cut">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Cut</string>

@@ -78,4 +78,25 @@ std::vector<std::shared_ptr<DialogueSegment>> &Dialogue::segments()
 	return m_segments;
 }
 
+void Dialogue::setSegmentHasShown(int index)
+{
+	auto key = "_d" + std::to_string(index);
+	getPropertyList()->sync();
+	getPropertyList()->setValue(key, 0);
+}
+
+bool Dialogue::getSegmentHasShown(int index) const
+{
+	auto key = "_d" + std::to_string(index);
+	getPropertyList()->sync();
+	return getPropertyList()->contains(key);
+}
+
+bool Dialogue::segmentShown(int index)
+{
+	auto v = getSegmentHasShown(index);
+	setSegmentHasShown(index);
+	return v;
+}
+
 } // namespace NovelTea

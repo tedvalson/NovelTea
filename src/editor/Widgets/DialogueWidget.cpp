@@ -12,8 +12,8 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::DialogueWidget)
 	, m_treeModel(new DialogueTreeModel)
-	, m_selectedItem(nullptr)
 	, m_menuTreeView(new QMenu)
+	, m_selectedItem(nullptr)
 {
 	m_idName = idName;
 	ui->setupUi(this);
@@ -162,6 +162,7 @@ void DialogueWidget::fillItemSettings()
 	ui->scriptEditConditional->setPlainText(QString::fromStdString(selectedSegment->getConditionScript()));
 	ui->checkBoxScript->setChecked(selectedSegment->getScriptEnabled());
 	ui->scriptEdit->setPlainText(QString::fromStdString(selectedSegment->getScript()));
+	ui->checkBoxShowOnce->setChecked(selectedSegment->getShowOnce());
 }
 
 void DialogueWidget::checkIndexChange()
@@ -197,6 +198,7 @@ void DialogueWidget::checkIndexChange()
 		segment->setConditionScript(ui->scriptEditConditional->toPlainText().toStdString());
 		segment->setScriptEnabled(ui->checkBoxScript->isChecked());
 		segment->setScript(ui->scriptEdit->toPlainText().toStdString());
+		segment->setShowOnce(ui->checkBoxShowOnce->isChecked());
 
 		if (m_treeModel->updateSegment(index, segment)) {
 			std::cout << "updated seg" << std::endl;

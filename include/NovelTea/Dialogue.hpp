@@ -21,6 +21,10 @@ public:
 	std::shared_ptr<DialogueSegment> getSegment(int index, bool followLink = true) const;
 	std::vector<std::shared_ptr<DialogueSegment>> &segments();
 
+	void setSegmentHasShown(int index);
+	bool getSegmentHasShown(int index) const;
+	bool segmentShown(int index);
+
 	static constexpr auto id = "dialogue";
 	const std::string entityId() const override {return id;}
 
