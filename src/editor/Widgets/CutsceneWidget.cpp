@@ -19,6 +19,7 @@ Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
 #define SEGMENT_DELAY "Delay"
 #define OFFSET "Offset"
 #define WAIT_FOR_CLICK "Wait for click"
+#define CAN_SKIP "Can Skip"
 #define SCRIPT_OVERRIDE_NAME "Variable or Function"
 #define FULLSCREEN "Full Screen"
 #define CAN_FAST_FORWARD "Can Fast-Forward"
@@ -162,6 +163,10 @@ void CutsceneWidget::fillPropertyEditor()
 	prop->setValue(segment->getWaitForClick());
 	ui->propertyBrowser->addProperty(prop);
 
+	prop = segmentsVariantManager->addProperty(QVariant::Bool, CAN_SKIP);
+	prop->setValue(segment->getCanSkip());
+	ui->propertyBrowser->addProperty(prop);
+
 	connect(segmentsVariantManager, &QtVariantPropertyManager::valueChanged, this, &CutsceneWidget::segmentPropertyChanged);
 }
 
@@ -263,7 +268,6 @@ void CutsceneWidget::saveData() const
 void CutsceneWidget::loadData()
 {
 	m_cutscene = Proj.get<NovelTea::Cutscene>(idName());
-	ui->listWidget->model()->disconnect();
 	ui->listWidget->clear();
 
 	qDebug() << "Loading cutscene data... " << QString::fromStdString(idName());
@@ -334,6 +338,8 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		segment->setDelay(value.toInt());
 	else if (propertyName == WAIT_FOR_CLICK)
 		segment->setWaitForClick(value.toBool());
+	else if (propertyName == CAN_SKIP)
+		segment->setCanSkip(value.toBool());
 	else if (propertyName == SCRIPT_OVERRIDE_NAME)
 		segment->setScriptOverrideName(value.toString().toStdString());
 
@@ -365,12 +371,12 @@ void CutsceneWidget::on_rowsMoved(const QModelIndex &sourceParent, int sourceSta
 
 void CutsceneWidget::on_actionAddText_triggered()
 {
-	addItem(std::make_shared<NovelTea::CutsceneTextSegment>());
+	addItem(std::make_shared<NovelTea::CutsceneTextSegment>(), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::on_actionAddPageBreak_triggered()
 {
-	addItem(std::make_shared<NovelTea::CutscenePageBreakSegment>());
+	addItem(std::make_shared<NovelTea::CutscenePageBreakSegment>(), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::timerEvent(QTimerEvent *event)

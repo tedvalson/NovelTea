@@ -29,44 +29,4 @@ std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)
 	return segment;
 }
 
-void CutsceneSegment::setDuration(size_t duration)
-{
-	m_duration = duration;
-}
-
-size_t CutsceneSegment::getDuration() const
-{
-	return m_duration;
-}
-
-void CutsceneSegment::setDelay(size_t delay)
-{
-	m_delay = delay;
-}
-
-size_t CutsceneSegment::getDelay() const
-{
-	return m_delay;
-}
-
-void CutsceneSegment::setWaitForClick(bool waitForClick)
-{
-	m_waitForClick = waitForClick;
-}
-
-bool CutsceneSegment::getWaitForClick() const
-{
-	return m_waitForClick;
-}
-
-void CutsceneSegment::setScriptOverrideName(const std::string &scriptName)
-{
-	m_scriptOverrideName = scriptName;
-}
-
-const std::string &CutsceneSegment::getScriptOverrideName() const
-{
-	return m_scriptOverrideName;
-}
-
 } // namespace NovelTea

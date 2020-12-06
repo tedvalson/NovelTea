@@ -2,6 +2,7 @@
 #define NOVELTEA_CUTSCENESEGMENT_HPP
 
 #include <NovelTea/JsonSerializable.hpp>
+#include <NovelTea/Utils.hpp>
 #include <memory>
 
 namespace NovelTea
@@ -22,22 +23,17 @@ public:
 
 	static std::shared_ptr<CutsceneSegment> createSegment(const json &j);
 
-	virtual void setDuration(size_t duration);
-	virtual size_t getDuration() const;
-
-	virtual void setDelay(size_t delay);
-	virtual size_t getDelay() const;
-
-	void setWaitForClick(bool waitForClick);
-	bool getWaitForClick() const;
-
-	void setScriptOverrideName(const std::string &scriptName);
-	const std::string &getScriptOverrideName() const;
+	ADD_ACCESSOR(size_t, Duration, m_duration)
+	ADD_ACCESSOR(size_t, Delay, m_delay)
+	ADD_ACCESSOR(bool, WaitForClick, m_waitForClick)
+	ADD_ACCESSOR(bool, CanSkip, m_canSkip)
+	ADD_ACCESSOR(std::string, ScriptOverrideName, m_scriptOverrideName)
 
 private:
 	size_t m_duration = 1000;
 	size_t m_delay = 1000;
 	bool m_waitForClick = false;
+	bool m_canSkip = true;
 	std::string m_scriptOverrideName;
 };
 

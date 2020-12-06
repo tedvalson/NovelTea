@@ -116,7 +116,7 @@ void CutsceneRenderer::click()
 		m_icon.hide(0.4f);
 		addSegmentToQueue(m_segmentIndex + 1);
 	} else {
-		if (m_currentSegment && m_currentSegment->type() != CutsceneSegment::PageBreak)
+		if (m_currentSegment && m_currentSegment->getCanSkip())
 			update(m_timeToNext.asSeconds());
 	}
 }

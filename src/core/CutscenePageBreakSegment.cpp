@@ -6,6 +6,7 @@ namespace NovelTea
 CutscenePageBreakSegment::CutscenePageBreakSegment()
 {
 	setWaitForClick(true);
+	setCanSkip(false);
 }
 
 json CutscenePageBreakSegment::toJson() const
@@ -16,7 +17,8 @@ json CutscenePageBreakSegment::toJson() const
 		getScriptOverrideName(),
 		m_transition,
 		getDuration(),
-		getDelay()
+		getDelay(),
+		getCanSkip()
 	);
 	return j;
 }
@@ -28,6 +30,7 @@ bool CutscenePageBreakSegment::fromJson(const json &j)
 	m_transition = j[3].ToInt();
 	setDuration(j[4].ToInt());
 	setDelay(j[5].ToInt());
+	setCanSkip(j[6].ToBool());
 	return true;
 }
 
