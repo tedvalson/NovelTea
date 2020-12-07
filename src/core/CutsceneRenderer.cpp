@@ -327,7 +327,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 				addSegmentToQueue(segmentIndex + 1);
 			else if (!m_skipWaitingForClick) {
 				m_isWaitingForClick = true;
-				auto posY = std::min(m_cursorPos.y + m_margin*3, m_size.y - m_margin * 2);
+				auto posY = std::min(m_scrollAreaSize.y, m_size.y - m_margin * 2);
 				m_icon.setPosition(m_size.x / 2, posY);
 				m_icon.show(2.f);
 			}
