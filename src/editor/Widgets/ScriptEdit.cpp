@@ -228,13 +228,17 @@ public:
 
 	int lineWithError;
 	std::string errorMessage;
-	NovelTea::Game game;
+	std::shared_ptr<NovelTea::Game> game;
 };
 
 ScriptEdit::ScriptEdit(QWidget *parent)
 : QPlainTextEdit(parent)
 , d_ptr(new ScriptEditPrivate)
 {
+	d_ptr->game = std::make_shared<NovelTea::Game>();
+	GMan.setActive(d_ptr->game);
+	d_ptr->game->initialize();
+
 	d_ptr->editor = this;
 	d_ptr->layout = new DocLayout(document());
 	d_ptr->highlighter = new SyntaxHighlighter(document());
@@ -621,11 +625,11 @@ bool ScriptEdit::checkErrors(const std::string &script)
 	auto result = false;
 	try
 	{
-		d_ptr->game.getScriptManager().reset();
+		d_ptr->game->getScriptManager().reset();
 		if (script.empty())
-			d_ptr->game.getScriptManager().runInClosure<T>(toPlainText().toStdString());
+			d_ptr->game->getScriptManager().runInClosure<T>(toPlainText().toStdString());
 		else
-			d_ptr->game.getScriptManager().runInClosure<T>(script);
+			d_ptr->game->getScriptManager().runInClosure<T>(script);
 
 		d_ptr->lineWithError = -1;
 		result = true;
