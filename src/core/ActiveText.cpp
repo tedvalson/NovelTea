@@ -190,6 +190,7 @@ void ActiveText::setText(const std::string &text, const TextFormat &format)
 	}
 
 	m_string = stripDiff(text);
+	ensureUpdate();
 	setAlpha(m_alpha);
 	setHighlightFactor(m_highlightFactor);
 }
