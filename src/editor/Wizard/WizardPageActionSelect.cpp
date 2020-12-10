@@ -97,7 +97,7 @@ void WizardPageActionSelect::allowCustomScript(bool allow)
 	if (!allow)
 	{
 		ui->radioExisting->setChecked(true);
-		ui->treeView->expandToDepth(1);
+		ui->treeView->expandToDepth(0);
 	}
 }
 
