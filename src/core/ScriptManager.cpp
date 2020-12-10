@@ -4,6 +4,7 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
+#include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/PropertyList.hpp>
@@ -186,6 +187,26 @@ void ScriptManager::registerClasses()
 	// Dialogue
 	REGISTER_CONSTRUCTOR(Dialogue);
 	REGISTER_ENTITY(Dialogue);
+	dukglue_register_method(m_context, &Dialogue::addSegment, "addSegment");
+	dukglue_register_method(m_context, &Dialogue::getSegment, "getSegment");
+	dukglue_register_method(m_context, &Dialogue::clearSegments, "clearSegments");
+	dukglue_register_property(m_context, &Dialogue::getRootIndex, &Dialogue::setRootIndex, "rootIndex");
+	dukglue_register_property(m_context, &Dialogue::getDefaultName, &Dialogue::setDefaultName, "defaultName");
+
+	REGISTER_CONSTRUCTOR(DialogueSegment);
+	dukglue_register_method(m_context, &DialogueSegment::appendChild, "appendChildId");
+	dukglue_register_method(m_context, &DialogueSegment::clearChildren, "clearChildren");
+	dukglue_register_property(m_context, &DialogueSegment::getId, nullptr, "id");
+	dukglue_register_property(m_context, &DialogueSegment::getLinkId, &DialogueSegment::setLinkId, "linkId");
+	dukglue_register_property(m_context, &DialogueSegment::getTypeInt, &DialogueSegment::setTypeInt, "type");
+	dukglue_register_property(m_context, &DialogueSegment::getConditionalEnabled, &DialogueSegment::setConditionalEnabled, "conditionalEnabled");
+	dukglue_register_property(m_context, &DialogueSegment::getScriptedText, &DialogueSegment::setScriptedText, "scriptedText");
+	dukglue_register_property(m_context, &DialogueSegment::getScriptEnabled, &DialogueSegment::setScriptEnabled, "scriptEnabled");
+	dukglue_register_property(m_context, &DialogueSegment::getShowOnce, &DialogueSegment::setShowOnce, "showOnce");
+	dukglue_register_property(m_context, &DialogueSegment::getConditionScript, &DialogueSegment::setConditionScript, "conditionScript");
+	dukglue_register_property(m_context, &DialogueSegment::getScript, &DialogueSegment::setScript, "script");
+	dukglue_register_property(m_context, &DialogueSegment::getTextRaw, &DialogueSegment::setTextRaw, "text");
+	dukglue_register_property(m_context, &DialogueSegment::getChildrenIds, &DialogueSegment::setChildrenIds, "childIds");
 
 	// Object
 	REGISTER_CONSTRUCTOR(Object);
@@ -202,6 +223,9 @@ void ScriptManager::registerClasses()
 	// Script
 	REGISTER_CONSTRUCTOR(Script);
 	REGISTER_ENTITY(Script);
+	dukglue_register_property(m_context, &Script::getAutorun, &Script::setAutorun, "autorun");
+	dukglue_register_property(m_context, &Script::getGlobal, &Script::setGlobal, "global");
+	dukglue_register_property(m_context, &Script::getContent, &Script::setContent, "content");
 
 	// Verb
 	REGISTER_CONSTRUCTOR(Verb);

@@ -142,6 +142,16 @@ void DialogueSegment::setDialogue(Dialogue *dialogue)
 	m_dialogue = dialogue;
 }
 
+void DialogueSegment::setTypeInt(int typeInt)
+{
+	m_type = static_cast<Type>(typeInt);
+}
+
+int DialogueSegment::getTypeInt() const
+{
+	return static_cast<int>(m_type);
+}
+
 json DialogueSegment::toJson() const
 {
 	auto jchildrenIds = sj::Array();

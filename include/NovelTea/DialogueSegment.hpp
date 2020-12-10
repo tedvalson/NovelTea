@@ -39,6 +39,10 @@ public:
 
 	void setDialogue(Dialogue *dialogue);
 
+	// For scripting compatiblity
+	void setTypeInt(int typeInt);
+	int getTypeInt() const;
+
 	ADD_ACCESSOR(int, Id, m_id)
 	ADD_ACCESSOR(int, LinkId, m_linkId)
 	ADD_ACCESSOR(Type, Type, m_type)
