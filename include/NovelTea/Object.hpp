@@ -18,9 +18,11 @@ public:
 	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(std::string, Name, m_name)
+	ADD_ACCESSOR(bool, CaseSensitive, m_caseSensitive)
 
 private:
 	std::string m_name;
+	bool m_caseSensitive;
 };
 
 } // namespace NovelTea

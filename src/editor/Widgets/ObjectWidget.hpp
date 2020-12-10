@@ -27,9 +27,6 @@ public:
 	QString tabText() const override;
 	Type getType() const override;
 
-private slots:
-	void on_actionRemoveObject_triggered();
-
 private:
 	void fillPropertyEditor();
 

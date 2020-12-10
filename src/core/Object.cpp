@@ -4,13 +4,14 @@ namespace NovelTea
 {
 
 Object::Object()
-	: m_name("New Object")
+	: m_name("Object Name")
+	, m_caseSensitive(false)
 {
 }
 
 size_t Object::jsonSize() const
 {
-	return 4;
+	return 5;
 }
 
 json Object::toJson() const
@@ -19,7 +20,8 @@ json Object::toJson() const
 		m_id,
 		m_parentId,
 		m_properties,
-		m_name
+		m_name,
+		m_caseSensitive
 	);
 	return j;
 }
@@ -30,6 +32,7 @@ void Object::loadJson(const json &j)
 	m_parentId = j[1].ToString();
 	m_properties = j[2];
 	m_name = j[3].ToString();
+	m_caseSensitive = j[4].ToBool();
 }
 
 } // namespace NovelTea

@@ -4,6 +4,11 @@
 #include <NovelTea/Object.hpp>
 #include <QDebug>
 
+namespace {
+	const auto propName = "Name";
+	const auto propCaseSensitive = "Case Sensitive";
+}
+
 ObjectWidget::ObjectWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::ObjectWidget)
@@ -41,6 +46,14 @@ void ObjectWidget::fillPropertyEditor()
 
 	QtVariantProperty *prop;
 
+	prop = variantManager->addProperty(QVariant::String, propName);
+	prop->setValue(QString::fromStdString(m_object->getName()));
+	ui->propertyBrowser->addProperty(prop);
+
+	prop = variantManager->addProperty(QVariant::Bool, propCaseSensitive);
+	prop->setValue(m_object->getCaseSensitive());
+	ui->propertyBrowser->addProperty(prop);
+
 	connect(variantManager, &QtVariantPropertyManager::valueChanged, this, &ObjectWidget::propertyChanged);
 }
 
@@ -75,10 +88,10 @@ void ObjectWidget::loadData()
 void ObjectWidget::propertyChanged(QtProperty *property, const QVariant &value)
 {
 	auto propertyName = property->propertyName();
+	if (propertyName == propName)
+		m_object->setName(value.toString().toStdString());
+	else if (propertyName == propCaseSensitive)
+		m_object->setCaseSensitive(value.toBool());
 
 	setModified();
-}
-
-void ObjectWidget::on_actionRemoveObject_triggered()
-{
 }

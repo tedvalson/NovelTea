@@ -218,7 +218,8 @@ void ActionBuilder::updateText()
 			if (!object->getId().empty())
 			{
 				objectStr = object->getName();
-				std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
+				if (!object->getCaseSensitive())
+					std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
 			}
 			tmpText.setSize(size);
 			tmpText.setText(objectStr, m_textFormat);
