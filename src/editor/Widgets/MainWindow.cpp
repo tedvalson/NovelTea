@@ -465,7 +465,11 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionDelete_triggered()
 {
-	// TODO: You sure you want to remove this?
+	auto msg = "Are you sure you want to remove entity:\n\"" + selectedIdName + "\"";
+	auto ret = QMessageBox::warning(this, "Delete Entity", QString::fromStdString(msg), QMessageBox::Cancel | QMessageBox::Ok, QMessageBox::Cancel);
+	if (ret == QMessageBox::Cancel)
+		return;
+
 	QModelIndex index = ui->treeView->selectionModel()->currentIndex();
 
 	auto &j = getDataFromTabType(selectedType);
