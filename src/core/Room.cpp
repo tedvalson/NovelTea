@@ -14,14 +14,9 @@ Room::Room()
 		m_paths.append(sj::Array(false, sj::Array(-1, "")));
 }
 
-Room::~Room()
-{
-	std::cout << "room destroyed!" << std::endl;
-}
-
 size_t Room::jsonSize() const
 {
-	return 10;
+	return 11;
 }
 
 json Room::toJson() const
@@ -45,7 +40,8 @@ json Room::toJson() const
 		m_scriptBeforeLeave,
 		m_scriptAfterLeave,
 		jobjects,
-		m_paths
+		m_paths,
+		m_name
 	);
 	return j;
 }
@@ -61,6 +57,7 @@ void Room::loadJson(const json &j)
 	m_scriptBeforeLeave = j[6].ToString();
 	m_scriptAfterLeave = j[7].ToString();
 	m_paths = j[9];
+	m_name = j[10].ToString();
 	for (auto &jroomObject : j[8].ArrayRange())
 		m_objects.push_back({jroomObject[0].ToString(), jroomObject[1].ToBool()});
 

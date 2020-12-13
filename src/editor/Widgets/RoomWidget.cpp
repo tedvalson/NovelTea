@@ -20,6 +20,8 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	ui->preview->setMode(NovelTea::StateEditorMode::Room);
 	m_objectMenu->addAction(ui->actionView_Edit);
 
+	ui->toolBarEntities->insertWidget(ui->actionAddObject, ui->widget);
+
 	ui->scriptEditBeforeEnter->hide();
 	ui->scriptEditAfterEnter->hide();
 	ui->scriptEditBeforeLeave->hide();
@@ -87,6 +89,7 @@ void RoomWidget::updateRoom() const
 	SET_SCRIPT(BeforeLeave);
 	SET_SCRIPT(AfterLeave);
 
+	m_room->setName(ui->lineNameEdit->text().toStdString());
 	m_room->setPaths(jpaths);
 	m_room->setObjects(objects);
 	m_room->setDescriptionRaw(ui->scriptEdit->toPlainText().toStdString());
@@ -96,7 +99,7 @@ void RoomWidget::updateRoom() const
 void RoomWidget::updatePreview()
 {
 	auto script = ui->scriptEdit->toPlainText().toStdString();
-	script = "text='';\n" + script + "\nreturn text;";
+	script = "room=Game.room;text='';\n" + script + "\nreturn text;";
 	if (ui->scriptEdit->checkErrors<std::string>(script))
 	{
 		json jdata;
@@ -107,6 +110,7 @@ void RoomWidget::updatePreview()
 		GSave.reset();
 		if (m_room)
 		{
+			m_room->setDescriptionRaw(script);
 			m_room->getObjectList()->saveChanges();
 			// Save room in case changes aren't yet saved to project
 			GSave.set(m_room);
@@ -162,6 +166,7 @@ void RoomWidget::loadData()
 		ui->listWidget->addItem(item);
 	}
 
+	ui->lineNameEdit->setText(QString::fromStdString(m_room->getName()));
 	ui->propertyEditor->setValue(m_room->getProperties());
 	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescriptionRaw()));
 
@@ -187,6 +192,7 @@ void RoomWidget::loadData()
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::dataChanged);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
+	MODIFIER(ui->lineNameEdit, &QLineEdit::textChanged);
 	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 

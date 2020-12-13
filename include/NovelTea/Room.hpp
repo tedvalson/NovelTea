@@ -16,7 +16,7 @@ public:
 	};
 
 	Room();
-	~Room();
+
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;
@@ -39,6 +39,7 @@ public:
 	bool runScriptBeforeLeave() const;
 	void runScriptAfterLeave() const;
 
+	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(std::string, DescriptionRaw, m_descriptionRaw)
 	ADD_ACCESSOR(std::string, ScriptBeforeEnter, m_scriptBeforeEnter)
 	ADD_ACCESSOR(std::string, ScriptAfterEnter, m_scriptAfterEnter)
@@ -48,6 +49,7 @@ public:
 	ADD_ACCESSOR(json, Paths, m_paths)
 
 private:
+	std::string m_name;
 	std::string m_descriptionRaw;
 	std::string m_scriptBeforeEnter;
 	std::string m_scriptAfterEnter;
