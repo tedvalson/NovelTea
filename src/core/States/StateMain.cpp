@@ -150,13 +150,14 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	// TextOverlay setup
 	m_textOverlay.hide(0.f);
-	m_textOverlay.setSize(sf::Vector2f(width, height - toolbarHeight));
+	m_textOverlay.setSize(sf::Vector2f(width, height));
 	GGame.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
 		m_textOverlayFunc = callback;
 		if (!m_testPlaybackMode)
 		{
 			m_textOverlay.setTextArray(messageArray);
 			m_textOverlay.show();
+			hideToolbar(0.4f);
 		}
 		else
 			callOverlayFunc();
@@ -199,12 +200,15 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_dialogueRenderer);
 	target.draw(m_bgToolbar);
 	target.draw(m_navigation);
-	target.draw(m_buttonSettings);
-	target.draw(m_buttonTextLog);
-	target.draw(m_textOverlay);
-	target.draw(m_inventory);
+
+	if (!ActiveGame->getObjectList()->objects().empty())
+		target.draw(m_inventory);
 	if (m_verbList.isVisible())
 		target.draw(m_verbList);
+
+	target.draw(m_textOverlay);
+	target.draw(m_buttonSettings);
+	target.draw(m_buttonTextLog);
 
 	for (auto &notification : Notification::notifications)
 		target.draw(*notification);
@@ -286,32 +290,38 @@ void StateMain::setMode(const json &jEntity)
 	setMode(mode, idName);
 }
 
-void StateMain::showToolbar()
+void StateMain::showToolbar(float duration)
 {
-	m_navigation.show(1.f);
-	m_inventory.show(1.f);
-	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, 1.f)
+	m_navigation.show(duration);
+	m_inventory.show(duration);
+	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, 1.f)
+	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, 1.f)
+	TweenEngine::Tween::to(m_buttonSettings, Button::TEXTCOLOR_ALPHA, duration)
+		.target(200.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonTextLog, Button::TEXTCOLOR_ALPHA, duration)
+		.target(200.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, duration)
 		.target(50.f)
 		.start(m_tweenManager);
 }
 
-void StateMain::hideToolbar()
+void StateMain::hideToolbar(float duration)
 {
-	m_navigation.hide();
-	m_inventory.hide();
-	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, 1.f)
-		.target(0.f)
+	m_navigation.hide(duration);
+	m_inventory.hide(duration);
+	TweenEngine::Tween::to(m_buttonSettings, Button::TEXTCOLOR_ALPHA, duration)
+		.target(80.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, 1.f)
-		.target(0.f)
+	TweenEngine::Tween::to(m_buttonTextLog, Button::TEXTCOLOR_ALPHA, duration)
+		.target(80.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, 1.f)
+	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
 }
@@ -586,11 +596,15 @@ void StateMain::repositionText()
 
 bool StateMain::processEvent(const sf::Event &event)
 {
+	if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
+		return true;
+
 	if (m_textOverlay.isVisible())
 	{
 		if (m_textOverlay.processEvent(event))
 			m_textOverlay.hide(0.5f, TextOverlay::ALPHA, [this](){
 				callOverlayFunc();
+				showToolbar(0.5f);
 			});
 		return true;
 	}
@@ -626,8 +640,6 @@ bool StateMain::processEvent(const sf::Event &event)
 				return true;
 		}
 
-		if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
-			return true;
 		if (m_actionBuilder.isVisible())
 			m_actionBuilder.processEvent(event);
 		m_navigation.processEvent(event);

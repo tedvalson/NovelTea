@@ -42,8 +42,8 @@ public:
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);
 
-	void showToolbar();
-	void hideToolbar();
+	void showToolbar(float duration = 1.f);
+	void hideToolbar(float duration = 1.f);
 
 	void setScroll(float position) override;
 	float getScroll() override;
