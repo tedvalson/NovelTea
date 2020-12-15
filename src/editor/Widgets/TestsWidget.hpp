@@ -39,6 +39,7 @@ private slots:
 	void on_actionRemoveStep_triggered();
 	void on_actionAddStepAction_triggered();
 	void on_actionAddStepWait_triggered();
+	void on_actionAddStepDialogueOption_triggered();
 	void on_listWidgetTests_currentRowChanged(int currentRow);
 	void on_listWidgetSteps_currentRowChanged(int currentRow);
 	void on_actionRunSteps_triggered();
@@ -52,9 +53,9 @@ private:
 	Ui::TestsWidget *ui;
 
 	QMenu *m_menuAdd;
-	QStandardItemModel *itemModel;
 
 	json m_json;
+	int m_errorStepIndex;
 	std::string m_selectedTestId;
 	NovelTea::TestCallback m_callback;
 };

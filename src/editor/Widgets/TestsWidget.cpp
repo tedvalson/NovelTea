@@ -9,11 +9,13 @@ TestsWidget::TestsWidget(QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::TestsWidget)
 	, m_menuAdd(new QMenu)
+	, m_errorStepIndex(-1)
 {
 	ui->setupUi(this);
 	load();
 
 	m_menuAdd->addAction(ui->actionAddStepAction);
+	m_menuAdd->addAction(ui->actionAddStepDialogueOption);
 	m_menuAdd->addAction(ui->actionAddStepWait);
 	ui->toolBarSteps->setEnabled(false);
 
@@ -133,14 +135,19 @@ bool TestsWidget::processCallbackData(const json &jdata)
 {
 	if (jdata.hasKey("success") && !jdata["success"].ToBool())
 	{
-		auto index = jdata["index"].ToInt();
-		auto item = ui->listWidgetSteps->item(index);
+		m_errorStepIndex = jdata["index"].ToInt();
+		auto item = ui->listWidgetSteps->item(m_errorStepIndex);
 		item->setSelected(true);
 		item->setBackground(QBrush(Qt::red));
 		return true;
 	}
 
-	addStep(jdata, true);
+	if (m_errorStepIndex != -1)
+	{
+		ui->listWidgetSteps->setCurrentRow(m_errorStepIndex);
+		addStep(jdata);
+	} else
+		addStep(jdata, true);
 
 //	std::cout << "process step: " << jstep["type"].ToString() << std::endl;
 	return true;
@@ -150,6 +157,7 @@ void TestsWidget::processSteps(bool startRecording)
 {
 	resetListStyle();
 	ui->preview->reset();
+	m_errorStepIndex = -1;
 	auto &jsteps = m_json[m_selectedTestId];
 	auto j = json({
 		"event", "test",
@@ -237,7 +245,17 @@ void TestsWidget::on_actionAddStepWait_triggered()
 		"type", "wait",
 		"duration", duration
 	});
-	addStep(j, true);
+	addStep(j);
+}
+
+void TestsWidget::on_actionAddStepDialogueOption_triggered()
+{
+	int index = QInputDialog::getInt(this, tr("Add Dialogue Option"), tr("Enter dialogue option index:"));
+	json j({
+		"type", "dialogue",
+		"index", index
+	});
+	addStep(j);
 }
 
 void TestsWidget::on_listWidgetTests_currentRowChanged(int currentRow)

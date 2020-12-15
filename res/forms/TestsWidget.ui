@@ -294,6 +294,11 @@
     <string>Record Steps</string>
    </property>
   </action>
+  <action name="actionAddStepDialogueOption">
+   <property name="text">
+    <string>Dialogue Option</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
