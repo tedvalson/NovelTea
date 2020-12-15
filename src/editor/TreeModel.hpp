@@ -42,6 +42,7 @@ public:
 	void update();
 
 private:
+	bool rename(TreeItem *item, int row, const QString &oldName, const QString &newName);
 	TreeItem *getItem(const QModelIndex &index) const;
 	TreeItem *rootItem;
 

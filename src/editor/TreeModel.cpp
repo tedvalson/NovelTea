@@ -144,21 +144,30 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	endResetModel();
 }
 
+
+bool TreeModel::rename(TreeItem *item, int row, const QString &oldName, const QString &newName)
+{
+	if (item->data(0) == oldName)
+	{
+		auto index = createIndex(row, 0, item);
+		setData(index, newName);
+		return true;
+	}
+
+	for (int i = 0; i < item->childCount(); ++i)
+		if (rename(item->child(i), i, oldName, newName))
+			return true;
+	return false;
+}
+
 void TreeModel::rename(EditorTabWidget::Type type, const QString &oldName, const QString &newName)
 {
 	auto parent = static_cast<TreeItem*>(index(type).internalPointer());
 	if (!parent)
 		return;
 	for (int i = 0; i < parent->childCount(); ++i)
-	{
-		auto child = parent->child(i);
-		if (child->data(0) == oldName)
-		{
-			auto index = createIndex(i, 0, child);
-			setData(index, newName);
-			break;
-		}
-	}
+		if (rename(parent->child(i), i, oldName, newName))
+			return;
 }
 
 bool TreeModel::changeParent(const QModelIndex &child, const QModelIndex &newParent)
