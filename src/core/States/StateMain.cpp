@@ -176,7 +176,12 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 void StateMain::render(sf::RenderTarget &target)
 {
 	if (m_mode != Mode::Room && m_roomTextChanging)
+	{
+		auto view = target.getView();
+		target.setView(m_roomTextView);
 		target.draw(m_roomActiveTextFadeOut);
+		target.setView(view);
+	}
 
 	if (m_mode == Mode::Cutscene)
 	{
@@ -279,7 +284,7 @@ void StateMain::setMode(const json &jEntity)
 	else if (type == EntityType::Dialogue)
 		mode = Mode::Dialogue;
 	else if (type == EntityType::Script) {
-		ScriptMan.run(idName);
+		ScriptMan.runScriptId(idName);
 		return;
 	}
 	else if (type == EntityType::CustomScript) {
