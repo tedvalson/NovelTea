@@ -473,10 +473,8 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 
 	if (action)
 		success = action->runScript();
-	else if (!verb->getScriptDefault().empty())
-		success = ScriptMan.runActionScript(verbId, objectIds, verb->getScriptDefault());
 	else
-		success = ScriptMan.runActionScript(verbId, objectIds, ProjData[ID::scriptUndefinedAction].ToString());
+		success = ScriptMan.runActionScript(verbId, objectIds);
 
 	if (!success)
 		return false;

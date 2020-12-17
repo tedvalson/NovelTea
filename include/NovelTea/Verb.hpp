@@ -20,7 +20,7 @@ public:
 	static constexpr auto id = "verb";
 	const std::string entityId() const override {return id;}
 
-	bool checkConditionScript(const std::string &objectId);
+	bool checkConditionScript(const std::string &verbId, const std::string &objectId);
 
 	std::string getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr = "____") const;
 	std::string getActionText(std::vector<std::string> objectIds, std::string blankStr = "____") const;

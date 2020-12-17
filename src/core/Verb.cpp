@@ -50,14 +50,20 @@ void Verb::loadJson(const json &j)
 		m_actionStructure.push_back(jpart.ToString());
 }
 
-bool Verb::checkConditionScript(const std::string &objectId)
+bool Verb::checkConditionScript(const std::string &verbId, const std::string &objectId)
 {
-	if (m_scriptConditional.empty())
-		return true;
+	if (m_scriptConditional.empty()) {
+		if (m_parentId.empty())
+			return true;
+		auto parentVerb = GSave.get<Verb>(m_parentId);
+		return parentVerb->checkConditionScript(verbId, objectId);
+	}
+
 	try {
 		auto object = GSave.get<Object>(objectId);
-		auto script = "function _f(object){\n" + m_scriptConditional + "\nreturn true;}";
-		return ActiveGame->getScriptManager().call<bool>(script, "_f", object);
+		auto verb = GSave.get<Verb>(verbId);
+		auto script = "function _f(verb,object){\n" + m_scriptConditional + "\nreturn true;}";
+		return ActiveGame->getScriptManager().call<bool>(script, "_f", verb, object);
 	} catch (std::exception &e) {
 		std::cerr << "Verb::checkConditionScript " << e.what() << std::endl;
 		return false;
@@ -80,7 +86,8 @@ std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, st
 			if (!object->getId().empty())
 			{
 				objectStr = object->getName();
-				std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
+				if (!object->getCaseSensitive())
+					std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
 			}
 		}
 

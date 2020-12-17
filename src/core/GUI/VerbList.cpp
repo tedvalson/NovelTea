@@ -156,7 +156,7 @@ void VerbList::setVerbs(const std::string &objectId)
 	for (auto it = verbIds.begin(); it != verbIds.end();)
 	{
 		auto verb = GSave.get<Verb>(*it);
-		if (!verb->checkConditionScript(objectId))
+		if (!verb->checkConditionScript(*it, objectId))
 			verbIds.erase(it);
 		else
 			++it;

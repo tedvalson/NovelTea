@@ -121,6 +121,25 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 	}
 }
 
+bool ScriptManager::runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds)
+{
+	auto verb = m_game->getSaveData().get<Verb>(verbId);
+	auto script = verb->getScriptDefault();;
+	if (script.empty()) {
+		if (verb->getParentId().empty())
+			return runActionScript(verbId, objectIds, ProjData[ID::scriptUndefinedAction].ToString());
+		else
+			return runActionScript(verb->getParentId(), verbIdOrig, objectIds);
+	}
+	else
+		return runActionScript(verbIdOrig, objectIds, script);
+}
+
+bool ScriptManager::runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds)
+{
+	return runActionScript(verbId, verbId, objectIds);
+}
+
 bool ScriptManager::runRoomScript(const std::string &roomId, const std::string &script)
 {
 	auto room = m_game->getSaveData().get<Room>(roomId);
