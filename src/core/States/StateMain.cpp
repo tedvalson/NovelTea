@@ -112,18 +112,17 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		m_actionBuilder.selectNextEmptyIndex();
 		m_verbList.hide();
 		m_inventory.close();
+		if (!m_actionBuilder.isVisible() && m_actionBuilder.getObjects().size() > 1)
+			TweenEngine::Tween::to(*this, ACTION_BUILDER, 0.4f)
+				.target(1.f)
+				.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+					m_actionBuilder.show();
+				})
+				.start(m_tweenManager);
 	});
 	m_verbList.setShowHideCallback([this](bool showing){
 		if (!showing) {
 			m_roomActiveText.setHighlightId("");
-			if (!m_selectedObjectId.empty() && m_actionBuilder.getObjects().size() > 1) {
-				TweenEngine::Tween::to(*this, ACTION_BUILDER, 0.4f)
-					.target(1.f)
-					.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-						m_actionBuilder.show();
-					})
-					.start(m_tweenManager);
-			}
 		}
 	});
 
