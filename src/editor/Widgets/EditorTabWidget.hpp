@@ -18,6 +18,7 @@ public:
 		Action,
 		Dialogue,
 		Tests,
+		Search,
 		Script,
 		Settings,
 		Verb,

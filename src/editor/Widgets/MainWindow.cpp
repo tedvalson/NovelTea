@@ -8,6 +8,7 @@
 #include "ObjectWidget.hpp"
 #include "ScriptWidget.hpp"
 #include "VerbWidget.hpp"
+#include "SearchWidget.hpp"
 #include "TestsWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
@@ -558,5 +559,15 @@ void MainWindow::on_actionClearParentSelection_triggered()
 void MainWindow::on_actionTests_triggered()
 {
 	auto w = new TestsWidget;
+	addEditorTab(w, true);
+}
+
+void MainWindow::on_actionSearch_triggered()
+{
+	QString searchTerm = QInputDialog::getText(this, tr("Search"),
+			tr("Enter Search Term:"), QLineEdit::Normal);
+	if (searchTerm.isEmpty())
+		return;
+	auto w = new SearchWidget(searchTerm.toStdString());
 	addEditorTab(w, true);
 }

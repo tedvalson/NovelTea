@@ -20,6 +20,7 @@ set(UIFILES
 	${UIROOT}/PropertyEditor.ui
 	${UIROOT}/RoomWidget.ui
 	${UIROOT}/RichTextEditor.ui
+	${UIROOT}/SearchWidget.ui
 	${UIROOT}/ScriptWidget.ui
 	${UIROOT}/TestsWidget.ui
 	${UIROOT}/VerbWidget.ui
@@ -58,6 +59,8 @@ set(SRC
 	${SRCROOT}/Widgets/PropertyEditor.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
 	${SRCROOT}/Widgets/RoomWidget.cpp
+	${SRCROOT}/Widgets/SearchTreeWidget.cpp
+	${SRCROOT}/Widgets/SearchWidget.cpp
 	${SRCROOT}/Widgets/ScriptEdit.cpp
 	${SRCROOT}/Widgets/ScriptWidget.cpp
 	${SRCROOT}/Widgets/SFMLWidget.cpp

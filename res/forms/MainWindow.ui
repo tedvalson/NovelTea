@@ -149,6 +149,7 @@
     </property>
     <addaction name="actionProjectSettings"/>
     <addaction name="actionTests"/>
+    <addaction name="actionSearch"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
@@ -297,6 +298,11 @@
   <action name="actionTests">
    <property name="text">
     <string>Tests</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="text">
+    <string>Search</string>
    </property>
   </action>
  </widget>

@@ -60,6 +60,7 @@ private slots:
 	void on_actionSelectParent_triggered();
 	void on_actionClearParentSelection_triggered();
 	void on_actionTests_triggered();
+	void on_actionSearch_triggered();
 
 private:
 	static MainWindow *_instance;
