@@ -42,8 +42,8 @@ public:
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);
 
-	void showToolbar(float duration = 1.f);
-	void hideToolbar(float duration = 1.f);
+	void showToolbar(float duration = 0.5f);
+	void hideToolbar(float duration = 0.5f);
 
 	void setScroll(float position) override;
 	float getScroll() override;
@@ -103,8 +103,8 @@ private:
 
 	float m_actionBuilderShowPos;
 
-	TweenEngine::Tween *m_highlightTween;
 	TweenEngine::TweenManager m_tweenManager;
+	TweenEngine::TweenManager m_tweenManagerHighlights;
 };
 
 } // namespace NovelTea

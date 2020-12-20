@@ -11,6 +11,7 @@ namespace NovelTea
 
 Navigation::Navigation()
 : m_needsUpdate(true)
+, m_highlightFactor(1.f)
 , m_alpha(255.f)
 , m_callback(nullptr)
 {
@@ -70,23 +71,7 @@ sf::Vector2f Navigation::getSize() const
 void Navigation::setPaths(const json &value)
 {
 	m_paths = value;
-
-	for (int i = 0; i < 8; ++i)
-	{
-		if (m_paths[i][0].ToBool() && m_paths[i][1][0].ToInt() != -1)
-		{
-			m_buttons[i]->setActiveColor(sf::Color(0, 0, 0, 20));
-			m_buttons[i]->setTextColor(sf::Color(0, 0, 0, 190));
-			m_buttons[i]->setTextActiveColor(sf::Color(0, 0, 0, 245));
-		} else {
-			m_buttons[i]->setActiveColor(sf::Color::Transparent);
-			m_buttons[i]->setTextColor(sf::Color(0, 0, 0, 20));
-			m_buttons[i]->setTextActiveColor(sf::Color(0, 0, 0, 20));
-		}
-	}
-
-	// Reset alpha to reflect new button states
-	setValues(ALPHA, &m_alpha);
+	m_needsUpdate = true;
 }
 
 const json &Navigation::getPaths() const
@@ -110,6 +95,17 @@ void Navigation::setCallback(NavigationCallback callback)
 	m_callback = callback;
 }
 
+void Navigation::setHighlightFactor(float highlightFactor)
+{
+	m_highlightFactor = highlightFactor;
+	m_needsUpdate = true;
+}
+
+float Navigation::getHighlightFactor() const
+{
+	return m_highlightFactor;
+}
+
 void Navigation::setAlpha(float alpha)
 {
 	m_alpha = alpha;
@@ -120,6 +116,28 @@ void Navigation::setAlpha(float alpha)
 float Navigation::getAlpha() const
 {
 	return m_alpha;
+}
+
+void Navigation::setValues(int tweenType, float *newValues)
+{
+	switch (tweenType) {
+		case HIGHLIGHTS:
+			setHighlightFactor(newValues[0]);
+			break;
+		default:
+			Hideable::setValues(tweenType, newValues);
+	}
+}
+
+int Navigation::getValues(int tweenType, float *returnValues)
+{
+	switch (tweenType) {
+	case HIGHLIGHTS:
+		returnValues[0] = getHighlightFactor();
+		return 1;
+	default:
+		return Hideable::getValues(tweenType, returnValues);
+	}
 }
 
 void Navigation::ensureUpdate() const
@@ -143,6 +161,23 @@ void Navigation::ensureUpdate() const
 		button->setContentSize(sf::Vector2f(buttonSize - padding.left - padding.width, buttonSize - padding.top - padding.height));
 		button->setPosition((buttonSize + spacing) * x, (buttonSize + spacing) * y);
 		++buttonIndex;
+	}
+
+	for (int i = 0; i < 8; ++i)
+	{
+		auto &button = m_buttons[i];
+		if (m_paths[i][0].ToBool() && m_paths[i][1][0].ToInt() != -1)
+		{
+			button->setActiveColor(sf::Color(0, 0, 0, 20));
+			button->setTextColor(sf::Color(0, 0, 0, 20 + m_highlightFactor * 170));
+			button->setTextActiveColor(sf::Color(0, 0, 0, 245));
+		} else {
+			button->setActiveColor(sf::Color::Transparent);
+			button->setTextColor(sf::Color(0, 0, 0, 20));
+			button->setTextActiveColor(sf::Color(0, 0, 0, 20));
+		}
+
+		button->setAlpha(m_alpha);
 	}
 
 	m_bounds.left = getPosition().x;

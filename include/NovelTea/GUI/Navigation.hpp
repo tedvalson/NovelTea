@@ -16,6 +16,8 @@ using NavigationCallback = std::function<void(int direction, const json &jentity
 class Navigation : public sf::Drawable, public Hideable
 {
 public:
+	static const int HIGHLIGHTS = 12;
+
 	Navigation();
 	~Navigation();
 
@@ -32,10 +34,16 @@ public:
 
 	void setCallback(NavigationCallback callback);
 
+	void setHighlightFactor(float highlightFactor);
+	float getHighlightFactor() const;
+
 	void setAlpha(float alpha) override;
 	float getAlpha() const override;
 
 protected:
+	virtual void setValues(int tweenType, float *newValues) override;
+	virtual int getValues(int tweenType, float *returnValues) override;
+
 	void ensureUpdate() const;
 	void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
@@ -44,6 +52,7 @@ private:
 	mutable sf::FloatRect m_bounds;
 	mutable bool m_needsUpdate;
 
+	float m_highlightFactor;
 	float m_alpha;
 	json m_paths;
 
