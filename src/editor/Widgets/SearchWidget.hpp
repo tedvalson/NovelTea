@@ -2,7 +2,7 @@
 #define SEARCHWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
-#include <QWidget>
+#include <QTreeWidgetItem>
 
 namespace Ui {
 class SearchWidget;
@@ -20,12 +20,16 @@ public:
 
 private slots:
 	void on_buttonSearchAgain_clicked();
+	void on_treeWidget_activated(const QModelIndex &index);
 
 private:
 	void saveData() const override;
 	void loadData() override;
 
-	void searchRooms();
+	void processString(QTreeWidgetItem *treeItem, const std::string &value, bool caseSensitive);
+	void searchEntities(const std::string &entityId, const QString &name, bool caseSensitive);
+	void searchTests(bool caseSensitive);
+	void searchProjectSettings(bool caseSensitive);
 
 	Ui::SearchWidget *ui;
 	std::string m_searchTerm;

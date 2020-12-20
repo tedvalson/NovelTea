@@ -11,7 +11,7 @@ class MainWindow;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	static MainWindow &instance();
@@ -21,6 +21,7 @@ public:
 	bool closeProject();
 
 	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = false);
+	void addEditorTab(EditorTabWidget::Type type, const std::string &idName);
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
 

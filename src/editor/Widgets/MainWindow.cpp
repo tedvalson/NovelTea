@@ -142,6 +142,28 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 	connect(widget, &EditorTabWidget::loaded, this, &MainWindow::refreshTabs);
 }
 
+void MainWindow::addEditorTab(EditorTabWidget::Type type, const std::string &idName)
+{
+	if (type == EditorTabWidget::Action)
+		addEditorTab(new ActionWidget(idName));
+	else if (type == EditorTabWidget::Cutscene)
+		addEditorTab(new CutsceneWidget(idName));
+	else if (type == EditorTabWidget::Dialogue)
+		addEditorTab(new DialogueWidget(idName));
+	else if (type == EditorTabWidget::Room)
+		addEditorTab(new RoomWidget(idName));
+	else if (type == EditorTabWidget::Object)
+		addEditorTab(new ObjectWidget(idName));
+	else if (type == EditorTabWidget::Script)
+		addEditorTab(new ScriptWidget(idName));
+	else if (type == EditorTabWidget::Verb)
+		addEditorTab(new VerbWidget(idName));
+	else if (type == EditorTabWidget::Settings)
+		addEditorTab(new ProjectSettingsWidget);
+	else if (type == EditorTabWidget::Tests)
+		addEditorTab(new TestsWidget);
+}
+
 int MainWindow::getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const
 {
 	for (int i = 0; i < ui->tabWidget->count(); ++i)
@@ -448,20 +470,8 @@ void MainWindow::on_actionOpen_triggered()
 	int existingIndex = getEditorTabIndex(selectedType, selectedIdName);
 	if (existingIndex >= 0)
 		ui->tabWidget->setCurrentIndex(existingIndex);
-	else if (selectedType == EditorTabWidget::Action)
-		addEditorTab(new ActionWidget(selectedIdName));
-	else if (selectedType == EditorTabWidget::Cutscene)
-		addEditorTab(new CutsceneWidget(selectedIdName));
-	else if (selectedType == EditorTabWidget::Dialogue)
-		addEditorTab(new DialogueWidget(selectedIdName));
-	else if (selectedType == EditorTabWidget::Room)
-		addEditorTab(new RoomWidget(selectedIdName));
-	else if (selectedType == EditorTabWidget::Object)
-		addEditorTab(new ObjectWidget(selectedIdName));
-	else if (selectedType == EditorTabWidget::Script)
-		addEditorTab(new ScriptWidget(selectedIdName));
-	else if (selectedType == EditorTabWidget::Verb)
-		addEditorTab(new VerbWidget(selectedIdName));
+	else
+		addEditorTab(selectedType, selectedIdName);
 }
 
 void MainWindow::on_actionDelete_triggered()
