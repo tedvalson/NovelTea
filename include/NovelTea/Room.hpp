@@ -33,6 +33,7 @@ public:
 	const std::shared_ptr<ObjectList> &getObjectList() const;
 
 	std::string getDescription() const;
+	void sync();
 
 	bool runScriptBeforeEnter() const;
 	void runScriptAfterEnter() const;

@@ -30,6 +30,8 @@ public:
 	void reset();
 
 	void setRoomId(const std::string &roomId);
+	void setRoom(const std::shared_ptr<Room> &room);
+	const std::shared_ptr<Room> &getRoom() const;
 
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
 	void setProp(const std::string &key, const DukValue &value);
@@ -49,7 +51,6 @@ public:
 	TimerManager &getTimerManager();
 
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
-	ADD_ACCESSOR(std::shared_ptr<Room>, Room, m_room)
 	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
 
 private:

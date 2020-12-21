@@ -93,6 +93,14 @@ void ObjectList::saveChanges()
 	m_saveData->data()[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
 }
 
+void ObjectList::sync()
+{
+	if (!m_attachedType.empty()) {
+		m_objects.clear();
+		attach(m_attachedType, m_attachedId);
+	}
+}
+
 std::vector<std::shared_ptr<Object> > ObjectList::objects() const
 {
 	return m_objects;

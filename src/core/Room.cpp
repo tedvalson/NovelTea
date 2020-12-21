@@ -119,6 +119,12 @@ std::string Room::getDescription() const
 	}
 }
 
+void Room::sync()
+{
+	m_objectList->sync();
+	getPropertyList()->sync();
+}
+
 bool Room::runScriptBeforeEnter() const
 {
 	auto script = ProjData[ID::scriptBeforeEnter].ToString();

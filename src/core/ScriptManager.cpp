@@ -180,10 +180,12 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &ObjectList::removeId, "removeId");
 	dukglue_register_method(m_context, &ObjectList::contains, "contains");
 	dukglue_register_method(m_context, &ObjectList::containsId, "containsId");
+	dukglue_register_method(m_context, &ObjectList::sync, "sync");
 
 	// PropertyList
 	dukglue_register_method(m_context, &PropertyList::set, "set");
 	dukglue_register_method(m_context, &PropertyList::get, "get");
+	dukglue_register_method(m_context, &PropertyList::sync, "sync");
 
 	// Timer
 	dukglue_register_method(m_context, &Timer::kill, "kill");
@@ -237,6 +239,7 @@ void ScriptManager::registerClasses()
 	REGISTER_ENTITY(Room);
 	dukglue_register_method(m_context, &Room::contains, "contains");
 	dukglue_register_method(m_context, &Room::containsId, "containsId");
+	dukglue_register_method(m_context, &Room::sync, "sync");
 	dukglue_register_property(m_context, &Room::getObjectList, nullptr, "objects");
 
 	// Script

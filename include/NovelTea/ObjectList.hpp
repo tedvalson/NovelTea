@@ -28,6 +28,7 @@ public:
 
 	void attach(const std::string &type, const std::string &id);
 	void saveChanges();
+	void sync();
 
 	std::vector<std::shared_ptr<Object>> objects() const;
 

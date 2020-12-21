@@ -48,6 +48,17 @@ void Game::setRoomId(const std::string &roomId)
 	m_room = m_saveData.get<Room>(roomId);
 }
 
+void Game::setRoom(const std::shared_ptr<Room> &room)
+{
+	m_room = room;
+}
+
+const std::shared_ptr<Room> &Game::getRoom() const
+{
+	m_room->sync();
+	return m_room;
+}
+
 DukValue Game::prop(const std::string &key, const DukValue &defaultValue)
 {
 	return m_propertyList->get(key, defaultValue);
