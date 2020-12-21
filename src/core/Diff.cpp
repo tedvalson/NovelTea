@@ -4,6 +4,15 @@
 namespace NovelTea
 {
 
+std::string stripEmptyDiff(const std::string &diffString)
+{
+	auto result = diffString;
+	auto pos = 0;
+	while ((pos = result.find("^[]^")) != result.npos)
+		result.erase(pos, 4);
+	return result;
+}
+
 bool isSnapChar(char c)
 {
 	return (c == ' ' || c == '\n' || c == '\t' || c == ',');
@@ -11,7 +20,7 @@ bool isSnapChar(char c)
 
 std::string snapDiffToWord(const std::string &diffString)
 {
-	auto result = diffString;
+	auto result = stripEmptyDiff(diffString);
 	size_t startPos = 0;
 	while ((startPos = result.find("^[", startPos)) != result.npos)
 	{
