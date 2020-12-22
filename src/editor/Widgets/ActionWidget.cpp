@@ -17,6 +17,7 @@ ActionWidget::ActionWidget(const std::string &idName, QWidget *parent)
 	load();
 
 	MODIFIER(ui->script, &ScriptEdit::textChanged);
+	MODIFIER(ui->checkBox, &QCheckBox::toggled);
 	MODIFIER(ui->actionBuilder, &ActionBuildWidget::valueChanged);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 }
@@ -41,6 +42,7 @@ void ActionWidget::saveData() const
 	if (m_action)
 	{
 		m_action->setScript(ui->script->toPlainText().toStdString());
+		m_action->setPositionDependent(!ui->checkBox->isChecked());
 		m_action->setVerbObjectCombo(ui->actionBuilder->getValue());
 		m_action->setProperties(ui->propertyEditor->getValue());
 		Proj.set<NovelTea::Action>(m_action, idName());
@@ -61,6 +63,7 @@ void ActionWidget::loadData()
 	}
 
 	ui->script->setPlainText(QString::fromStdString(m_action->getScript()));
+	ui->checkBox->setChecked(!m_action->getPositionDependent());
 	ui->actionBuilder->setValue(m_action->getVerbObjectCombo());
 	ui->propertyEditor->setValue(m_action->getProperties());
 }
