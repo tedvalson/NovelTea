@@ -10,6 +10,8 @@ std::string stripEmptyDiff(const std::string &diffString)
 	auto pos = 0;
 	while ((pos = result.find("^[]^")) != result.npos)
 		result.erase(pos, 4);
+	while ((pos = result.find("]^^[")) != result.npos)
+		result.erase(pos, 4);
 	return result;
 }
 
@@ -63,6 +65,45 @@ std::string snapDiffToWord(const std::string &diffString)
 		}
 
 		startPos++;
+	}
+
+	return stripEmptyDiff(result);
+}
+
+std::string snapDiffToObject(const std::string &diffString)
+{
+	auto result = diffString;
+	std::vector<std::pair<int,int>> objectBounds;
+	auto pos = 0;
+	while ((pos = diffString.find("[[", pos)) != diffString.npos)
+	{
+		auto endPos = diffString.find("]]", pos);
+		if (endPos != diffString.npos)
+			objectBounds.emplace_back(pos, endPos);
+		++pos;
+	}
+	for (auto &bounds : objectBounds)
+	{
+		pos = 0;
+		while ((pos = result.find("^[", pos)) != diffString.npos)
+		{
+			if (pos > bounds.first && pos < bounds.second)
+			{
+				result.erase(pos, 2);
+				result.insert(bounds.first, "^[");
+			}
+			++pos;
+		}
+		pos = 0;
+		while ((pos = result.find("]^", pos)) != diffString.npos)
+		{
+			if (pos > bounds.first && pos < bounds.second)
+			{
+				result.insert(bounds.second + 2, "]^");
+				result.erase(pos, 2);
+			}
+			++pos;
+		}
 	}
 
 	return result;
@@ -131,7 +172,7 @@ std::string diff(const std::string &oldString, const std::string &newString)
 	if (startNew)
 		result += "]^";
 
-	return removeNestedDiff(snapDiffToWord(result));
+	return removeNestedDiff(snapDiffToObject(snapDiffToWord(result)));
 }
 
 std::string stripDiff(const std::string &diffString)
