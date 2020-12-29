@@ -16,6 +16,7 @@ ActiveText::ActiveText()
 	, m_lineSpacing(5.f)
 	, m_alpha(255.f)
 	, m_highlightFactor(1.f)
+	, m_fontSizeMultiplier(1.f)
 	, m_fadeAcrossPosition(1.f)
 	, m_fadeLineIndex(0)
 	, m_renderTexture(nullptr)
@@ -191,8 +192,6 @@ void ActiveText::setText(const std::string &text, const TextFormat &format)
 
 	m_string = stripDiff(text);
 	ensureUpdate();
-	setAlpha(m_alpha);
-	setHighlightFactor(m_highlightFactor);
 }
 
 std::string ActiveText::getText() const
@@ -238,8 +237,8 @@ void ActiveText::setHighlightId(const std::string &id)
 		}
 		else
 		{
-			segment.text.setOutlineColor(sf::Color::Yellow);
-			segment.text.setOutlineThickness(3.f);
+			segment.text.setOutlineColor(sf::Color(255, 255, 0, 140));
+			segment.text.setOutlineThickness(0.1f * segment.text.getCharacterSize());
 		}
 	}
 }
@@ -294,12 +293,8 @@ const sf::Vector2f &ActiveText::getCursorEnd() const
 
 void ActiveText::setAlpha(float alpha)
 {
-	sf::Color color;
 	m_alpha = alpha;
-	float *newValues = &alpha; // Hack for the macro below
-	for (auto &segment : m_segments) {
-		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
-	}
+	applyAlpha();
 }
 
 float ActiveText::getAlpha() const
@@ -310,24 +305,23 @@ float ActiveText::getAlpha() const
 void ActiveText::setHighlightFactor(float highlightFactor)
 {
 	m_highlightFactor = highlightFactor;
-
-	for (auto &segment : m_segments)
-	{
-		if (!segment.objectIdName.empty())
-		{
-			sf::Color color;
-			if (segment.objectExists)
-				color = sf::Color(0, 0, highlightFactor * 255, m_alpha);
-			else
-				color = sf::Color(highlightFactor * 155, 0, highlightFactor * 255, m_alpha);
-			segment.text.setFillColor(color);
-		}
-	}
+	applyHighlightFactor();
 }
 
 float ActiveText::getHighlightFactor() const
 {
 	return m_highlightFactor;
+}
+
+void ActiveText::setFontSizeMultiplier(float fontSizeMultiplier)
+{
+	m_needsUpdate = true;
+	m_fontSizeMultiplier = fontSizeMultiplier;
+}
+
+float ActiveText::getFontSizeMultiplier() const
+{
+	return m_fontSizeMultiplier;
 }
 
 void ActiveText::setFadeAcrossPosition(float position)
@@ -405,6 +399,31 @@ int ActiveText::getValues(int tweenType, float *returnValues)
 		return 1;
 	default:
 		return Hideable::getValues(tweenType, returnValues);
+	}
+}
+
+void ActiveText::applyAlpha() const
+{
+	sf::Color color;
+	const float *newValues = &m_alpha; // Hack for the macro below
+	for (auto &segment : m_segments) {
+		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
+	}
+}
+
+void ActiveText::applyHighlightFactor() const
+{
+	for (auto &segment : m_segments)
+	{
+		if (!segment.objectIdName.empty())
+		{
+			sf::Color color;
+			if (segment.objectExists)
+				color = sf::Color(0, 0, m_highlightFactor * 200, m_alpha);
+			else
+				color = sf::Color(m_highlightFactor * 155, 0, m_highlightFactor * 255, m_alpha);
+			segment.text.setFillColor(color);
+		}
 	}
 }
 
@@ -498,7 +517,7 @@ void ActiveText::ensureUpdate() const
 
 				TweenText text;
 				text.setFont(*font);
-				text.setCharacterSize(format.size()*2); // TODO: standardize using pt size
+				text.setCharacterSize(m_fontSizeMultiplier * format.size());
 				text.setStyle(style);
 
 				text.setString(" ");
@@ -517,7 +536,7 @@ void ActiveText::ensureUpdate() const
 					auto string = textObjectPair.first;
 					auto objectId = textObjectPair.second;
 					auto objectExists = false;
-					auto color = (newTextPair.first ? sf::Color::Red : format.color());
+					auto color = (newTextPair.first ? sf::Color(150, 0, 0) : format.color());
 					if (!objectId.empty()) {
 						objectExists = ActiveGame->getRoom()->containsId(objectId) ||
 									  ActiveGame->getObjectList()->containsId(objectId);
@@ -561,6 +580,9 @@ void ActiveText::ensureUpdate() const
 		}
 		m_linePositions.push_back(m_cursorPos);
 	}
+
+	applyAlpha();
+	applyHighlightFactor();
 
 	m_debugBorder.setFillColor(sf::Color::Transparent);
 	m_debugBorder.setOutlineColor(sf::Color::Red);

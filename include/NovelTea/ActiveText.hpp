@@ -66,6 +66,9 @@ public:
 	void setHighlightFactor(float highlightFactor);
 	float getHighlightFactor() const;
 
+	void setFontSizeMultiplier(float fontSizeMultiplier);
+	float getFontSizeMultiplier() const;
+
 	void setFadeAcrossPosition(float position);
 	float getFadeAcrossPosition() const;
 	float getFadeAcrossLength() const;
@@ -75,6 +78,9 @@ public:
 protected:
 	virtual void setValues(int tweenType, float *newValues) override;
 	virtual int getValues(int tweenType, float *returnValues) override;
+
+	void applyAlpha() const;
+	void applyHighlightFactor() const;
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	void ensureUpdate() const;
@@ -92,6 +98,7 @@ private:
 	float m_lineSpacing;
 	float m_alpha;
 	float m_highlightFactor;
+	float m_fontSizeMultiplier;
 
 	float m_fadeAcrossPosition;
 	int m_fadeLineIndex;
