@@ -15,6 +15,7 @@ public:
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
+	void resize(const sf::Vector2f &size) override;
 
 	void setAlpha(float alpha) override;
 

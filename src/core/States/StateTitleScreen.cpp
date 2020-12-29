@@ -11,34 +11,13 @@ namespace NovelTea
 StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 {
-	auto width = context.config.width;
-	auto height = context.config.height;
-
-	// Title
-	TextFormat format;
-	format.size(35);
-	format.bold(true);
-	m_textTitle.setSize(sf::Vector2f(0.95f * width, height));
-	m_textTitle.setText(ProjData[ID::projectName].ToString(), format);
-	m_textTitle.setPosition(round(0.05f * width), round(0.05f * width));
-
-	// Author
-	format.color(sf::Color(120, 120, 120));
-	format.size(8);
-	format.bold(false);
-	m_textAuthor.setSize(sf::Vector2f(0.9f * width, height));
-	m_textAuthor.setPosition(round(0.05 * width), round((0.1f * width) + m_textTitle.getLocalBounds().height));
-	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), format);
 
 	// Buttons
 	m_buttonStart.getText().setFont(*Proj.getFont(0));
-	m_buttonStart.getText().setCharacterSize(45.f);
 	m_buttonStart.setString("Start");
 	m_buttonStart.setTextColor(sf::Color(80, 80, 80));
 	m_buttonStart.setActiveColor(sf::Color(0, 0, 0, 50));
 	m_buttonStart.setColor(sf::Color(0, 0, 0, 30));
-	m_buttonStart.setContentSize(300.f, 60.f);
-	m_buttonStart.setPosition(0.5f * (width - 300.f), height - 200.f);
 	m_buttonStart.onClick([this](){
 		if (m_tweenManager.getRunningTweensCount() > 0)
 			return;
@@ -53,9 +32,8 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 
 	m_buttonSettings = m_buttonStart;
 	m_buttonSettings.setString("Settings");
-	m_buttonSettings.setPosition(0.5f * (width - 300.f), height - 120.f);
 	m_buttonSettings.onClick([this](){
-		//
+		requestStackPush(StateID::Settings);
 	});
 
 	setAlpha(0.f);
@@ -76,6 +54,44 @@ void StateTitleScreen::render(sf::RenderTarget &target)
 	target.draw(m_textAuthor);
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonStart);
+}
+
+void StateTitleScreen::resize(const sf::Vector2f &size)
+{
+	auto w = size.x;
+	auto h = size.y;
+	auto portrait = (h > w);
+
+	// Title
+	TextFormat format;
+	format.size(0.1f * h);
+	format.bold(true);
+	m_textTitle.setSize(sf::Vector2f((portrait ? 0.95f : 0.8f) * w, h));
+	m_textTitle.setFontSizeMultiplier(portrait ? 0.8f : 1.4f);
+	m_textTitle.setText(ProjData[ID::projectName].ToString(), format);
+	m_textTitle.setOrigin(m_textTitle.getLocalBounds().width / 2, 0.f);
+	m_textTitle.setPosition(round(0.5f * w), round(0.05f * h));
+
+	// Author
+	format.color(sf::Color(120, 120, 120));
+	format.size(0.03f * h);
+	format.bold(false);
+	m_textAuthor.setSize(sf::Vector2f(0.9f * w, h));
+	m_textAuthor.setFontSizeMultiplier(portrait ? 0.7f : 1.2f);
+	m_textAuthor.setPosition(round(0.5f * w - m_textTitle.getLocalBounds().width / 2),
+							 round((0.07f * h) + m_textTitle.getLocalBounds().height));
+	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), format);
+
+	auto buttonWidth = (portrait ? 0.85f : 0.4f) * w;
+	auto buttonHeight = (portrait ? 0.09f : 0.12f) * h;
+	auto buttonFontSize = buttonHeight * 0.7f;
+	m_buttonStart.getText().setCharacterSize(buttonFontSize);
+	m_buttonStart.setSize(buttonWidth, buttonHeight);
+	m_buttonStart.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 3.f));
+
+	m_buttonSettings.getText().setCharacterSize(buttonFontSize);
+	m_buttonSettings.setSize(buttonWidth, buttonHeight);
+	m_buttonSettings.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 1.8f));
 }
 
 void StateTitleScreen::setAlpha(float alpha)

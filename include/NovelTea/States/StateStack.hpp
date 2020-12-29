@@ -31,6 +31,7 @@ public:
 
 	void update(float delta);
 	void render(sf::RenderTarget &target);
+	void resize(const sf::Vector2f &size);
 	void processEvent(const sf::Event& event);
 
 	void *processData(void *data);

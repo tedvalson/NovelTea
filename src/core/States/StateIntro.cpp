@@ -11,8 +11,24 @@ namespace NovelTea
 StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 {
-	m_renderTexture.create(context.config.width, context.config.height);
-	m_sprite.setTexture(m_renderTexture.getTexture(), true);
+}
+
+void StateIntro::render(sf::RenderTarget &target)
+{
+	target.clear(sf::Color::White);
+	m_renderTexture.clear(sf::Color::White);
+	m_renderTexture.draw(m_spriteLogo);
+	m_renderTexture.display();
+
+	target.draw(m_textBg);
+	target.draw(m_sprite, sf::BlendAdd);
+}
+
+void StateIntro::resize(const sf::Vector2f &size)
+{
+	auto w = size.x;
+	auto h = size.y;
+	auto wi = std::min(w, h);
 
 	sf::FileInputStream file;
 	std::string text;
@@ -26,16 +42,21 @@ StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callba
 		file.read(&text[0], text.size());
 	}
 
+	m_tweenManager.killAll();
+
+	m_renderTexture.create(w, h);
+	m_sprite.setTexture(m_renderTexture.getTexture(), true);
+
 	auto format = TextFormat();
-	format.size(8);
+	format.size(0.02f * wi);
 	m_textBg.setText(text, format);
-	m_textBg.setSize(sf::Vector2f(0.95f * context.config.width, context.config.height));
-	m_textBg.setPosition(0.05f * context.config.width, 0.f);
+	m_textBg.setSize(sf::Vector2f(0.95f * wi, h));
+	m_textBg.setPosition(round((w - wi)/2 + 0.025f * w), 0.f);
 
 	auto texture = AssetManager<sf::Texture>::get("images/noveltea.png");
-	auto targetScale = 0.9f * context.config.width / texture->getSize().x;
+	auto targetScale = 0.9f * wi / texture->getSize().x;
 	m_spriteLogo.setTexture(*texture, true);
-	m_spriteLogo.setPosition(context.config.width / 2, context.config.height / 2);
+	m_spriteLogo.setPosition(w / 2, h / 2);
 	m_spriteLogo.setOrigin(1.38f * m_spriteLogo.getLocalBounds().width / 2, m_spriteLogo.getLocalBounds().height / 2);
 	m_spriteLogo.setScale(targetScale*35, targetScale*35);
 
@@ -55,9 +76,9 @@ StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callba
 		.target(0.f)
 		.delay(5.5f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_textBg, ActiveText::POSITION_Y, 6.f)
+	TweenEngine::Tween::to(m_textBg, ActiveText::POSITION_Y, 5.f)
 		.ease(TweenEngine::TweenEquations::easeInOutLinear)
-		.target(0.f - context.config.height * 1.2f)
+		.target(0.f - wi * 1.1f)
 		.repeat(-1, 0.f)
 		.start(m_tweenManager);
 
@@ -68,17 +89,6 @@ StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callba
 			requestStackPush(StateID::TitleScreen);
 		})
 		.start(m_tweenManager);
-}
-
-void StateIntro::render(sf::RenderTarget &target)
-{
-	target.clear(sf::Color::White);
-	m_renderTexture.clear(sf::Color::White);
-	m_renderTexture.draw(m_spriteLogo);
-	m_renderTexture.display();
-
-	target.draw(m_textBg);
-	target.draw(m_sprite, sf::BlendAdd);
 }
 
 bool StateIntro::processEvent(const sf::Event &event)

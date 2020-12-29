@@ -12,7 +12,6 @@ StateSettings::StateSettings(StateStack& stack, Context& context, StateCallback 
 	m_text.setFont(*Proj.getFont(0));
 	m_text.setString("Settings");
 
-	m_bg.setSize(sf::Vector2f(context.config.width, context.config.height));
 	m_bg.setFillColor(sf::Color(180, 180, 180, 0));
 
 	setAlpha(0.f);
@@ -25,6 +24,13 @@ void StateSettings::render(sf::RenderTarget &target)
 {
 	target.draw(m_bg);
 	target.draw(m_text);
+}
+
+void StateSettings::resize(const sf::Vector2f &size)
+{
+	auto w = size.x;
+	auto h = size.y;
+	m_bg.setSize(size);
 }
 
 void StateSettings::setAlpha(float alpha)

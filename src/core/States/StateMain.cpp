@@ -217,6 +217,10 @@ void StateMain::render(sf::RenderTarget &target)
 		target.draw(*notification);
 }
 
+void StateMain::resize(const sf::Vector2f &size)
+{
+}
+
 void StateMain::setMode(Mode mode, const std::string &idName)
 {
 	m_roomActiveText.setHighlightId("");

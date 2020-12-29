@@ -12,13 +12,22 @@
 namespace NovelTea
 {
 
+enum class EngineOrientation
+{
+	Auto,
+	Portrait,
+	Landscape,
+};
+
 struct EngineConfig
 {
+	float fontSizeMultiplier = 1.f;
 	size_t width = 1024;
 	size_t height = 720;
 	unsigned short fps = 30;
-	sf::Color backgroundColor = sf::Color(200.f, 200.f, 200.f);
-	StateID initialState;
+	sf::Color backgroundColor = sf::Color(200, 200, 200);
+	StateID initialState = StateID::Intro;
+	EngineOrientation orientation = EngineOrientation::Auto;
 };
 
 class Engine

@@ -86,6 +86,10 @@ void StateEditor::render(sf::RenderTarget &target)
 
 }
 
+void StateEditor::resize(const sf::Vector2f &size)
+{
+}
+
 void *StateEditor::processData(void *data)
 {
 	auto &jsonData = *static_cast<json*>(data);

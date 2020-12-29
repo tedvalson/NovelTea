@@ -27,6 +27,10 @@ void StateTextLog::render(sf::RenderTarget &target)
 	target.draw(m_text);
 }
 
+void StateTextLog::resize(const sf::Vector2f &size)
+{
+}
+
 void StateTextLog::setAlpha(float alpha)
 {
 	sf::Color color;

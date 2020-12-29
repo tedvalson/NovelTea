@@ -38,6 +38,7 @@ public:
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
+	void resize(const sf::Vector2f &size) override;
 
 	void setMode(Mode mode, const std::string &idName = std::string());
 	void setMode(const json &jEntity);

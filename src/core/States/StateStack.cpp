@@ -1,4 +1,5 @@
 #include <NovelTea/States/StateStack.hpp>
+#include <NovelTea/Engine.hpp>
 #include <cassert>
 
 
@@ -32,6 +33,12 @@ void StateStack::render(sf::RenderTarget &target)
 			state.pointer->render(target);
 }
 
+void StateStack::resize(const sf::Vector2f &size)
+{
+	for(auto &state : m_stack)
+		state.pointer->resize(size);
+}
+
 void StateStack::processEvent(const sf::Event& event)
 {
 	// Iterate from top to bottom, stop as soon as handleEvent() returns false
@@ -49,7 +56,7 @@ void *StateStack::processData(void *data)
 	void *ret;
 	for (auto itr = m_stack.rbegin(); itr != m_stack.rend(); ++itr)
 	{
-		if (ret = itr->pointer->processData(data))
+		if ((ret = itr->pointer->processData(data)))
 			return ret;
 	}
 	return nullptr;
@@ -95,10 +102,13 @@ void StateStack::applyPendingChanges()
 		const PendingChange &change = m_pendingList[i];
 		switch (change.action)
 		{
-			case Push:
-				m_stack.push_back({change.stateID, createState(change.stateID, change.callback), change.renderAlone, true});
+			case Push: {
+				auto state = createState(change.stateID, change.callback);
+				state->resize(sf::Vector2f(m_context.config.width, m_context.config.height));
+				m_stack.push_back({change.stateID, std::move(state), change.renderAlone, true});
 				updateRenderConfig();
 				break;
+			}
 
 			case Pop:
 				m_stack.pop_back();

@@ -42,6 +42,15 @@ bool Engine::isRunning() const
 
 void Engine::resize(size_t width, size_t height)
 {
+	m_internalRatio = static_cast<float>(width) / height;
+	m_view.reset(sf::FloatRect(0, 0, width, height));
+
+	m_renderTexture.create(width, height);
+	m_renderTexture.setSmooth(true);
+	m_sprite.setTexture(m_renderTexture.getTexture(), true);
+
+	Notification::setScreenSize(sf::Vector2f(width, height));
+
 	sf::FloatRect viewport;
 	sf::Vector2f widgetSize(width, height);
 	auto ratio = widgetSize.x / widgetSize.y;
@@ -64,6 +73,10 @@ void Engine::resize(size_t width, size_t height)
 	m_view.setViewport(viewport);
 	m_width = width;
 	m_height = height;
+	m_config.width = width;
+	m_config.height = height;
+
+	m_stateStack->resize(sf::Vector2f(width, height));
 }
 
 void Engine::render(sf::RenderTarget &target)
@@ -175,14 +188,6 @@ void Engine::initialize()
 	m_game->initialize();
 	m_lastTime = getSystemTimeMs();
 	m_deltaPerFrame = 1.f / m_config.fps;
-	m_internalRatio = static_cast<float>(m_config.width) / m_config.height;
-	m_view.reset(sf::FloatRect(0, 0, m_config.width, m_config.height));
-
-	m_renderTexture.create(m_config.width, m_config.height);
-	m_renderTexture.setSmooth(true);
-	m_sprite.setTexture(m_renderTexture.getTexture(), true);
-
-	Notification::setScreenSize(sf::Vector2f(m_config.width, m_config.height));
 
 	resize(m_config.width, m_config.height);
 

@@ -44,6 +44,7 @@ public:
 	virtual ~State();
 
 	virtual void render(sf::RenderTarget &target) = 0;
+	virtual void resize(const sf::Vector2f &size) = 0;
 	virtual bool update(float delta) = 0;
 	virtual bool processEvent(const sf::Event& event) = 0;
 
