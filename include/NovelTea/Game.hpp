@@ -42,6 +42,7 @@ public:
 
 	void save(int slot);
 	bool load(int slot);
+	void autosave();
 	void syncToSave();
 
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
@@ -50,6 +51,7 @@ public:
 	SaveData &getSaveData();
 	TimerManager &getTimerManager();
 
+	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
 
@@ -59,6 +61,7 @@ private:
 	std::shared_ptr<Room> m_room;
 	std::string m_roomId;
 	std::queue<std::shared_ptr<Entity>> m_entityQueue;
+	bool m_autosaveEnabled;
 
 	MessageCallback m_messageCallback;
 

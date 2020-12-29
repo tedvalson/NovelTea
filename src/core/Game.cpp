@@ -13,6 +13,7 @@ Game::Game()
 	: m_objectList(nullptr)
 	, m_propertyList(nullptr)
 	, m_room(nullptr)
+	, m_autosaveEnabled(true)
 	, m_scriptManager(this)
 {
 	m_messageCallback = [](const std::vector<std::string>&, const DukValue&){};
@@ -117,6 +118,12 @@ bool Game::load(int slot)
 		return false;
 	syncToSave();
 	return true;
+}
+
+void Game::autosave()
+{
+	if (m_autosaveEnabled)
+		save(0);
 }
 
 void Game::syncToSave()
