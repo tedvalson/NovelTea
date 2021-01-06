@@ -26,7 +26,7 @@ public:
 	CutsceneRenderer();
 
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
-	void reset();
+	void reset(bool preservePosition = false);
 
 	bool processEvent(const sf::Event &event);
 	void update(float delta);
@@ -41,8 +41,12 @@ public:
 	const sf::Vector2f &getScrollSize() override;
 	void repositionItems();
 
-	ADD_ACCESSOR(sf::Vector2f, Size, m_size)
-	ADD_ACCESSOR(float, Margin, m_margin)
+	void setSize(const sf::Vector2f &size);
+	const sf::Vector2f &getSize() const;
+
+	void setMargin(float margin);
+	float getMargin() const;
+
 	ADD_ACCESSOR(bool, SkipWaitingForClick, m_skipWaitingForClick)
 
 protected:

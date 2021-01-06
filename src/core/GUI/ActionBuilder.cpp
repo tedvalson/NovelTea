@@ -30,8 +30,6 @@ ActionBuilder::ActionBuilder()
 			m_callback(false);
 	});
 
-	m_textFormat.size(16);
-
 	setAlpha(0.f);
 }
 
@@ -41,24 +39,31 @@ void ActionBuilder::update(float delta)
 	Hideable::update(delta);
 }
 
+// Returns true if interacts with the action builder
 bool ActionBuilder::processEvent(const sf::Event &event)
 {
-	m_buttonCancel.processEvent(event);
+	if (m_buttonCancel.processEvent(event))
+		return true;
 
-	if (event.type == sf::Event::MouseButtonPressed)
+	if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased)
 	{
 		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
-		for (int i = 0; i < m_emptyRects.size(); ++i)
-		{
-			auto &rect = m_emptyRects[i];
-			if (rect->getGlobalBounds().contains(p))
+		if (event.type == sf::Event::MouseButtonPressed)
+			for (int i = 0; i < m_emptyRects.size(); ++i)
 			{
-				setSelectedIndex(i);
-				return true;
+				auto &rect = m_emptyRects[i];
+				if (rect->getGlobalBounds().contains(p))
+				{
+					setSelectedIndex(i);
+					return true;
+				}
 			}
-		}
+
+		if (p.x > 0 && p.x < m_size.x && p.y > 0 && p.y < m_size.y)
+			return true;
 	}
-	return true;
+
+	return false;
 }
 
 void ActionBuilder::show(float duration, int tweenType, HideableCallback callback)
@@ -144,10 +149,12 @@ void ActionBuilder::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
 
-	m_buttonWidth = size.y / 8;
+	m_buttonWidth = 0.08f * size.x;
 	m_buttonCancel.setPosition(size.x - m_buttonWidth * 1.2f, 0.f);
-	m_buttonCancel.setContentSize(m_buttonWidth, m_buttonWidth);
-	m_buttonCancel.getText().setCharacterSize(m_buttonWidth * 0.9f);
+	m_buttonCancel.setSize(m_buttonWidth, m_buttonWidth);
+	m_buttonCancel.getText().setCharacterSize(m_buttonWidth * 0.8f);
+	m_textFormat.size(0.03f * size.x);
+	updateText();
 }
 
 sf::Vector2f ActionBuilder::getSize() const
@@ -199,7 +206,8 @@ void ActionBuilder::updateText()
 	auto alpha = getAlpha();
 	auto size = sf::Vector2f(m_size.x, m_size.y);
 	auto lastCursorPos = sf::Vector2f();
-	auto offsetY = m_buttonWidth * 1.3f;
+	auto offsetX = m_buttonWidth * 0.2f;
+	auto offsetY = m_buttonWidth * 1.1f;
 
 	m_tweenManager.killAll();
 	m_texts.clear();
@@ -225,14 +233,14 @@ void ActionBuilder::updateText()
 			tmpText.setText(objectStr, m_textFormat);
 			auto width = tmpText.getCursorEnd().x;
 			rect->setFillColor(m_emptyRectColor);
-			rect->setSize(sf::Vector2f(width, 35.f));
+			rect->setSize(sf::Vector2f(width, m_textFormat.size()*2));
 
 			tmpText.setCursorStart(lastCursorPos);
 			if (lastCursorPos.y != tmpText.getCursorEnd().y) {
 				lastCursorPos = sf::Vector2f(0.f, tmpText.getCursorEnd().y);
 				tmpText.setCursorStart(lastCursorPos);
 			}
-			rect->setPosition(tmpText.getCursorEnd().x - width, offsetY + tmpText.getCursorEnd().y + 4.f);
+			rect->setPosition(offsetX + tmpText.getCursorEnd().x - width, offsetY + tmpText.getCursorEnd().y + 4.f);
 			m_emptyRects.emplace_back(rect);
 			if (objectStr != blankStr)
 				s = objectStr + " " + s;
@@ -243,7 +251,7 @@ void ActionBuilder::updateText()
 		}
 
 		auto text = new ActiveText;
-		text->setPosition(0.f, offsetY);
+		text->setPosition(offsetX, offsetY);
 		text->setSize(size);
 		text->setAlpha(alpha);
 		text->setCursorStart(lastCursorPos);

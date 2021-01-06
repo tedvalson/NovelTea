@@ -32,6 +32,7 @@ public:
 	void processLines();
 	bool processSelection(int buttonIndex);
 	void setDialogueCallback(DialogueCallback callback);
+	void repositionButtons();
 
 	void changeSegment(int newSegmentIndex);
 	void changeLine(int newLineIndex);
@@ -56,6 +57,7 @@ private:
 	int m_textLineIndex;
 	std::vector<std::pair<std::string,std::string>> m_textLines;
 
+	std::vector<std::string> m_buttonStrings;
 	std::vector<std::shared_ptr<Button>> m_buttons;
 	std::vector<std::shared_ptr<Button>> m_buttonsOld;
 	ActiveText m_textName;
@@ -66,6 +68,7 @@ private:
 	sf::Texture *m_buttonTexture;
 	TweenNinePatch m_bg;
 	float m_middleY;
+	float m_fontSize;
 
 	TweenEngine::Tween *m_fadeTween;
 	TweenEngine::TweenManager m_tweenManager;

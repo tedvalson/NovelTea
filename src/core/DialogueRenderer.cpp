@@ -94,6 +94,29 @@ void DialogueRenderer::setDialogueCallback(DialogueCallback callback)
 	m_callback = callback;
 }
 
+void DialogueRenderer::repositionButtons()
+{
+	auto width = (m_size.x < m_size.y ? 0.98f : 0.6f) * m_size.x;
+	auto posY = m_text.getPosition().y + m_bg.getSize().y + m_fontSize * 0.4f;
+	for (int i = 0; i < m_buttons.size(); ++i)
+	{
+		auto &button = m_buttons[i];
+		auto str = m_buttonStrings[i];
+		auto &text = button->getText();
+		auto &padding = button->getPadding();
+		button->setString(str);
+		text.setCharacterSize(m_fontSize);
+
+		if (wrapText(text, width))
+			str = text.getString().toAnsiString();
+		auto lineCount = 1 + std::count(str.begin(), str.end(), '\n');
+		button->setSize(width, m_fontSize * lineCount + (padding.top + padding.height) * 1.9f);
+
+		button->setPosition(m_bg.getPosition().x, round(posY));
+		posY += button->getSize().y + m_fontSize * 0.1f;
+	}
+}
+
 void DialogueRenderer::changeSegment(int newSegmentIndex)
 {
 	if (newSegmentIndex < 0) {
@@ -105,6 +128,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 	m_tweenManager.killAll();
 	m_buttonsOld = m_buttons;
 	m_buttons.clear();
+	m_buttonStrings.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
 	std::shared_ptr<DialogueSegment> npcSegment = nullptr;
@@ -152,13 +176,10 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 				continue;
 		}
 		auto btn = new Button;
-		auto str = seg->getText();
-		auto &text = btn->getText();
-		btn->setString(str);
 		btn->setCentered(false);
 		btn->setTexture(m_buttonTexture);
 		btn->setColor(sf::Color(180, 180, 180));
-		btn->setActiveColor(sf::Color::Red);
+		btn->setActiveColor(sf::Color(120, 120, 120));
 		btn->onClick([this, seg, i, childId](){
 			if (m_callback)
 				m_callback(i);
@@ -166,15 +187,11 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 				m_dialogue->setSegmentHasShown(childId);
 			changeSegment(childId);
 		});
-		text.setCharacterSize(20);
 
-		if (wrapText(text, m_size.x-30.f))
-			str = text.getString().toAnsiString();
-		auto lineCount = 1 + std::count(str.begin(), str.end(), '\n');
-		btn->setContentSize(m_size.x-30.f, 25.f * lineCount);
 
 		++i;
 		m_buttons.emplace_back(btn);
+		m_buttonStrings.emplace_back(seg->getText());
 	}
 
 	for (auto &button : m_buttons) {
@@ -197,12 +214,14 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	if (newLineIndex + 1 > m_textLines.size())
 		return;
 	auto &line = m_textLines[newLineIndex];
+	TextFormat format;
+	format.size(m_fontSize/2);
 	m_textLineIndex = newLineIndex;
 	m_text.setFadeAcrossPosition(1.f);
 	m_textOld = m_text;
 	m_textNameOld = m_textName;
-	m_textName.setText(line.first);
-	m_text.setText(line.second);
+	m_textName.setText(line.first, format);
+	m_text.setText(line.second, format);
 
 	float duration = 0.3f;
 	m_text.setFadeAcrossPosition(0.f);
@@ -216,15 +235,14 @@ void DialogueRenderer::changeLine(int newLineIndex)
 		.target(1.f);
 	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*)
 	{
-		auto posY = m_text.getPosition().y + m_bg.getSize().y + 10.f;
-		if (m_textLineIndex + 1 == m_textLines.size())
+		if (m_textLineIndex + 1 == m_textLines.size()) {
+			repositionButtons();
 			for (auto &button : m_buttons) {
-				button->setPosition(10.f, posY);
-				posY += button->getSize().y + 2.f;
 				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
 					.target(255.f)
 					.start(m_tweenManager);
 			}
+		}
 	}).start(m_tweenManager);
 
 	m_textName.setAlpha(0.f);
@@ -284,14 +302,26 @@ void DialogueRenderer::hide(float duration)
 
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
+	auto portrait = size.x < size.y;
+	auto posX = (portrait ? 0.01f : 0.2f) * size.x;
+	auto padding = (portrait ? 0.01f : 0.004f) * size.x;
+	m_fontSize = 0.05f * std::min(size.x, size.y);
 	m_size = size;
-	m_text.setSize(sf::Vector2f(size.x - 40.f, size.y));
+	m_text.setSize(sf::Vector2f((portrait ? 0.95f : 0.58f) * size.x, size.y));
 	m_middleY = round(m_size.y / 8);
 
-	m_textName.setPosition(5.f, m_middleY);
-	m_text.setPosition(20.f, m_textName.getPosition().y + 36.f);
-	m_bg.setPosition(5.f, m_textName.getPosition().y + 28.f);
-	m_bg.setSize(size.x - 10.f, 160.f);
+	TextFormat format;
+	format.size(m_fontSize/2);
+	m_textName.setText(m_textName.getText(), format);
+	m_text.setText(m_text.getText(), format);
+
+	m_textName.setPosition(round(posX + padding), m_middleY);
+	m_text.setPosition(round(posX + padding * 2),
+					   round(padding + m_textName.getPosition().y + 1.2f * m_fontSize));
+	m_bg.setPosition(round(posX), m_textName.getPosition().y + 1.2f * m_fontSize);
+	m_bg.setSize((portrait ? 0.98f : 0.6f) * size.x, m_fontSize * 5);
+
+	repositionButtons();
 }
 
 sf::Vector2f DialogueRenderer::getSize() const

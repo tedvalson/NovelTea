@@ -30,7 +30,13 @@ bool TextOverlay::processEvent(const sf::Event &event)
 	if (event.type == sf::Event::MouseButtonReleased)
 	{
 //		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
-		return gotoNextString();
+		if (m_scrollPos > m_size.y - m_scrollAreaSize.y) {
+			TweenEngine::Tween::to(m_scrollBar, ScrollBar::SCROLLPOS, 0.3f)
+				.targetRelative(-m_size.y * 0.8f)
+				.start(m_tweenManager);
+			return false;
+		} else
+			return gotoNextString();
 	}
 	return false;
 }
@@ -60,6 +66,8 @@ const sf::Vector2f &TextOverlay::getScrollSize()
 void TextOverlay::repositionText()
 {
 	m_text.setPosition(m_padding, m_padding + m_scrollPos);
+	if (m_size.x > m_size.y)
+		m_text.move(0.2f * m_size.x, 0.f);
 }
 
 void TextOverlay::show(float duration, int tweenType, HideableCallback callback)
@@ -112,19 +120,23 @@ float TextOverlay::getAlpha() const
 
 void TextOverlay::setSize(const sf::Vector2f &size)
 {
-	m_padding = 1.f / 8.f * size.x;
+	auto portrait = size.x < size.y;
+	m_padding = 1.f / 8.f * (portrait ? size.x : size.y);
 	m_needsUpdate = true;
 
 	m_view.reset(sf::FloatRect(0.f, 0.f, size.x, size.y));
 
 	m_bg.setSize(size);
-	m_text.setSize(sf::Vector2f(size.x - m_padding * 2.f, size.y));
+	m_text.setSize(sf::Vector2f((portrait ? 1.f : 0.6f) * size.x - m_padding * 2.f, size.y));
 
 	m_scrollBar.setPosition(size.x - 4.f, 4.f);
 	m_scrollBar.setSize(sf::Vector2u(2, size.y - 8.f));
 	m_scrollBar.setScrollAreaSize(sf::Vector2u(size.x, size.y));
 
 	m_size = size;
+
+	m_scrollAreaSize.y = m_padding*2 + m_text.getLocalBounds().height;
+	m_scrollBar.setScroll(0.f);
 }
 
 sf::Vector2f TextOverlay::getSize() const

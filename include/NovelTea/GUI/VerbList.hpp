@@ -25,6 +25,11 @@ public:
 	void update(float delta) override;
 	bool processEvent(const sf::Event& event);
 
+	void refreshItems();
+
+	void setScreenSize(const sf::Vector2f &size);
+	const sf::Vector2f &getScreenSize() const;
+
 	void show(float duration = 0.4f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
 	void hide(float duration = 0.4f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
 
@@ -41,7 +46,7 @@ public:
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
 
-	void setPositionBounded(const sf::Vector2f& position, const sf::FloatRect &bounds);
+	void setPositionBounded(const sf::Vector2f& position);
 	sf::FloatRect getLocalBounds() const;
 	sf::FloatRect getGlobalBounds() const;
 
@@ -60,11 +65,12 @@ private:
 	float m_scrollPos;
 	float m_margin;
 	float m_itemHeight;
-	sf::Vector2f m_size;
+	sf::Vector2f m_screenSize;
 	sf::Vector2f m_scrollAreaSize;
 
 	ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
+	TweenText m_text;
 
 	sf::FloatRect m_bounds;
 

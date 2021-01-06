@@ -517,7 +517,7 @@ void ActiveText::ensureUpdate() const
 
 				TweenText text;
 				text.setFont(*font);
-				text.setCharacterSize(m_fontSizeMultiplier * format.size());
+				text.setCharacterSize(2.f * m_fontSizeMultiplier * format.size());
 				text.setStyle(style);
 
 				text.setString(" ");

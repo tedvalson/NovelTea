@@ -27,30 +27,16 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 {
 	ScriptMan.reset();
 
-	auto width = getContext().config.width;
-	auto height = getContext().config.height;
-	auto toolbarHeight = round(height * 2.f/9.f);
-	auto toolbarPadding = toolbarHeight / 10.f;
 
 
 	// Room
-	m_roomScrollbar.setPosition(width - 4.f, 4.f);
 	m_roomScrollbar.setColor(sf::Color(0, 0, 0, 40));
 	m_roomScrollbar.setAutoHide(false);
 	m_roomScrollbar.attachObject(this);
 
-	// Cutscene
-	m_roomTextPadding = round(1.f / 16.f * width);
-	m_roomActiveText.setLineSpacing(5.f);
-	m_roomActiveText.setSize(sf::Vector2f(width - m_roomTextPadding*2, 0.f));
-	m_cutsceneRenderer.setMargin(m_roomTextPadding);
-	m_cutsceneRenderer.setSize(sf::Vector2f(width, height));
-
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
 	m_navigation.hide(0.f);
-	m_navigation.setSize(sf::Vector2f(toolbarHeight - toolbarPadding*2, toolbarHeight - toolbarPadding*2));
-	m_navigation.setPosition(toolbarPadding, toolbarPadding + height - toolbarHeight);
 	m_navigation.setCallback([this](int direction, const json &jentity){
 		if (m_testRecordMode) {
 			json jtestItem({
@@ -63,43 +49,48 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 
 	// Toolbar
-	auto padding = round(width / 30.f);
-	m_bgToolbar.setSize(sf::Vector2f(width, toolbarHeight));
-	m_bgToolbar.setPosition(0.f, height - toolbarHeight);
 	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
-	m_buttonSettings.setContentSize(40.f, 40.f);
-	m_buttonSettings.getText().setFont(*Proj.getFont(1));
-	m_buttonSettings.getText().setCharacterSize(30.f);
+
+	m_buttonInventory.getText().setFont(*Proj.getFont(1));
+	m_buttonInventory.setString(L"\uf0b1");
+	m_buttonInventory.setActiveColor(sf::Color(0, 0, 0, 50));
+	m_buttonInventory.setColor(sf::Color(0, 0, 0, 30));
+	m_buttonInventory.onClick([this](){
+		if (m_inventory.isOpen())
+			m_inventory.close();
+		else
+			m_inventory.open();
+	});
+
+	m_buttonSettings = m_buttonInventory;
 	m_buttonSettings.setString(L"\uf013");
 	m_buttonSettings.setAlpha(0.f);
 	m_buttonSettings.setColor(sf::Color::Transparent);
 	m_buttonSettings.setActiveColor(sf::Color(0, 0, 0, 30));
 	m_buttonSettings.setTextColor(sf::Color(0, 0, 0, 200));
 	m_buttonSettings.setTextActiveColor(sf::Color(0, 0, 0, 255));
-	m_buttonSettings.setPosition(width - toolbarPadding - 130.f - m_buttonSettings.getSize().x*2, height - m_buttonSettings.getSize().y - toolbarPadding);
 	m_buttonSettings.onClick([this](){
 		requestStackPush(StateID::Settings);
 	});
 
 	m_buttonTextLog = m_buttonSettings;
 	m_buttonTextLog.setString(L"\uf02d");
-	m_buttonTextLog.move(m_buttonSettings.getSize().x, 0.f);
 	m_buttonTextLog.onClick([this](){
 		requestStackPush(StateID::TextLog);
 	});
 
 	// Inventory setup
 	m_inventory.hide(0.f);
-	m_inventory.setSize(sf::Vector2f(width, height));
 	m_inventory.setCallback([this](const std::string &objectId, float posX, float posY){
 		if (m_actionBuilder.isVisible()) {
 			m_actionBuilder.setObject(objectId);
 			m_actionBuilder.selectNextEmptyIndex();
+			m_inventory.close();
 		} else {
 			m_selectedObjectId = objectId;
 			m_verbList.setVerbs(objectId);
 			auto p = sf::Vector2f(posX - m_verbList.getLocalBounds().width, posY - m_verbList.getLocalBounds().height);
-			m_verbList.setPositionBounded(p, sf::FloatRect(0.f, 0.f, getContext().config.width, getContext().config.height));
+			m_verbList.setPositionBounded(p);
 			m_verbList.show();
 		}
 	});
@@ -126,7 +117,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 
 	// ActionBuilder setup
-	m_actionBuilder.setSize(sf::Vector2f(width - 20.f, 1.f / 4.f * height));
 	m_actionBuilder.setCallback([this](bool confirmed){
 		if (confirmed)
 			processAction(m_actionBuilder.getVerb(), m_actionBuilder.getObjects());
@@ -139,16 +129,11 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 	setActionBuilderShowPos(0.f);
 
-	// Notification setup
-	Notification::setScreenSize(sf::Vector2f(width, m_actionBuilder.getPosition().y));
-
 	// Dialogue setup
 	m_dialogueRenderer.hide(0.f);
-	m_dialogueRenderer.setSize(sf::Vector2f(width, height));
 
 	// TextOverlay setup
 	m_textOverlay.hide(0.f);
-	m_textOverlay.setSize(sf::Vector2f(width, height));
 	GGame.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
 		m_textOverlayFunc = callback;
 		if (!m_testPlaybackMode)
@@ -205,13 +190,14 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_navigation);
 
 	if (!ActiveGame->getObjectList()->objects().empty())
-		target.draw(m_inventory);
+		target.draw(m_buttonInventory);
 	if (m_verbList.isVisible())
 		target.draw(m_verbList);
 
 	target.draw(m_textOverlay);
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonTextLog);
+	target.draw(m_inventory);
 
 	for (auto &notification : Notification::notifications)
 		target.draw(*notification);
@@ -219,6 +205,65 @@ void StateMain::render(sf::RenderTarget &target)
 
 void StateMain::resize(const sf::Vector2f &size)
 {
+	auto w = size.x;
+	auto h = size.y;
+	auto wi = std::min(w, h);
+	auto portrait = (h > w);
+	auto toolbarHeight = round(std::max(w, h) * 2.f/9.f);
+	auto toolbarPadding = toolbarHeight / 10.f;
+
+	// Room
+	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier;
+	m_roomScrollbar.setPosition(w - 4.f, 4.f);
+	m_roomTextPadding = round(1.f / 16.f * wi);
+	m_roomActiveText.setFontSizeMultiplier(fontSizeMultiplier);
+	m_roomActiveText.setLineSpacing(fontSizeMultiplier * 5.f);
+	m_roomActiveText.setSize(sf::Vector2f((portrait ? 1.f : 0.6f) * w - m_roomTextPadding*2, 0.f));
+
+	// Cutscene
+	m_cutsceneRenderer.setMargin(m_roomTextPadding);
+	m_cutsceneRenderer.setSize(size);
+
+	m_navigation.setSize(sf::Vector2f(toolbarHeight - toolbarPadding*2, toolbarHeight - toolbarPadding*2));
+	m_navigation.setPosition(toolbarPadding, toolbarPadding + h - toolbarHeight);
+
+	// Toolbar
+	m_bgToolbar.setSize(sf::Vector2f(w, portrait ? toolbarHeight : 0.f));
+	m_bgToolbar.setPosition(0.f, h - toolbarHeight);
+
+	m_buttonSettings.getText().setCharacterSize(0.15f * toolbarHeight);
+	m_buttonSettings.setSize(toolbarHeight/5, toolbarHeight/5);
+	m_buttonSettings.setPosition(w - toolbarPadding - m_buttonSettings.getSize().x * 1.2f, h - m_buttonSettings.getSize().y - toolbarPadding);
+
+	m_buttonTextLog.getText().setCharacterSize(0.15f * toolbarHeight);
+	m_buttonTextLog.setSize(m_buttonSettings.getSize());
+	m_buttonTextLog.setPosition(m_buttonSettings.getPosition());
+	m_buttonTextLog.move(-m_buttonSettings.getSize().x, 0.f);
+
+	m_buttonInventory.getText().setCharacterSize(0.3f * toolbarHeight);
+	m_buttonInventory.setSize(toolbarHeight/2, toolbarHeight/2);
+	m_buttonInventory.setPosition(w - toolbarPadding - m_buttonInventory.getSize().x, m_buttonSettings.getPosition().y - m_buttonInventory.getSize().y * 1.2f);
+
+	m_inventory.setStartPosition(sf::Vector2f(w, m_buttonInventory.getPosition().y));
+	m_inventory.refreshItems();
+
+	// Notification setup
+	Notification::setScreenSize(size);
+
+	m_actionBuilder.setSize(sf::Vector2f((portrait ? 1.f : 0.5f) * w, portrait ? 0.25f * h : 0.3f * h));
+	m_actionBuilder.setPosition(portrait ? 0.f : (w - m_roomActiveText.getSize().x)/2, h);
+
+	m_inventory.setSize(size);
+	m_dialogueRenderer.setSize(size);
+	m_textOverlay.setSize(size);
+	m_verbList.setScreenSize(size);
+
+	m_verbList.hide(0.f);
+
+	setActionBuilderShowPos(m_actionBuilderShowPos);
+	m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
+	updateScrollbar();
+	m_roomScrollbar.setScroll(0.f);
 }
 
 void StateMain::setMode(Mode mode, const std::string &idName)
@@ -300,11 +345,16 @@ void StateMain::setMode(const json &jEntity)
 void StateMain::showToolbar(float duration)
 {
 	m_navigation.show(duration);
-	m_inventory.show(duration);
+	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonInventory, Button::TEXTCOLOR_ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonSettings, Button::TEXTCOLOR_ALPHA, duration)
@@ -321,7 +371,12 @@ void StateMain::showToolbar(float duration)
 void StateMain::hideToolbar(float duration)
 {
 	m_navigation.hide(duration);
-	m_inventory.hide(duration);
+	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonInventory, Button::TEXTCOLOR_ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonSettings, Button::TEXTCOLOR_ALPHA, duration)
 		.target(80.f)
 		.start(m_tweenManager);
@@ -335,6 +390,8 @@ void StateMain::hideToolbar(float duration)
 
 void StateMain::setScroll(float position)
 {
+	std::cout << "StateMain::setScroll " << position << std::endl;
+	std::cout << "  scroll area: " << m_scrollAreaSize.x << " " << m_scrollAreaSize.y << std::endl;
 	m_scrollPos = round(position);
 	repositionText();
 }
@@ -579,7 +636,7 @@ void StateMain::setActionBuilderShowPos(float position)
 	auto toolbarHeight = m_bgToolbar.getSize().y;
 	auto pos = position * m_actionBuilder.getSize().y;
 
-	m_actionBuilder.setPosition(10.f, height - toolbarHeight - pos);
+	m_actionBuilder.setPosition(m_actionBuilder.getPosition().x, height - toolbarHeight - pos);
 
 	m_roomScrollbar.setSize(sf::Vector2u(2, height - toolbarHeight - pos - 8.f));
 	m_roomScrollbar.setScrollAreaSize(sf::Vector2u(width, height - toolbarHeight - pos));
@@ -603,12 +660,13 @@ void StateMain::callOverlayFunc()
 
 void StateMain::repositionText()
 {
-	m_roomActiveText.setPosition(m_roomTextPadding, m_roomTextPadding + m_scrollPos);
+	auto w = getContext().config.width;
+	m_roomActiveText.setPosition((w - m_roomActiveText.getSize().x)/2, m_roomTextPadding + m_scrollPos);
 }
 
 bool StateMain::processEvent(const sf::Event &event)
 {
-	if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
+	if (m_buttonInventory.processEvent(event) || m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
 		return true;
 
 	if (m_textOverlay.isVisible())
@@ -652,8 +710,8 @@ bool StateMain::processEvent(const sf::Event &event)
 				return true;
 		}
 
-		if (m_actionBuilder.isVisible())
-			m_actionBuilder.processEvent(event);
+		if (m_actionBuilder.isVisible() && m_actionBuilder.processEvent(event))
+			return true;
 		m_navigation.processEvent(event);
 
 		if (m_roomScrollbar.processEvent(event))
@@ -671,7 +729,7 @@ bool StateMain::processEvent(const sf::Event &event)
 					if (!m_actionBuilder.isVisible())
 					{
 						m_verbList.setVerbs(word);
-						m_verbList.setPositionBounded(p, sf::FloatRect(0.f, 0.f, getContext().config.width, getContext().config.height));
+						m_verbList.setPositionBounded(p);
 						m_verbList.show();
 					} else {
 						m_actionBuilder.setObject(m_selectedObjectId);

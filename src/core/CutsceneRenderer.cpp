@@ -38,8 +38,11 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 	reset();
 }
 
-void CutsceneRenderer::reset()
+void CutsceneRenderer::reset(bool preservePosition)
 {
+	auto timePassed = m_timePassed - sf::seconds(0.2f);
+	auto timeToNext = m_timeToNext;
+
 	m_currentSegment = nullptr;
 	m_isComplete = false;
 	m_isWaitingForClick = false;
@@ -54,7 +57,18 @@ void CutsceneRenderer::reset()
 	m_icon.hide(0.f);
 	m_tweenManager.killAll();
 
-	addSegmentToQueue(0);
+	if (preservePosition) {
+		auto skipWaiting = m_skipWaitingForClick;
+		m_skipWaitingForClick = true;
+
+		addSegmentToQueue(0);
+		update(timePassed.asSeconds());
+
+		m_timePassed = timePassed;
+		m_timeToNext = timeToNext;
+		m_skipWaitingForClick = skipWaiting;
+	} else
+		addSegmentToQueue(0);
 }
 
 bool CutsceneRenderer::processEvent(const sf::Event &event)
@@ -74,13 +88,14 @@ void CutsceneRenderer::update(float delta)
 
 	while (timeDelta >= m_timeToNext)
 	{
-		if (m_isWaitingForClick)
+		if (m_isWaitingForClick && !m_skipWaitingForClick)
 			break;
 		if (m_segmentIndex >= segments.size())
 			break;
 
 		size_t segmentIndex;
 		timeDelta -= m_timeToNext;
+		m_timePassed += m_timeToNext;
 		m_tweenManager.update(m_timeToNext.asSeconds());
 
 		do
@@ -92,7 +107,7 @@ void CutsceneRenderer::update(float delta)
 		while (segmentIndex != m_segmentIndex);
 	}
 
-	if (!m_isWaitingForClick) {
+	if (!m_isWaitingForClick || m_skipWaitingForClick) {
 		m_timePassed += timeDelta;
 		m_timeToNext -= timeDelta;
 	}
@@ -169,6 +184,28 @@ void CutsceneRenderer::repositionItems()
 	m_fadeRectBottom.setPosition(0.f, m_size.y - m_margin);
 }
 
+void CutsceneRenderer::setSize(const sf::Vector2f &size)
+{
+	m_size = size;
+	reset(true);
+}
+
+const sf::Vector2f &CutsceneRenderer::getSize() const
+{
+	return m_size;
+}
+
+void CutsceneRenderer::setMargin(float margin)
+{
+	m_margin = margin;
+	reset(true);
+}
+
+float CutsceneRenderer::getMargin() const
+{
+	return m_margin;
+}
+
 void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
@@ -201,7 +238,7 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 			m_texts.push_back(activeText);
 		}).start(m_tweenManager);
 
-	activeText->setPosition(0.f, 0.f);
+	activeText->setPosition((m_size.x < m_size.y ? 0.f : 0.2f * m_size.x), 0.f);
 
 	if (effect == CutsceneTextSegment::Fade) {
 		activeText->setAlpha(0.f);
@@ -273,7 +310,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			auto scrollAreaMargin = m_margin * 2;
 
 			auto activeText = seg->getActiveText();
-			activeText->setSize(sf::Vector2f(m_size.x - m_margin*2, m_size.y));
+			activeText->setSize(sf::Vector2f((m_size.x < m_size.y ? 1.f : 0.6f) * m_size.x - m_margin*2, m_size.y));
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y = m_scrollAreaSize.y - scrollAreaMargin;

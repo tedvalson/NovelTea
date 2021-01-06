@@ -14,7 +14,7 @@ VerbList::VerbList()
 : m_scrollPos(0.f)
 , m_margin(10.f)
 , m_itemHeight(38.f)
-, m_size(320.f, 400.f)
+, m_screenSize(320.f, 400.f)
 , m_selectCallback(nullptr)
 , m_showHideCallback(nullptr)
 {
@@ -79,6 +79,39 @@ bool VerbList::processEvent(const sf::Event &event)
 	return false;
 }
 
+void VerbList::refreshItems()
+{
+	float maxWidth = 0.f;
+	float posY = m_margin + m_itemHeight * 4;
+	for (auto &verb : m_verbs) {
+		verb.text.setCharacterSize(m_itemHeight);
+		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
+	}
+
+	m_bounds = sf::FloatRect(0.f, 0.f, maxWidth + m_margin*2, posY + m_margin*2);
+	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY));
+	m_scrollBar.setPosition(m_bounds.width + 4.f, 0.f);
+	m_scrollBar.setDragRect(getGlobalBounds());
+	m_scrollAreaSize.y = m_itemHeight * m_verbs.size();
+
+	m_bg.setSize(sf::Vector2f(m_bounds.width, m_bounds.height));
+	repositionItems();
+	updateScrollbar();
+}
+
+void VerbList::setScreenSize(const sf::Vector2f &size)
+{
+	m_itemHeight = (size.x < size.y) ? 0.07f * size.x : 0.07f * size.y;
+	m_screenSize = size;
+	refreshItems();
+}
+
+const sf::Vector2f &VerbList::getScreenSize() const
+{
+	return m_screenSize;
+}
+
 void VerbList::show(float duration, int tweenType, HideableCallback callback)
 {
 	Hideable::show(duration, tweenType, [this, callback](){
@@ -122,21 +155,7 @@ void VerbList::setVerbs(const std::vector<std::string> &verbIds)
 	for (auto &verbId : verbIds)
 		addVerbOption(verbId);
 
-	float maxWidth = 0.f;
-	float posY = m_margin + m_itemHeight * 4;
-	for (auto &verb : m_verbs)
-		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
-
-	m_bounds = sf::FloatRect(0.f, 0.f, maxWidth + m_margin*2, posY + m_margin*2);
-	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY));
-	m_scrollBar.setPosition(m_bounds.width + 4.f, 0.f);
-	m_scrollBar.setDragRect(getGlobalBounds());
-	m_scrollAreaSize.y = m_itemHeight * m_verbs.size();
-
-	m_bg.setSize(sf::Vector2f(m_bounds.width, m_bounds.height));
-	repositionItems();
-	updateScrollbar();
+	refreshItems();
 }
 
 void VerbList::setVerbs(const std::string &objectId)
@@ -191,11 +210,11 @@ const sf::Vector2f &VerbList::getScrollSize()
 	return m_scrollAreaSize;
 }
 
-void VerbList::setPositionBounded(const sf::Vector2f &position, const sf::FloatRect &bounds)
+void VerbList::setPositionBounded(const sf::Vector2f &position)
 {
 	auto p = position;
-	if (p.x + m_bounds.width > bounds.width)
-		p.x = bounds.width - m_bounds.width;
+	if (p.x + m_bounds.width > m_screenSize.x)
+		p.x = m_screenSize.x - m_bounds.width;
 	setPosition(p);
 	m_scrollBar.setDragRect(getGlobalBounds());
 }
@@ -258,7 +277,6 @@ void VerbList::addVerbOption(const std::string &verbId)
 {
 	VerbOption option;
 	option.verbId = verbId;
-	option.text.setCharacterSize(30);
 	option.text.setFillColor(sf::Color::Black);
 	option.text.setFont(*Proj.getFont(0));
 

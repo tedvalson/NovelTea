@@ -67,7 +67,7 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	format.size(0.1f * h);
 	format.bold(true);
 	m_textTitle.setSize(sf::Vector2f((portrait ? 0.95f : 0.8f) * w, h));
-	m_textTitle.setFontSizeMultiplier(portrait ? 0.8f : 1.4f);
+	m_textTitle.setFontSizeMultiplier(portrait ? 0.4f : 0.7f);
 	m_textTitle.setText(ProjData[ID::projectName].ToString(), format);
 	m_textTitle.setOrigin(m_textTitle.getLocalBounds().width / 2, 0.f);
 	m_textTitle.setPosition(round(0.5f * w), round(0.05f * h));
@@ -77,7 +77,7 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	format.size(0.03f * h);
 	format.bold(false);
 	m_textAuthor.setSize(sf::Vector2f(0.9f * w, h));
-	m_textAuthor.setFontSizeMultiplier(portrait ? 0.7f : 1.2f);
+	m_textAuthor.setFontSizeMultiplier(portrait ? 0.35f : 0.6f);
 	m_textAuthor.setPosition(round(0.5f * w - m_textTitle.getLocalBounds().width / 2),
 							 round((0.07f * h) + m_textTitle.getLocalBounds().height));
 	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), format);

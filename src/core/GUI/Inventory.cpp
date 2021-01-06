@@ -14,7 +14,7 @@ namespace NovelTea
 Inventory::Inventory()
 : m_needsUpdate(true)
 , m_margin(3.f)
-, m_itemHeight(30.f)
+, m_itemHeight(20.f)
 , m_alpha(255.f)
 , m_isOpen(false)
 , m_scrollPos(0.f)
@@ -23,20 +23,6 @@ Inventory::Inventory()
 	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
 	m_scrollBar.setAutoHide(false);
 	m_scrollBar.attachObject(this);
-
-	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
-	m_button.getText().setFont(*Proj.getFont(1));
-	m_button.getText().setCharacterSize(50.f);
-	m_button.setTexture(texture.get());
-	m_button.setString(L"\uf0b1");
-	m_button.setActiveColor(sf::Color(0, 0, 0, 50));
-	m_button.setColor(sf::Color(0, 0, 0, 30));
-	m_button.onClick([this](){
-		if (isOpen())
-			close();
-		else
-			open();
-	});
 
 	setSize(sf::Vector2f(150.f, 150.f));
 }
@@ -50,8 +36,6 @@ void Inventory::update(float delta)
 bool Inventory::processEvent(const sf::Event &event)
 {
 	if (isOpen() && m_scrollBar.processEvent(event))
-		return false;
-	if (m_button.processEvent(event))
 		return false;
 	if (!isOpen())
 		return false;
@@ -111,41 +95,46 @@ bool Inventory::isOpen()
 
 void Inventory::refreshItems()
 {
-	auto maxWidth = 100.f;
+	auto portrait = (m_size.x < m_size.y);
+	auto width = 0.f;
+	auto height = 0.f;
 	m_objectTexts.clear();
 	for (auto &object : ActiveGame->getObjectList()->objects())
 	{
-		std::cout << object->getName() << std::endl;
 		auto text = new TweenText;
 		text->setString(object->getName());
 		text->setFont(*Proj.getFont(0));
 		text->setFillColor(sf::Color::Black);
-		if (text->getLocalBounds().width > maxWidth)
-			maxWidth = text->getLocalBounds().width;
+		text->setCharacterSize(m_itemHeight);
+		if (text->getLocalBounds().width > width)
+			width = text->getLocalBounds().width;
+		height += m_itemHeight;
 		m_objectTexts.emplace_back(text);
 	}
 
-	auto padding = round(m_size.y / 30.f);
-	m_button.setContentSize(100.f, 100.f);
-	m_button.setPosition(m_size.x - m_button.getSize().x - padding, m_size.y - m_button.getSize().y - padding);
-	m_bg.setSize(sf::Vector2f(maxWidth + m_margin*2 + 4.f, 150.f));
-	m_bg.setPosition(m_size.x - m_bg.getSize().x - padding, m_button.getPosition().y - m_bg.getSize().y);
+	height = std::min(height, 0.5f * m_size.y);
+	m_margin = portrait ? 0.01f * m_size.x : 0.01f * m_size.y;
+
+	m_bg.setSize(sf::Vector2f(std::min(width, m_size.x) + m_margin*2 + 4.f, height + m_margin*2));
+	m_bg.setPosition(m_startPosition.x - m_bg.getSize().x, m_startPosition.y - m_bg.getSize().y);
 	m_scrollBar.setSize(sf::Vector2u(2, m_bg.getSize().y));
-	m_scrollBar.setPosition(m_size.x - 4.f, m_bg.getPosition().y);
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, 150.f));
+	m_scrollBar.setPosition(m_startPosition.x - 4.f, m_bg.getPosition().y);
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(0, m_bg.getSize().y));
+
+	m_scrollAreaSize.y = m_itemHeight * m_objectTexts.size();
+	updateScrollbar();
 	repositionItems();
 }
 
 void Inventory::repositionItems()
 {
-	float posY = m_margin + m_scrollPos + m_bg.getPosition().y;
+	auto posX = round(m_bg.getPosition().x + m_margin);
+	auto posY = m_margin + m_scrollPos + m_bg.getPosition().y;
 	for (auto &text : m_objectTexts)
 	{
-		text->setPosition(m_bg.getPosition().x + m_margin, posY);
+		text->setPosition(posX, round(posY));
 		posY += m_itemHeight;
 	}
-	m_scrollAreaSize.y = posY - m_scrollPos - m_bg.getPosition().y + 10.f;
-	updateScrollbar();
 }
 
 void Inventory::setScroll(float position)
@@ -153,7 +142,6 @@ void Inventory::setScroll(float position)
 //	if (m_scrollPos == position)
 //		return;
 	m_scrollPos = round(position);
-	std::cout << "setScroll " << m_scrollPos << std::endl;
 	repositionItems();
 }
 
@@ -171,7 +159,9 @@ void Inventory::setSize(const sf::Vector2f &size)
 {
 	m_needsUpdate = true;
 	m_size = size;
+	m_itemHeight = (size.x < size.y) ? 0.07f * size.x : 0.07f * m_size.y;
 	refreshItems();
+	m_scrollBar.setScroll(0.f);
 }
 
 sf::Vector2f Inventory::getSize() const
@@ -195,10 +185,14 @@ void Inventory::setCallback(InventoryCallback callback)
 	m_callback = callback;
 }
 
+void Inventory::setStartPosition(const sf::Vector2f &position)
+{
+	m_startPosition = position;
+}
+
 void Inventory::setAlpha(float alpha)
 {
 	m_alpha = alpha;
-	m_button.setAlpha(alpha);
 }
 
 float Inventory::getAlpha() const
@@ -224,7 +218,6 @@ void Inventory::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	ensureUpdate();
 	auto transform = getTransform();
 	states.transform *= transform;
-	target.draw(m_button, states);
 	if (m_isOpen)
 	{
 		target.draw(m_bg, states);

@@ -38,6 +38,7 @@ public:
 	sf::FloatRect getGlobalBounds() const;
 
 	void setCallback(InventoryCallback callback);
+	void setStartPosition(const sf::Vector2f &position);
 
 	void setAlpha(float alpha) override;
 	float getAlpha() const override;
@@ -60,11 +61,11 @@ private:
 	mutable sf::Transform m_lastTransform;
 	mutable sf::View m_view;
 
-	mutable Button m_button;
 	mutable ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
 	std::vector<std::unique_ptr<TweenText>> m_objectTexts;
 	float m_scrollPos;
+	sf::Vector2f m_startPosition;
 	sf::Vector2f m_scrollAreaSize;
 
 	InventoryCallback m_callback;
