@@ -26,6 +26,8 @@ public:
 	void autoSize();
 	void setContentSize(const sf::Vector2f& size);
 	void setContentSize(float width, float height);
+	void setSize(const sf::Vector2f& size);
+	void setSize(float width, float height);
 	const sf::Vector2f& getContentSize() const;
 	const sf::Vector2f& getSize() const;
 
