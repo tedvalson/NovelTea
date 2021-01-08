@@ -81,7 +81,7 @@ void NovelTeaWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	sf::Event event;
 	event.type = sf::Event::MouseMoved;
-	event.mouseButton = sf::Event::MouseButtonEvent {sf::Mouse::Button::Left, e->x(), e->y()};
+	event.mouseMove = sf::Event::MouseMoveEvent {e->x(), e->y()};
 	m_engine->processEvent(event);
 }
 

@@ -153,12 +153,15 @@ void Engine::processEvent(const sf::Event &event)
 		e.type = sf::Event::MouseMoved;
 
 	if (e.type == sf::Event::MouseButtonPressed ||
-			e.type == sf::Event::MouseButtonReleased ||
-			e.type == sf::Event::MouseMoved)
+			e.type == sf::Event::MouseButtonReleased)
 	{
-		auto coords = mapPixelToCoords(pos);
-		e.mouseButton.x = coords.x;
-		e.mouseButton.y = coords.y;
+		e.mouseButton.x = pos.x;
+		e.mouseButton.y = pos.y;
+	}
+	else if (e.type == sf::Event::MouseMoved)
+	{
+		e.mouseMove.x = pos.x;
+		e.mouseMove.y = pos.y;
 	}
 
 	m_stateStack->processEvent(e);

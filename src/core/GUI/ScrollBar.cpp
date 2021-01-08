@@ -75,14 +75,14 @@ bool ScrollBar::processEvent(const sf::Event &event)
 		if (m_isTouching)
 		{
 			m_clockHide.restart();
-			if (!m_isScrolling && std::abs(m_startTouchPos.y - event.mouseButton.y) > m_scrollTolerance)
+			if (!m_isScrolling && std::abs(m_startTouchPos.y - event.mouseMove.y) > m_scrollTolerance)
 				m_isScrolling = true;
 
-			float posDiff = m_lastTouchPos.y - event.mouseButton.y;
+			float posDiff = m_lastTouchPos.y - event.mouseMove.y;
 			if (m_isScrolling)
 				setScrollRelative(-posDiff);
-			m_lastTouchPos.x = event.mouseButton.x;
-			m_lastTouchPos.y = event.mouseButton.y;
+			m_lastTouchPos.x = event.mouseMove.x;
+			m_lastTouchPos.y = event.mouseMove.y;
 
 			sf::Time timeDiff = m_clockVelocity.restart();
 			float v = m_veloctyModifer * -posDiff / (1 + timeDiff.asMilliseconds());

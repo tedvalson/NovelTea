@@ -222,7 +222,7 @@ bool Button::processEvent(const sf::Event &event)
 	if (event.type == sf::Event::MouseMoved)
 	{
 		if (m_active) {
-			if (!m_rect.contains(event.touch.x, event.touch.y)) {
+			if (!m_rect.contains(event.mouseMove.x, event.mouseMove.y)) {
 				m_active = false;
 				m_needsUpdate = true;
 			}
