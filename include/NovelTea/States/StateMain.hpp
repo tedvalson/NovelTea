@@ -20,8 +20,6 @@ using json = sj::JSON;
 namespace NovelTea
 {
 
-using TestCallback = std::function<bool(const json&)>;
-
 enum class Mode {
 	Nothing,
 	Cutscene,

@@ -1,20 +1,19 @@
 #ifndef NOVELTEA_STATEEDITOR_HPP
 #define NOVELTEA_STATEEDITOR_HPP
 
-#include <SFML/Graphics.hpp>
 #include <NovelTea/States/State.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/CutsceneRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
-#include <NovelTea/GUI/VerbList.hpp>
-#include <NovelTea/GUI/ActionBuilder.hpp>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
 
 namespace NovelTea
 {
+
+using TestCallback = std::function<bool(const json&)>;
 
 enum class StateEditorMode : int {
 	Nothing  = 0,
@@ -23,7 +22,7 @@ enum class StateEditorMode : int {
 	Dialogue,
 };
 
-class StateEditor : public State
+class StateEditor : public State, public Scrollable
 {
 public:
 	StateEditor(StateStack& stack, Context& context, StateCallback callback);
@@ -32,20 +31,22 @@ public:
 	void render(sf::RenderTarget &target) override;
 	void resize(const sf::Vector2f &size) override;
 
+	void repositionText();
+
+	void setScroll(float position) override;
+	float getScroll() override;
+	const sf::Vector2f &getScrollSize() override;
+
 	void *processData(void *data) override;
 
 private:
-	TweenText text;
-	TweenRectangleShape shape;
-	sf::Texture texture;
-
 	CutsceneRenderer m_cutsceneRenderer;
+
 	ActiveText m_roomActiveText;
-
-	VerbList m_verbList;
-	ActionBuilder m_actionBuilder;
-
-	std::string m_selectedObjectId;
+	float m_scrollPos;
+	float m_roomTextPadding;
+	sf::Vector2f m_scrollAreaSize;
+	ScrollBar m_roomScrollbar;
 
 	TweenEngine::TweenManager m_tweenManager;
 	StateEditorMode m_mode;
