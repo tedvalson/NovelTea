@@ -59,7 +59,7 @@ protected:
 private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	std::shared_ptr<CutsceneSegment> m_currentSegment;
-	size_t m_segmentIndex;
+	int m_segmentIndex;
 	bool m_isComplete;
 	bool m_isWaitingForClick;
 	bool m_skipWaitingForClick;

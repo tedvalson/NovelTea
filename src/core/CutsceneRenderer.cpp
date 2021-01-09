@@ -40,13 +40,12 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 
 void CutsceneRenderer::reset(bool preservePosition)
 {
-	auto timePassed = m_timePassed - sf::seconds(0.2f);
-	auto timeToNext = m_timeToNext;
+	auto timePassed = m_timePassed;
 
 	m_currentSegment = nullptr;
 	m_isComplete = false;
 	m_isWaitingForClick = false;
-	m_segmentIndex = 0;
+	m_segmentIndex = -1;
 	m_timePassed = sf::Time::Zero;
 	m_timeToNext = sf::Time::Zero;
 	m_cursorPos = sf::Vector2f();
@@ -61,11 +60,12 @@ void CutsceneRenderer::reset(bool preservePosition)
 		auto skipWaiting = m_skipWaitingForClick;
 		m_skipWaitingForClick = true;
 
+		if (timePassed.asSeconds() > 0.2f)
+			timePassed -= sf::seconds(0.2f);
+
 		addSegmentToQueue(0);
 		update(timePassed.asSeconds());
 
-		m_timePassed = timePassed;
-		m_timeToNext = timeToNext;
 		m_skipWaitingForClick = skipWaiting;
 	} else
 		addSegmentToQueue(0);
@@ -82,6 +82,7 @@ void CutsceneRenderer::update(float delta)
 
 	m_icon.update(delta);
 	m_scrollBar.update(delta);
+	m_tweenManager.update(0.001f); // Trigger next segment if delay is 0
 
 	delta *= m_cutscene->getSpeedFactor();
 	auto timeDelta = sf::seconds(delta);
@@ -90,7 +91,7 @@ void CutsceneRenderer::update(float delta)
 	{
 		if (m_isWaitingForClick && !m_skipWaitingForClick)
 			break;
-		if (m_segmentIndex >= segments.size())
+		if (m_segmentIndex < 0 || m_segmentIndex >= segments.size())
 			break;
 
 		size_t segmentIndex;
