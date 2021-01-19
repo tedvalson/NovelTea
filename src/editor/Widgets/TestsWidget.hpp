@@ -6,7 +6,7 @@
 #include <QMenu>
 #include <QStandardItemModel>
 #include <NovelTea/json.hpp>
-#include <NovelTea/States/StateMain.hpp>
+#include <NovelTea/States/StateEditor.hpp>
 
 using json = sj::JSON;
 

@@ -104,7 +104,6 @@ void RoomWidget::updatePreview()
 	{
 		json jdata;
 		jdata["event"] = "text";
-		jdata["data"] = script;
 
 		// Reset any changes made by previous script execution
 		GSave.reset();

@@ -2,6 +2,7 @@
 #include "ui_TestsWidget.h"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Verb.hpp>
 #include <QToolButton>
 #include <QInputDialog>
 
