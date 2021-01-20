@@ -25,6 +25,7 @@ public:
 
 	void newProject();
 	void closeProject();
+	void clearFilename();
 
 	bool isLoaded() const;
 	bool isValid(std::string &errorMessage) const;

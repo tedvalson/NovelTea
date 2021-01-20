@@ -58,6 +58,11 @@ void ProjectData::closeProject()
 	_filename.clear();
 }
 
+void ProjectData::clearFilename()
+{
+	_filename.clear();
+}
+
 bool ProjectData::isLoaded() const
 {
 	return _loaded;
