@@ -53,9 +53,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->menuRecentProjects->insertSeparator(ui->actionClearList);
 
 	readSettings();
-
-	// Load testing project
-	loadProject("/home/android/test.ntp");
 }
 
 MainWindow::~MainWindow()
@@ -426,8 +423,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionProjectSettings_triggered()
 {
-	auto w = new ProjectSettingsWidget;
-	addEditorTab(w, true);
+	addEditorTab(new ProjectSettingsWidget);
 }
 
 void MainWindow::on_actionOpenProject_triggered()
@@ -646,8 +642,7 @@ void MainWindow::on_actionClearParentSelection_triggered()
 
 void MainWindow::on_actionTests_triggered()
 {
-	auto w = new TestsWidget;
-	addEditorTab(w, true);
+	addEditorTab(new TestsWidget);
 }
 
 void MainWindow::on_actionSearch_triggered()
@@ -656,8 +651,7 @@ void MainWindow::on_actionSearch_triggered()
 			tr("Enter Search Term:"), QLineEdit::Normal);
 	if (searchTerm.isEmpty())
 		return;
-	auto w = new SearchWidget(searchTerm.toStdString());
-	addEditorTab(w, true);
+	addEditorTab(new SearchWidget(searchTerm.toStdString()));
 }
 
 void MainWindow::on_actionClearList_triggered()

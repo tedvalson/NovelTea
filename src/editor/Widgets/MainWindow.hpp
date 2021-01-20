@@ -23,7 +23,7 @@ public:
 	bool reloadProject();
 	bool closeProject();
 
-	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = false);
+	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = true);
 	void addEditorTab(EditorTabWidget::Type type, const std::string &idName);
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
