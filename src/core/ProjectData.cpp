@@ -11,7 +11,6 @@ namespace NovelTea
 {
 
 ProjectData::ProjectData()
-	: m_engineVersion(NOVELTEA_VERSION)
 {
 }
 
@@ -30,8 +29,8 @@ void ProjectData::newProject()
 {
 	TextFormat textFormat;
 
-	_json = json({
-		ID::engineVersion, m_engineVersion,
+	auto j = json({
+		ID::engineVersion, NOVELTEA_VERSION,
 		ID::projectName, "Project Name",
 		ID::projectVersion, "1.0",
 		ID::projectAuthor, "Author Name",
@@ -43,17 +42,20 @@ void ProjectData::newProject()
 		ID::scriptBeforeLeave, "return true;",
 		ID::scriptAfterEnter, "",
 		ID::scriptBeforeEnter, "return true;",
-		ID::textFormats, sj::Array(textFormat.toJson())
+		ID::textFormats, sj::Array(textFormat.toJson()),
+		ID::openTabs, sj::Array(),
+		ID::openTabIndex, -1,
 	});
 
-	_json[ID::projectFonts] = sj::Array(0);
-	fromJson(_json);
+	j[ID::projectFonts] = sj::Array("fontawesome");
+	fromJson(j);
 }
 
 void ProjectData::closeProject()
 {
 	_json = sj::Array();
 	_loaded = false;
+	_filename.clear();
 }
 
 bool ProjectData::isLoaded() const
@@ -112,7 +114,9 @@ void ProjectData::saveToFile(const std::string &filename)
 {
 	if (filename.empty() && _filename.empty())
 		return;
-	std::ofstream file(filename.empty() ? _filename : filename);
+	if (!filename.empty())
+		_filename = filename;
+	std::ofstream file(_filename);
 	auto j = toJson();
 //	json::to_msgpack(j, file);
 	file << j;
@@ -177,7 +181,6 @@ json ProjectData::toJson() const
 //		{"textformats", jtextformats}
 //	});
 
-	_json[ID::engineVersion] = m_engineVersion;
 	_json[ID::textFormats] = jtextformats;
 
 	return _json;

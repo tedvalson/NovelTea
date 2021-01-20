@@ -119,8 +119,15 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuRecentProjects">
+     <property name="title">
+      <string>Recent P&amp;rojects</string>
+     </property>
+     <addaction name="actionClearList"/>
+    </widget>
     <addaction name="actionNewProject"/>
     <addaction name="actionOpenProject"/>
+    <addaction name="menuRecentProjects"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionCloseProject"/>
@@ -303,6 +310,11 @@
   <action name="actionSearch">
    <property name="text">
     <string>Search</string>
+   </property>
+  </action>
+  <action name="actionClearList">
+   <property name="text">
+    <string>Clear List</string>
    </property>
   </action>
  </widget>

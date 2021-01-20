@@ -16,6 +16,7 @@ public:
 	~WizardPageProject();
 
 	int nextId() const override;
+	bool validatePage() override;
 
 private:
 	Ui::WizardPageProject *ui;

@@ -45,10 +45,13 @@ namespace ID
 	const auto cutsceneSegBreak   = 1;
 	const auto textFormats        = "textformats";
 	const auto player             = "player";
+
+	// For Editor
 	const auto tests              = "tests";
+	const auto openTabs           = "tabs";
+	const auto openTabIndex       = "tabIndex";
 
 	// For SaveData
-	const auto variables          = "variables";
 	const auto entityQueue        = "entityQueue";
 	const auto objectLocations    = "objectLocations";
 	const auto roomDescriptions   = "roomDescriptions";

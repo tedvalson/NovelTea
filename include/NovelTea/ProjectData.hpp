@@ -19,6 +19,8 @@ class Action;
 class ProjectData: public JsonSerializable
 {
 public:
+	ProjectData();
+	~ProjectData();
 	static ProjectData &instance();
 
 	void newProject();
@@ -65,23 +67,10 @@ public:
 	const json &data() const;
 	json &data();
 
-	ADD_ACCESSOR(float, EngineVersion, m_engineVersion)
-	ADD_ACCESSOR(sf::String, Title, m_title)
-
-protected:
-	ProjectData();
-	~ProjectData();
-
 private:
 	bool _loaded = false;
 	std::string _filename;
 	mutable json _json;
-
-	//
-	sf::String m_title;
-	float m_engineVersion;
-	int m_startTypeId;
-	int m_startEntityId;
 
 	std::vector<TextFormat> _textFormats;
 	std::vector<std::shared_ptr<sf::Font>> m_fonts;

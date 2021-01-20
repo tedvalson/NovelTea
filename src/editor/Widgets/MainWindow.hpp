@@ -13,10 +13,13 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+	enum { MaxRecentProjects = 5 };
+
 public:
 	static MainWindow &instance();
 
 	bool loadProject(const QString &filename);
+	bool loadProject(const NovelTea::ProjectData &project);
 	bool reloadProject();
 	bool closeProject();
 
@@ -38,10 +41,15 @@ protected:
 	void readSettings();
 	void writeSettings();
 
+private:
+	void updateRecentProjectList();
+
 public slots:
 	void refreshTabs();
 
 private slots:
+	void openRecentProject();
+
 	void on_treeView_clicked(const QModelIndex &index);
 	void on_treeView_activated(const QModelIndex &index);
 	void on_treeView_pressed(const QModelIndex &index);
@@ -62,6 +70,7 @@ private slots:
 	void on_actionClearParentSelection_triggered();
 	void on_actionTests_triggered();
 	void on_actionSearch_triggered();
+	void on_actionClearList_triggered();
 
 private:
 	static MainWindow *_instance;
@@ -70,6 +79,9 @@ private:
 	QMenu *menuTreeView;
 	std::string selectedIdName;
 	EditorTabWidget::Type selectedType;
+
+	QStringList m_recentProjects;
+	QAction *m_recentProjectActions[MaxRecentProjects];
 };
 
 #endif // MAINWINDOW_H

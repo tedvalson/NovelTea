@@ -25,6 +25,7 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 	{
 		ui->radioAction->setEnabled(false);
 		ui->radioCutscene->setEnabled(false);
+		ui->radioDialogue->setEnabled(false);
 		ui->radioRoom->setEnabled(false);
 		ui->radioObject->setEnabled(false);
 		ui->radioScript->setEnabled(false);

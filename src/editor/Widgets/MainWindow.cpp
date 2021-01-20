@@ -44,6 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
 	menuTreeView->addAction(ui->actionClearParentSelection);
 	menuTreeView->addAction(ui->actionDelete);
 
+	for (int i = 0; i < MaxRecentProjects; ++i) {
+		auto action = new QAction(this);
+		ui->menuRecentProjects->insertAction(ui->actionClearList, action);
+		connect(action, SIGNAL(triggered()), this, SLOT(openRecentProject()));
+		m_recentProjectActions[i] = action;
+	}
+	ui->menuRecentProjects->insertSeparator(ui->actionClearList);
+
 	readSettings();
 
 	// Load testing project
@@ -70,16 +78,35 @@ bool MainWindow::loadProject(const QString &filename)
 {
 	if (closeProject() && !filename.isEmpty())
 	{
-		if (Proj.loadFromFile(filename.toStdString()))
+		NovelTea::ProjectData project;
+		if (project.loadFromFile(filename.toStdString()))
 		{
-			treeModel->loadProject(Proj);
-			warnIfInvalid();
-			setWindowTitle(QString::fromStdString(ProjData[NovelTea::ID::projectName].ToString()) + " - NovelTea Editor");
-			return true;
+			m_recentProjects.removeAll(filename);
+			m_recentProjects.prepend(filename);
+			updateRecentProjectList();
+
+			return loadProject(project);
 		}
 	}
 
 	return false;
+}
+
+bool MainWindow::loadProject(const NovelTea::ProjectData &project)
+{
+	if (!closeProject())
+		return false;
+
+	Proj = project;
+	treeModel->loadProject(Proj);
+	warnIfInvalid();
+	setWindowTitle(QString::fromStdString(ProjData[NovelTea::ID::projectName].ToString()) + " - NovelTea Editor");
+
+	for (auto &jtab : ProjData[NovelTea::ID::openTabs].ArrayRange())
+		addEditorTab(static_cast<EditorTabWidget::Type>(jtab[0].ToInt()), jtab[1].ToString());
+	ui->tabWidget->setCurrentIndex(ProjData[NovelTea::ID::openTabIndex].ToInt());
+
+	return true;
 }
 
 bool MainWindow::reloadProject()
@@ -95,9 +122,16 @@ bool MainWindow::closeProject()
 	if (!reallyWantToClose())
 		return false;
 
+	auto jtabs = sj::Array();
 	auto count = ui->tabWidget->count();
-	for (int i = 0; i < count; ++i)
-		delete ui->tabWidget->widget(0);
+	ProjData[NovelTea::ID::openTabIndex] = ui->tabWidget->currentIndex();
+	for (int i = 0; i < count; ++i) {
+		auto tab = qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(0));
+		jtabs.append(sj::Array(static_cast<int>(tab->getType()), tab->idName()));
+		delete tab;
+	}
+	ProjData[NovelTea::ID::openTabs] = jtabs;
+	Proj.saveToFile();
 
 	Proj.closeProject();
 	treeModel->loadProject(Proj);
@@ -261,6 +295,9 @@ void MainWindow::readSettings()
 	restoreState(settings.value("state").toByteArray());
 	ui->splitter->restoreState(settings.value("splitter").toByteArray());
 	settings.endGroup();
+
+	m_recentProjects = settings.value("recentProjects").toStringList();
+	updateRecentProjectList();
 }
 
 void MainWindow::writeSettings()
@@ -271,6 +308,28 @@ void MainWindow::writeSettings()
 	settings.setValue("state", saveState());
 	settings.setValue("splitter", ui->splitter->saveState());
 	settings.endGroup();
+
+	settings.setValue("recentProjects", m_recentProjects);
+}
+
+void MainWindow::updateRecentProjectList()
+{
+	while (m_recentProjects.size() > MaxRecentProjects)
+		m_recentProjects.removeLast();
+
+	int count = qMin(m_recentProjects.size(), static_cast<int>(MaxRecentProjects));
+
+	for (int i = 0; i < count; ++i) {
+		auto action = m_recentProjectActions[i];
+		auto text = tr("&%1 %2").arg(i + 1).arg(m_recentProjects[i]);
+		action->setText(text);
+		action->setData(m_recentProjects[i]);
+		action->setVisible(true);
+	}
+	for (int i = count; i < MaxRecentProjects; ++i)
+		m_recentProjectActions[i]->setVisible(false);
+
+	ui->menuRecentProjects->setEnabled(count > 0);
 }
 
 void MainWindow::refreshTabs()
@@ -287,6 +346,13 @@ void MainWindow::refreshTabs()
 			if (i == currentIndex)
 				ui->actionSave->setEnabled(modified);
 		}
+}
+
+void MainWindow::openRecentProject()
+{
+	auto action = qobject_cast<QAction*>(sender());
+	if (action)
+		loadProject(action->data().toString());
 }
 
 void MainWindow::on_treeView_clicked(const QModelIndex &index)
@@ -375,20 +441,21 @@ void MainWindow::on_actionOpenProject_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
+	auto widget = ui->tabWidget->currentWidget();
+	auto editorWidget = qobject_cast<EditorTabWidget*>(widget);
+	if (editorWidget)
+	{
+		editorWidget->save();
+		warnIfInvalid();
+	}
+
 	if (Proj.filename().empty())
 	{
 		ui->actionSaveAs->trigger();
 		return;
 	}
 
-	auto widget = ui->tabWidget->currentWidget();
-	auto editorWidget = qobject_cast<EditorTabWidget*>(widget);
-	if (editorWidget)
-	{
-		editorWidget->save();
-		Proj.saveToFile();
-		warnIfInvalid();
-	}
+	Proj.saveToFile();
 }
 
 void MainWindow::on_actionSaveAs_triggered()
@@ -402,6 +469,11 @@ void MainWindow::on_actionSaveAs_triggered()
 		return;
 	if (!fileName.endsWith(".ntp"))
 		fileName += ".ntp";
+
+	m_recentProjects.removeAll(QString::fromStdString(Proj.filename()));
+	m_recentProjects.prepend(fileName);
+	updateRecentProjectList();
+
 	Proj.saveToFile(fileName.toStdString());
 }
 
@@ -498,8 +570,14 @@ void MainWindow::on_actionCloseProject_triggered()
 
 void MainWindow::on_actionPlayGame_triggered()
 {
+	if (Proj.filename().empty()) {
+		QMessageBox::warning(this, "Cannot Play", "You need to save the project before you can play it.");
+		return;
+	}
+
 	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
 	QStringList args;
+	args << QString::fromStdString(Proj.filename());
 	if (ui->tabWidget->currentIndex() != -1)
 	{
 		auto widget = qobject_cast<EditorTabWidget*>(ui->tabWidget->currentWidget());
@@ -580,4 +658,10 @@ void MainWindow::on_actionSearch_triggered()
 		return;
 	auto w = new SearchWidget(searchTerm.toStdString());
 	addEditorTab(w, true);
+}
+
+void MainWindow::on_actionClearList_triggered()
+{
+	m_recentProjects.clear();
+	updateRecentProjectList();
 }
