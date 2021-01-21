@@ -159,6 +159,11 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 			auto room = std::static_pointer_cast<NovelTea::Room>(entity);
 			processString(item, room->getDescriptionRaw(), caseSensitive);
 			processString(item, room->getPaths().dump(), caseSensitive);
+			processString(item, room->getProjectRoomObjects().dump(), caseSensitive);
+			processString(item, room->getScriptBeforeLeave(), caseSensitive);
+			processString(item, room->getScriptBeforeEnter(), caseSensitive);
+			processString(item, room->getScriptAfterLeave(), caseSensitive);
+			processString(item, room->getScriptAfterEnter(), caseSensitive);
 		}
 		else if (entityId == NovelTea::Script::id) {
 			auto script = std::static_pointer_cast<NovelTea::Script>(entity);
@@ -214,15 +219,18 @@ void SearchWidget::searchTests(bool caseSensitive)
 		parentItem->addChild(item);
 	}
 
+	if (parentItem->childCount() == 0) {
+		delete parentItem;
+		return;
+	}
+
 	parentItem->setText(0, QString("Tests (%2)").arg(count));
 	ui->treeWidget->addTopLevelItem(parentItem);
 }
 
 void SearchWidget::searchProjectSettings(bool caseSensitive)
 {
-	auto parentItem = new QTreeWidgetItem;
 	auto count = 0;
-
 	auto item = new QTreeWidgetItem;
 	item->setData(0, Qt::UserRole, EditorTabWidget::Settings);
 
@@ -239,6 +247,7 @@ void SearchWidget::searchProjectSettings(bool caseSensitive)
 		return;
 	}
 
+	auto parentItem = new QTreeWidgetItem;
 	count += item->childCount();
 	item->setText(0, QString::fromStdString("Scripts (%1)").arg(item->childCount()));
 	parentItem->addChild(item);
