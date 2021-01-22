@@ -330,13 +330,14 @@ void StateMain::setMode(const json &jEntity)
 		mode = Mode::Room;
 	else if (type == EntityType::Dialogue)
 		mode = Mode::Dialogue;
-	else if (type == EntityType::Script) {
+	else if (type == EntityType::Script)
 		ScriptMan.runScriptId(idName);
-		return;
-	}
-	else if (type == EntityType::CustomScript) {
+	else if (type == EntityType::CustomScript)
 		ScriptMan.runInClosure(idName);
-		return;
+
+	if (type == EntityType::Script || type == EntityType::CustomScript) {
+		mode = Mode::Room;
+		idName = GGame.getRoom()->getId();
 	}
 
 	setMode(mode, idName);
@@ -519,9 +520,6 @@ void StateMain::processTestSteps()
 
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
-	auto action = Action::find(verbId, objectIds);
-	auto verb = GSave.get<Verb>(verbId);
-
 	for (auto &objectId : objectIds)
 		if (!GGame.getRoom()->containsId(objectId) && !GGame.getObjectList()->containsId(objectId))
 			return false;
@@ -530,6 +528,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 	if (!success)
 		return false;
 
+	auto action = Action::find(verbId, objectIds);
 	if (action)
 		success = action->runScript();
 	else
@@ -580,6 +579,7 @@ bool StateMain::gotoNextEntity()
 	else if (nextEntity->entityId() == Script::id) {
 		auto script = std::static_pointer_cast<Script>(nextEntity);
 		ScriptMan.runScript(script);
+		setMode(Mode::Room, GGame.getRoom()->getId());
 		return true;
 	}
 	setMode(mode, nextEntity->getId());
