@@ -64,6 +64,7 @@ private:
 	mutable ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
 	std::vector<std::unique_ptr<TweenText>> m_objectTexts;
+	std::vector<std::string> m_objectIds;
 	float m_scrollPos;
 	sf::Vector2f m_startPosition;
 	sf::Vector2f m_scrollAreaSize;

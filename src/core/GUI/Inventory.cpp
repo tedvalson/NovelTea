@@ -64,7 +64,7 @@ bool Inventory::processEvent(const sf::Event &event)
 				auto &text = m_objectTexts[i];
 				text->setFillColor(sf::Color::Red);
 				if (m_callback)
-					m_callback(text->getString().toAnsiString(), m_bg.getPosition().x, posY);
+					m_callback(m_objectIds[i], m_bg.getPosition().x, posY);
 				return true;
 			}
 			posY += m_itemHeight;
@@ -99,6 +99,7 @@ void Inventory::refreshItems()
 	auto width = 0.f;
 	auto height = 0.f;
 	m_objectTexts.clear();
+	m_objectIds.clear();
 	for (auto &object : ActiveGame->getObjectList()->objects())
 	{
 		auto text = new TweenText;
@@ -110,6 +111,7 @@ void Inventory::refreshItems()
 			width = text->getLocalBounds().width;
 		height += m_itemHeight;
 		m_objectTexts.emplace_back(text);
+		m_objectIds.emplace_back(object->getId());
 	}
 
 	height = std::min(height, 0.5f * m_size.y);
