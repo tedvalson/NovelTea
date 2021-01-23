@@ -484,17 +484,19 @@ void ActiveText::ensureUpdate() const
 	{
 		// Keep largest char size for current line
 		auto lineMaxCharacterSize = 0u;
+		auto &frags = block->fragments();
 
 		if (processedFirstBlock)
 		{
 			m_cursorPos.x = 0.f;
 			m_cursorPos.y = m_bounds.height;
-			m_bounds.height += lineHeight + m_lineSpacing;
+			if (!frags.empty() && frags[0]->getText().empty())
+				m_bounds.height += lineHeight + m_lineSpacing;
 		}
 		else
 			processedFirstBlock = true;
 
-		for (auto &frag : block->fragments())
+		for (auto &frag : frags)
 		{
 			auto font = Proj.getFont(0);
 			auto format = frag->getTextFormat();
