@@ -14,6 +14,7 @@ CutsceneRenderer::CutsceneRenderer()
 : m_skipWaitingForClick(false)
 , m_size(400.f, 400.f)
 , m_margin(10.f)
+, m_fontSizeMultiplier(1.f)
 {
 	auto fadeTexture = AssetManager<sf::Texture>::get("images/fade.png").get();
 	m_fadeRectTop.setTexture(fadeTexture);
@@ -207,6 +208,17 @@ float CutsceneRenderer::getMargin() const
 	return m_margin;
 }
 
+void CutsceneRenderer::setFontSizeMultiplier(float fontSizeMultiplier)
+{
+	m_fontSizeMultiplier = fontSizeMultiplier;
+	reset(true);
+}
+
+float CutsceneRenderer::getFontSizeMultiplier() const
+{
+	return m_fontSizeMultiplier;
+}
+
 void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
@@ -312,6 +324,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 
 			auto activeText = seg->getActiveText();
 			activeText->setSize(sf::Vector2f((m_size.x < m_size.y ? 1.f : 0.6f) * m_size.x - m_margin*2, m_size.y));
+			activeText->setFontSizeMultiplier(0.5f * m_fontSizeMultiplier);
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y = m_scrollAreaSize.y - scrollAreaMargin;

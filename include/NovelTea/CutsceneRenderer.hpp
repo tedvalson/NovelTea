@@ -47,6 +47,9 @@ public:
 	void setMargin(float margin);
 	float getMargin() const;
 
+	void setFontSizeMultiplier(float fontSizeMultiplier);
+	float getFontSizeMultiplier() const;
+
 	ADD_ACCESSOR(bool, SkipWaitingForClick, m_skipWaitingForClick)
 
 protected:
@@ -71,6 +74,7 @@ private:
 	sf::Vector2f m_cursorPos;
 	sf::Vector2f m_size;
 	float m_margin;
+	float m_fontSizeMultiplier;
 
 	float m_scrollPos;
 	ScrollBar m_scrollBar;
