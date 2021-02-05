@@ -56,7 +56,8 @@ void Game::setRoom(const std::shared_ptr<Room> &room)
 
 const std::shared_ptr<Room> &Game::getRoom() const
 {
-	m_room->sync();
+	if (m_room)
+		m_room->sync();
 	return m_room;
 }
 
@@ -131,8 +132,14 @@ void Game::syncToSave()
 	m_room = std::make_shared<Room>();
 	m_objectList = std::make_shared<ObjectList>(m_saveData);
 	m_propertyList = std::make_shared<PropertyList>();
-	m_objectList->attach("player", "inv");
-	m_propertyList->attach("game", "globals");
+	if (m_saveData.isLoaded()) {
+		m_objectList->attach("player", "inv");
+		m_propertyList->attach("game", "globals");
+	} else {
+		auto &j = ProjData[ID::startingInventory];
+		for (auto &jObjectId : j.ArrayRange())
+			m_objectList->addId(jObjectId.ToString());
+	}
 }
 
 //void Game::execMessageCallback(const std::string &message, const DukValue &callback)

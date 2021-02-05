@@ -33,6 +33,9 @@ private slots:
 	void on_listFonts_currentRowChanged(int currentRow);
 	void on_buttonImportFont_clicked();
 	void on_buttonSetDefaultFont_clicked();
+	void on_actionAddObject_triggered();
+	void on_actionRemoveObject_triggered();
+	void on_listInventory_currentRowChanged(int currentRow);
 
 private:
 	Ui::ProjectSettingsWidget *ui;

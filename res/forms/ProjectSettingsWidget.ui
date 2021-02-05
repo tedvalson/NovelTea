@@ -35,7 +35,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-620</y>
+        <y>-213</y>
         <width>600</width>
         <height>1000</height>
        </rect>
@@ -134,7 +134,26 @@ Inventory</string>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QListWidget" name="listWidget_2"/>
+           <layout class="QVBoxLayout" name="verticalLayout_12">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QListWidget" name="listInventory"/>
+            </item>
+            <item>
+             <widget class="QToolBar" name="toolBar">
+              <property name="floatable">
+               <bool>false</bool>
+              </property>
+              <addaction name="actionAddObject"/>
+              <addaction name="actionRemoveObject"/>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -388,6 +407,25 @@ Inventory</string>
     </widget>
    </item>
   </layout>
+  <action name="actionAddObject">
+   <property name="icon">
+    <iconset theme="list-add"/>
+   </property>
+   <property name="text">
+    <string>Add Object</string>
+   </property>
+  </action>
+  <action name="actionRemoveObject">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="list-remove"/>
+   </property>
+   <property name="text">
+    <string>Remove Object</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

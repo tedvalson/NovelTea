@@ -1,6 +1,7 @@
 #include "ProjectSettingsWidget.hpp"
 #include "MainWindow.hpp"
 #include "ui_ProjectSettingsWidget.h"
+#include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <QStandardPaths>
 #include <QDir>
@@ -23,6 +24,9 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	ui->lineEditFontPreview->setText("Preview Text");
 
 	// Connect all modifying signals
+	MODIFIER(ui->listInventory->model(), &QAbstractItemModel::dataChanged);
+	MODIFIER(ui->listInventory->model(), &QAbstractItemModel::rowsInserted);
+	MODIFIER(ui->listInventory->model(), &QAbstractItemModel::rowsRemoved);
 	MODIFIER(ui->lineEditName, &QLineEdit::textChanged);
 	MODIFIER(ui->lineEditVersion, &QLineEdit::textChanged);
 	MODIFIER(ui->lineEditAuthor, &QLineEdit::textChanged);
@@ -86,12 +90,19 @@ void ProjectSettingsWidget::makeFontDefault(int index)
 void ProjectSettingsWidget::saveData() const
 {
 	auto &j = ProjData;
+	auto jobjects = sj::Array();
+	for (int i = 0; i < ui->listInventory->count(); ++i) {
+		auto item = ui->listInventory->item(i);
+		jobjects.append(item->text().toStdString());
+	}
+
 	j[ID::projectName] = ui->lineEditName->text().toStdString();
 	j[ID::projectVersion] = ui->lineEditVersion->text().toStdString();
 	j[ID::projectAuthor] = ui->lineEditAuthor->text().toStdString();
 	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
 	j[ID::projectFontDefault] = defaultFontIndex;
 	j[ID::entrypointEntity] = ui->actionSelect->getValue();
+	j[ID::startingInventory] = jobjects;
 
 	j[ID::scriptAfterAction] = ui->scriptAfterActionEdit->toPlainText().toStdString();
 	j[ID::scriptBeforeAction] = ui->scriptBeforeActionEdit->toPlainText().toStdString();
@@ -112,6 +123,11 @@ void ProjectSettingsWidget::loadData()
 
 	auto entryPoint = j[ID::entrypointEntity];
 	ui->actionSelect->setValue(entryPoint);
+
+	auto jobjects = j[ID::startingInventory];
+	ui->listInventory->clear();
+	for (auto &jObjectId : jobjects.ArrayRange())
+		ui->listInventory->addItem(QString::fromStdString(jObjectId.ToString()));
 
 	ui->scriptAfterActionEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterAction].ToString()));
 	ui->scriptBeforeActionEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeAction].ToString()));
@@ -163,4 +179,45 @@ void ProjectSettingsWidget::on_buttonImportFont_clicked()
 void ProjectSettingsWidget::on_buttonSetDefaultFont_clicked()
 {
 	makeFontDefault(ui->listFonts->currentRow());
+}
+
+void ProjectSettingsWidget::on_actionAddObject_triggered()
+{
+	QWizard wizard;
+	auto page = new WizardPageActionSelect;
+
+	page->setFilterRegExp("Objects");
+	page->allowCustomScript(false);
+
+	wizard.addPage(page);
+
+	if (wizard.exec() == QDialog::Accepted)
+	{
+		auto jval = page->getValue();
+		auto idName = QString::fromStdString(jval[NovelTea::ID::selectEntityId].ToString());
+		auto type = static_cast<NovelTea::EntityType>(jval[NovelTea::ID::selectEntityType].ToInt());
+		if (type == NovelTea::EntityType::Object)
+		{
+			// Check if object already exists
+			for (int i = 0; i < ui->listInventory->count(); ++i)
+			{
+				auto item = ui->listInventory->item(i);
+				if (item->text() == idName)
+					return;
+			}
+
+			auto item = new QListWidgetItem(idName);
+			ui->listInventory->addItem(item);
+		}
+	}
+}
+
+void ProjectSettingsWidget::on_actionRemoveObject_triggered()
+{
+	delete ui->listInventory->currentItem();
+}
+
+void ProjectSettingsWidget::on_listInventory_currentRowChanged(int currentRow)
+{
+	ui->actionRemoveObject->setEnabled(currentRow >= 0);
 }

@@ -35,6 +35,7 @@ void ProjectData::newProject()
 		ID::projectVersion, "1.0",
 		ID::projectAuthor, "Author Name",
 		ID::projectWebsite, "",
+		ID::startingInventory, sj::Array(),
 		ID::scriptAfterAction, "",
 		ID::scriptBeforeAction, "return true;",
 		ID::scriptUndefinedAction, "return false;",

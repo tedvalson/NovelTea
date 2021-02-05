@@ -27,6 +27,7 @@ namespace ID
 	const auto projectWebsite     = "website";
 	const auto projectFonts       = "fonts";
 	const auto projectFontDefault = "fontDefault";
+	const auto startingInventory  = "startInv";
 	const auto entrypointEntity   = "entrypoint";
 	const auto scriptAfterAction  = "saa";
 	const auto scriptBeforeAction = "sba";
