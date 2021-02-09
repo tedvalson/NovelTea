@@ -15,6 +15,7 @@ public:
 
 	static QByteArray getData(QString filepath);
 	static int getTimeMs();
+	void setFPS(float fps);
 
 protected:
 	virtual void onInit() = 0;

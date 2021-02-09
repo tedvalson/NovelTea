@@ -17,8 +17,7 @@ SFMLWidget::SFMLWidget(QWidget *parent):
 	// Set strong focus to enable keyboard events to be received
 	setFocusPolicy(Qt::StrongFocus);
 
-	connect(&_timer, SIGNAL(timeout()), this, SLOT(repaint()));
-	_timer.setInterval(1000 / 60);
+	setFPS(60.f);
 }
 
 SFMLWidget::~SFMLWidget()
@@ -90,6 +89,15 @@ void SFMLWidget::resizeEvent(QResizeEvent *)
 	}
 	else
 		resize(w, h);
+}
+
+void SFMLWidget::setFPS(float fps)
+{
+	if (fps > 0.f) {
+		connect(&_timer, SIGNAL(timeout()), this, SLOT(repaint()));
+		_timer.setInterval(1000.f / fps);
+	} else
+		_timer.disconnect();
 }
 
 void SFMLWidget::takeWindow()

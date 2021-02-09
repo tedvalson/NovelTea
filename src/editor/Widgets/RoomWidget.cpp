@@ -7,7 +7,6 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/Game.hpp>
-#include <QWizard>
 #include <QDebug>
 
 RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
@@ -18,6 +17,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	m_idName = idName;
 	ui->setupUi(this);
 	ui->preview->setMode(NovelTea::StateEditorMode::Room);
+	ui->preview->setFPS(0.f);
 	m_objectMenu->addAction(ui->actionView_Edit);
 
 	ui->toolBarEntities->insertWidget(ui->actionAddObject, ui->widget);
@@ -119,6 +119,8 @@ void RoomWidget::updatePreview()
 
 		ui->preview->processData(jdata);
 	}
+
+	ui->preview->repaint();
 }
 
 void RoomWidget::savePathDirection(json &path, const QCheckBox *checkBox, const ActionSelectWidget *actionSelect) const
