@@ -36,6 +36,9 @@ public:
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
 
+	void setFontSizeMultiplier(float fontSizeMultiplier);
+	float getFontSizeMultiplier() const;
+
 	sf::FloatRect getLocalBounds() const;
 	sf::FloatRect getGlobalBounds() const;
 

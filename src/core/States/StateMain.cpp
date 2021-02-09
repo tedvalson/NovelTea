@@ -250,6 +250,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	// Notification setup
 	Notification::setScreenSize(size);
 
+	m_textOverlay.setFontSizeMultiplier(fontSizeMultiplier);
+
 	m_actionBuilder.setSize(sf::Vector2f((portrait ? 1.f : 0.5f) * w, portrait ? 0.25f * h : 0.3f * h));
 	m_actionBuilder.setPosition(portrait ? 0.f : (w - m_roomActiveText.getSize().x)/2, h);
 

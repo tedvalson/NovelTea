@@ -144,6 +144,18 @@ sf::Vector2f TextOverlay::getSize() const
 	return m_size;
 }
 
+void TextOverlay::setFontSizeMultiplier(float fontSizeMultiplier)
+{
+	m_text.setFontSizeMultiplier(fontSizeMultiplier);
+	m_scrollAreaSize.y = m_padding*2 + m_text.getLocalBounds().height;
+	m_scrollBar.setScroll(m_scrollPos);
+}
+
+float TextOverlay::getFontSizeMultiplier() const
+{
+	return m_text.getFontSizeMultiplier();
+}
+
 sf::FloatRect TextOverlay::getLocalBounds() const
 {
 	return m_bounds;
