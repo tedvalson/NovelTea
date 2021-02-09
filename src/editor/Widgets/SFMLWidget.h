@@ -15,7 +15,9 @@ public:
 
 	static QByteArray getData(QString filepath);
 	static int getTimeMs();
+
 	void setFPS(float fps);
+	float getFPS() const;
 
 protected:
 	virtual void onInit() = 0;
@@ -34,6 +36,7 @@ private:
 	QTimer _timer;
 	bool _initialized;
 	int _lastTime;
+	float m_fps;
 };
 
 #endif // SFMLWIDGET_H

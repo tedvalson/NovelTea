@@ -67,6 +67,8 @@ void NovelTeaWidget::mousePressEvent(QMouseEvent *e)
 	event.type = sf::Event::MouseButtonPressed;
 	event.mouseButton = sf::Event::MouseButtonEvent {sf::Mouse::Button::Left, e->x(), e->y()};
 	m_engine->processEvent(event);
+	if (getFPS() == 0.f)
+		repaint();
 }
 
 void NovelTeaWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -75,6 +77,8 @@ void NovelTeaWidget::mouseReleaseEvent(QMouseEvent *e)
 	event.type = sf::Event::MouseButtonReleased;
 	event.mouseButton = sf::Event::MouseButtonEvent {sf::Mouse::Button::Left, e->x(), e->y()};
 	m_engine->processEvent(event);
+	if (getFPS() == 0.f)
+		repaint();
 }
 
 void NovelTeaWidget::mouseMoveEvent(QMouseEvent *e)
@@ -83,6 +87,8 @@ void NovelTeaWidget::mouseMoveEvent(QMouseEvent *e)
 	event.type = sf::Event::MouseMoved;
 	event.mouseMove = sf::Event::MouseMoveEvent {e->x(), e->y()};
 	m_engine->processEvent(event);
+	if (getFPS() == 0.f)
+		repaint();
 }
 
 void NovelTeaWidget::onInit()
