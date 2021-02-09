@@ -16,8 +16,9 @@ public:
 	~WizardPageCutscene();
 
 	int nextId() const override;
-
 	bool validatePage() override;
+
+	void generateFromText();
 
 private:
 	Ui::WizardPageCutscene *ui;
