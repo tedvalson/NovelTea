@@ -14,6 +14,7 @@ Game::Game()
 	, m_propertyList(nullptr)
 	, m_room(nullptr)
 	, m_autosaveEnabled(true)
+	, m_quitting(false)
 	, m_scriptManager(this)
 {
 	m_messageCallback = [](const std::vector<std::string>&, const DukValue&){};
@@ -37,6 +38,7 @@ void Game::reset()
 	if (!Proj.isLoaded())
 		return;
 
+	m_quitting = false;
 	m_saveData.reset();
 	m_timerManager.reset();
 	m_scriptManager.reset();
@@ -140,6 +142,16 @@ void Game::syncToSave()
 		for (auto &jObjectId : j.ArrayRange())
 			m_objectList->addId(jObjectId.ToString());
 	}
+}
+
+void Game::quit()
+{
+	m_quitting = true;
+}
+
+bool Game::isQuitting()
+{
+	return m_quitting;
 }
 
 //void Game::execMessageCallback(const std::string &message, const DukValue &callback)

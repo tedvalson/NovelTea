@@ -45,6 +45,9 @@ public:
 	void autosave();
 	void syncToSave();
 
+	void quit();
+	bool isQuitting();
+
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
 
 	ScriptManager &getScriptManager();
@@ -62,6 +65,7 @@ private:
 	std::string m_roomId;
 	std::queue<std::shared_ptr<Entity>> m_entityQueue;
 	bool m_autosaveEnabled;
+	bool m_quitting;
 
 	MessageCallback m_messageCallback;
 

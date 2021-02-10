@@ -24,6 +24,7 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 		TweenEngine::Tween::to(*this, ALPHA, 1.f)
 			.target(0.f)
 			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
+				GGame.reset();
 				requestStackClear();
 				requestStackPush(StateID::Main);
 			})

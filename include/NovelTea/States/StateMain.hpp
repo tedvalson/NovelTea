@@ -62,11 +62,13 @@ public:
 protected:
 	void callOverlayFunc();
 	void repositionText();
+	void quit();
 
 private:
 	Mode m_mode;
 	bool m_testPlaybackMode;
 	bool m_testRecordMode;
+	bool m_quitting;
 
 	// Room
 	ActiveText m_roomActiveText;
@@ -91,6 +93,7 @@ private:
 	TextOverlay m_textOverlay;
 	std::string m_selectedObjectId;
 	DukValue m_textOverlayFunc;
+	TweenRectangleShape m_bg;
 
 	// Cutscene
 	std::shared_ptr<Cutscene> m_cutscene;

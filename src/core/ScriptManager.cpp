@@ -270,6 +270,7 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::save, "save");
 	dukglue_register_method(m_context, &Game::load, "load");
 	dukglue_register_method(m_context, &Game::autosave, "autosave");
+	dukglue_register_method(m_context, &Game::quit, "quit");
 	dukglue_register_property(m_context, &Game::getObjectList, nullptr, "inventory");
 	dukglue_register_property(m_context, &Game::getRoom, nullptr, "room");
 

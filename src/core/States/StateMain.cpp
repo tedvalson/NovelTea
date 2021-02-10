@@ -21,6 +21,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_mode(Mode::Nothing)
 , m_testPlaybackMode(false)
 , m_testRecordMode(false)
+, m_quitting(false)
 , m_roomTextChanging(false)
 , m_scrollPos(0.f)
 , m_cutsceneSpeed(1.f)
@@ -53,6 +54,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	m_buttonInventory.getText().setFont(*Proj.getFont(1));
 	m_buttonInventory.setString(L"\uf0b1");
+	m_buttonInventory.setAlpha(0.f);
 	m_buttonInventory.setActiveColor(sf::Color(0, 0, 0, 50));
 	m_buttonInventory.setColor(sf::Color(0, 0, 0, 30));
 	m_buttonInventory.onClick([this](){
@@ -64,7 +66,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	m_buttonSettings = m_buttonInventory;
 	m_buttonSettings.setString(L"\uf013");
-	m_buttonSettings.setAlpha(0.f);
 	m_buttonSettings.setColor(sf::Color::Transparent);
 	m_buttonSettings.setActiveColor(sf::Color(0, 0, 0, 30));
 	m_buttonSettings.setTextColor(sf::Color(0, 0, 0, 200));
@@ -158,6 +159,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 void StateMain::render(sf::RenderTarget &target)
 {
+	if (m_quitting)
+		target.clear(m_bg.getFillColor());
+
 	if (m_mode != Mode::Room && m_roomTextChanging)
 	{
 		auto view = target.getView();
@@ -562,6 +566,9 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 
 bool StateMain::gotoNextEntity()
 {
+	if (m_quitting)
+		return false;
+
 	auto nextEntity = GGame.popNextEntity();
 	if (!nextEntity)
 	{
@@ -666,8 +673,56 @@ void StateMain::repositionText()
 	m_roomActiveText.setPosition((w - m_roomActiveText.getSize().x)/2, m_roomTextPadding + m_scrollPos);
 }
 
+void StateMain::quit()
+{
+	if (m_quitting)
+		return;
+
+	m_quitting = true;
+	m_tweenManager.killAll();
+	m_tweenManagerHighlights.killAll();
+
+	auto duration = 1.f;
+	TweenEngine::Tween::to(m_roomActiveText, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_roomActiveTextFadeOut, ActiveText::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
+
+	m_bg.setFillColor(getContext().config.backgroundColor);
+	TweenEngine::Tween::to(m_bg, TweenRectangleShape::FILL_COLOR_RGB, duration)
+		.target(255.f, 255.f, 255.f)
+		.start(m_tweenManager);
+
+	m_dialogueRenderer.hide(duration);
+	m_textOverlay.hide(duration);
+	m_inventory.hide(duration);
+	m_verbList.hide(duration);
+	m_actionBuilder.hide(duration);
+	m_navigation.hide(duration, Navigation::ALPHA, [this](){
+		requestStackClear();
+		requestStackPush(StateID::TitleScreen);
+	});
+}
+
 bool StateMain::processEvent(const sf::Event &event)
 {
+	if (m_quitting)
+		return true;
+
 	if (m_buttonInventory.processEvent(event) || m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
 		return true;
 
@@ -748,6 +803,9 @@ bool StateMain::processEvent(const sf::Event &event)
 
 bool StateMain::update(float delta)
 {
+	if (GGame.isQuitting())
+		quit();
+
 	m_dialogueRenderer.update(delta);
 
 	if (m_mode == Mode::Cutscene)
