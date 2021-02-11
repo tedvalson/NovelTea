@@ -150,9 +150,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto &saveEntryPoint = GSave.data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
 	if (!saveEntryPoint.IsEmpty())
-		setMode(saveEntryPoint);
+		GGame.pushNextEntityJson(saveEntryPoint);
 	else if (!projEntryPoint.IsEmpty())
-		setMode(projEntryPoint);
+		GGame.pushNextEntityJson(projEntryPoint);
 
 	processTestSteps();
 }
@@ -579,7 +579,11 @@ bool StateMain::gotoNextEntity()
 	}
 
 	auto mode = Mode::Nothing;
-	if (nextEntity->entityId() == Cutscene::id)
+	if (nextEntity->entityId() == Action::id) {
+		auto action = std::static_pointer_cast<Action>(nextEntity);
+		action->runScript();
+		return true;
+	} else if (nextEntity->entityId() == Cutscene::id)
 		mode = Mode::Cutscene;
 	else if (nextEntity->entityId() == Room::id)
 		mode = Mode::Room;

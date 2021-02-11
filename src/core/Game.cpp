@@ -1,5 +1,6 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/Action.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
@@ -82,7 +83,9 @@ void Game::pushNextEntityJson(json jentity)
 {
 	auto type = static_cast<EntityType>(jentity[ID::selectEntityType].ToInt());
 	auto idName = jentity[ID::selectEntityId].ToString();
-	if (type == EntityType::Cutscene)
+	if (type == EntityType::Action)
+		pushNextEntity(m_saveData.get<Action>(idName));
+	else if (type == EntityType::Cutscene)
 		pushNextEntity(m_saveData.get<Cutscene>(idName));
 	else if (type == EntityType::Room)
 		pushNextEntity(m_saveData.get<Room>(idName));
