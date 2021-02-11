@@ -9,19 +9,18 @@ int main(int argc, char *argv[])
 	sf::RenderWindow window(screen, "");
 	window.setFramerateLimit(30);
 
-	Proj.loadFromFile("demo.ntp");
+	std::string saveDir = getenv("EXTERNAL_STORAGE");
+	saveDir += "/test";
+	Proj.loadFromFile(saveDir + "/test.ntp");
 	
 	NovelTea::EngineConfig config;
 	config.width = window.getSize().x;
 	config.height = window.getSize().y;
-	if (config.height < config.width)
-		std::swap(config.width, config.height);
 	config.fps = 30;
-	config.initialState = NovelTea::StateID::Main;
+	config.initialState = NovelTea::StateID::Intro;
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
 
-	std::string saveDir = getenv("EXTERNAL_STORAGE");
 	if (!saveDir.empty())
 		GSave.setDirectory(saveDir);
 
