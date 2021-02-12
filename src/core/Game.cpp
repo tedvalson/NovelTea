@@ -126,6 +126,14 @@ bool Game::load(int slot)
 	return true;
 }
 
+bool Game::loadLast()
+{
+	auto success = m_saveData.loadLast();
+	if (success)
+		syncToSave();
+	return success;
+}
+
 void Game::autosave()
 {
 	if (m_autosaveEnabled)
@@ -137,14 +145,13 @@ void Game::syncToSave()
 	m_room = std::make_shared<Room>();
 	m_objectList = std::make_shared<ObjectList>(m_saveData);
 	m_propertyList = std::make_shared<PropertyList>();
-	if (m_saveData.isLoaded()) {
-		m_objectList->attach("player", "inv");
-		m_propertyList->attach("game", "globals");
-	} else {
+	if (!m_saveData.isLoaded()) {
 		auto &j = ProjData[ID::startingInventory];
 		for (auto &jObjectId : j.ArrayRange())
 			m_objectList->addId(jObjectId.ToString());
 	}
+	m_objectList->attach("player", "inv");
+	m_propertyList->attach("game", "globals");
 }
 
 void Game::quit()

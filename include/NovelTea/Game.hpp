@@ -42,6 +42,7 @@ public:
 
 	void save(int slot);
 	bool load(int slot);
+	bool loadLast();
 	void autosave();
 	void syncToSave();
 

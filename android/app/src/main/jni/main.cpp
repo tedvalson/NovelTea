@@ -1,6 +1,9 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/SaveData.hpp>
-#include <SFML/Graphics.hpp>
+#include <SFML/System/NativeActivity.hpp>
+#include <SFML/System/Sleep.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <android/native_activity.h>
 
 int main(int argc, char *argv[])
 {
@@ -8,10 +11,6 @@ int main(int argc, char *argv[])
 
 	sf::RenderWindow window(screen, "");
 	window.setFramerateLimit(30);
-
-	std::string saveDir = getenv("EXTERNAL_STORAGE");
-	saveDir += "/test";
-	Proj.loadFromFile(saveDir + "/test.ntp");
 	
 	NovelTea::EngineConfig config;
 	config.width = window.getSize().x;
@@ -21,8 +20,12 @@ int main(int argc, char *argv[])
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
 
-	if (!saveDir.empty())
-		GSave.setDirectory(saveDir);
+	std::string projDir = getenv("EXTERNAL_STORAGE");
+	projDir += "/test";
+	Proj.loadFromFile(projDir + "/test.ntp");
+	
+	auto nativeActivity = sf::getNativeActivity();
+	GSave.setDirectory(nativeActivity->internalDataPath);
 
 	// We shouldn't try drawing to the screen while in background
 	// so we'll have to track that. You can do minor background

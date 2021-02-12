@@ -132,12 +132,14 @@ bool ProjectData::loadFromFile(const std::string &filename)
 {
 	try
 	{
-		sf::FileInputStream file;
-		std::string s;
-		if (!file.open(filename))
+		std::ifstream file(filename);
+		if (!file.is_open())
 			return false;
 
-		s.resize(file.getSize());
+		std::string s;
+		file.seekg(0, std::ios_base::end);
+		s.resize(file.tellg());
+		file.seekg(0);
 		file.read(&s[0], s.size());
 
 //		auto j = json::from_msgpack(file);

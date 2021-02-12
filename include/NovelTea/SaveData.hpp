@@ -13,6 +13,12 @@ class SaveData: public JsonSerializable
 	friend class Game;
 protected:
 	SaveData();
+
+	void save(int slot);
+	bool load(int slot);
+	bool loadLast();
+	std::string getSlotFilename(int slot) const;
+
 public:
 	bool isLoaded() const;
 
@@ -36,10 +42,6 @@ public:
 
 	void setDirectory(const std::string &path);
 	const std::string &getDirectory() const;
-
-	void save(int slot);
-	bool load(int slot);
-	std::string getSlotFilename(int slot) const;
 
 	void set(std::shared_ptr<Entity> obj, const std::string &idName = std::string());
 

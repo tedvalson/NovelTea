@@ -12,6 +12,10 @@
 #include <fstream>
 #include <iostream>
 
+namespace {
+	const auto lastFilename = "/lastSave";
+}
+
 namespace NovelTea
 {
 
@@ -39,12 +43,14 @@ bool SaveData::loadFromFile(const std::string &filename)
 {
 	try
 	{
-		sf::FileInputStream file;
-		std::string s;
-		if (!file.open(filename))
+		std::ifstream file(filename);
+		if (!file.is_open())
 			return false;
 
-		s.resize(file.getSize());
+		std::string s;
+		file.seekg(0, std::ios_base::end);
+		s.resize(file.tellg());
+		file.seekg(0);
 		file.read(&s[0], s.size());
 		auto j = json::Load(s);
 
@@ -143,11 +149,26 @@ const std::string &SaveData::getDirectory() const
 void SaveData::save(int slot)
 {
 	saveToFile(getSlotFilename(slot));
+
+	std::ofstream file(m_directory + lastFilename);
+	file << slot;
 }
 
 bool SaveData::load(int slot)
 {
 	return loadFromFile(getSlotFilename(slot));
+}
+
+bool SaveData::loadLast()
+{
+	int slot;
+	std::ifstream file(m_directory + lastFilename);
+	if (file.is_open()) {
+		file >> slot;
+		return load(slot);
+	}
+
+	return false;
 }
 
 std::string SaveData::getSlotFilename(int slot) const
