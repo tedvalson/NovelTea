@@ -841,8 +841,10 @@ bool StateMain::update(float delta)
 	m_textOverlay.update(delta);
 
 	Notification::update(delta);
-	if (GGame.getTimerManager().update(delta))
-		updateRoomText();
+	if (GGame.getTimerManager().update(delta)) {
+		if (m_mode == Mode::Room)
+			updateRoomText();
+	}
 
 	m_tweenManager.update(delta);
 	m_tweenManagerHighlights.update(delta);
