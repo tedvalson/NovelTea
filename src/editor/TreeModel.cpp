@@ -82,6 +82,7 @@ void addToTree(const json &data, TreeItem *parent, NovelTea::EntityType type)
 		QList<QVariant> columnData;
 		columnData << QString::fromStdString(item.first);
 		columnData << static_cast<int>(type);
+		columnData << QVariant();
 
 		auto child = new TreeItem(columnData, parent);
 		parent->appendChild(child);
@@ -90,6 +91,15 @@ void addToTree(const json &data, TreeItem *parent, NovelTea::EntityType type)
 		if (!j.IsEmpty())
 			addToTree(j, child, type);
 	}
+}
+
+void loadColors(TreeItem *item, const sj::JSON &jcolors)
+{
+	auto id = item->data(0).toString().toStdString();
+	if (jcolors.hasKey(id))
+		item->setData(2, QBrush(QColor(QString::fromStdString(jcolors[id].ToString()))));
+	for (int i = 0; i < item->childCount(); ++i)
+		loadColors(item->child(i), jcolors);
 }
 
 void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, std::string typeIndex)
@@ -103,6 +113,10 @@ void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, s
 		addToJson(&j, item.second, data[typeIndex], keys);
 
 	addToTree(j, root, type);
+
+	// Load item colors
+	for (int i = 0; i < root->childCount(); ++i)
+		loadColors(root->child(i), data[NovelTea::ID::entityColors][typeIndex]);
 }
 
 void TreeModel::loadProject(const NovelTea::ProjectData &project)
@@ -170,6 +184,45 @@ void TreeModel::rename(EditorTabWidget::Type type, const QString &oldName, const
 			return;
 }
 
+void saveColorsRecursive(sj::JSON &jout, const TreeItem *item)
+{
+	for (int i = 0; i < item->childCount(); ++i)
+		saveColorsRecursive(jout, item->child(i));
+
+	auto id = item->data(0).toString().toStdString();
+	auto color = item->data(2);
+	if (color.isValid())
+		jout[id] = color.value<QBrush>().color().name().toStdString();
+}
+
+void saveColors(sj::JSON &jout, const TreeItem *item)
+{
+	for (int i = 0; i < item->childCount(); ++i)
+		saveColorsRecursive(jout, item->child(i));
+}
+
+void TreeModel::setColor(const QModelIndex &index, const QColor &color)
+{
+	auto item = getItem(index);
+	if (!item)
+		return;
+
+	item->setData(2, color.isValid() ? QBrush(color) : QVariant());
+}
+
+sj::JSON TreeModel::getColorJSON() const
+{
+	auto result = sj::Object();
+	saveColors(result[NovelTea::Action::id], actionRoot);
+	saveColors(result[NovelTea::Cutscene::id], cutsceneRoot);
+	saveColors(result[NovelTea::Dialogue::id], dialogueRoot);
+	saveColors(result[NovelTea::Object::id], objectRoot);
+	saveColors(result[NovelTea::Room::id], roomRoot);
+	saveColors(result[NovelTea::Script::id], scriptRoot);
+	saveColors(result[NovelTea::Verb::id], verbRoot);
+	return result;
+}
+
 bool TreeModel::changeParent(const QModelIndex &child, const QModelIndex &newParent)
 {
 	auto childItem = getItem(child);
@@ -220,6 +273,8 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 	}
 	else if (role == Qt::DisplayRole)
 		return item->data(index.column());
+	else if (role == Qt::BackgroundRole)
+		return item->data(2);
 
 	return QVariant();
 }

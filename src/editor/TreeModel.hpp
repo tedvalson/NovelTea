@@ -41,6 +41,9 @@ public:
 	bool changeParent(const QModelIndex &child, const QModelIndex &newParent);
 	void update();
 
+	void setColor(const QModelIndex &index, const QColor &color);
+	sj::JSON getColorJSON() const;
+
 private:
 	bool rename(TreeItem *item, int row, const QString &oldName, const QString &newName);
 	TreeItem *getItem(const QModelIndex &index) const;

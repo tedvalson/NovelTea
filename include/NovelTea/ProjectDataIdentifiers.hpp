@@ -51,6 +51,7 @@ namespace ID
 	const auto tests              = "tests";
 	const auto openTabs           = "tabs";
 	const auto openTabIndex       = "tabIndex";
+	const auto entityColors       = "colors";
 
 	// For SaveData
 	const auto entityQueue        = "entityQueue";

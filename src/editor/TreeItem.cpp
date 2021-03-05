@@ -4,7 +4,7 @@
 TreeItem::TreeItem(const QString &title, TreeItem *parent)
 {
 	parentItem = parent;
-	itemData << title << -1;
+	itemData << title << -1 << QVariant();
 }
 
 TreeItem::TreeItem(const QList<QVariant> &data, TreeItem *parent)
@@ -23,7 +23,7 @@ void TreeItem::appendChild(TreeItem *item)
 	childItems.append(item);
 }
 
-TreeItem *TreeItem::child(int row)
+TreeItem *TreeItem::child(int row) const
 {
 	return childItems.value(row);
 }

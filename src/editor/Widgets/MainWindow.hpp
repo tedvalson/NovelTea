@@ -42,12 +42,16 @@ protected:
 	void writeSettings();
 
 private:
+	QAction *makeColorAction(const QString &string, const QColor &color);
+	void setColorOfSelected(const QColor &color);
+	void createMenus();
 	void updateRecentProjectList();
 
 public slots:
 	void refreshTabs();
 
 private slots:
+	void actionSetColorTriggered();
 	void openRecentProject();
 
 	void on_treeView_clicked(const QModelIndex &index);
@@ -71,6 +75,8 @@ private slots:
 	void on_actionTests_triggered();
 	void on_actionSearch_triggered();
 	void on_actionClearList_triggered();
+	void on_actionCustomColor_triggered();
+	void on_actionClearColor_triggered();
 
 private:
 	static MainWindow *_instance;

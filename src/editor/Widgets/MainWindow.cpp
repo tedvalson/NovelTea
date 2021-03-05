@@ -15,6 +15,7 @@
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <QFileDialog>
+#include <QColorDialog>
 #include <QDebug>
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -38,19 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	ui->treeView->setModel(treeModel);
 
-	menuTreeView->addAction(ui->actionOpen);
-	menuTreeView->addAction(ui->actionRename);
-	menuTreeView->addAction(ui->actionSelectParent);
-	menuTreeView->addAction(ui->actionClearParentSelection);
-	menuTreeView->addAction(ui->actionDelete);
-
-	for (int i = 0; i < MaxRecentProjects; ++i) {
-		auto action = new QAction(this);
-		ui->menuRecentProjects->insertAction(ui->actionClearList, action);
-		connect(action, SIGNAL(triggered()), this, SLOT(openRecentProject()));
-		m_recentProjectActions[i] = action;
-	}
-	ui->menuRecentProjects->insertSeparator(ui->actionClearList);
+	createMenus();
 
 	readSettings();
 }
@@ -101,7 +90,8 @@ bool MainWindow::loadProject(const NovelTea::ProjectData &project)
 
 	for (auto &jtab : ProjData[NovelTea::ID::openTabs].ArrayRange())
 		addEditorTab(static_cast<EditorTabWidget::Type>(jtab[0].ToInt()), jtab[1].ToString());
-	ui->tabWidget->setCurrentIndex(ProjData[NovelTea::ID::openTabIndex].ToInt());
+	auto index = ProjData[NovelTea::ID::openTabIndex].ToInt();
+	ui->tabWidget->setCurrentIndex(index);
 
 	return true;
 }
@@ -128,6 +118,7 @@ bool MainWindow::closeProject()
 		delete tab;
 	}
 	ProjData[NovelTea::ID::openTabs] = jtabs;
+	ProjData[NovelTea::ID::entityColors] = treeModel->getColorJSON();
 	Proj.saveToFile();
 
 	Proj.closeProject();
@@ -309,6 +300,48 @@ void MainWindow::writeSettings()
 	settings.setValue("recentProjects", m_recentProjects);
 }
 
+QAction *MainWindow::makeColorAction(const QString &string, const QColor &color)
+{
+	QPixmap pixmap(32, 32);
+	pixmap.fill(color);
+	auto action = new QAction(QIcon(pixmap), string, this);
+	action->setData(color);
+	connect(action, SIGNAL(triggered()), this, SLOT(actionSetColorTriggered()));
+	return action;
+}
+
+void MainWindow::setColorOfSelected(const QColor &color)
+{
+	auto selectedIndex = ui->treeView->mapToSource(ui->treeView->currentIndex());
+	treeModel->setColor(selectedIndex, color);
+}
+
+void MainWindow::createMenus()
+{
+	auto menuSetColor = new QMenu("Set Color");
+	menuSetColor->addAction(ui->actionClearColor);
+	menuSetColor->addSeparator();
+	menuSetColor->addAction(makeColorAction("Red", Qt::red));
+	menuSetColor->addAction(makeColorAction("Green", Qt::green));
+	menuSetColor->addSeparator();
+	menuSetColor->addAction(ui->actionCustomColor);
+
+	menuTreeView->addAction(ui->actionOpen);
+	menuTreeView->addAction(ui->actionRename);
+	menuTreeView->addMenu(menuSetColor);
+	menuTreeView->addAction(ui->actionSelectParent);
+	menuTreeView->addAction(ui->actionClearParentSelection);
+	menuTreeView->addAction(ui->actionDelete);
+
+	for (int i = 0; i < MaxRecentProjects; ++i) {
+		auto action = new QAction(this);
+		ui->menuRecentProjects->insertAction(ui->actionClearList, action);
+		connect(action, SIGNAL(triggered()), this, SLOT(openRecentProject()));
+		m_recentProjectActions[i] = action;
+	}
+	ui->menuRecentProjects->insertSeparator(ui->actionClearList);
+}
+
 void MainWindow::updateRecentProjectList()
 {
 	while (m_recentProjects.size() > MaxRecentProjects)
@@ -345,6 +378,13 @@ void MainWindow::refreshTabs()
 		}
 }
 
+void MainWindow::actionSetColorTriggered()
+{
+	auto action = qobject_cast<QAction*>(sender());
+	if (action)
+		setColorOfSelected(action->data().value<QColor>());
+}
+
 void MainWindow::openRecentProject()
 {
 	auto action = qobject_cast<QAction*>(sender());
@@ -373,9 +413,11 @@ void MainWindow::on_treeView_activated(const QModelIndex &index)
 void MainWindow::on_treeView_pressed(const QModelIndex &index)
 {
 	qDebug() << "index:" << index.column() << index.row();
-	auto proxyIndex = ui->treeView->mapToSource(index);
 	if (QApplication::mouseButtons() != Qt::RightButton)
 		return;
+	if (!index.parent().isValid())
+		return;
+	auto proxyIndex = ui->treeView->mapToSource(index);
 	auto item = static_cast<TreeItem*>(proxyIndex.internalPointer());
 	auto type = item->data(1);
 	if (!type.isValid())
@@ -658,4 +700,15 @@ void MainWindow::on_actionClearList_triggered()
 {
 	m_recentProjects.clear();
 	updateRecentProjectList();
+}
+
+void MainWindow::on_actionCustomColor_triggered()
+{
+	auto color = QColorDialog::getColor();
+	setColorOfSelected(color);
+}
+
+void MainWindow::on_actionClearColor_triggered()
+{
+	setColorOfSelected(QColor());
 }

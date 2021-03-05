@@ -317,6 +317,16 @@
     <string>Clear List</string>
    </property>
   </action>
+  <action name="actionCustomColor">
+   <property name="text">
+    <string>Custom...</string>
+   </property>
+  </action>
+  <action name="actionClearColor">
+   <property name="text">
+    <string>None</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
