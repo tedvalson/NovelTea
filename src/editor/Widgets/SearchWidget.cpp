@@ -159,11 +159,12 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 			auto room = std::static_pointer_cast<NovelTea::Room>(entity);
 			processString(item, room->getDescriptionRaw(), caseSensitive);
 			processString(item, room->getPaths().dump(), caseSensitive);
-			processString(item, room->getProjectRoomObjects().dump(), caseSensitive);
 			processString(item, room->getScriptBeforeLeave(), caseSensitive);
 			processString(item, room->getScriptBeforeEnter(), caseSensitive);
 			processString(item, room->getScriptAfterLeave(), caseSensitive);
 			processString(item, room->getScriptAfterEnter(), caseSensitive);
+			for (auto &obj : room->getObjects())
+				processString(item, obj.idName, caseSensitive);
 		}
 		else if (entityId == NovelTea::Script::id) {
 			auto script = std::static_pointer_cast<NovelTea::Script>(entity);
