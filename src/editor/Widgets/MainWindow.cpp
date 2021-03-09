@@ -155,7 +155,7 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 		Proj.saveToFile();
 	}
 
-	auto index = ui->tabWidget->addTab(widget, widget->tabText());
+	auto index = ui->tabWidget->addTab(widget, widget->getIcon(), widget->tabText());
 	ui->tabWidget->setCurrentIndex(index);
 	refreshTabs();
 

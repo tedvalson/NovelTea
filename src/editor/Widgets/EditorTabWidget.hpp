@@ -29,6 +29,7 @@ public:
 	bool isModified() const;
 	virtual QString tabText() const = 0;
 	virtual Type getType() const = 0;
+	virtual QIcon getIcon() const;
 	const std::string &idName() const;
 	void rename(const std::string &newIdName);
 

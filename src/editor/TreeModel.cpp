@@ -112,6 +112,7 @@ void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, s
 	for (auto &item : data[typeIndex].ObjectRange())
 		addToJson(&j, item.second, data[typeIndex], keys);
 
+	root->setData(1, static_cast<int>(type));
 	addToTree(j, root, type);
 
 	// Load item colors
@@ -268,8 +269,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 	}
 	else if (role == Qt::DecorationRole)
 	{
-		if (index.column() == 1)
-			return QIcon::fromTheme("edit-undo");
+		auto tabType = EditorTabWidget::entityTypeToTabType(static_cast<NovelTea::EntityType>(item->data(1).toInt()));
+		if (!index.parent().isValid())
+			return QIcon(QString(":/icons/%1.png").arg(tabType));
 	}
 	else if (role == Qt::DisplayRole)
 		return item->data(index.column());
