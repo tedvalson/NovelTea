@@ -321,8 +321,14 @@ void MainWindow::createMenus()
 	auto menuSetColor = new QMenu("Set Color");
 	menuSetColor->addAction(ui->actionClearColor);
 	menuSetColor->addSeparator();
-	menuSetColor->addAction(makeColorAction("Red", Qt::red));
+	menuSetColor->addAction(makeColorAction("Red", "#FF5555"));
 	menuSetColor->addAction(makeColorAction("Green", Qt::green));
+	menuSetColor->addAction(makeColorAction("Blue", "#5555FF"));
+	menuSetColor->addAction(makeColorAction("Cyan", Qt::cyan));
+	menuSetColor->addAction(makeColorAction("Magenta", Qt::magenta));
+	menuSetColor->addAction(makeColorAction("Yellow", Qt::yellow));
+	menuSetColor->addAction(makeColorAction("Gray", Qt::gray));
+	menuSetColor->addAction(makeColorAction("Light Gray", Qt::lightGray));
 	menuSetColor->addSeparator();
 	menuSetColor->addAction(ui->actionCustomColor);
 
