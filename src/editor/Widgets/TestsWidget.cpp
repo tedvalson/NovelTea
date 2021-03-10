@@ -4,7 +4,9 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Verb.hpp>
 #include <QToolButton>
+#include <QMessageBox>
 #include <QInputDialog>
+#include <QDebug>
 
 TestsWidget::TestsWidget(QWidget *parent)
 	: EditorTabWidget(parent)
@@ -18,7 +20,7 @@ TestsWidget::TestsWidget(QWidget *parent)
 	m_menuAdd->addAction(ui->actionAddStepAction);
 	m_menuAdd->addAction(ui->actionAddStepDialogueOption);
 	m_menuAdd->addAction(ui->actionAddStepWait);
-	ui->toolBarSteps->setEnabled(false);
+	ui->tabWidget->setEnabled(false);
 
 	m_callback = [this](const json &j){ return processCallbackData(j); };
 
@@ -48,29 +50,45 @@ EditorTabWidget::Type TestsWidget::getType() const
 
 void TestsWidget::loadTest(const std::string &testId)
 {
+	ui->actionSelect->disconnect(this);
+	ui->listInventory->model()->disconnect(this);
+	ui->scriptEditInit->disconnect(this);
+	ui->scriptEditCheck->disconnect(this);
+
 	ui->listWidgetSteps->clear();
-	ui->toolBarSteps->setEnabled(!testId.empty());
+	ui->listInventory->clear();
+	ui->tabWidget->setEnabled(!testId.empty());
+	ui->tabWidget->setCurrentIndex(0);
 	if (testId.empty())
 		return;
 
 	auto &j = m_json[testId];
-	for (auto &jstep : m_json[testId].ArrayRange())
-	{
+	ui->actionSelect->setValue(j[NovelTea::ID::entrypointEntity]);
+	ui->scriptEditInit->setPlainText(QString::fromStdString(j[NovelTea::ID::testScriptInit].ToString()));
+	ui->scriptEditCheck->setPlainText(QString::fromStdString(j[NovelTea::ID::testScriptCheck].ToString()));
+	for (auto &jstep : j[NovelTea::ID::testSteps].ArrayRange())
 		addStepToList(jstep, true);
-//		ui->listWidgetSteps->addItem(QString::fromStdString(jstep.ToString()));
-	}
+
+	auto &jobjects = j[NovelTea::ID::startingInventory];
+	for (auto &jobject : jobjects.ArrayRange())
+		ui->listInventory->addItem(QString::fromStdString(jobject.ToString()));
+
+	MODIFIER(ui->actionSelect, &ActionSelectWidget::valueChanged);
+	MODIFIER(ui->scriptEditInit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptEditCheck, &ScriptEdit::textChanged);
+	MODIFIER(ui->listInventory->model(), &QAbstractItemModel::dataChanged);
+	MODIFIER(ui->listInventory->model(), &QAbstractItemModel::rowsInserted);
+	MODIFIER(ui->listInventory->model(), &QAbstractItemModel::rowsRemoved);
 }
 
 void TestsWidget::addStep(const json &jstep, bool append)
 {
-	auto &jtest = m_json[m_selectedTestId];
-//	auto type = jstep["type"].ToString();
+	auto &jtestSteps = m_json[m_selectedTestId][NovelTea::ID::testSteps];
 	setModified();
 
 	if (append)
 	{
-//		ui->listWidgetSteps->addItem(QString::fromStdString(text));
-		jtest.append(jstep);
+		jtestSteps.append(jstep);
 		addStepToList(jstep, append);
 		return;
 	}
@@ -78,8 +96,7 @@ void TestsWidget::addStep(const json &jstep, bool append)
 	auto row = ui->listWidgetSteps->currentRow();
 	if (row < 0)
 		row = 0;
-//	ui->listWidgetSteps->insertItem(row, QString::fromStdString(text));
-	jtest.insert(row, jstep);
+	jtestSteps.insert(row, jstep);
 	addStepToList(jstep, append);
 }
 
@@ -136,10 +153,21 @@ bool TestsWidget::processCallbackData(const json &jdata)
 {
 	if (jdata.hasKey("success") && !jdata["success"].ToBool())
 	{
-		m_errorStepIndex = jdata["index"].ToInt();
-		auto item = ui->listWidgetSteps->item(m_errorStepIndex);
-		item->setSelected(true);
-		item->setBackground(QBrush(Qt::red));
+		if (jdata.hasKey("index")) {
+			m_errorStepIndex = jdata["index"].ToInt();
+			auto item = ui->listWidgetSteps->item(m_errorStepIndex);
+			item->setSelected(true);
+			item->setBackground(QBrush(Qt::red));
+		} else {
+			auto msg = QString::fromStdString(jdata["error"].ToString());
+			if (msg.isEmpty())
+				msg = "Script check returned false.";
+			else {
+				ui->tabWidget->setCurrentWidget(ui->tabScripts);
+				msg = "Script error:\n\n" + msg;
+			}
+			QMessageBox::critical(this, "Test Failed", msg);
+		}
 		return true;
 	}
 
@@ -156,22 +184,42 @@ bool TestsWidget::processCallbackData(const json &jdata)
 
 void TestsWidget::processSteps(bool startRecording)
 {
+	saveSettings();
 	resetListStyle();
 	ui->preview->reset();
 	m_errorStepIndex = -1;
-	auto &jsteps = m_json[m_selectedTestId];
+	auto &jtest = m_json[m_selectedTestId];
 	auto j = json({
 		"event", "test",
 		"type", "playback",
-		"steps", jsteps,
+		"test", jtest,
 		"record", startRecording,
 		"callback", std::to_string(&m_callback),
 	});
 	ui->preview->processData(j);
 }
 
+void TestsWidget::saveSettings() const
+{
+	if (m_selectedTestId.empty())
+		return;
+
+	auto &jtest = m_json[m_selectedTestId];
+	auto jobjects = sj::Array();
+	for (int i = 0; i < ui->listInventory->count(); ++i) {
+		auto item = ui->listInventory->item(i);
+		jobjects.append(item->text().toStdString());
+	}
+
+	jtest[NovelTea::ID::startingInventory] = jobjects;
+	jtest[NovelTea::ID::entrypointEntity] = ui->actionSelect->getValue();
+	jtest[NovelTea::ID::testScriptInit] = ui->scriptEditInit->toPlainText().toStdString();
+	jtest[NovelTea::ID::testScriptCheck] = ui->scriptEditCheck->toPlainText().toStdString();
+}
+
 void TestsWidget::saveData() const
 {
+	saveSettings();
 	ProjData[NovelTea::ID::tests] = m_json;
 }
 
@@ -195,7 +243,13 @@ void TestsWidget::on_actionAddTest_triggered()
 			tr("Enter name for new test:"));
 	if (!name.isEmpty() && !m_json.hasKey(name.toStdString()))
 	{
-		m_json[name.toStdString()] = sj::Array();
+		m_json[name.toStdString()] = sj::JSON({
+			NovelTea::ID::entrypointEntity,  sj::Array(-1, ""),
+			NovelTea::ID::startingInventory, sj::Array(),
+			NovelTea::ID::testSteps,         sj::Array(),
+			NovelTea::ID::testScriptInit,    "",
+			NovelTea::ID::testScriptCheck,   ""
+		});
 		ui->listWidgetTests->addItem(name);
 	}
 }
@@ -261,6 +315,8 @@ void TestsWidget::on_actionAddStepDialogueOption_triggered()
 
 void TestsWidget::on_listWidgetTests_currentRowChanged(int currentRow)
 {
+	saveSettings();
+
 	auto item = ui->listWidgetTests->currentItem();
 	if (item)
 		m_selectedTestId = item->text().toStdString();
@@ -293,4 +349,45 @@ void TestsWidget::on_rowsMoved(const QModelIndex &sourceParent, int sourceStart,
 	auto &jsource = jtest[sourceStart];
 	jtest.insert(destinationRow, jsource);
 	jtest.erase((sourceStart < destinationRow) ? sourceStart : sourceStart+1);
+}
+
+void TestsWidget::on_actionAddObject_triggered()
+{
+	QWizard wizard;
+	auto page = new WizardPageActionSelect;
+
+	page->setFilterRegExp("Objects");
+	page->allowCustomScript(false);
+
+	wizard.addPage(page);
+
+	if (wizard.exec() == QDialog::Accepted)
+	{
+		auto jval = page->getValue();
+		auto idName = QString::fromStdString(jval[NovelTea::ID::selectEntityId].ToString());
+		auto type = static_cast<NovelTea::EntityType>(jval[NovelTea::ID::selectEntityType].ToInt());
+		if (type == NovelTea::EntityType::Object)
+		{
+			// Check if object already exists
+			for (int i = 0; i < ui->listInventory->count(); ++i)
+			{
+				auto item = ui->listInventory->item(i);
+				if (item->text() == idName)
+					return;
+			}
+
+			auto item = new QListWidgetItem(idName);
+			ui->listInventory->addItem(item);
+		}
+	}
+}
+
+void TestsWidget::on_actionRemoveObject_triggered()
+{
+	delete ui->listInventory->currentItem();
+}
+
+void TestsWidget::on_listInventory_currentRowChanged(int currentRow)
+{
+	ui->actionRemoveObject->setEnabled(currentRow >= 0);
 }

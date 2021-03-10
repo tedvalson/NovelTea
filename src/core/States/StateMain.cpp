@@ -434,7 +434,8 @@ void StateMain::setValues(int tweenType, float *newValues)
 
 void StateMain::processTestSteps()
 {
-	if (!getContext().data.hasKey("testSteps"))
+	std::string scriptError;
+	if (!getContext().data.hasKey("test"))
 		return;
 
 	m_testPlaybackMode = true;
@@ -450,8 +451,23 @@ void StateMain::processTestSteps()
 		});
 
 	auto success = true;
-	auto jsteps = getContext().data["testSteps"];
+	auto jtest = getContext().data["test"];
+	auto jsteps = jtest[ID::testSteps];
+
+	GGame.reset();
+	GGame.getObjectList()->clear();
+	for (auto &jobject : jtest[ID::startingInventory].ArrayRange())
+		GGame.getObjectList()->addId(jobject.ToString());
+
+	if (jtest[ID::entrypointEntity][ID::selectEntityType].ToInt() == -1)
+		GGame.pushNextEntityJson(ProjData[ID::entrypointEntity]);
+	else
+		GGame.pushNextEntityJson(jtest[ID::entrypointEntity]);
+
+	ScriptMan.runInClosure(jtest[ID::testScriptInit].ToString());
+
 	m_cutsceneRenderer.setSkipWaitingForClick(true);
+
 	for (int i = 0; i < jsteps.size(); ++i)
 	{
 		auto &jstep = jsteps[i];
@@ -518,6 +534,21 @@ void StateMain::processTestSteps()
 			std::cout << "FAILED" << std::endl;
 			break;
 		}
+	}
+
+	auto scriptCheck = jtest[ID::testScriptCheck].ToString() + "\nreturn true;";
+	auto checkPass = false;
+	try {
+		if (scriptError.empty())
+			checkPass = ScriptMan.runInClosure<bool>(scriptCheck);
+	} catch (std::exception &e) {
+		scriptError = e.what();
+	}
+
+	if (!checkPass || !scriptError.empty())
+	{
+		json j({"success", false, "error", scriptError});
+		runCallback(&j);
 	}
 
 	m_cutsceneRenderer.setSkipWaitingForClick(false);

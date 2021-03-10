@@ -102,7 +102,7 @@ void *StateEditor::processData(void *data)
 			return callback(j);
 		};
 
-		getContext().data["testSteps"] = jsonData["steps"];
+		getContext().data["test"] = jsonData["test"];
 		getContext().data["record"] = jsonData["record"];
 
 		requestStackPop();

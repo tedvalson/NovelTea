@@ -49,6 +49,9 @@ namespace ID
 
 	// For Editor
 	const auto tests              = "tests";
+	const auto testScriptInit     = "init";
+	const auto testScriptCheck    = "check";
+	const auto testSteps          = "steps";
 	const auto openTabs           = "tabs";
 	const auto openTabIndex       = "tabIndex";
 	const auto entityColors       = "colors";
