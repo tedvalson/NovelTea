@@ -51,7 +51,10 @@ public:
 	int getValues(int tweenType, float *returnValues) override;
 	void setValues(int tweenType, float *newValues) override;
 
-	void processTestSteps();
+	void processTest();
+	bool processTestSteps();
+	bool processTestInit();
+	bool processTestCheck();
 	bool processAction(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	bool gotoNextEntity();

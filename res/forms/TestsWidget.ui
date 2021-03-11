@@ -399,6 +399,9 @@
    </property>
   </action>
   <action name="actionRemoveObject">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset theme="list-remove">
      <normaloff/>

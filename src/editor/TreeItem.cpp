@@ -68,7 +68,7 @@ bool TreeItem::insertChildren(int position, int count, int columns)
 
 	for (int row = 0; row < count; ++row) {
 		QList<QVariant> data;
-		data << "[empty]" << -1;
+		data << "[empty]" << -1 << QVariant();
 		TreeItem *item = new TreeItem(data, this);
 		childItems.insert(position, item);
 	}

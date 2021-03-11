@@ -153,8 +153,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		GGame.pushNextEntityJson(saveEntryPoint);
 	else if (!projEntryPoint.IsEmpty())
 		GGame.pushNextEntityJson(projEntryPoint);
+	processTest();
 
-	processTestSteps();
 }
 
 void StateMain::render(sf::RenderTarget &target)
@@ -432,27 +432,13 @@ void StateMain::setValues(int tweenType, float *newValues)
 		State::setValues(tweenType, newValues);
 }
 
-void StateMain::processTestSteps()
+void StateMain::processTest()
 {
-	std::string scriptError;
 	if (!getContext().data.hasKey("test"))
 		return;
 
-	m_testPlaybackMode = true;
+	auto &jtest = getContext().data["test"];
 	m_testRecordMode = getContext().data["record"].ToBool();
-	if (m_testRecordMode)
-		m_dialogueRenderer.setDialogueCallback([this](int index){
-			json jtestItem({
-				"type", "dialogue",
-				"index", index
-			});
-			if (!m_testPlaybackMode)
-				runCallback(&jtestItem);
-		});
-
-	auto success = true;
-	auto jtest = getContext().data["test"];
-	auto jsteps = jtest[ID::testSteps];
 
 	GGame.reset();
 	GGame.getObjectList()->clear();
@@ -464,10 +450,28 @@ void StateMain::processTestSteps()
 	else
 		GGame.pushNextEntityJson(jtest[ID::entrypointEntity]);
 
-	ScriptMan.runInClosure(jtest[ID::testScriptInit].ToString());
+	if (processTestInit() && processTestSteps() && !m_testRecordMode)
+		processTestCheck();
+}
+
+bool StateMain::processTestSteps()
+{
+	m_testPlaybackMode = true;
+	if (m_testRecordMode)
+		m_dialogueRenderer.setDialogueCallback([this](int index){
+			json jtestItem({
+				"type", "dialogue",
+				"index", index
+			});
+			if (!m_testPlaybackMode)
+				runCallback(&jtestItem);
+		});
+
+	auto success = true;
+	auto &jtest = getContext().data["test"];
+	auto &jsteps = jtest[ID::testSteps];
 
 	m_cutsceneRenderer.setSkipWaitingForClick(true);
-
 	for (int i = 0; i < jsteps.size(); ++i)
 	{
 		auto &jstep = jsteps[i];
@@ -536,23 +540,49 @@ void StateMain::processTestSteps()
 		}
 	}
 
-	auto scriptCheck = jtest[ID::testScriptCheck].ToString() + "\nreturn true;";
-	auto checkPass = false;
+	m_cutsceneRenderer.setSkipWaitingForClick(false);
+	m_testPlaybackMode = false;
+	return success;
+}
+
+bool StateMain::processTestInit()
+{
+	auto &jtest = getContext().data["test"];
+	std::string error;
+
 	try {
-		if (scriptError.empty())
-			checkPass = ScriptMan.runInClosure<bool>(scriptCheck);
+		ScriptMan.runInClosure(jtest[ID::testScriptInit].ToString());
 	} catch (std::exception &e) {
-		scriptError = e.what();
+		error = e.what();
 	}
 
-	if (!checkPass || !scriptError.empty())
-	{
-		json j({"success", false, "error", scriptError});
+	if (!error.empty()) {
+		json j({"success", false, "error", error});
 		runCallback(&j);
 	}
 
-	m_cutsceneRenderer.setSkipWaitingForClick(false);
-	m_testPlaybackMode = false;
+	return error.empty();
+}
+
+bool StateMain::processTestCheck()
+{
+	auto &jtest = getContext().data["test"];
+	auto script = jtest[ID::testScriptCheck].ToString() + "\nreturn true;";
+	auto success = false;
+	std::string error;
+
+	try {
+		success = ScriptMan.runInClosure<bool>(script);
+	} catch (std::exception &e) {
+		error = e.what();
+	}
+
+	if (!success) {
+		json j({"success", false, "error", error});
+		runCallback(&j);
+	}
+
+	return success;
 }
 
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)

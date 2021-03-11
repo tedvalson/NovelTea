@@ -264,7 +264,7 @@ void TestsWidget::on_actionRemoveStep_triggered()
 {
 	setModified();
 	auto row = ui->listWidgetSteps->currentRow();
-	m_json[m_selectedTestId].erase(row);
+	m_json[m_selectedTestId][NovelTea::ID::testSteps].erase(row);
 	delete ui->listWidgetSteps->currentItem();
 }
 
@@ -345,10 +345,10 @@ void TestsWidget::on_actionRecordSteps_triggered()
 void TestsWidget::on_rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow)
 {
 	setModified();
-	auto &jtest = m_json[m_selectedTestId];
-	auto &jsource = jtest[sourceStart];
-	jtest.insert(destinationRow, jsource);
-	jtest.erase((sourceStart < destinationRow) ? sourceStart : sourceStart+1);
+	auto &jtestSteps = m_json[m_selectedTestId][NovelTea::ID::testSteps];
+	auto &jsource = jtestSteps[sourceStart];
+	jtestSteps.insert(destinationRow, jsource);
+	jtestSteps.erase((sourceStart < destinationRow) ? sourceStart : sourceStart+1);
 }
 
 void TestsWidget::on_actionAddObject_triggered()
