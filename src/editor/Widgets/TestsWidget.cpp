@@ -201,7 +201,7 @@ void TestsWidget::processSteps(bool startRecording)
 
 void TestsWidget::saveSettings() const
 {
-	if (m_selectedTestId.empty())
+	if (m_selectedTestId.empty() || !m_json.hasKey(m_selectedTestId))
 		return;
 
 	auto &jtest = m_json[m_selectedTestId];
