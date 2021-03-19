@@ -58,4 +58,11 @@ bool wrapText(sf::Text &text, float width)
 	return true;
 }
 
+std::string replace(const std::string &text, const std::string &textToReplace, const std::string &replacement)
+{
+	// TODO: Optimize
+	auto v = split(text, textToReplace);
+	return join(v, replacement);
+}
+
 } // namespace NovelTea

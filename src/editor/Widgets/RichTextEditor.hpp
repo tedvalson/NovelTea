@@ -23,6 +23,9 @@ public:
 	void setValue(const std::shared_ptr<NovelTea::ActiveText> &text);
 	std::shared_ptr<NovelTea::ActiveText> getValue() const;
 
+	void setFormattingEnabled(bool value);
+	bool getFormattingEnabled() const;
+
 	static QTextDocument *activeTextToDocument(const std::shared_ptr<NovelTea::ActiveText> &activeText);
 	static std::shared_ptr<NovelTea::ActiveText> documentToActiveText(const QTextDocument *doc);
 
@@ -50,6 +53,7 @@ private:
 	Ui::RichTextEditor *ui;
 	std::shared_ptr<NovelTea::ActiveText> m_activeText;
 	bool m_isChanged;
+	bool m_formattingEnabled;
 };
 
 #endif // RICHTEXTEDITOR_HPP

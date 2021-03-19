@@ -2,6 +2,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageBreakSegment.hpp>
+#include <NovelTea/CutscenePageSegment.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <TweenEngine/Tween.h>
@@ -253,13 +254,13 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 
 	activeText->setPosition((m_size.x < m_size.y ? 0.f : 0.2f * m_size.x), 0.f);
 
-	if (effect == CutsceneTextSegment::Fade) {
+	if (effect == CutsceneSegment::TextEffectFade) {
 		activeText->setAlpha(0.f);
 		TweenEngine::Tween::to(*activeText, ActiveText::ALPHA, duration)
 			.target(255.f)
 			.start(m_tweenManager);
 	}
-	else if (effect == CutsceneTextSegment::FadeAcross) {
+	else if (effect == CutsceneSegment::TextEffectFadeAcross) {
 		activeText->setFadeAcrossPosition(0.f);
 		TweenEngine::Tween::to(*activeText, ActiveText::FADEACROSS, duration)
 			.ease(TweenEngine::TweenEquations::easeInOutLinear)
@@ -275,18 +276,18 @@ void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *seg
 
 	for (auto &text : m_textsOld)
 	{
-		if (effect == CutscenePageBreakSegment::None) {
+		if (effect == CutsceneSegment::PageEffectNone) {
 			TweenEngine::Tween::set(*text, ActiveText::ALPHA)
 				.target(0.f)
 				.delay(duration)
 				.start(m_tweenManager);
 		}
-		else if (effect == CutscenePageBreakSegment::Fade) {
+		else if (effect == CutsceneSegment::PageEffectFade) {
 			TweenEngine::Tween::to(*text, ActiveText::ALPHA, duration)
 				.target(0.f)
 				.start(m_tweenManager);
 		}
-		else if (effect == CutscenePageBreakSegment::ScrollLeft) {
+		else if (effect == CutsceneSegment::PageEffectScrollLeft) {
 			TweenEngine::Tween::to(*text, ActiveText::POSITION_X, duration)
 				.target(-getPosition().x - text->getSize().x - m_margin)
 				.start(m_tweenManager);

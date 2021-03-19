@@ -22,9 +22,11 @@ public:
 	const std::string entityId() const override {return id;}
 
 	void addSegment(std::shared_ptr<CutsceneSegment> segment);
+	void updateSegments();
 
 	// TODO: make CutsceneWidget a friend to not expose this entirely
 	std::vector<std::shared_ptr<CutsceneSegment>> &segments();
+	std::vector<std::shared_ptr<CutsceneSegment>> &internalSegments();
 
 	size_t getDurationMs() const;
 	size_t getDurationMs(size_t indexEnd) const;
@@ -44,6 +46,7 @@ public:
 
 private:
 	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
+	std::vector<std::shared_ptr<CutsceneSegment>> m_internalSegments;
 
 	bool m_fullScreen;
 	bool m_canFastForward;

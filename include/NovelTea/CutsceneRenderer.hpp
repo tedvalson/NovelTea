@@ -18,6 +18,7 @@ class Cutscene;
 class CutsceneSegment;
 class CutsceneTextSegment;
 class CutscenePageBreakSegment;
+class CutscenePageSegment;
 class ActiveText;
 
 class CutsceneRenderer : public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>

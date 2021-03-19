@@ -5,8 +5,16 @@
 #include <QTextBlock>
 #include <iostream>
 
-EditorUtils::EditorUtils()
+QString EditorUtils::escape(const QString &s)
 {
+	auto result = s;
+	return result.replace("\n", "\\n").replace("\t", "\\t");
+}
+
+QString EditorUtils::unescape(const QString &s)
+{
+	auto result = s;
+	return result.replace("\\n", "\n").replace("\\t", "\t");
 }
 
 json EditorUtils::documentToJson(const QTextDocument *doc)

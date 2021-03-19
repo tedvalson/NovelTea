@@ -30,6 +30,7 @@ public:
 
 private slots:
 	void on_actionAddText_triggered();
+	void on_actionAddPage_triggered();
 	void on_actionAddPageBreak_triggered();
 	void on_actionRemoveSegment_triggered();
 	void on_horizontalSlider_valueChanged(int value);

@@ -10,12 +10,6 @@ namespace NovelTea
 class CutsceneTextSegment : public CutsceneSegment
 {
 public:
-	enum TransitionEffect {
-		None = 0,
-		Fade = 1,
-		FadeAcross,
-	};
-
 	CutsceneTextSegment();
 	json toJson() const override;
 	bool fromJson(const json &j) override;
@@ -33,7 +27,7 @@ private:
 	bool m_beginWithNewline = false;
 	int m_offsetX = 0;
 	int m_offsetY = 0;
-	int m_transition = Fade;
+	int m_transition = TextEffectFade;
 	std::shared_ptr<ActiveText> m_activeText;
 };
 

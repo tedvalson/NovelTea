@@ -379,6 +379,11 @@
     <string>Loop</string>
    </property>
   </action>
+  <action name="actionAddPage">
+   <property name="text">
+    <string>Page</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

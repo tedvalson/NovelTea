@@ -48,6 +48,19 @@ std::shared_ptr<NovelTea::ActiveText> RichTextEditor::getValue() const
 	return documentToActiveText(ui->textEdit->document());
 }
 
+void RichTextEditor::setFormattingEnabled(bool value)
+{
+	m_formattingEnabled = value;
+	ui->actionBold->setEnabled(value);
+	ui->actionItalic->setEnabled(value);
+	ui->actionUnderline->setEnabled(value);
+}
+
+bool RichTextEditor::getFormattingEnabled() const
+{
+	return m_formattingEnabled;
+}
+
 QTextDocument *RichTextEditor::activeTextToDocument(const std::shared_ptr<NovelTea::ActiveText> &activeText)
 {
 	auto doc = new QTextDocument;

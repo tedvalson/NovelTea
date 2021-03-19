@@ -42,8 +42,6 @@ namespace ID
 	const auto entityParentId     = 1;
 	const auto entityProperties   = 2;
 	const auto cutsceneSegType    = 0;
-	const auto cutsceneSegText    = 0;
-	const auto cutsceneSegBreak   = 1;
 	const auto textFormats        = "textformats";
 	const auto player             = "player";
 

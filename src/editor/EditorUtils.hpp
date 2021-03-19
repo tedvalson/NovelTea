@@ -14,7 +14,8 @@ using json = sj::JSON;
 class EditorUtils
 {
 public:
-	EditorUtils();
+	static QString escape(const QString &s);
+	static QString unescape(const QString &s);
 
 	static json documentToJson(const QTextDocument *doc);
 	static QTextDocument *jsonToDocument(const json &j);

@@ -14,7 +14,7 @@ json CutscenePageBreakSegment::toJson() const
 	auto j = sj::Array(
 		static_cast<int>(type()),
 		getWaitForClick(),
-		getScriptOverrideName(),
+		"",
 		m_transition,
 		getDuration(),
 		getDelay(),
@@ -26,7 +26,6 @@ json CutscenePageBreakSegment::toJson() const
 bool CutscenePageBreakSegment::fromJson(const json &j)
 {
 	setWaitForClick(j[1].ToBool());
-	setScriptOverrideName(j[2].ToString());
 	m_transition = j[3].ToInt();
 	setDuration(j[4].ToInt());
 	setDelay(j[5].ToInt());

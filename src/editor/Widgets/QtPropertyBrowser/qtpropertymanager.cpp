@@ -6594,7 +6594,7 @@ QString QtRichTextPropertyManager::valueText(const QtProperty *property) const
 	if (!activeText)
 		return QString();
 
-	return QString::fromStdString(activeText->toPlainText());
+	return QString::fromStdString(activeText->toPlainText(" | "));
 }
 
 /*!

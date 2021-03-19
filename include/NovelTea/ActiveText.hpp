@@ -34,7 +34,7 @@ public:
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
-	std::string toPlainText() const;
+	std::string toPlainText(const std::string &newline = "\n") const;
 	std::string objectFromPoint(const sf::Vector2f &point) const;
 
 	void setText(const std::string &text, const TextFormat &format = TextFormat());

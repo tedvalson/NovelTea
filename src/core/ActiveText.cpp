@@ -145,14 +145,14 @@ bool ActiveText::fromJson(const json &j)
 	return true;
 }
 
-std::string ActiveText::toPlainText() const
+std::string ActiveText::toPlainText(const std::string &newline) const
 {
 	std::string result;
 	bool processedFirstBlock = false;
 	for (auto &block : blocks())
 	{
 		if (processedFirstBlock)
-			result += " | ";
+			result += newline;
 		processedFirstBlock = true;
 		for (auto &frag : block->fragments())
 			result += frag->getText();
@@ -486,7 +486,7 @@ void ActiveText::ensureUpdate() const
 		auto lineMaxCharacterSize = 0u;
 		auto &frags = block->fragments();
 
-		if (processedFirstBlock)
+		if (processedFirstBlock) // When '\n' is encountered
 		{
 			m_cursorPos.x = 0.f;
 			m_cursorPos.y = m_bounds.height;
