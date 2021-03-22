@@ -2532,7 +2532,7 @@ void QtRichTextEditWidget::setValue(const std::shared_ptr<NovelTea::ActiveText> 
 {
 	m_activeText = activeText;
 	if (activeText)
-		m_label->setText(QString::fromStdString(activeText->toPlainText(" | ")));
+		m_label->setText(QString::fromStdString(activeText->toPlainText(" | ")).replace("\t", " "));
 }
 
 void QtRichTextEditWidget::buttonClicked()

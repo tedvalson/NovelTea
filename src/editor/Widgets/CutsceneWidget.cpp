@@ -283,19 +283,20 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 {
 	auto type = segment->type();
 	QListWidgetItem *item = nullptr;
-	QString text;
 
 	if (type == NovelTea::CutsceneSegment::Text)
 	{
 		auto seg = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
-		text = QString::fromStdString(seg->getActiveText()->toPlainText(" | "));
+		auto text = QString::fromStdString(seg->getActiveText()->toPlainText(" | "));
+		text.replace("\t", " ");
 		item = new QListWidgetItem(QIcon::fromTheme("format"), text);
 	}
 	else if (type == NovelTea::CutsceneSegment::Page)
 	{
 		auto seg = static_cast<NovelTea::CutscenePageSegment*>(segment.get());
-		text = QString::fromStdString(seg->getText());
-		item = new QListWidgetItem(QIcon::fromTheme("document-new"), text.replace("\n", " | "));
+		auto text = QString::fromStdString(seg->getText());
+		text.replace("\n", " | ").replace("\t", " ");
+		item = new QListWidgetItem(QIcon::fromTheme("document-new"), text);
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
 	{
@@ -380,7 +381,7 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		if (propertyName == propText)
 		{
 			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
-			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText(" | ")));
+			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText(" | ")).replace("\t"," "));
 			textSegment->setActiveText(activeText);
 		}
 		else if (propertyName == propBeginNewLine)
@@ -406,7 +407,7 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 
 		if (propertyName == propText){
 			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
-			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText(" | ")));
+			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText(" | ")).replace("\t"," "));
 			pageSegment->setText(activeText->toPlainText());
 		}
 		else if (propertyName == propTextDelimiter)
