@@ -17,7 +17,6 @@ Cutscene::Cutscene()
 
 Cutscene::~Cutscene()
 {
-	std::cout << "cutscene destroyed!" << std::endl;
 }
 
 size_t Cutscene::jsonSize() const
@@ -87,11 +86,11 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 			}
 
 			auto texts = split(textPages[i], pageSegment->getTextDelimiter());
-			for (auto &text : texts)
+			for (int j = 0; j < texts.size(); ++j)
 			{
 				TextFormat format;
 				auto activeText = std::make_shared<ActiveText>();
-				activeText->setText(text, format);
+				activeText->setText(texts[j], format);
 
 				auto textSegment = new CutsceneTextSegment;
 				textSegment->setActiveText(activeText);
@@ -103,6 +102,8 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 				textSegment->setCanSkip(pageSegment->getCanSkip());
 				textSegment->setOffsetX(pageSegment->getOffsetX());
 				textSegment->setOffsetY(pageSegment->getOffsetY());
+				if (i > 0 && j == 0) // Don't wait for click on first seg of new page
+					textSegment->setWaitForClick(false);
 				m_segments.emplace_back(textSegment);
 			}
 		}
