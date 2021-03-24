@@ -13,9 +13,10 @@
 namespace NovelTea
 {
 
+class ActiveText;
 class Button;
 class Dialogue;
-class ActiveText;
+class DialogueSegment;
 
 using DialogueCallback = std::function<void(int)>;
 
@@ -46,6 +47,7 @@ public:
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+	void genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot);
 
 private:
 	std::shared_ptr<Dialogue> m_dialogue;

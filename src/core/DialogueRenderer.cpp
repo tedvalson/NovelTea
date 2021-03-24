@@ -155,44 +155,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 		return;
 	}
 
-	// Get player options
-	int i = 0;
-	for (auto childId : npcSegment->getChildrenIds())
-	{
-		auto seg = m_dialogue->getSegment(childId);
-		if (!seg->conditionPasses())
-			continue;
-		if (seg->getShowOnce() && m_dialogue->getSegmentHasShown(childId))
-			continue;
-		if (seg->getTextRaw().empty()) {
-			if (m_buttons.empty()) {
-				m_nextForcedSegmentIndex = childId;
-				if (seg->getShowOnce())
-					m_dialogue->setSegmentHasShown(childId);
-				if (npcSegment->getTextRaw().empty())
-					changeSegment(childId);
-				break;
-			} else
-				continue;
-		}
-		auto btn = new Button;
-		btn->setCentered(false);
-		btn->setTexture(m_buttonTexture);
-		btn->setColor(sf::Color(180, 180, 180));
-		btn->setActiveColor(sf::Color(120, 120, 120));
-		btn->onClick([this, seg, i, childId](){
-			if (m_callback)
-				m_callback(i);
-			if (seg->getShowOnce())
-				m_dialogue->setSegmentHasShown(childId);
-			changeSegment(childId);
-		});
-
-
-		++i;
-		m_buttons.emplace_back(btn);
-		m_buttonStrings.emplace_back(seg->getText());
-	}
+	genOptions(npcSegment, true);
 
 	for (auto &button : m_buttons) {
 		TweenEngine::Tween::set(*button, Button::ALPHA)
@@ -342,6 +305,57 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 		target.draw(*button, states);
 	for (auto &button : m_buttons)
 		target.draw(*button, states);
+}
+
+void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot)
+{
+	// Get player options
+	int i = 0;
+	for (auto childId : parentNode->getChildrenIds())
+	{
+		auto seg = m_dialogue->getSegment(childId);
+		if (!seg->conditionPasses())
+			continue;
+		if (seg->getShowOnce() && m_dialogue->getSegmentHasShown(childId))
+			continue;
+		if (seg->getTextRaw().empty()) {
+			if (m_buttons.empty()) {
+				m_nextForcedSegmentIndex = childId;
+				if (seg->getShowOnce())
+					m_dialogue->setSegmentHasShown(childId);
+				if (isRoot && parentNode->getTextRaw().empty()) {
+					changeSegment(childId);
+					return;
+				}
+				auto childrenIds = seg->getChildrenIds();
+				if (!childrenIds.empty()) {
+					auto firstChild = m_dialogue->getSegment(childrenIds[0]);
+					if (firstChild->getTextRaw().empty()) {
+						genOptions(firstChild, false);
+						return;
+					}
+				}
+				break;
+			} else
+				continue;
+		}
+		auto btn = new Button;
+		btn->setCentered(false);
+		btn->setTexture(m_buttonTexture);
+		btn->setColor(sf::Color(180, 180, 180));
+		btn->setActiveColor(sf::Color(120, 120, 120));
+		btn->onClick([this, seg, i, childId](){
+			if (m_callback)
+				m_callback(i);
+			if (seg->getShowOnce())
+				m_dialogue->setSegmentHasShown(childId);
+			changeSegment(childId);
+		});
+
+		++i;
+		m_buttons.emplace_back(btn);
+		m_buttonStrings.emplace_back(seg->getText());
+	}
 }
 
 } // namespace NovelTea
