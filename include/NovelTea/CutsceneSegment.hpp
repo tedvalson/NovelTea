@@ -15,6 +15,7 @@ public:
 		Text      = 0,
 		PageBreak = 1,
 		Page,
+		Script,
 	};
 
 	enum TextEffect {

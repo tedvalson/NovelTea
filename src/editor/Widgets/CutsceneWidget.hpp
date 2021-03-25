@@ -32,12 +32,14 @@ private slots:
 	void on_actionAddText_triggered();
 	void on_actionAddPage_triggered();
 	void on_actionAddPageBreak_triggered();
+	void on_actionAddScript_triggered();
 	void on_actionRemoveSegment_triggered();
 	void on_horizontalSlider_valueChanged(int value);
 	void on_actionPlayPause_toggled(bool checked);
 	void on_actionStop_triggered();
 	void on_actionLoop_toggled(bool checked);
 	void on_listWidget_clicked(const QModelIndex &index);
+	void on_scriptEdit_textChanged();
 
 protected:
 	void timerEvent(QTimerEvent*) override;

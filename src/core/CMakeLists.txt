@@ -9,6 +9,7 @@ set(SOURCE_FILES
 	${SRCROOT}/CutscenePageBreakSegment.cpp
 	${SRCROOT}/CutscenePageSegment.cpp
 	${SRCROOT}/CutsceneRenderer.cpp
+	${SRCROOT}/CutsceneScriptSegment.cpp
 	${SRCROOT}/CutsceneSegment.cpp
 	${SRCROOT}/CutsceneTextSegment.cpp
 	${SRCROOT}/Dialogue.cpp

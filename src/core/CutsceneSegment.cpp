@@ -2,6 +2,7 @@
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/CutscenePageSegment.hpp>
+#include <NovelTea/CutsceneScriptSegment.hpp>
 
 namespace NovelTea
 {
@@ -25,6 +26,8 @@ std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)
 		segment.reset(new CutscenePageBreakSegment);
 	else if (type == Type::Page)
 		segment.reset(new CutscenePageSegment);
+	else if (type == Type::Script)
+		segment.reset(new CutsceneScriptSegment);
 	else
 		return nullptr;
 

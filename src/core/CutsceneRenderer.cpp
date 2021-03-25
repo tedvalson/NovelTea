@@ -3,6 +3,7 @@
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/CutscenePageSegment.hpp>
+#include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <TweenEngine/Tween.h>
@@ -310,7 +311,8 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	m_currentSegment = segment;
 	auto type = segment->type();
 
-	TweenEngine::TweenCallbackFunction beginCallback, endCallback;
+	TweenEngine::TweenCallbackFunction beginCallback = nullptr;
+	TweenEngine::TweenCallbackFunction endCallback = nullptr;
 	auto timeToNext = 0.f;
 
 	if (type == CutsceneSegment::Text)
@@ -328,7 +330,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			activeText->setFontSizeMultiplier(0.5f * m_fontSizeMultiplier);
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
-				m_cursorPos.y = m_scrollAreaSize.y - scrollAreaMargin;
+				m_cursorPos.y = std::max(0.f, m_scrollAreaSize.y - scrollAreaMargin);
 			}
 			m_cursorPos.x += seg->getOffsetX();
 			m_cursorPos.y += seg->getOffsetY();
@@ -364,6 +366,21 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			startTransitionEffect(seg);
 		};
 	}
+	else if (type == CutsceneSegment::Script)
+	{
+		auto seg = static_cast<CutsceneScriptSegment*>(segment.get());
+		timeToNext = 0.f;
+		beginCallback = [this, seg](TweenEngine::BaseTween*)
+		{
+			if (seg->getAutosaveBefore()) {
+			}
+
+			seg->runScript(m_cutscene);
+
+			if (seg->getAutosaveAfter()) {
+			}
+		};
+	}
 	else
 	{
 		// TODO: Throw error
@@ -386,13 +403,15 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		}
 	};
 
-	TweenEngine::Tween::mark()
-		.setCallback(TweenEngine::TweenCallback::BEGIN, beginCallback)
-		.start(m_tweenManager);
-	TweenEngine::Tween::mark()
-		.delay(timeToNext)
-		.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
-		.start(m_tweenManager);
+	if (beginCallback)
+		TweenEngine::Tween::mark()
+			.setCallback(TweenEngine::TweenCallback::BEGIN, beginCallback)
+			.start(m_tweenManager);
+	if (endCallback)
+		TweenEngine::Tween::mark()
+			.delay(timeToNext)
+			.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
+			.start(m_tweenManager);
 	repositionItems();
 }
 

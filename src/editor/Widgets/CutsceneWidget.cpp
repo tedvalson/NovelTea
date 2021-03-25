@@ -7,6 +7,7 @@
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/CutscenePageSegment.hpp>
+#include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <QToolButton>
 #include <QDebug>
@@ -32,6 +33,10 @@ namespace
 	const auto propBreakDuration  = "Break Duration";
 	const auto propBreakDelimiter = "Break Delimiter";
 
+	const auto propAutosaveAfter  = "Autosave After";
+	const auto propAutosaveBefore = "Autosave Before";
+	const auto propComment        = "Comment";
+
 	const auto propFullScreen     = "Full Screen";
 	const auto propCanFastForward = "Can Fast-Foward";
 	const auto propSpeedFactor    = "Speed Factor";
@@ -53,6 +58,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	createMenus();
 	load();
 
+	ui->scriptEdit->hide();
 	ui->richTextEditor->hide();
 	auto showBrowser = [this]() {
 		ui->richTextEditor->hide();
@@ -103,6 +109,7 @@ void CutsceneWidget::createMenus()
 	menuAdd->addAction(ui->actionAddText);
 	menuAdd->addAction(ui->actionAddPage);
 	menuAdd->addAction(ui->actionAddPageBreak);
+	menuAdd->addAction(ui->actionAddScript);
 
 	// Attach the menu to the Add toolbutton
 	ui->actionAddSegment->setMenu(menuAdd);
@@ -141,6 +148,7 @@ void CutsceneWidget::fillPropertyEditor()
 	ui->propertyBrowser->clear();
 	ui->propertyBrowser->show();
 	ui->richTextEditor->hide();
+	ui->scriptEdit->hide();
 
 	ui->propertyBrowser->setFactoryForManager(segmentsVariantManager, variantFactory);
 	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
@@ -150,6 +158,7 @@ void CutsceneWidget::fillPropertyEditor()
 		return;
 
 	segmentsVariantManager->blockSignals(true);
+	ui->scriptEdit->blockSignals(true);
 
 	QtVariantProperty *prop;
 	auto segment = m_cutscene->internalSegments()[selectedIndex];
@@ -221,16 +230,39 @@ void CutsceneWidget::fillPropertyEditor()
 		prop->setValue(QPoint(pageSegment->getOffsetX(), pageSegment->getOffsetY()));
 		ui->propertyBrowser->addProperty(prop);
 	}
+	else if (type == NovelTea::CutsceneSegment::Script)
+	{
+		auto scriptSegment = static_cast<NovelTea::CutsceneScriptSegment*>(segment.get());
 
-	prop = segmentsVariantManager->addProperty(QVariant::Bool, propWaitForClick);
-	prop->setValue(segment->getWaitForClick());
-	ui->propertyBrowser->addProperty(prop);
+		ui->scriptEdit->show();
+		ui->scriptEdit->setPlainText(QString::fromStdString(scriptSegment->getScript()));
 
-	prop = segmentsVariantManager->addProperty(QVariant::Bool, propCanSkip);
-	prop->setValue(segment->getCanSkip());
-	ui->propertyBrowser->addProperty(prop);
+		prop = segmentsVariantManager->addProperty(QVariant::String, propComment);
+		prop->setValue(QString::fromStdString(scriptSegment->getComment()));
+
+		ui->propertyBrowser->addProperty(prop);
+		prop = segmentsVariantManager->addProperty(QVariant::Bool, propAutosaveBefore);
+		prop->setValue(scriptSegment->getAutosaveBefore());
+		ui->propertyBrowser->addProperty(prop);
+
+		prop = segmentsVariantManager->addProperty(QVariant::Bool, propAutosaveAfter);
+		prop->setValue(scriptSegment->getAutosaveAfter());
+		ui->propertyBrowser->addProperty(prop);
+	}
+
+	if (type != NovelTea::CutsceneSegment::Script)
+	{
+		prop = segmentsVariantManager->addProperty(QVariant::Bool, propWaitForClick);
+		prop->setValue(segment->getWaitForClick());
+		ui->propertyBrowser->addProperty(prop);
+
+		prop = segmentsVariantManager->addProperty(QVariant::Bool, propCanSkip);
+		prop->setValue(segment->getCanSkip());
+		ui->propertyBrowser->addProperty(prop);
+	}
 
 	segmentsVariantManager->blockSignals(false);
+	ui->scriptEdit->blockSignals(false);
 }
 
 void CutsceneWidget::fillSettingsPropertyEditor()
@@ -302,6 +334,12 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	{
 		item = new QListWidgetItem(QIcon::fromTheme("stop"), "Page Break");
 	}
+	else if (type == NovelTea::CutsceneSegment::Script)
+	{
+		auto seg = static_cast<NovelTea::CutsceneScriptSegment*>(segment.get());
+		auto text = "<Script> " + seg->getComment();
+		item = new QListWidgetItem(QIcon::fromTheme("stop"), QString::fromStdString(text));
+	}
 
 	if (!item)
 		return;
@@ -360,6 +398,7 @@ void CutsceneWidget::loadData()
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsRemoved);
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
+	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
 }
 
 void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant &value)
@@ -434,6 +473,19 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 			pageSegment->setOffsetY(point.y());
 		}
 	}
+	else if (type == NovelTea::CutsceneSegment::Script)
+	{
+		auto scriptSegment = static_cast<NovelTea::CutsceneScriptSegment*>(segment.get());
+		if (propertyName == propAutosaveAfter)
+			scriptSegment->setAutosaveAfter(value.toBool());
+		else if (propertyName == propAutosaveBefore)
+			scriptSegment->setAutosaveBefore(value.toBool());
+		else if (propertyName == propComment) {
+			auto comment = value.toString();
+			scriptSegment->setComment(comment.toStdString());
+			ui->listWidget->currentItem()->setText("<Script> " + comment);
+		}
+	}
 
 	if (type != NovelTea::CutsceneSegment::Page)
 	{
@@ -489,6 +541,11 @@ void CutsceneWidget::on_actionAddPage_triggered()
 void CutsceneWidget::on_actionAddPageBreak_triggered()
 {
 	addItem(std::make_shared<NovelTea::CutscenePageBreakSegment>(), true, ui->listWidget->currentRow());
+}
+
+void CutsceneWidget::on_actionAddScript_triggered()
+{
+	addItem(std::make_shared<NovelTea::CutsceneScriptSegment>(), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::timerEvent(QTimerEvent *event)
@@ -678,4 +735,19 @@ void CutsceneWidget::on_actionLoop_toggled(bool checked)
 void CutsceneWidget::on_listWidget_clicked(const QModelIndex &index)
 {
 	checkIndexChange();
+}
+
+void CutsceneWidget::on_scriptEdit_textChanged()
+{
+	if (selectedIndex < 0)
+		return;
+
+	auto &segment = m_cutscene->internalSegments()[selectedIndex];
+	if (segment->type() != NovelTea::CutsceneSegment::Script)
+		return;
+
+	auto scriptSegment = static_cast<NovelTea::CutsceneScriptSegment*>(segment.get());
+	scriptSegment->setScript(ui->scriptEdit->toPlainText().toStdString());
+
+	setModified();
 }
