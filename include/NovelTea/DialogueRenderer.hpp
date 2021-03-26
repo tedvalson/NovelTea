@@ -26,6 +26,7 @@ public:
 	DialogueRenderer();
 
 	void setDialogue(const std::shared_ptr<Dialogue> &dialogue);
+	const std::shared_ptr<Dialogue> &getDialogue() const;
 	void reset();
 	void update(float delta);
 	bool processEvent(const sf::Event &event);
@@ -35,11 +36,14 @@ public:
 	void setDialogueCallback(DialogueCallback callback);
 	void repositionButtons();
 
-	void changeSegment(int newSegmentIndex);
+	void changeSegment(int newSegmentIndex, bool runScript = true);
 	void changeLine(int newLineIndex);
 
+	sj::JSON saveState() const;
+	void restoreState(const sj::JSON &jstate);
+
 	bool isComplete() const;
-	void show(float duration = 1.f);
+	void show(float duration = 1.f, int startSegmentIndex = -1);
 	void hide(float duration = 1.f);
 
 	void setSize(const sf::Vector2f &size);

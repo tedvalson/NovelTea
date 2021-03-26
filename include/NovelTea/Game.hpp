@@ -16,6 +16,7 @@ namespace NovelTea
 {
 
 using MessageCallback = std::function<void(const std::vector<std::string> &messageArray, const DukValue &callback)>;
+using SaveCallback = std::function<void()>;
 
 class ObjectList;
 class Room;
@@ -58,6 +59,7 @@ public:
 	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
+	ADD_ACCESSOR(SaveCallback, SaveCallback, m_saveCallback)
 
 private:
 	std::shared_ptr<ObjectList> m_objectList;
@@ -69,6 +71,7 @@ private:
 	bool m_quitting;
 
 	MessageCallback m_messageCallback;
+	SaveCallback m_saveCallback;
 
 	SaveData m_saveData;
 	TimerManager m_timerManager;

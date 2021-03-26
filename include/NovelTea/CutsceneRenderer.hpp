@@ -27,6 +27,7 @@ public:
 	CutsceneRenderer();
 
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
+	const std::shared_ptr<Cutscene> &getCutscene() const;
 	void reset(bool preservePosition = false);
 
 	bool processEvent(const sf::Event &event);
@@ -35,6 +36,9 @@ public:
 	bool isComplete() const;
 	bool isWaitingForClick() const;
 	void click();
+
+	sj::JSON saveState() const;
+	void restoreState(const sj::JSON &jstate);
 
 	void setScrollTween(float position, float duration);
 	void setScroll(float position) override;
@@ -52,6 +56,7 @@ public:
 	float getFontSizeMultiplier() const;
 
 	ADD_ACCESSOR(bool, SkipWaitingForClick, m_skipWaitingForClick)
+	ADD_ACCESSOR(bool, SkipScriptSegments, m_skipScriptSegments)
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -64,9 +69,11 @@ private:
 	std::shared_ptr<Cutscene> m_cutscene;
 	std::shared_ptr<CutsceneSegment> m_currentSegment;
 	int m_segmentIndex;
+	int m_segmentSaveIndex;
 	bool m_isComplete;
 	bool m_isWaitingForClick;
 	bool m_skipWaitingForClick;
+	bool m_skipScriptSegments;
 
 	IconGlow m_icon;
 

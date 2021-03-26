@@ -31,6 +31,11 @@ void DialogueRenderer::setDialogue(const std::shared_ptr<Dialogue> &dialogue)
 	reset();
 }
 
+const std::shared_ptr<Dialogue> &DialogueRenderer::getDialogue() const
+{
+	return m_dialogue;
+}
+
 void DialogueRenderer::reset()
 {
 	hide(0.f);
@@ -117,7 +122,7 @@ void DialogueRenderer::repositionButtons()
 	}
 }
 
-void DialogueRenderer::changeSegment(int newSegmentIndex)
+void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 {
 	if (newSegmentIndex < 0) {
 		m_isComplete = true;
@@ -133,7 +138,8 @@ void DialogueRenderer::changeSegment(int newSegmentIndex)
 	m_nextForcedSegmentIndex = -1;
 	std::shared_ptr<DialogueSegment> npcSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
-	startSegment->runScript();
+	if (runScript)
+		startSegment->runScript();
 
 	// Get NPC line
 	for (auto childId : startSegment->getChildrenIds())
@@ -218,17 +224,33 @@ void DialogueRenderer::changeLine(int newLineIndex)
 		.start(m_tweenManager);
 }
 
+sj::JSON DialogueRenderer::saveState() const
+{
+	return sj::Array(m_currentSegmentIndex);
+}
+
+void DialogueRenderer::restoreState(const sj::JSON &jstate)
+{
+	auto segmentIndex = jstate[0].ToInt();
+	if (segmentIndex < 0 || segmentIndex >= m_dialogue->segments().size())
+		return;
+	reset();
+	show(1.f, segmentIndex);
+}
+
 bool DialogueRenderer::isComplete() const
 {
 	return m_isComplete;
 }
 
-void DialogueRenderer::show(float duration)
+void DialogueRenderer::show(float duration, int startSegmentIndex)
 {
+	if (startSegmentIndex < 0)
+		startSegmentIndex = m_dialogue->getRootIndex();
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(30.f)
-		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-			changeSegment(m_dialogue->getRootIndex());
+		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this, startSegmentIndex](TweenEngine::BaseTween*){
+			changeSegment(startSegmentIndex, false);
 		})
 		.start(m_tweenManager);
 }

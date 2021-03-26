@@ -16,9 +16,10 @@ Game::Game()
 	, m_room(nullptr)
 	, m_autosaveEnabled(true)
 	, m_quitting(false)
+	, m_messageCallback(nullptr)
+	, m_saveCallback(nullptr)
 	, m_scriptManager(this)
 {
-	m_messageCallback = [](const std::vector<std::string>&, const DukValue&){};
 }
 
 Game::~Game()
@@ -38,6 +39,9 @@ void Game::reset()
 {
 	if (!Proj.isLoaded())
 		return;
+
+	while (!m_entityQueue.empty())
+		m_entityQueue.pop();
 
 	m_quitting = false;
 	m_saveData.reset();
@@ -111,10 +115,8 @@ std::shared_ptr<Entity> Game::popNextEntity()
 
 void Game::save(int slot)
 {
-	m_saveData.data()[ID::entrypointEntity] = sj::Array(
-		static_cast<int>(EntityType::Room),
-		ActiveGame->getRoom()->getId()
-	);
+	if (m_saveCallback)
+		m_saveCallback();
 	m_saveData.save(slot);
 }
 
@@ -171,9 +173,8 @@ bool Game::isQuitting()
 
 void Game::execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback)
 {
-	for (auto &s : messageArray)
-		std::cout << "line: " << s << std::endl;
-	m_messageCallback(messageArray, callback);
+	if (m_messageCallback)
+		m_messageCallback(messageArray, callback);
 }
 
 ScriptManager &Game::getScriptManager()

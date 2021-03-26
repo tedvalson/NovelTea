@@ -147,13 +147,46 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			callOverlayFunc();
 	});
 
+	GGame.setSaveCallback([this](){
+		auto entityType = EntityType::Room;
+		auto entityId = ActiveGame->getRoom()->getId();
+		auto metaData = sj::Array(entityId);
+
+		if (m_mode == Mode::Cutscene) {
+			entityType = EntityType::Cutscene;
+			entityId = m_cutsceneRenderer.getCutscene()->getId();
+			metaData.append(m_cutsceneRenderer.saveState());
+		} else if (m_mode == Mode::Dialogue) {
+			entityType = EntityType::Dialogue;
+			entityId = m_dialogueRenderer.getDialogue()->getId();
+			metaData.append(m_dialogueRenderer.saveState());
+		}
+
+		GSave.data()[ID::entrypointEntity] = sj::Array(
+			static_cast<int>(entityType),
+			entityId
+		);
+		GSave.data()[ID::entrypointMetadata] = metaData;
+	});
+
 	auto &saveEntryPoint = GSave.data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
+	auto &entryMetadata = GSave.data()[ID::entrypointMetadata];
 	if (!saveEntryPoint.IsEmpty())
+	{
 		GGame.pushNextEntityJson(saveEntryPoint);
+		GGame.pushNextEntity(GSave.get<Room>(entryMetadata[0].ToString()));
+		if (entryMetadata.size() > 1 && gotoNextEntity()) {
+			if (m_mode == Mode::Cutscene)
+				m_cutsceneRenderer.restoreState(entryMetadata[1]);
+			else if (m_mode == Mode::Dialogue)
+				m_dialogueRenderer.restoreState(entryMetadata[1]);
+		}
+	}
 	else if (!projEntryPoint.IsEmpty())
 		GGame.pushNextEntityJson(projEntryPoint);
 	processTest();
+}
 
 }
 
@@ -314,11 +347,11 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 			room->runScriptAfterLeave();
 			GGame.setRoom(nextRoom);
 			nextRoom->runScriptAfterEnter();
-			m_navigation.setPaths(nextRoom->getPaths());
 		}
 		showToolbar();
 		updateRoomText();
 		m_roomScrollbar.setScroll(0.f);
+		m_navigation.setPaths(nextRoom->getPaths());
 	}
 
 	m_mode = mode;
@@ -625,6 +658,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 	return success;
 }
 
+// Returns true if active entity is switched
 bool StateMain::gotoNextEntity()
 {
 	if (m_quitting)

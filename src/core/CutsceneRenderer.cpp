@@ -6,6 +6,7 @@
 #include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/Game.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -14,6 +15,7 @@ namespace NovelTea
 
 CutsceneRenderer::CutsceneRenderer()
 : m_skipWaitingForClick(false)
+, m_skipScriptSegments(false)
 , m_size(400.f, 400.f)
 , m_margin(10.f)
 , m_fontSizeMultiplier(1.f)
@@ -41,6 +43,11 @@ void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
 	reset();
 }
 
+const std::shared_ptr<Cutscene> &CutsceneRenderer::getCutscene() const
+{
+	return m_cutscene;
+}
+
 void CutsceneRenderer::reset(bool preservePosition)
 {
 	auto timePassed = m_timePassed;
@@ -49,6 +56,7 @@ void CutsceneRenderer::reset(bool preservePosition)
 	m_isComplete = false;
 	m_isWaitingForClick = false;
 	m_segmentIndex = -1;
+	m_segmentSaveIndex = -1;
 	m_timePassed = sf::Time::Zero;
 	m_timeToNext = sf::Time::Zero;
 	m_cursorPos = sf::Vector2f();
@@ -60,7 +68,9 @@ void CutsceneRenderer::reset(bool preservePosition)
 	m_tweenManager.killAll();
 
 	if (preservePosition) {
+		auto skipScripts = m_skipScriptSegments;
 		auto skipWaiting = m_skipWaitingForClick;
+		m_skipScriptSegments = true;
 		m_skipWaitingForClick = true;
 
 		if (timePassed.asSeconds() > 0.2f)
@@ -69,6 +79,7 @@ void CutsceneRenderer::reset(bool preservePosition)
 		addSegmentToQueue(0);
 		update(timePassed.asSeconds());
 
+		m_skipScriptSegments = skipScripts;
 		m_skipWaitingForClick = skipWaiting;
 	} else
 		addSegmentToQueue(0);
@@ -85,7 +96,6 @@ void CutsceneRenderer::update(float delta)
 
 	m_icon.update(delta);
 	m_scrollBar.update(delta);
-	m_tweenManager.update(0.001f); // Trigger next segment if delay is 0
 
 	delta *= m_cutscene->getSpeedFactor();
 	auto timeDelta = sf::seconds(delta);
@@ -105,8 +115,6 @@ void CutsceneRenderer::update(float delta)
 		do
 		{
 			segmentIndex = m_segmentIndex;
-			m_tweenManager.update(0.001f); // Trigger next segment if delay is 0
-			m_tweenManager.update(0.001f); // Trigger possible 0 delay tween in above segment
 		}
 		while (segmentIndex != m_segmentIndex);
 	}
@@ -138,6 +146,25 @@ void CutsceneRenderer::click()
 		if (m_currentSegment && m_currentSegment->getCanSkip())
 			update(m_timeToNext.asSeconds());
 	}
+}
+
+sj::JSON CutsceneRenderer::saveState() const
+{
+	return sj::Array(m_segmentSaveIndex);
+}
+
+void CutsceneRenderer::restoreState(const sj::JSON &jstate)
+{
+	reset();
+	auto segmentIndex = jstate[0].ToInt();
+	if (segmentIndex < 1 || segmentIndex >= m_cutscene->segments().size())
+		return;
+	auto timeMs = m_cutscene->getDelayMs(segmentIndex) - 1;
+	setSkipScriptSegments(true);
+	setSkipWaitingForClick(true);
+	update(0.001f * timeMs);
+	setSkipScriptSegments(false);
+	setSkipWaitingForClick(false);
 }
 
 void CutsceneRenderer::setScrollTween(float position, float duration)
@@ -303,6 +330,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	m_scrollBar.setScrollAreaSize(sf::Vector2u(m_size.x, m_size.y - m_margin*2));
 
 	m_segmentIndex = segmentIndex;
+	m_segmentSaveIndex = segmentIndex;
 	auto segments = m_cutscene->segments();
 	if (segmentIndex >= segments.size())
 		return;
@@ -313,12 +341,12 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 
 	TweenEngine::TweenCallbackFunction beginCallback = nullptr;
 	TweenEngine::TweenCallbackFunction endCallback = nullptr;
-	auto timeToNext = 0.f;
+	auto delayMs = segment->getDelay();
+	auto timeToNext = 0.001f * (delayMs > 0 ? delayMs - 1 : 0);
 
 	if (type == CutsceneSegment::Text)
 	{
 		auto seg = static_cast<CutsceneTextSegment*>(segment.get());
-		timeToNext = 0.001f * seg->getDelay();
 
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
@@ -352,7 +380,6 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	else if (type == CutsceneSegment::PageBreak)
 	{
 		auto seg = static_cast<CutscenePageBreakSegment*>(segment.get());
-		timeToNext = 0.001f * seg->getDelay();
 
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
@@ -369,15 +396,22 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	else if (type == CutsceneSegment::Script)
 	{
 		auto seg = static_cast<CutsceneScriptSegment*>(segment.get());
-		timeToNext = 0.f;
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
+			m_timeToNext = sf::milliseconds(seg->getDelay());
+			if (m_skipScriptSegments)
+				return;
+
 			if (seg->getAutosaveBefore()) {
+				m_segmentSaveIndex = m_segmentIndex;
+				ActiveGame->autosave();
 			}
 
 			seg->runScript(m_cutscene);
 
 			if (seg->getAutosaveAfter()) {
+				m_segmentSaveIndex = m_segmentIndex + 1;
+				ActiveGame->autosave();
 			}
 		};
 	}
@@ -404,9 +438,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	};
 
 	if (beginCallback)
-		TweenEngine::Tween::mark()
-			.setCallback(TweenEngine::TweenCallback::BEGIN, beginCallback)
-			.start(m_tweenManager);
+		beginCallback(nullptr);
 	if (endCallback)
 		TweenEngine::Tween::mark()
 			.delay(timeToNext)

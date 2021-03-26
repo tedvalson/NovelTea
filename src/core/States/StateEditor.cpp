@@ -21,6 +21,7 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	ScriptMan.reset();
 
 	m_cutsceneRenderer.setSkipWaitingForClick(true);
+	m_cutsceneRenderer.setSkipScriptSegments(true);
 
 	m_roomScrollbar.setColor(sf::Color(0, 0, 0, 40));
 	m_roomScrollbar.setAutoHide(false);
