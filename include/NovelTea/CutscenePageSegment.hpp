@@ -18,6 +18,8 @@ public:
 	const size_t &getDuration() const override;
 	const size_t &getDelay() const override;
 
+	int getSegmentCount() const;
+
 	ADD_ACCESSOR(size_t, TextDelay, m_textDelay)
 	ADD_ACCESSOR(size_t, TextDuration, m_textDuration)
 	ADD_ACCESSOR(size_t, BreakDelay, m_breakDelay)

@@ -90,4 +90,13 @@ const size_t &CutscenePageSegment::getDelay() const
 	return m_delay;
 }
 
+int CutscenePageSegment::getSegmentCount() const
+{
+	auto pages = split(getText(), getBreakDelimiter());
+	auto result = pages.empty() ? 0 : pages.size() - 1;
+	for (auto &page : pages)
+		result += split(page, getTextDelimiter()).size();
+	return result;
+}
+
 } // namespace NovelTea

@@ -46,6 +46,9 @@ public:
 	const sf::Vector2f &getScrollSize() override;
 	void repositionItems();
 
+	int getSegmentIndex() const;
+	int getInternalSegmentIndex(int index = -1) const;
+
 	void setSize(const sf::Vector2f &size);
 	const sf::Vector2f &getSize() const;
 

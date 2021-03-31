@@ -107,16 +107,9 @@ void CutsceneRenderer::update(float delta)
 		if (m_segmentIndex < 0 || m_segmentIndex >= segments.size())
 			break;
 
-		size_t segmentIndex;
 		timeDelta -= m_timeToNext;
 		m_timePassed += m_timeToNext;
 		m_tweenManager.update(m_timeToNext.asSeconds());
-
-		do
-		{
-			segmentIndex = m_segmentIndex;
-		}
-		while (segmentIndex != m_segmentIndex);
 	}
 
 	if (!m_isWaitingForClick || m_skipWaitingForClick) {
@@ -150,16 +143,19 @@ void CutsceneRenderer::click()
 
 sj::JSON CutsceneRenderer::saveState() const
 {
-	return sj::Array(m_segmentSaveIndex);
+	auto index = getInternalSegmentIndex(m_segmentSaveIndex);
+	if (index < 0)
+		index = m_cutscene->internalSegments().size();
+	return sj::Array(index);
 }
 
 void CutsceneRenderer::restoreState(const sj::JSON &jstate)
 {
 	reset();
 	auto segmentIndex = jstate[0].ToInt();
-	if (segmentIndex < 1 || segmentIndex >= m_cutscene->segments().size())
+	if (segmentIndex < 1 || segmentIndex > m_cutscene->internalSegments().size() + 1)
 		return;
-	auto timeMs = m_cutscene->getDelayMs(segmentIndex) - 1;
+	auto timeMs = m_cutscene->getDelayMs(segmentIndex) - 2;
 	setSkipScriptSegments(true);
 	setSkipWaitingForClick(true);
 	update(0.001f * timeMs);
@@ -213,6 +209,28 @@ void CutsceneRenderer::repositionItems()
 	m_fadeRectTop.setSize(sf::Vector2f(998.f, m_margin));
 	m_fadeRectTop.setOrigin(m_fadeRectTop.getSize());
 	m_fadeRectBottom.setPosition(0.f, m_size.y - m_margin);
+}
+
+int CutsceneRenderer::getSegmentIndex() const
+{
+	return m_segmentIndex;
+}
+
+int CutsceneRenderer::getInternalSegmentIndex(int index) const
+{
+	int pos = (index < 0) ? m_segmentIndex : index;
+	for (int i = 0; i < m_cutscene->internalSegments().size(); ++i)
+	{
+		auto &segment = m_cutscene->internalSegments()[i];
+		if (segment->type() == CutsceneSegment::Page) {
+			auto pageSegment = static_cast<CutscenePageSegment*>(segment.get());
+			pos -= pageSegment->getSegmentCount();
+		} else
+			--pos;
+		if (pos < 0)
+			return i;
+	}
+	return -1;
 }
 
 void CutsceneRenderer::setSize(const sf::Vector2f &size)
