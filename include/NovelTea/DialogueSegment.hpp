@@ -37,6 +37,9 @@ public:
 	std::string getText(bool *ok = nullptr) const;
 	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
 
+	bool isTextNext() const;
+	bool isOptionNext() const;
+
 	void setDialogue(Dialogue *dialogue);
 
 	// For scripting compatiblity

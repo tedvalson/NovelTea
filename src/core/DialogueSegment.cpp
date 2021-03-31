@@ -137,6 +137,27 @@ std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultilin
 	return result;
 }
 
+bool DialogueSegment::isTextNext() const
+{
+	if (m_childrenIds.empty())
+		return false;
+	auto seg = m_dialogue->getSegment(m_childrenIds[0]);
+	if (!seg->getTextRaw().empty())
+		return seg->getType() == Text;
+	return seg->isTextNext();
+}
+
+bool DialogueSegment::isOptionNext() const
+{
+	// TODO: Handle infinite recursion case with Link type
+	if (m_childrenIds.empty())
+		return false;
+	auto seg = m_dialogue->getSegment(m_childrenIds[0]);
+	if (!seg->getTextRaw().empty())
+		return seg->getType() == Option;
+	return seg->isOptionNext();
+}
+
 void DialogueSegment::setDialogue(Dialogue *dialogue)
 {
 	m_dialogue = dialogue;

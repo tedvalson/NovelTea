@@ -122,6 +122,7 @@ void DialogueRenderer::repositionButtons()
 	}
 }
 
+// Segment arg is a choice segment (or root/link)
 void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 {
 	if (newSegmentIndex < 0) {
@@ -136,12 +137,12 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 	m_buttonStrings.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
-	std::shared_ptr<DialogueSegment> npcSegment = nullptr;
+	std::shared_ptr<DialogueSegment> textSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
 	if (runScript)
 		startSegment->runScript();
 
-	// Get NPC line
+	// Get text line
 	for (auto childId : startSegment->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
@@ -150,18 +151,25 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 		if (seg->getShowOnce() && m_dialogue->segmentShown(childId))
 			continue;
 
-		npcSegment = seg;
-		m_textLines = npcSegment->getTextMultiline();
+		textSegment = seg;
+		m_textLines = textSegment->getTextMultiline();
 		break;
 	}
-	if (npcSegment)
-		npcSegment->runScript();
+	if (textSegment)
+		textSegment->runScript();
 	else {
 		m_isComplete = true;
 		return;
 	}
 
-	genOptions(npcSegment, true);
+	genOptions(textSegment, true);
+
+	// Exit properly when ended on empty text segment
+	auto &childIds = textSegment->getChildrenIds();
+	if (childIds.empty() && textSegment->getTextRaw().empty() && m_buttons.empty()) {
+		m_isComplete = true;
+		return;
+	}
 
 	for (auto &button : m_buttons) {
 		TweenEngine::Tween::set(*button, Button::ALPHA)
@@ -226,7 +234,10 @@ void DialogueRenderer::changeLine(int newLineIndex)
 
 sj::JSON DialogueRenderer::saveState() const
 {
-	return sj::Array(m_currentSegmentIndex);
+	auto index = m_nextForcedSegmentIndex;
+	if (index < 0)
+		index = m_currentSegmentIndex;
+	return sj::Array(index);
 }
 
 void DialogueRenderer::restoreState(const sj::JSON &jstate)
@@ -331,28 +342,35 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 
 void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot)
 {
+	auto optionNext = parentNode->isOptionNext();
+
 	// Get player options
 	int i = 0;
 	for (auto childId : parentNode->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
-		if (!seg->conditionPasses())
-			continue;
 		if (seg->getShowOnce() && m_dialogue->getSegmentHasShown(childId))
 			continue;
+		if (!seg->conditionPasses())
+			continue;
 		if (seg->getTextRaw().empty()) {
+			// If first valid option is empty, pass through
 			if (m_buttons.empty()) {
-				m_nextForcedSegmentIndex = childId;
+				if (isRoot)
+					m_nextForcedSegmentIndex = childId;
 				if (seg->getShowOnce())
 					m_dialogue->setSegmentHasShown(childId);
 				if (isRoot && parentNode->getTextRaw().empty()) {
 					changeSegment(childId);
 					return;
 				}
-				auto childrenIds = seg->getChildrenIds();
-				if (!childrenIds.empty()) {
-					auto firstChild = m_dialogue->getSegment(childrenIds[0]);
+				if (optionNext) {
+					// If first child [text] seg is empty, then recurse.
+					// Children should exist if optionNext while seg is empty.
+					auto firstChild = m_dialogue->getSegment(seg->getChildrenIds()[0]);
 					if (firstChild->getTextRaw().empty()) {
+						seg->runScript();
+						firstChild->runScript();
 						genOptions(firstChild, false);
 						return;
 					}
