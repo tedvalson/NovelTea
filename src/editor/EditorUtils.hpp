@@ -4,6 +4,7 @@
 #include <QTextDocument>
 #include <QTextCharFormat>
 #include <SFML/Graphics/Color.hpp>
+#include "Widgets/EditorTabWidget.hpp"
 #include <NovelTea/TextFormat.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/json.hpp>
@@ -16,6 +17,8 @@ class EditorUtils
 public:
 	static QString escape(const QString &s);
 	static QString unescape(const QString &s);
+
+	static QIcon iconFromTabType(EditorTabWidget::Type type);
 
 	static json documentToJson(const QTextDocument *doc);
 	static QTextDocument *jsonToDocument(const json &j);

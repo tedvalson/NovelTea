@@ -1,6 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>wave.vert</file>
-        <file>pixelate.frag</file>
+        <file>icons/bg.png</file>
+        <file alias="icons/0.png">icons/cutscene.png</file>
+        <file alias="icons/1.png">icons/room.png</file>
+        <file alias="icons/2.png">icons/object.png</file>
+        <file alias="icons/3.png">icons/action.png</file>
+        <file alias="icons/4.png">icons/dialogue.png</file>
+        <file alias="icons/7.png">icons/script.png</file>
+        <file alias="icons/9.png">icons/verb.png</file>
     </qresource>
 </RCC>

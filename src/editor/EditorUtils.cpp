@@ -3,6 +3,8 @@
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <QTextBlock>
+#include <QPainter>
+#include <QIcon>
 #include <iostream>
 
 QString EditorUtils::escape(const QString &s)
@@ -15,6 +17,54 @@ QString EditorUtils::unescape(const QString &s)
 {
 	auto result = s;
 	return result.replace("\\n", "\n").replace("\\t", "\t");
+}
+
+QIcon EditorUtils::iconFromTabType(EditorTabWidget::Type type)
+{
+	QColor color;
+	QPixmap pixmap(":/icons/bg.png");
+
+	switch (type) {
+	case EditorTabWidget::Action:
+		color = Qt::magenta;
+		break;
+	case EditorTabWidget::Cutscene:
+		color = Qt::black;
+		break;
+	case EditorTabWidget::Dialogue:
+		color = Qt::cyan;
+		break;
+	case EditorTabWidget::Object:
+		color = Qt::red;
+		break;
+	case EditorTabWidget::Room:
+		color = Qt::blue;
+		break;
+	case EditorTabWidget::Script:
+		color = Qt::yellow;
+		break;
+	case EditorTabWidget::Verb:
+		color = Qt::green;
+		break;
+	default:
+		return QIcon();
+	}
+
+	color.setAlpha(250);
+	pixmap.fill(color);
+
+	auto image = QImage(QString(":/icons/%1.png").arg(type));
+	QPainter p;
+	p.begin(&pixmap);
+	p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+	p.drawImage(0, 0, image);
+	p.setCompositionMode(QPainter::CompositionMode_DestinationOver);
+	// Exclude shadow for the black icon
+	if (type != EditorTabWidget::Cutscene)
+		p.drawImage(2, 2, image);
+	p.end();
+
+	return QIcon(pixmap);
 }
 
 json EditorUtils::documentToJson(const QTextDocument *doc)

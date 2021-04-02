@@ -1,4 +1,5 @@
 #include "EditorTabWidget.hpp"
+#include "EditorUtils.hpp"
 #include <QIcon>
 
 
@@ -20,7 +21,7 @@ bool EditorTabWidget::isModified() const
 
 QIcon EditorTabWidget::getIcon() const
 {
-	return QIcon(QString(":/icons/%1.png").arg(getType()));
+	return EditorUtils::iconFromTabType(getType());
 }
 
 const std::string &EditorTabWidget::idName() const

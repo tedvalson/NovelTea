@@ -1,5 +1,6 @@
 #include "TreeModel.hpp"
 #include "TreeItem.hpp"
+#include "EditorUtils.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Object.hpp>
@@ -269,9 +270,10 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 	}
 	else if (role == Qt::DecorationRole)
 	{
-		auto tabType = EditorTabWidget::entityTypeToTabType(static_cast<NovelTea::EntityType>(item->data(1).toInt()));
-		if (!index.parent().isValid())
-			return QIcon(QString(":/icons/%1.png").arg(tabType));
+		if (!index.parent().isValid()) {
+			auto tabType = EditorTabWidget::entityTypeToTabType(static_cast<NovelTea::EntityType>(item->data(1).toInt()));
+			return EditorUtils::iconFromTabType(tabType);
+		}
 	}
 	else if (role == Qt::DisplayRole)
 		return item->data(index.column());
