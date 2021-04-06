@@ -35,10 +35,11 @@ VerbList::VerbList()
 	setAlpha(0.f);
 }
 
-void VerbList::update(float delta)
+bool VerbList::update(float delta)
 {
 	m_scrollBar.update(delta);
 	Hideable::update(delta);
+	return true;
 }
 
 bool VerbList::processEvent(const sf::Event &event)

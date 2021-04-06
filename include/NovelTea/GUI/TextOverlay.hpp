@@ -17,7 +17,7 @@ public:
 	TextOverlay();
 
 	bool processEvent(const sf::Event& event);
-	void update(float delta) override;
+	bool update(float delta) override;
 
 	void setScroll(float position) override;
 	float getScroll() override;

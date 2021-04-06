@@ -27,10 +27,11 @@ Inventory::Inventory()
 	setSize(sf::Vector2f(150.f, 150.f));
 }
 
-void Inventory::update(float delta)
+bool Inventory::update(float delta)
 {
 	m_scrollBar.update(delta);
 	Hideable::update(delta);
+	return true;
 }
 
 bool Inventory::processEvent(const sf::Event &event)

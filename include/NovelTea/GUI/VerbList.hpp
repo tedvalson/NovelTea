@@ -22,7 +22,7 @@ class VerbList : public sf::Drawable, public Scrollable, public Hideable
 public:
 	VerbList();
 
-	void update(float delta) override;
+	bool update(float delta) override;
 	bool processEvent(const sf::Event& event);
 
 	void refreshItems();

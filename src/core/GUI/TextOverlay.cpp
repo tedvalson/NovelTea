@@ -41,10 +41,11 @@ bool TextOverlay::processEvent(const sf::Event &event)
 	return false;
 }
 
-void TextOverlay::update(float delta)
+bool TextOverlay::update(float delta)
 {
 	m_scrollBar.update(delta);
 	Hideable::update(delta);
+	return true;
 }
 
 void TextOverlay::setScroll(float position)

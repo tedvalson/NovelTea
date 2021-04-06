@@ -23,7 +23,7 @@ class ActionBuilder : public sf::Drawable, public Hideable
 public:
 	ActionBuilder();
 
-	void update(float delta) override;
+	bool update(float delta) override;
 	bool processEvent(const sf::Event& event);
 
 	void show(float duration = 0.4f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;

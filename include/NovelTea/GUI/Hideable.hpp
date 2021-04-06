@@ -17,10 +17,11 @@ public:
 
 	Hideable();
 
-	virtual void update(float delta);
+	virtual bool update(float delta);
 
 	virtual void show(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr);
 	virtual void hide(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr);
+	bool isHiding() const;
 	bool isShowing() const;
 	bool isVisible() const;
 

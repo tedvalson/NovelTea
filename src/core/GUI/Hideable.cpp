@@ -11,14 +11,15 @@ Hideable::Hideable()
 {
 }
 
-void Hideable::update(float delta)
+bool Hideable::update(float delta)
 {
 	m_tweenManager.update(delta);
+	return true;
 }
 
 void Hideable::show(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isShowing && !m_visible)
+	if (!m_isShowing && (!m_visible || m_isHiding))
 	{
 		m_isShowing = true;
 		m_isHiding = false;
@@ -32,6 +33,7 @@ void Hideable::show(float duration, int tweenType, HideableCallback callback)
 					callback();
 			}).start(m_tweenManager);
 	}
+	m_tweenManager.update(0.001f);
 }
 
 void Hideable::hide(float duration, int tweenType, HideableCallback callback)
@@ -50,6 +52,12 @@ void Hideable::hide(float duration, int tweenType, HideableCallback callback)
 					callback();
 			}).start(m_tweenManager);
 	}
+	m_tweenManager.update(0.001f);
+}
+
+bool Hideable::isHiding() const
+{
+	return m_isHiding;
 }
 
 bool Hideable::isShowing() const
