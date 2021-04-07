@@ -10,6 +10,7 @@ enum class StateID {
 	Main,
 	Settings,
 	TextLog,
+	TextSettings,
 	TitleScreen,
 };
 

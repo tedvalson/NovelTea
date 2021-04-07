@@ -1,18 +1,18 @@
-#ifndef NOVELTEA_STATESETTINGS_HPP
-#define NOVELTEA_STATESETTINGS_HPP
+#ifndef NOVELTEA_STATETEXTSETTINGS_HPP
+#define NOVELTEA_STATETEXTSETTINGS_HPP
 
 #include <NovelTea/States/State.hpp>
 #include <TweenEngine/TweenManager.h>
-#include <NovelTea/TweenObjects.hpp>
+#include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/Button.hpp>
 
 namespace NovelTea
 {
 
-class StateSettings : public State
+class StateTextSettings : public State
 {
 public:
-	StateSettings(StateStack& stack, Context& context, StateCallback callback);
+	StateTextSettings(StateStack& stack, Context& context, StateCallback callback);
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
@@ -20,14 +20,22 @@ public:
 
 	void setAlpha(float alpha) override;
 
+	void changeSizeMultiplier(float multiplier);
+
 private:
+	float m_multiplier;
+	ActiveText m_roomActiveText;
+
 	TweenText m_textTitle;
-	Button m_buttonBack;
-	Button m_buttonTextSize;
+	TweenText m_textValue;
+	Button m_buttonCancel;
+	Button m_buttonFinish;
+	Button m_buttonSizeDec;
+	Button m_buttonSizeInc;
 	TweenRectangleShape m_bg;
 	TweenEngine::TweenManager m_tweenManager;
 };
 
 } // namespace NovelTea
 
-#endif // NOVELTEA_STATESETTINGS_HPP
+#endif // NOVELTEA_STATETEXTSETTINGS_HPP

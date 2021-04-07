@@ -28,6 +28,7 @@ set(SOURCE_FILES
 	${SRCROOT}/SaveData.cpp
 	${SRCROOT}/Script.cpp
 	${SRCROOT}/ScriptManager.cpp
+	${SRCROOT}/Settings.cpp
 	${SRCROOT}/TextBlock.cpp
 	${SRCROOT}/TextFormat.cpp
 	${SRCROOT}/TextFragment.cpp
@@ -53,6 +54,7 @@ set(SOURCE_FILES
 	${SRCROOT}/States/StateSettings.cpp
 	${SRCROOT}/States/StateStack.cpp
 	${SRCROOT}/States/StateTextLog.cpp
+	${SRCROOT}/States/StateTextSettings.cpp
 	${SRCROOT}/States/StateTitleScreen.cpp
 	
 	${PROJECT_SOURCE_DIR}/external/duktape.c

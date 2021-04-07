@@ -1,13 +1,21 @@
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Settings.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
 int main(int argc, char **argv)
 {
+	auto dir = "/home/android/dev/NovelTea/bin";
+	GSettings.setDirectory(dir);
+	GSettings.load();
+	GSave.setDirectory(dir);
+
 	sf::RenderWindow window(sf::VideoMode(480/2, 700/2, 16), "NovelTea Launcher");
 	NovelTea::EngineConfig config;
 	config.width = 480;
 	config.height = 700;
+	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
 	config.fps = 30;
 	config.initialState = NovelTea::StateID::Intro;
 	auto engine = new NovelTea::Engine(config);

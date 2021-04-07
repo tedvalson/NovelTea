@@ -4,6 +4,7 @@
 #include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/States/StateSettings.hpp>
 #include <NovelTea/States/StateTextLog.hpp>
+#include <NovelTea/States/StateTextSettings.hpp>
 #include <NovelTea/States/StateTitleScreen.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <SFML/System/Time.hpp>
@@ -27,6 +28,7 @@ Engine::Engine(EngineConfig config)
 	m_stateStack->registerState<StateMain>(StateID::Main);
 	m_stateStack->registerState<StateSettings>(StateID::Settings);
 	m_stateStack->registerState<StateTextLog>(StateID::TextLog);
+	m_stateStack->registerState<StateTextSettings>(StateID::TextSettings);
 	m_stateStack->registerState<StateTitleScreen>(StateID::TitleScreen);
 }
 

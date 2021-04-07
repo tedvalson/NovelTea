@@ -1,5 +1,6 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/Settings.hpp>
 #include <SFML/System/NativeActivity.hpp>
 #include <SFML/System/Sleep.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -7,6 +8,11 @@
 
 int main(int argc, char *argv[])
 {
+	auto nativeActivity = sf::getNativeActivity();
+	GSave.setDirectory(nativeActivity->internalDataPath);
+	GSettings.setDirectory(nativeActivity->internalDataPath);
+	GSettings.load();
+
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
 
 	sf::RenderWindow window(screen, "");
@@ -15,6 +21,7 @@ int main(int argc, char *argv[])
 	NovelTea::EngineConfig config;
 	config.width = window.getSize().x;
 	config.height = window.getSize().y;
+	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
 	config.fps = 30;
 	config.initialState = NovelTea::StateID::Intro;
 	auto engine = new NovelTea::Engine(config);
@@ -24,8 +31,6 @@ int main(int argc, char *argv[])
 	projDir += "/test";
 	Proj.loadFromFile(projDir + "/test.ntp");
 	
-	auto nativeActivity = sf::getNativeActivity();
-	GSave.setDirectory(nativeActivity->internalDataPath);
 
 	// We shouldn't try drawing to the screen while in background
 	// so we'll have to track that. You can do minor background
