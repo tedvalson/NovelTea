@@ -55,9 +55,10 @@ public:
 	void requestStackClear();
 	void requestStackClearUnder();
 	bool runCallback(void *data);
-	void close(float duration = 0.5f);
+	void close(float duration = 0.5f, StateID stateId = StateID::None);
 
 	Context getContext() const;
+	StateStack &getStack() const;
 
 private:
 	float        m_alpha;

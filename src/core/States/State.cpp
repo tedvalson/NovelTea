@@ -54,10 +54,12 @@ bool State::runCallback(void *data)
 	return false;
 }
 
-void State::close(float duration)
+void State::close(float duration, StateID stateId)
 {
-	hide(duration, ALPHA, [this](){
+	hide(duration, ALPHA, [this, stateId](){
 		requestStackPop();
+		if (stateId != StateID::None)
+			requestStackPush(stateId);
 	});
 }
 
@@ -74,6 +76,11 @@ float State::getAlpha() const
 State::Context State::getContext() const
 {
 	return m_context;
+}
+
+StateStack &State::getStack() const
+{
+	return *m_stack;
 }
 
 } // namespace NovelTea
