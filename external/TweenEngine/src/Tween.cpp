@@ -679,6 +679,11 @@ namespace TweenEngine
 	 */
     int Tween::getCombinedAttributesCount() { return combinedAttrsCnt; }
 
+	Tweenable *Tween::getTarget() const
+	{
+		return targetObj;
+	}
+
     // -------------------------------------------------------------------------
 	// Base Class
 	// -------------------------------------------------------------------------

@@ -109,6 +109,8 @@ namespace TweenEngine
         float *getTargetValues();
         int getCombinedAttributesCount();
 
+		Tweenable *getTarget() const;
+
         
     };
 }
