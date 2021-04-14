@@ -30,5 +30,5 @@ function toast(msg, duration)
 {
 	if (typeof duration === 'undefined')
 		duration = 0;
-	spawnNotification(msg, duration);
+	Game.spawnNotification(msg, duration);
 }

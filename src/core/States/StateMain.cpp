@@ -1,6 +1,5 @@
 #include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
-#include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ScriptManager.hpp>
@@ -236,8 +235,7 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_buttonTextLog);
 	target.draw(m_inventory);
 
-	for (auto &notification : Notification::notifications)
-		target.draw(*notification);
+	target.draw(GGame.getNotificationManager());
 }
 
 void StateMain::resize(const sf::Vector2f &size)
@@ -285,7 +283,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_inventory.refreshItems();
 
 	// Notification setup
-	Notification::setScreenSize(size);
+	GGame.getNotificationManager().setScreenSize(size);
+	GGame.getNotificationManager().setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_textOverlay.setFontSizeMultiplier(fontSizeMultiplier);
 
@@ -935,7 +934,7 @@ bool StateMain::update(float delta)
 	m_navigation.update(delta);
 	m_textOverlay.update(delta);
 
-	Notification::update(delta);
+	GGame.getNotificationManager().update(delta);
 	if (GGame.getTimerManager().update(delta)) {
 		if (m_mode == Mode::Room)
 			updateRoomText();

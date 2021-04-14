@@ -6,6 +6,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/Utils.hpp>
+#include <NovelTea/GUI/Notification.hpp>
 #include <queue>
 
 #define GMan NovelTea::GameManager::instance()
@@ -50,11 +51,14 @@ public:
 	void quit();
 	bool isQuitting();
 
+	void spawnNotification(const std::string &message, int durationMs = 0);
+
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
 
 	ScriptManager &getScriptManager();
 	SaveData &getSaveData();
 	TimerManager &getTimerManager();
+	NotificationManager &getNotificationManager();
 
 	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
@@ -76,6 +80,7 @@ private:
 	SaveData m_saveData;
 	TimerManager m_timerManager;
 	ScriptManager m_scriptManager;
+	NotificationManager m_notificationManager;
 };
 
 

@@ -6,7 +6,6 @@
 #include <NovelTea/States/StateTextLog.hpp>
 #include <NovelTea/States/StateTextSettings.hpp>
 #include <NovelTea/States/StateTitleScreen.hpp>
-#include <NovelTea/GUI/Notification.hpp>
 #include <SFML/System/Time.hpp>
 #include <chrono>
 
@@ -51,7 +50,7 @@ void Engine::resize(size_t width, size_t height)
 	m_renderTexture.setSmooth(true);
 	m_sprite.setTexture(m_renderTexture.getTexture(), true);
 
-	Notification::setScreenSize(sf::Vector2f(width, height));
+	m_game->getNotificationManager().setScreenSize(sf::Vector2f(width, height));
 
 	sf::FloatRect viewport;
 	sf::Vector2f widgetSize(width, height);

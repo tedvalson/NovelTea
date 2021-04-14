@@ -166,6 +166,11 @@ bool Game::isQuitting()
 	return m_quitting;
 }
 
+void Game::spawnNotification(const std::string &message, int durationMs)
+{
+	m_notificationManager.spawn(message, durationMs);
+}
+
 //void Game::execMessageCallback(const std::string &message, const DukValue &callback)
 //{
 //	m_messageCallback(message, callback);
@@ -190,6 +195,11 @@ SaveData &Game::getSaveData()
 TimerManager &Game::getTimerManager()
 {
 	return m_timerManager;
+}
+
+NotificationManager &Game::getNotificationManager()
+{
+	return m_notificationManager;
 }
 
 
