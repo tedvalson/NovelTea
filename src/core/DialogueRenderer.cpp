@@ -163,6 +163,9 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 	}
 
 	genOptions(textSegment, true);
+	// Return if genOptions() changed the segment
+	if (m_currentSegmentIndex != newSegmentIndex)
+		return;
 
 	// Exit properly when ended on empty text segment
 	auto &childIds = textSegment->getChildrenIds();
@@ -382,8 +385,9 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 		auto btn = new Button;
 		btn->setCentered(false);
 		btn->setTexture(m_buttonTexture);
-		btn->setColor(sf::Color(180, 180, 180));
-		btn->setActiveColor(sf::Color(120, 120, 120));
+		btn->setColor(sf::Color(180, 180, 180, 180));
+		btn->setActiveColor(sf::Color(140, 140, 140));
+		btn->setTextColor(sf::Color::Black);
 		btn->onClick([this, seg, i, childId](){
 			if (m_callback)
 				m_callback(i);
