@@ -21,7 +21,8 @@ namespace std
 	template < typename T > std::string to_string(const T& n)
 	{
 		std::ostringstream stm;
-		stm << n;
+		stm.precision(6);
+		stm << std::fixed << n;
 		return stm.str();
 	}
 }
@@ -308,6 +309,7 @@ class JSON
 
 		/// Added for NovelTea
 		bool IsArray() const { return Type == Class::Array; }
+		bool IsObject() const { return Type == Class::Object; }
 		bool IsEmpty() const;
 		void erase( unsigned index ){
 			Internal.List->erase(Internal.List->begin() + index);
