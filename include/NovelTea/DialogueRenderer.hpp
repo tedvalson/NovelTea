@@ -34,7 +34,6 @@ public:
 	void processLines();
 	bool processSelection(int buttonIndex);
 	void setDialogueCallback(DialogueCallback callback);
-	void repositionButtons();
 
 	void changeSegment(int newSegmentIndex, bool runScript = true);
 	void changeLine(int newLineIndex);
@@ -49,9 +48,15 @@ public:
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
 
+	void setFontSizeMultiplier(float fontSizeMultiplier);
+	float getFontSizeMultiplier() const;
+
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	void genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot);
+
+	void repositionButtons();
+	void applyChanges();
 
 private:
 	std::shared_ptr<Dialogue> m_dialogue;
@@ -75,6 +80,7 @@ private:
 	TweenNinePatch m_bg;
 	float m_middleY;
 	float m_fontSize;
+	float m_fontSizeMultiplier;
 
 	TweenEngine::Tween *m_fadeTween;
 	TweenEngine::TweenManager m_tweenManager;

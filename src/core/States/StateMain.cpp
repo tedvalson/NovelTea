@@ -296,7 +296,9 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_actionBuilder.setSize(sf::Vector2f((portrait ? 1.f : 0.5f) * w, portrait ? 0.25f * h : 0.3f * h));
 	m_actionBuilder.setPosition(portrait ? 0.f : (w - m_roomActiveText.getSize().x)/2, h);
 
+	// Dialogue
 	m_dialogueRenderer.setSize(size);
+	m_dialogueRenderer.setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_inventory.setSize(size);
 	m_textOverlay.setSize(size);

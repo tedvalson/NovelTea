@@ -122,6 +122,29 @@ void DialogueRenderer::repositionButtons()
 	}
 }
 
+void DialogueRenderer::applyChanges()
+{
+	auto portrait = m_size.x < m_size.y;
+	auto posX = (portrait ? 0.01f : 0.2f) * m_size.x;
+	auto padding = (portrait ? 0.01f : 0.004f) * m_size.x;
+	m_fontSize = m_fontSizeMultiplier * 22;
+	m_text.setSize(sf::Vector2f((portrait ? 0.95f : 0.58f) * m_size.x, m_size.y));
+	m_middleY = 7.f;
+
+	TextFormat format;
+	format.size(m_fontSize/2);
+	m_textName.setText(m_textName.getText(), format);
+	m_text.setText(m_text.getText(), format);
+
+	m_textName.setPosition(round(posX + padding), m_middleY);
+	m_text.setPosition(round(posX + padding * 2),
+					   round(padding + m_textName.getPosition().y + 1.2f * m_fontSize));
+	m_bg.setPosition(round(posX), m_textName.getPosition().y + 1.2f * m_fontSize);
+	m_bg.setSize((portrait ? 0.98f : 0.6f) * m_size.x, m_fontSize * 5);
+
+	repositionButtons();
+}
+
 // Segment arg is a choice segment (or root/link)
 void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 {
@@ -301,31 +324,24 @@ void DialogueRenderer::hide(float duration)
 
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
-	auto portrait = size.x < size.y;
-	auto posX = (portrait ? 0.01f : 0.2f) * size.x;
-	auto padding = (portrait ? 0.01f : 0.004f) * size.x;
-	m_fontSize = 0.05f * std::min(size.x, size.y);
 	m_size = size;
-	m_text.setSize(sf::Vector2f((portrait ? 0.95f : 0.58f) * size.x, size.y));
-	m_middleY = round(m_size.y / 8);
-
-	TextFormat format;
-	format.size(m_fontSize/2);
-	m_textName.setText(m_textName.getText(), format);
-	m_text.setText(m_text.getText(), format);
-
-	m_textName.setPosition(round(posX + padding), m_middleY);
-	m_text.setPosition(round(posX + padding * 2),
-					   round(padding + m_textName.getPosition().y + 1.2f * m_fontSize));
-	m_bg.setPosition(round(posX), m_textName.getPosition().y + 1.2f * m_fontSize);
-	m_bg.setSize((portrait ? 0.98f : 0.6f) * size.x, m_fontSize * 5);
-
-	repositionButtons();
+	applyChanges();
 }
 
 sf::Vector2f DialogueRenderer::getSize() const
 {
 	return m_size;
+}
+
+void DialogueRenderer::setFontSizeMultiplier(float fontSizeMultiplier)
+{
+	m_fontSizeMultiplier = fontSizeMultiplier;
+	applyChanges();
+}
+
+float DialogueRenderer::getFontSizeMultiplier() const
+{
+	return m_fontSizeMultiplier;
 }
 
 void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
