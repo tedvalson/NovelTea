@@ -296,8 +296,9 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_actionBuilder.setSize(sf::Vector2f((portrait ? 1.f : 0.5f) * w, portrait ? 0.25f * h : 0.3f * h));
 	m_actionBuilder.setPosition(portrait ? 0.f : (w - m_roomActiveText.getSize().x)/2, h);
 
-	m_inventory.setSize(size);
 	m_dialogueRenderer.setSize(size);
+
+	m_inventory.setSize(size);
 	m_textOverlay.setSize(size);
 	m_verbList.setScreenSize(size);
 
@@ -417,6 +418,12 @@ void StateMain::hideToolbar(float duration)
 	m_navigation.hide(duration);
 	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
 		.target(0.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, duration)
+		.target(255.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonInventory, Button::TEXTCOLOR_ALPHA, duration)
 		.target(0.f)
@@ -826,7 +833,7 @@ bool StateMain::processEvent(const sf::Event &event)
 	if (m_quitting)
 		return true;
 
-	if (m_buttonInventory.processEvent(event) || m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
+	if (m_buttonSettings.processEvent(event) || m_buttonTextLog.processEvent(event))
 		return true;
 
 	if (m_textOverlay.isVisible())
@@ -862,6 +869,8 @@ bool StateMain::processEvent(const sf::Event &event)
 	}
 	else if (m_mode == Mode::Room)
 	{
+		if (m_buttonInventory.processEvent(event))
+			return true;
 		if (m_verbList.isVisible() && m_verbList.processEvent(event)) {
 			return false;
 		} else {
