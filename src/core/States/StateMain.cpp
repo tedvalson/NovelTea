@@ -263,6 +263,7 @@ void StateMain::resize(const sf::Vector2f &size)
 	// Cutscene
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setSize(size);
+	m_cutsceneRenderer.setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_navigation.setSize(sf::Vector2f(toolbarHeight - toolbarPadding*2, toolbarHeight - toolbarPadding*2));
 	m_navigation.setPosition(toolbarPadding, toolbarPadding + h - toolbarHeight);
