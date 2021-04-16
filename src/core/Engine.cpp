@@ -1,4 +1,5 @@
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/States/StateIntro.hpp>
 #include <NovelTea/States/StateMain.hpp>
@@ -50,7 +51,7 @@ void Engine::resize(size_t width, size_t height)
 	m_renderTexture.setSmooth(true);
 	m_sprite.setTexture(m_renderTexture.getTexture(), true);
 
-	m_game->getNotificationManager().setScreenSize(sf::Vector2f(width, height));
+	m_game->getNotificationManager()->setScreenSize(sf::Vector2f(width, height));
 
 	sf::FloatRect viewport;
 	sf::Vector2f widgetSize(width, height);

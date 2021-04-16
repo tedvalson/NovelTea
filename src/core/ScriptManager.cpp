@@ -15,7 +15,7 @@
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 #include <NovelTea/Timer.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <SFML/System/FileInputStream.hpp>
 
@@ -71,7 +71,7 @@ void ScriptManager::reset()
 #ifdef ANDROID
 	if (file.open("core.js"))
 #else
-	if (file.open("/home/android/dev/NovelTea/core.js"))
+	if (file.open("/home/android/dev/NovelTea/res/assets/core.js"))
 #endif
 	{
 		script.resize(file.getSize());
@@ -92,15 +92,15 @@ void ScriptManager::runScript(std::shared_ptr<Script> script)
 
 void ScriptManager::runScriptId(const std::string &scriptId)
 {
-	runScript(m_game->getSaveData().get<Script>(scriptId));
+	runScript(m_game->getSaveData()->get<Script>(scriptId));
 }
 
 bool ScriptManager::runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script)
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
-		objects.push_back(m_game->getSaveData().get<Object>(objectId));
-	auto verb = m_game->getSaveData().get<Verb>(verbId);
+		objects.push_back(m_game->getSaveData()->get<Object>(objectId));
+	auto verb = m_game->getSaveData()->get<Verb>(verbId);
 	auto objectCount = objects.size();
 	auto s = "function f(verb,object1,object2,object3,object4){\n"+script+"\nreturn true;}";
 	try {
@@ -122,7 +122,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 
 bool ScriptManager::runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds)
 {
-	auto verb = m_game->getSaveData().get<Verb>(verbId);
+	auto verb = m_game->getSaveData()->get<Verb>(verbId);
 	auto script = verb->getScriptDefault();;
 	if (script.empty()) {
 		if (verb->getParentId().empty())
@@ -141,7 +141,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 
 bool ScriptManager::runRoomScript(const std::string &roomId, const std::string &script)
 {
-	auto room = m_game->getSaveData().get<Room>(roomId);
+	auto room = m_game->getSaveData()->get<Room>(roomId);
 	auto s = "function _f(room){\n"+script+"\nreturn true;}";
 	try {
 		return call<bool>(s, "_f", room);
@@ -255,7 +255,7 @@ void ScriptManager::registerClasses()
 void ScriptManager::registerGlobals()
 {
 	// Save
-	dukglue_register_global(m_context, &m_game->getSaveData(), "Save");
+	dukglue_register_global(m_context, m_game->getSaveData(), "Save");
 	dukglue_register_method(m_context, &SaveData::set, "saveEntity");
 	dukglue_register_method(m_context, &SaveData::resetRoomDescriptions, "resetRoomDescriptions");
 
@@ -278,25 +278,25 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &ScriptManager::runScriptId, "run");
 
 	// TimerManager
-	dukglue_register_global(m_context, &m_game->getTimerManager(), "Timer");
+	dukglue_register_global(m_context, m_game->getTimerManager(), "Timer");
 	dukglue_register_method(m_context, &TimerManager::start, "start");
 	dukglue_register_method(m_context, &TimerManager::startRepeat, "startRepeat");
 }
 
 void ScriptManager::runAutorunScripts()
 {
-	if (m_game->getSaveData().isLoaded())
-		for (auto &item : m_game->getSaveData().data()[Script::id].ObjectRange())
+	if (m_game->getSaveData()->isLoaded())
+		for (auto &item : m_game->getSaveData()->data()[Script::id].ObjectRange())
 			checkAutorun(item.second);
 	if (Proj.isLoaded())
 		for (auto &item : ProjData[Script::id].ObjectRange())
-			if (!m_game->getSaveData().data()[Script::id].hasKey(item.first))
+			if (!m_game->getSaveData()->data()[Script::id].hasKey(item.first))
 				checkAutorun(item.second);
 }
 
 void ScriptManager::checkAutorun(const sj::JSON &j)
 {
-	auto script = m_game->getSaveData().get<Script>(j[ID::entityId].ToString());
+	auto script = m_game->getSaveData()->get<Script>(j[ID::entityId].ToString());
 	if (script->getAutorun())
 		runScript(script);
 }

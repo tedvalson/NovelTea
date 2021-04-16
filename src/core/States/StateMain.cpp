@@ -9,6 +9,9 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Timer.hpp>
+#include <NovelTea/GUI/Notification.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -161,20 +164,22 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			metaData.append(m_dialogueRenderer.saveState());
 		}
 
-		GSave.data()[ID::entrypointEntity] = sj::Array(
+		GSave->data()[ID::entrypointEntity] = sj::Array(
 			static_cast<int>(entityType),
 			entityId
 		);
-		GSave.data()[ID::entrypointMetadata] = metaData;
+		GSave->data()[ID::entrypointMetadata] = metaData;
 	});
 
-	auto &saveEntryPoint = GSave.data()[ID::entrypointEntity];
+	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
-	auto &entryMetadata = GSave.data()[ID::entrypointMetadata];
+	auto &entryMetadata = GSave->data()[ID::entrypointMetadata];
 	if (!saveEntryPoint.IsEmpty())
 	{
+		auto roomId = entryMetadata[0].ToString();
 		GGame.pushNextEntityJson(saveEntryPoint);
-		GGame.pushNextEntity(GSave.get<Room>(entryMetadata[0].ToString()));
+		if (!roomId.empty())
+			GGame.pushNextEntity(GSave->get<Room>(roomId));
 		if (entryMetadata.size() > 1 && gotoNextEntity()) {
 			if (m_mode == Mode::Cutscene)
 				m_cutsceneRenderer.restoreState(entryMetadata[1]);
@@ -235,7 +240,7 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_buttonTextLog);
 	target.draw(m_inventory);
 
-	target.draw(GGame.getNotificationManager());
+	target.draw(*GGame.getNotificationManager());
 }
 
 void StateMain::resize(const sf::Vector2f &size)
@@ -283,8 +288,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_inventory.refreshItems();
 
 	// Notification setup
-	GGame.getNotificationManager().setScreenSize(size);
-	GGame.getNotificationManager().setFontSizeMultiplier(fontSizeMultiplier);
+	GGame.getNotificationManager()->setScreenSize(size);
+	GGame.getNotificationManager()->setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_textOverlay.setFontSizeMultiplier(fontSizeMultiplier);
 
@@ -324,18 +329,18 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 
 	if (mode == Mode::Cutscene)
 	{
-		m_cutscene = GSave.get<Cutscene>(idName);
+		m_cutscene = GSave->get<Cutscene>(idName);
 		m_cutsceneRenderer.setCutscene(m_cutscene);
 	}
 	else if (mode == Mode::Dialogue)
 	{
-		m_dialogue = GSave.get<Dialogue>(idName);
+		m_dialogue = GSave->get<Dialogue>(idName);
 		m_dialogueRenderer.setDialogue(m_dialogue);
 		m_dialogueRenderer.show();
 	}
 	else if (mode == Mode::Room)
 	{
-		auto nextRoom = GSave.get<Room>(idName);
+		auto nextRoom = GSave->get<Room>(idName);
 		auto room = GGame.getRoom();
 		if (room->getId() != idName)
 		{
@@ -369,9 +374,9 @@ void StateMain::setMode(const json &jEntity)
 	else if (type == EntityType::Dialogue)
 		mode = Mode::Dialogue;
 	else if (type == EntityType::Script)
-		ScriptMan.runScriptId(idName);
+		ScriptMan->runScriptId(idName);
 	else if (type == EntityType::CustomScript)
-		ScriptMan.runInClosure(idName);
+		ScriptMan->runInClosure(idName);
 
 	if (type == EntityType::Script || type == EntityType::CustomScript) {
 		mode = Mode::Room;
@@ -529,7 +534,7 @@ bool StateMain::processTestSteps()
 			}
 
 			if (waiting && waitTimeLeft > 0.f) {
-				if (GGame.getTimerManager().update(0.01f))
+				if (GGame.getTimerManager()->update(0.01f))
 					updateRoomText();
 				waitTimeLeft -= 0.01f;
 			}
@@ -583,7 +588,7 @@ bool StateMain::processTestInit()
 	std::string error;
 
 	try {
-		ScriptMan.runInClosure(jtest[ID::testScriptInit].ToString());
+		ScriptMan->runInClosure(jtest[ID::testScriptInit].ToString());
 	} catch (std::exception &e) {
 		error = e.what();
 	}
@@ -604,7 +609,7 @@ bool StateMain::processTestCheck()
 	std::string error;
 
 	try {
-		success = ScriptMan.runInClosure<bool>(script);
+		success = ScriptMan->runInClosure<bool>(script);
 	} catch (std::exception &e) {
 		error = e.what();
 	}
@@ -623,7 +628,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 		if (!GGame.getRoom()->containsId(objectId) && !GGame.getObjectList()->containsId(objectId))
 			return false;
 
-	auto success = ScriptMan.runActionScript(verbId, objectIds, ProjData[ID::scriptBeforeAction].ToString());
+	auto success = ScriptMan->runActionScript(verbId, objectIds, ProjData[ID::scriptBeforeAction].ToString());
 	if (!success)
 		return false;
 
@@ -631,11 +636,11 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 	if (action)
 		success = action->runScript();
 	else
-		success = ScriptMan.runActionScript(verbId, objectIds);
+		success = ScriptMan->runActionScript(verbId, objectIds);
 
 	if (!success)
 		return false;
-	success = ScriptMan.runActionScript(verbId, objectIds, ProjData[ID::scriptAfterAction].ToString());
+	success = ScriptMan->runActionScript(verbId, objectIds, ProjData[ID::scriptAfterAction].ToString());
 
 	if (success)
 	{
@@ -685,7 +690,7 @@ bool StateMain::gotoNextEntity()
 		mode = Mode::Dialogue;
 	else if (nextEntity->entityId() == Script::id) {
 		auto script = std::static_pointer_cast<Script>(nextEntity);
-		ScriptMan.runScript(script);
+		ScriptMan->runScript(script);
 		setMode(Mode::Room, GGame.getRoom()->getId());
 		return true;
 	}
@@ -697,7 +702,7 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 {
 	auto room = GGame.getRoom();
 	auto text = newText;
-	auto firstVisit = !GSave.data()[ID::roomDescriptions].hasKey(room->getId());
+	auto firstVisit = !GSave->data()[ID::roomDescriptions].hasKey(room->getId());
 	if (text == " ")
 		text = room->getDescription();
 	if (text == m_roomActiveText.getText())
@@ -760,7 +765,7 @@ void StateMain::setActionBuilderShowPos(float position)
 void StateMain::callOverlayFunc()
 {
 	if (m_textOverlayFunc.type() != DukValue::UNDEFINED){
-		ScriptMan.call<void>(m_textOverlayFunc);
+		ScriptMan->call<void>(m_textOverlayFunc);
 		updateRoomText();
 	}
 }
@@ -934,8 +939,8 @@ bool StateMain::update(float delta)
 	m_navigation.update(delta);
 	m_textOverlay.update(delta);
 
-	GGame.getNotificationManager().update(delta);
-	if (GGame.getTimerManager().update(delta)) {
+	GGame.getNotificationManager()->update(delta);
+	if (GGame.getTimerManager()->update(delta)) {
 		if (m_mode == Mode::Room)
 			updateRoomText();
 	}

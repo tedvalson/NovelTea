@@ -1,6 +1,7 @@
 #include <NovelTea/Room.hpp>
-#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -109,10 +110,10 @@ const std::shared_ptr<ObjectList> &Room::getObjectList() const
 std::string Room::getDescription() const
 {
 	try {
-		auto room = ActiveGame->getSaveData().get<Room>(m_id);
+		auto room = GSave->get<Room>(m_id);
 		auto script = "function _f(room){text='';\n"+m_descriptionRaw+"\nreturn text;}";
-		auto newDescription = ActiveGame->getScriptManager().call<std::string>(script, "_f", room);
-		return GSave.roomDescription(m_id, newDescription);
+		auto newDescription = ActiveGame->getScriptManager()->call<std::string>(script, "_f", room);
+		return GSave->roomDescription(m_id, newDescription);
 	} catch (std::exception &e) {
 		std::cerr << "Room::getDescription " << e.what() << std::endl;
 		return "You encountered a game error.\n" + std::string(e.what());
@@ -128,39 +129,39 @@ void Room::sync()
 bool Room::runScriptBeforeEnter() const
 {
 	auto script = ProjData[ID::scriptBeforeEnter].ToString();
-	if (!script.empty() && !ActiveGame->getScriptManager().runRoomScript(m_id, script))
+	if (!script.empty() && !ActiveGame->getScriptManager()->runRoomScript(m_id, script))
 		return false;
 	if (m_scriptBeforeEnter.empty())
 		return true;
-	return ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptBeforeEnter);
+	return ActiveGame->getScriptManager()->runRoomScript(m_id, m_scriptBeforeEnter);
 }
 
 void Room::runScriptAfterEnter() const
 {
 	auto script = ProjData[ID::scriptAfterEnter].ToString();
 	if (!script.empty())
-		ActiveGame->getScriptManager().runRoomScript(m_id, script);
+		ActiveGame->getScriptManager()->runRoomScript(m_id, script);
 	if (!m_scriptAfterEnter.empty())
-		ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptAfterEnter);
+		ActiveGame->getScriptManager()->runRoomScript(m_id, m_scriptAfterEnter);
 }
 
 bool Room::runScriptBeforeLeave() const
 {
 	auto script = ProjData[ID::scriptBeforeLeave].ToString();
-	if (!script.empty() && !ActiveGame->getScriptManager().runRoomScript(m_id, script))
+	if (!script.empty() && !ActiveGame->getScriptManager()->runRoomScript(m_id, script))
 		return false;
 	if (m_scriptBeforeLeave.empty())
 		return true;
-	return ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptBeforeLeave);
+	return ActiveGame->getScriptManager()->runRoomScript(m_id, m_scriptBeforeLeave);
 }
 
 void Room::runScriptAfterLeave() const
 {
 	auto script = ProjData[ID::scriptAfterLeave].ToString();
 	if (!script.empty())
-		ActiveGame->getScriptManager().runRoomScript(m_id, script);
+		ActiveGame->getScriptManager()->runRoomScript(m_id, script);
 	if (!m_scriptAfterLeave.empty())
-		ActiveGame->getScriptManager().runRoomScript(m_id, m_scriptAfterLeave);
+		ActiveGame->getScriptManager()->runRoomScript(m_id, m_scriptAfterLeave);
 }
 
 } // namespace NovelTea

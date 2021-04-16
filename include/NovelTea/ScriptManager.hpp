@@ -12,8 +12,9 @@ class Script;
 
 class ScriptManager
 {
-	friend class Game;
 public:
+	ScriptManager(Game *game);
+	~ScriptManager();
 	void reset();
 
 	void runScript(std::shared_ptr<Script> script);
@@ -67,8 +68,6 @@ public:
 	}
 
 protected:
-	ScriptManager(Game *game);
-	~ScriptManager();
 	void registerFunctions();
 	void registerClasses();
 	void registerGlobals();

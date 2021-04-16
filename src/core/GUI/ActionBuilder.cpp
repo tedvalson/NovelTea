@@ -1,4 +1,5 @@
 #include <NovelTea/Game.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -33,10 +34,11 @@ ActionBuilder::ActionBuilder()
 	setAlpha(0.f);
 }
 
-void ActionBuilder::update(float delta)
+bool ActionBuilder::update(float delta)
 {
 	m_tweenManager.update(delta);
 	Hideable::update(delta);
+	return true;
 }
 
 // Returns true if interacts with the action builder
@@ -102,7 +104,7 @@ float ActionBuilder::getAlpha() const
 void ActionBuilder::setVerb(const std::string &verbId)
 {
 	m_verbId = verbId;
-	auto verb = GSave.get<Verb>(verbId);
+	auto verb = GSave->get<Verb>(verbId);
 	m_selectedIndex = 0;
 	m_objectIds.resize(verb->getObjectCount());
 	for (auto &objectId : m_objectIds)
@@ -200,7 +202,7 @@ void ActionBuilder::setCallback(ActionBuilderCallback callback)
 void ActionBuilder::updateText()
 {
 	std::string blankStr = "_____";
-	auto verb = GSave.get<Verb>(m_verbId);
+	auto verb = GSave->get<Verb>(m_verbId);
 	auto &actionStructure = verb->getActionStructure();
 
 	auto alpha = getAlpha();
@@ -219,7 +221,7 @@ void ActionBuilder::updateText()
 		if (i > 0)
 		{
 			auto objectStr = blankStr;
-			auto object = GSave.get<Object>(m_objectIds[i-1]);
+			auto object = GSave->get<Object>(m_objectIds[i-1]);
 			auto rect = new TweenRectangleShape;
 			ActiveText tmpText;
 

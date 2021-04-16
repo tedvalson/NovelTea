@@ -1,7 +1,6 @@
 #ifndef ENTITYSORTFILTERPROXYMODEL_HPP
 #define ENTITYSORTFILTERPROXYMODEL_HPP
 
-#include <NovelTea/ProjectData.hpp>
 #include <QSortFilterProxyModel>
 #include <QModelIndex>
 #include <QVariant>

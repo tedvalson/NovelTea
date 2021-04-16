@@ -1,6 +1,7 @@
 #include <NovelTea/States/StateTitleScreen.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>

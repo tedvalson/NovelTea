@@ -1,4 +1,5 @@
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Settings.hpp>
 #include <SFML/Graphics.hpp>
@@ -9,7 +10,6 @@ int main(int argc, char **argv)
 	auto dir = "/home/android/dev/NovelTea/bin";
 	GSettings.setDirectory(dir);
 	GSettings.load();
-	GSave.setDirectory(dir);
 
 	sf::RenderWindow window(sf::VideoMode(480/2, 700/2, 16), "NovelTea Launcher");
 	NovelTea::EngineConfig config;
@@ -20,6 +20,8 @@ int main(int argc, char **argv)
 	config.initialState = NovelTea::StateID::Intro;
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
+	
+	GSave->setDirectory(dir);
 	while (window.isOpen())
 	{
 		sf::Event event;

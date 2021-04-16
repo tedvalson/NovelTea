@@ -1,13 +1,14 @@
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <string>
 
 namespace NovelTea
 {
 
-ObjectList::ObjectList(SaveData &saveData)
-	: m_saveData(&saveData)
+ObjectList::ObjectList(std::shared_ptr<SaveData> saveData)
+	: m_saveData(saveData)
 {
 }
 

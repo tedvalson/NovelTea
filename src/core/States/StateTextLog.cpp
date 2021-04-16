@@ -1,5 +1,6 @@
 #include <NovelTea/States/StateTextLog.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 

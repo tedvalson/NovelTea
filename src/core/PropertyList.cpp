@@ -2,6 +2,7 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -19,7 +20,7 @@ DukValue PropertyList::get(const std::string &key, const DukValue &defaultValue)
 
 	if (!contains(key))
 	{
-		auto parentId = GSave.getParentId(m_attachedType, m_attachedId);
+		auto parentId = GSave->getParentId(m_attachedType, m_attachedId);
 		if (parentId.empty())
 			return defaultValue;
 
@@ -73,7 +74,7 @@ void PropertyList::attach(const std::string &type, const std::string &id)
 	m_attachedType = type;
 	m_attachedId = id;
 
-	auto &jEntities = GSave.data()[ID::properties][type];
+	auto &jEntities = GSave->data()[ID::properties][type];
 	m_projectProperties = ProjData[type][id][ID::entityProperties];
 
 	// If no properties in list, load from SaveData.
@@ -90,7 +91,7 @@ void PropertyList::saveChanges()
 		return;
 
 	if (!m_savedProperties.IsEmpty())
-		GSave.data()[ID::properties][m_attachedType][m_attachedId] = m_savedProperties;
+		GSave->data()[ID::properties][m_attachedType][m_attachedId] = m_savedProperties;
 }
 
 void PropertyList::sync()

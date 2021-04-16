@@ -2,6 +2,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Transform.hpp>
 #include <TweenEngine/Tween.h>
@@ -163,19 +164,19 @@ void VerbList::setVerbs(const std::string &objectId)
 {
 	std::vector<std::string> verbIds;
 
-	for (auto &item : GSave.data()[Verb::id].ObjectRange())
+	for (auto &item : GSave->data()[Verb::id].ObjectRange())
 		verbIds.push_back(item.first);
 	for (auto &item : ProjData[Verb::id].ObjectRange())
 	{
 		auto verbId = item.first;
-		if (!GSave.data()[Verb::id].hasKey(verbId)) {
+		if (!GSave->data()[Verb::id].hasKey(verbId)) {
 			verbIds.push_back(verbId);
 		}
 	}
 
 	for (auto it = verbIds.begin(); it != verbIds.end();)
 	{
-		auto verb = GSave.get<Verb>(*it);
+		auto verb = GSave->get<Verb>(*it);
 		if (!verb->checkConditionScript(*it, objectId))
 			verbIds.erase(it);
 		else
@@ -281,7 +282,7 @@ void VerbList::addVerbOption(const std::string &verbId)
 	option.text.setFillColor(sf::Color::Black);
 	option.text.setFont(*Proj.getFont(0));
 
-	auto verb = GSave.get<Verb>(verbId);
+	auto verb = GSave->get<Verb>(verbId);
 	option.text.setString(verb->getName());
 	m_verbs.push_back(option);
 }

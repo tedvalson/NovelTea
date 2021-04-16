@@ -1,6 +1,8 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
@@ -53,7 +55,7 @@ void Action::setVerbObjectCombo(const json &j)
 			!j[1].IsArray() || j[1].IsEmpty())
 		return;
 
-	auto verb = GSave.get<Verb>(j[0].ToString());
+	auto verb = GSave->get<Verb>(j[0].ToString());
 	if (!verb)
 		return;
 
@@ -80,11 +82,11 @@ bool Action::runScript(const std::string &verbId, const std::vector<std::string>
 	if (m_script.empty())
 		return true;
 	if (!m_parentId.empty()) {
-		auto parentAction = GSave.get<Action>(m_parentId);
+		auto parentAction = GSave->get<Action>(m_parentId);
 		if (parentAction && !parentAction->runScript(verbId, objectIds))
 			return false;
 	}
-	return ActiveGame->getScriptManager().runActionScript(verbId, objectIds, m_script);
+	return ActiveGame->getScriptManager()->runActionScript(verbId, objectIds, m_script);
 }
 
 bool Action::runScript()
@@ -118,7 +120,7 @@ std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vecto
 			}
 
 			if (match)
-				return GSave.get<Action>(item.first);
+				return GSave->get<Action>(item.first);
 		}
 	}
 

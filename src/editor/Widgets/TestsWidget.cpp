@@ -1,7 +1,7 @@
 #include "TestsWidget.hpp"
 #include "ui_TestsWidget.h"
 #include "Wizard/WizardPageActionSelect.hpp"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/Verb.hpp>
 #include <QToolButton>
 #include <QMessageBox>
@@ -109,7 +109,7 @@ void TestsWidget::addStepToList(const json &jstep, bool append)
 		std::vector<std::string> objectIds;
 		for (auto jobjectId : jstep["objects"].ArrayRange())
 			objectIds.push_back(jobjectId.ToString());
-		auto verb = GSave.get<NovelTea::Verb>(jstep["verb"].ToString());
+		auto verb = GSave->get<NovelTea::Verb>(jstep["verb"].ToString());
 		text = "Action: " + verb->getActionText(objectIds);
 	}
 	else if (type == "wait")
@@ -274,7 +274,7 @@ void TestsWidget::on_actionAddStepAction_triggered()
 	if (verbId.empty())
 		return;
 	auto jobjectIds = sj::Array();
-	auto verb = GSave.get<NovelTea::Verb>(verbId);
+	auto verb = GSave->get<NovelTea::Verb>(verbId);
 	for (int i = 0; i < verb->getObjectCount(); ++i)
 	{
 		auto labelMessage = "Select object " + std::to_string(i+1) + " of " + std::to_string(verb->getObjectCount()) + ":";

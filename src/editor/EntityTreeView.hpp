@@ -2,7 +2,6 @@
 #define ENTITYTREEVIEW_HPP
 
 #include "EntitySortFilterProxyModel.hpp"
-#include <NovelTea/ProjectData.hpp>
 #include <QTreeView>
 #include <QModelIndex>
 #include <QVariant>

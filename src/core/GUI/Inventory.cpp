@@ -3,6 +3,7 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
 

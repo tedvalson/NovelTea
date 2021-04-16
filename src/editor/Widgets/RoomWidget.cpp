@@ -3,7 +3,7 @@
 #include "MainWindow.hpp"
 #include "ObjectWidget.hpp"
 #include "Wizard/WizardPageActionSelect.hpp"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/Game.hpp>
@@ -106,13 +106,13 @@ void RoomWidget::updatePreview()
 		jdata["event"] = "text";
 
 		// Reset any changes made by previous script execution
-		GSave.reset();
+		GSave->reset();
 		if (m_room)
 		{
 			m_room->setDescriptionRaw(script);
 			m_room->getObjectList()->saveChanges();
 			// Save room in case changes aren't yet saved to project
-			GSave.set(m_room);
+			GSave->set(m_room);
 			// Force reloading of room data we just saved in player
 			ActiveGame->setRoomId(m_room->getId());
 		}

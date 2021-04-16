@@ -1,5 +1,6 @@
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
@@ -57,10 +58,8 @@ void Timer::setTimePassed(int timeMs)
 
 void Timer::exec()
 {
-	ActiveGame->getScriptManager().call<void>(m_func);
+	ActiveGame->getScriptManager()->call<void>(m_func);
 }
-
-
 
 TimerManager::TimerManager()
 {

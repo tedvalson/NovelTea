@@ -1,7 +1,6 @@
 #include "TreeModel.hpp"
 #include "TreeItem.hpp"
 #include "EditorUtils.hpp"
-#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Cutscene.hpp>

@@ -1,6 +1,8 @@
 #include <NovelTea/Verb.hpp>
-#include <NovelTea/Object.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Object.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
@@ -55,15 +57,15 @@ bool Verb::checkConditionScript(const std::string &verbId, const std::string &ob
 	if (m_scriptConditional.empty()) {
 		if (m_parentId.empty())
 			return true;
-		auto parentVerb = GSave.get<Verb>(m_parentId);
+		auto parentVerb = GSave->get<Verb>(m_parentId);
 		return parentVerb->checkConditionScript(verbId, objectId);
 	}
 
 	try {
-		auto object = GSave.get<Object>(objectId);
-		auto verb = GSave.get<Verb>(verbId);
+		auto object = GSave->get<Object>(objectId);
+		auto verb = GSave->get<Verb>(verbId);
 		auto script = "function _f(verb,object){\n" + m_scriptConditional + "\nreturn true;}";
-		return ActiveGame->getScriptManager().call<bool>(script, "_f", verb, object);
+		return ActiveGame->getScriptManager()->call<bool>(script, "_f", verb, object);
 	} catch (std::exception &e) {
 		std::cerr << "Verb::checkConditionScript " << e.what() << std::endl;
 		return false;
@@ -102,7 +104,7 @@ std::string Verb::getActionText(std::vector<std::string> objectIds, std::string 
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
-		objects.push_back(GSave.get<Object>(objectId));
+		objects.push_back(GSave->get<Object>(objectId));
 	return getActionText(objects, blankStr);
 }
 

@@ -1,5 +1,6 @@
 #include "ScriptEdit.hpp"
 #include <NovelTea/Game.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <QWhatsThis>
 #include <QTextBlock>
 #include <QPainter>
@@ -627,9 +628,9 @@ bool ScriptEdit::checkErrors(const std::string &script)
 	{
 		d_ptr->game->getScriptManager().reset();
 		if (script.empty())
-			d_ptr->game->getScriptManager().runInClosure<T>(toPlainText().toStdString());
+			d_ptr->game->getScriptManager()->runInClosure<T>(toPlainText().toStdString());
 		else
-			d_ptr->game->getScriptManager().runInClosure<T>(script);
+			d_ptr->game->getScriptManager()->runInClosure<T>(script);
 
 		d_ptr->lineWithError = -1;
 		result = true;

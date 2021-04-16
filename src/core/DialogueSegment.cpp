@@ -1,6 +1,8 @@
 #include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
@@ -47,9 +49,9 @@ void DialogueSegment::runScript()
 	if (!m_scriptEnabled)
 		return;
 	try {
-		auto dialogue = GSave.get<Dialogue>(m_dialogue->getId());
+		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
 		auto script = "function _f(dialogue){\n" + m_script + "}";
-		ActiveGame->getScriptManager().call(script, "_f", dialogue);
+		ActiveGame->getScriptManager()->call(script, "_f", dialogue);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::runScript() " << e.what() << std::endl;
 	}
@@ -63,9 +65,9 @@ bool DialogueSegment::conditionPasses() const
 		return false;
 
 	try {
-		auto dialogue = GSave.get<Dialogue>(m_dialogue->getId());
+		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
 		auto script = "function _f(dialogue){\n" + m_conditionScript + "\nreturn false;}";
-		return ActiveGame->getScriptManager().call<bool>(script, "_f", dialogue);
+		return ActiveGame->getScriptManager()->call<bool>(script, "_f", dialogue);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::conditionPasses() " << e.what() << std::endl;
 		return false;
@@ -79,9 +81,9 @@ std::string DialogueSegment::getText(bool *ok) const
 			*ok = true;
 		if (m_scriptedText)
 		{
-			auto dialogue = GSave.get<Dialogue>(m_dialogue->getId());
+			auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
 			auto script = "function _f(dialogue){\n" + m_textRaw + "\nreturn \"\";}";
-			return ActiveGame->getScriptManager().call<std::string>(script, "_f", dialogue);
+			return ActiveGame->getScriptManager()->call<std::string>(script, "_f", dialogue);
 		} else
 			return m_textRaw;
 	} catch (std::exception &e) {

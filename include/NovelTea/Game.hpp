@@ -2,11 +2,7 @@
 #define NOVELTEA_GAME_HPP
 
 #include <NovelTea/Entity.hpp>
-#include <NovelTea/ScriptManager.hpp>
-#include <NovelTea/SaveData.hpp>
-#include <NovelTea/Timer.hpp>
 #include <NovelTea/Utils.hpp>
-#include <NovelTea/GUI/Notification.hpp>
 #include <queue>
 
 #define GMan NovelTea::GameManager::instance()
@@ -21,6 +17,10 @@ using SaveCallback = std::function<void()>;
 
 class ObjectList;
 class Room;
+class SaveData;
+class ScriptManager;
+class NotificationManager;
+class TimerManager;
 
 class Game
 {
@@ -55,10 +55,10 @@ public:
 
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
 
-	ScriptManager &getScriptManager();
-	SaveData &getSaveData();
-	TimerManager &getTimerManager();
-	NotificationManager &getNotificationManager();
+	std::shared_ptr<ScriptManager> getScriptManager();
+	std::shared_ptr<SaveData> getSaveData();
+	std::shared_ptr<TimerManager> getTimerManager();
+	std::shared_ptr<NotificationManager> getNotificationManager();
 
 	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
@@ -77,10 +77,10 @@ private:
 	MessageCallback m_messageCallback;
 	SaveCallback m_saveCallback;
 
-	SaveData m_saveData;
-	TimerManager m_timerManager;
-	ScriptManager m_scriptManager;
-	NotificationManager m_notificationManager;
+	std::shared_ptr<SaveData> m_saveData;
+	std::shared_ptr<TimerManager> m_timerManager;
+	std::shared_ptr<ScriptManager> m_scriptManager;
+	std::shared_ptr<NotificationManager> m_notificationManager;
 };
 
 

@@ -1,6 +1,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
 #include <NovelTea/GUI/Button.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
 
