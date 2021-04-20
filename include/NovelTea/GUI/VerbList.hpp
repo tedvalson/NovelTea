@@ -27,6 +27,7 @@ public:
 
 	void refreshItems();
 
+	void setFontSizeMultiplier(float fontSizeMultiplier);
 	void setScreenSize(const sf::Vector2f &size);
 	const sf::Vector2f &getScreenSize() const;
 
@@ -65,6 +66,7 @@ private:
 	float m_scrollPos;
 	float m_margin;
 	float m_itemHeight;
+	float m_fontSizeMultiplier;
 	sf::Vector2f m_screenSize;
 	sf::Vector2f m_scrollAreaSize;
 

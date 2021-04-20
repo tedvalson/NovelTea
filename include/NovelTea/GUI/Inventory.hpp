@@ -27,12 +27,12 @@ public:
 	void refreshItems();
 	void repositionItems();
 
+	void setFontSizeMultiplier(float fontSizeMultiplier);
+	void setScreenSize(const sf::Vector2f &size);
+
 	void setScroll(float position) override;
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
-
-	void setSize(const sf::Vector2f &size);
-	sf::Vector2f getSize() const;
 
 	sf::FloatRect getLocalBounds() const;
 	sf::FloatRect getGlobalBounds() const;
@@ -48,12 +48,13 @@ protected:
 	void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
 private:
-	sf::Vector2f m_size;
+	sf::Vector2f m_screenSize;
 	mutable sf::FloatRect m_bounds;
 	mutable bool m_needsUpdate;
 
 	float m_margin;
 	float m_itemHeight;
+	float m_fontSizeMultiplier;
 
 	float m_alpha;
 	bool m_isOpen;

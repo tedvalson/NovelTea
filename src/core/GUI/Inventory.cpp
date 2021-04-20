@@ -14,8 +14,9 @@ namespace NovelTea
 
 Inventory::Inventory()
 : m_needsUpdate(true)
-, m_margin(3.f)
+, m_margin(0.f)
 , m_itemHeight(20.f)
+, m_fontSizeMultiplier(1.f)
 , m_alpha(255.f)
 , m_isOpen(false)
 , m_scrollPos(0.f)
@@ -25,7 +26,7 @@ Inventory::Inventory()
 	m_scrollBar.setAutoHide(false);
 	m_scrollBar.attachObject(this);
 
-	setSize(sf::Vector2f(150.f, 150.f));
+	setScreenSize(sf::Vector2f(720.f, 1280.f));
 }
 
 bool Inventory::update(float delta)
@@ -37,10 +38,10 @@ bool Inventory::update(float delta)
 
 bool Inventory::processEvent(const sf::Event &event)
 {
-	if (isOpen() && m_scrollBar.processEvent(event))
-		return false;
 	if (!isOpen())
 		return false;
+	if (m_scrollBar.processEvent(event))
+		return true;
 
 	if (event.type == sf::Event::MouseButtonPressed)
 	{
@@ -97,7 +98,6 @@ bool Inventory::isOpen()
 
 void Inventory::refreshItems()
 {
-	auto portrait = (m_size.x < m_size.y);
 	auto width = 0.f;
 	auto height = 0.f;
 	m_objectTexts.clear();
@@ -117,13 +117,12 @@ void Inventory::refreshItems()
 	}
 
 	height = std::min(height, 0.5f * m_size.y);
-	m_margin = portrait ? 0.01f * m_size.x : 0.01f * m_size.y;
 
-	m_bg.setSize(sf::Vector2f(std::min(width, m_size.x) + m_margin*2 + 4.f, height + m_margin*2));
+	m_bg.setSize(sf::Vector2f(std::min(width, m_screenSize.x) + m_margin*2 + 4.f, height + m_margin*2));
 	m_bg.setPosition(m_startPosition.x - m_bg.getSize().x, m_startPosition.y - m_bg.getSize().y);
 	m_scrollBar.setSize(sf::Vector2u(2, m_bg.getSize().y));
 	m_scrollBar.setPosition(m_startPosition.x - 4.f, m_bg.getPosition().y);
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(0, m_bg.getSize().y));
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(0, height));
 
 	m_scrollAreaSize.y = m_itemHeight * m_objectTexts.size();
 	updateScrollbar();
@@ -139,6 +138,23 @@ void Inventory::repositionItems()
 		text->setPosition(posX, round(posY));
 		posY += m_itemHeight;
 	}
+}
+
+void Inventory::setFontSizeMultiplier(float fontSizeMultiplier)
+{
+	m_fontSizeMultiplier = fontSizeMultiplier;
+	m_itemHeight = 26.f * fontSizeMultiplier;
+	m_margin = 0.3f * m_itemHeight;
+	refreshItems();
+	m_scrollBar.setScroll(0.f);
+}
+
+void Inventory::setScreenSize(const sf::Vector2f &size)
+{
+	m_needsUpdate = true;
+	m_screenSize = size;
+	refreshItems();
+	m_scrollBar.setScroll(0.f);
 }
 
 void Inventory::setScroll(float position)
@@ -157,20 +173,6 @@ float Inventory::getScroll()
 const sf::Vector2f &Inventory::getScrollSize()
 {
 	return m_scrollAreaSize;
-}
-
-void Inventory::setSize(const sf::Vector2f &size)
-{
-	m_needsUpdate = true;
-	m_size = size;
-	m_itemHeight = (size.x < size.y) ? 0.07f * size.x : 0.07f * m_size.y;
-	refreshItems();
-	m_scrollBar.setScroll(0.f);
-}
-
-sf::Vector2f Inventory::getSize() const
-{
-	return m_size;
 }
 
 sf::FloatRect Inventory::getLocalBounds() const

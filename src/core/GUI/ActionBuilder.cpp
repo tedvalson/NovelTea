@@ -44,6 +44,8 @@ bool ActionBuilder::update(float delta)
 // Returns true if interacts with the action builder
 bool ActionBuilder::processEvent(const sf::Event &event)
 {
+	if (!isVisible())
+		return false;
 	if (m_buttonCancel.processEvent(event))
 		return true;
 

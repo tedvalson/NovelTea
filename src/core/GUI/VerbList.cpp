@@ -13,7 +13,7 @@ namespace NovelTea
 
 VerbList::VerbList()
 : m_scrollPos(0.f)
-, m_margin(10.f)
+, m_margin(0.f)
 , m_itemHeight(38.f)
 , m_screenSize(320.f, 400.f)
 , m_selectCallback(nullptr)
@@ -45,12 +45,10 @@ bool VerbList::update(float delta)
 
 bool VerbList::processEvent(const sf::Event &event)
 {
+	if (!isVisible() || m_verbs.empty() || isHiding())
+		return false;
 	if (m_scrollBar.processEvent(event))
 		return true;
-	if (m_isHiding)
-		return false;
-	if (m_verbs.empty())
-		return false;
 
 	if (event.type == sf::Event::MouseButtonPressed)
 	{
@@ -58,6 +56,7 @@ bool VerbList::processEvent(const sf::Event &event)
 		// Needs to return true so inventory menu knows to stay open
 		if (m_bg.getGlobalBounds().contains(p))
 			return true;
+		hide();
 	}
 	else if (event.type == sf::Event::MouseButtonReleased)
 	{
@@ -84,7 +83,7 @@ bool VerbList::processEvent(const sf::Event &event)
 void VerbList::refreshItems()
 {
 	float maxWidth = 0.f;
-	float posY = m_margin + m_itemHeight * 4;
+	float posY = m_itemHeight * std::min(m_verbs.size(), 6u);
 	for (auto &verb : m_verbs) {
 		verb.text.setCharacterSize(m_itemHeight);
 		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
@@ -93,18 +92,26 @@ void VerbList::refreshItems()
 	m_bounds = sf::FloatRect(0.f, 0.f, maxWidth + m_margin*2, posY + m_margin*2);
 	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
 	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY));
-	m_scrollBar.setPosition(m_bounds.width + 4.f, 0.f);
+	m_scrollBar.setPosition(m_bounds.width - 4.f, 0.f);
 	m_scrollBar.setDragRect(getGlobalBounds());
 	m_scrollAreaSize.y = m_itemHeight * m_verbs.size();
 
 	m_bg.setSize(sf::Vector2f(m_bounds.width, m_bounds.height));
 	repositionItems();
 	updateScrollbar();
+	m_scrollBar.setScroll(0.f);
+}
+
+void VerbList::setFontSizeMultiplier(float fontSizeMultiplier)
+{
+	m_itemHeight = 26.f * fontSizeMultiplier;
+	m_margin = 0.3f * m_itemHeight;
+	m_fontSizeMultiplier = fontSizeMultiplier;
+	refreshItems();
 }
 
 void VerbList::setScreenSize(const sf::Vector2f &size)
 {
-	m_itemHeight = (size.x < size.y) ? 0.07f * size.x : 0.07f * size.y;
 	m_screenSize = size;
 	refreshItems();
 }
@@ -217,6 +224,10 @@ void VerbList::setPositionBounded(const sf::Vector2f &position)
 	auto p = position;
 	if (p.x + m_bounds.width > m_screenSize.x)
 		p.x = m_screenSize.x - m_bounds.width;
+	if (p.x < 0.f)
+		p.x = 0.f;
+	if (p.y  < 0.f)
+		p.y = 0.f;
 	setPosition(p);
 	m_scrollBar.setDragRect(getGlobalBounds());
 }

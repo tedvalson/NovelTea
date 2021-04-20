@@ -232,13 +232,13 @@ void StateMain::render(sf::RenderTarget &target)
 
 	if (!ActiveGame->getObjectList()->objects().empty())
 		target.draw(m_buttonInventory);
+	target.draw(m_inventory);
 	if (m_verbList.isVisible())
 		target.draw(m_verbList);
 
 	target.draw(m_textOverlay);
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonTextLog);
-	target.draw(m_inventory);
 
 	target.draw(*GGame.getNotificationManager());
 }
@@ -285,6 +285,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_buttonInventory.setSize(toolbarHeight/2, toolbarHeight/2);
 	m_buttonInventory.setPosition(w - toolbarPadding - m_buttonInventory.getSize().x, m_buttonSettings.getPosition().y - m_buttonInventory.getSize().y * 1.2f);
 
+	m_inventory.setScreenSize(size);
+	m_inventory.setFontSizeMultiplier(fontSizeMultiplier);
 	m_inventory.setStartPosition(sf::Vector2f(w, m_buttonInventory.getPosition().y));
 	m_inventory.refreshItems();
 
@@ -301,10 +303,10 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_dialogueRenderer.setSize(size);
 	m_dialogueRenderer.setFontSizeMultiplier(fontSizeMultiplier);
 
-	m_inventory.setSize(size);
 	m_textOverlay.setSize(size);
-	m_verbList.setScreenSize(size);
 
+	m_verbList.setScreenSize(size);
+	m_verbList.setFontSizeMultiplier(fontSizeMultiplier);
 	m_verbList.hide(0.f);
 
 	setActionBuilderShowPos(m_actionBuilderShowPos);
@@ -872,9 +874,7 @@ bool StateMain::processEvent(const sf::Event &event)
 	}
 	else if (m_mode == Mode::Room)
 	{
-		if (m_buttonInventory.processEvent(event))
-			return true;
-		if (m_verbList.isVisible() && m_verbList.processEvent(event)) {
+		if (m_verbList.processEvent(event)) {
 			return false;
 		} else {
 			// Returns true if an object is clicked on
@@ -882,11 +882,11 @@ bool StateMain::processEvent(const sf::Event &event)
 				return true;
 		}
 
-		if (m_actionBuilder.isVisible() && m_actionBuilder.processEvent(event))
+		if (m_actionBuilder.processEvent(event))
 			return true;
 		m_navigation.processEvent(event);
 
-		if (m_roomScrollbar.processEvent(event))
+		if (m_buttonInventory.processEvent(event) || m_roomScrollbar.processEvent(event))
 			return true;
 
 		if (event.type == sf::Event::MouseButtonReleased)
