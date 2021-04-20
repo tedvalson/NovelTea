@@ -9,7 +9,6 @@
 int main(int argc, char *argv[])
 {
 	auto nativeActivity = sf::getNativeActivity();
-	GSave.setDirectory(nativeActivity->internalDataPath);
 	GSettings.setDirectory(nativeActivity->internalDataPath);
 	GSettings.load();
 
@@ -26,6 +25,8 @@ int main(int argc, char *argv[])
 	config.initialState = NovelTea::StateID::Intro;
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
+
+	GSave->setDirectory(nativeActivity->internalDataPath);
 
 	std::string projDir = getenv("EXTERNAL_STORAGE");
 	projDir += "/test";
