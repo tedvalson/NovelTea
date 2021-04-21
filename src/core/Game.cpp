@@ -175,9 +175,11 @@ bool Game::isQuitting()
 	return m_quitting;
 }
 
-void Game::spawnNotification(const std::string &message, int durationMs)
+void Game::spawnNotification(const std::string &message, bool addToLog, int durationMs)
 {
 	m_notificationManager->spawn(message, durationMs);
+	if (addToLog)
+		m_textLog->push(message, TextLogType::Notification);
 }
 
 //void Game::execMessageCallback(const std::string &message, const DukValue &callback)
@@ -189,6 +191,13 @@ void Game::execMessageCallback(const std::vector<std::string> &messageArray, con
 {
 	if (m_messageCallback)
 		m_messageCallback(messageArray, callback);
+}
+
+void Game::execMessageCallbackLog(const std::vector<std::string> &messageArray, const DukValue &callback)
+{
+	execMessageCallback(messageArray, callback);
+	for (auto &s : messageArray)
+		m_textLog->push(s, TextLogType::TextOverlay);
 }
 
 std::shared_ptr<ScriptManager> Game::getScriptManager()

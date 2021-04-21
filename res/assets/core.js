@@ -26,9 +26,11 @@ function _jsonGet(jsonStr, key)
 	return (typeof key === 'undefined') ? v : v[key];
 }
 
-function toast(msg, duration)
+function toast(msg, addToLog, duration)
 {
+	if (typeof addToLog === 'undefined')
+		addToLog = true;
 	if (typeof duration === 'undefined')
 		duration = 0;
-	Game.spawnNotification(msg, duration);
+	Game.spawnNotification(msg, addToLog, duration);
 }

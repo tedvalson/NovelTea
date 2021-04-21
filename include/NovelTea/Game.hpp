@@ -52,9 +52,10 @@ public:
 	void quit();
 	bool isQuitting();
 
-	void spawnNotification(const std::string &message, int durationMs = 0);
+	void spawnNotification(const std::string &message, bool addToLog = true, int durationMs = 0);
 
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
+	void execMessageCallbackLog(const std::vector<std::string> &messageArray, const DukValue &callback);
 
 	std::shared_ptr<ScriptManager> getScriptManager();
 	std::shared_ptr<SaveData> getSaveData();
