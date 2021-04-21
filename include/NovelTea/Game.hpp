@@ -20,6 +20,7 @@ class Room;
 class SaveData;
 class ScriptManager;
 class NotificationManager;
+class TextLog;
 class TimerManager;
 
 class Game
@@ -59,6 +60,7 @@ public:
 	std::shared_ptr<SaveData> getSaveData();
 	std::shared_ptr<TimerManager> getTimerManager();
 	std::shared_ptr<NotificationManager> getNotificationManager();
+	std::shared_ptr<TextLog> getTextLog();
 
 	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
@@ -81,6 +83,7 @@ private:
 	std::shared_ptr<TimerManager> m_timerManager;
 	std::shared_ptr<ScriptManager> m_scriptManager;
 	std::shared_ptr<NotificationManager> m_notificationManager;
+	std::shared_ptr<TextLog> m_textLog;
 };
 
 

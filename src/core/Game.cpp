@@ -8,6 +8,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/TextLog.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <iostream>
 
@@ -26,6 +27,7 @@ Game::Game()
 	, m_timerManager(new TimerManager)
 	, m_scriptManager(new ScriptManager(this))
 	, m_notificationManager(new NotificationManager)
+	, m_textLog(new TextLog)
 {
 }
 
@@ -207,6 +209,11 @@ std::shared_ptr<TimerManager> Game::getTimerManager()
 std::shared_ptr<NotificationManager> Game::getNotificationManager()
 {
 	return m_notificationManager;
+}
+
+std::shared_ptr<TextLog> Game::getTextLog()
+{
+	return m_textLog;
 }
 
 
