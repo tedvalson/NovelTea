@@ -10,6 +10,7 @@ enum class TextLogType {
 	Cutscene,
 	DialogueOption,
 	DialogueText,
+	DialogueTextName,
 	Notification,
 	TextOverlay,
 };

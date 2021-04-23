@@ -1,6 +1,8 @@
 #include <NovelTea/DialogueRenderer.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/Game.hpp>
+#include <NovelTea/TextLog.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <TweenEngine/Tween.h>
@@ -162,6 +164,9 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 	m_nextForcedSegmentIndex = -1;
 	std::shared_ptr<DialogueSegment> textSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
+	auto segText = startSegment->getText();
+	if (!segText.empty())
+		ActiveGame->getTextLog()->push(segText, TextLogType::DialogueOption);
 	if (runScript)
 		startSegment->runScript();
 
@@ -225,6 +230,9 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_textNameOld = m_textName;
 	m_textName.setText(line.first, format);
 	m_text.setText(line.second, format);
+
+	ActiveGame->getTextLog()->push(line.first, TextLogType::DialogueTextName);
+	ActiveGame->getTextLog()->push(line.second, TextLogType::DialogueText);
 
 	float duration = 0.3f;
 	m_text.setFadeAcrossPosition(0.f);
