@@ -72,7 +72,7 @@ void StateTextLog::setAlpha(float alpha)
 
 void StateTextLog::setScroll(float position)
 {
-	m_scrollPos = std::round(position);
+	m_scrollPos = round(position);
 	repositionItems();
 }
 
@@ -109,7 +109,7 @@ void StateTextLog::refreshItems()
 
 	updateScrollbar();
 	repositionItems();
-	m_scrollbar.setScroll(0.f);
+	m_scrollbar.setScroll(-m_scrollAreaSize.y);
 }
 
 void StateTextLog::repositionItems()
