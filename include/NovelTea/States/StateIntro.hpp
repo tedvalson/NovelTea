@@ -22,6 +22,7 @@ public:
 private:
 	mutable sf::RenderTexture m_renderTexture;
 	ActiveText m_textBg;
+	TweenText m_textCopyright;
 	TweenSprite m_sprite;
 	TweenSprite m_spriteLogo;
 	TweenEngine::TweenManager m_tweenManager;
