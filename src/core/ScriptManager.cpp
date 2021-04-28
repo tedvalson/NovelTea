@@ -264,6 +264,9 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::pushNextEntity, "pushNext");
 	dukglue_register_method(m_context, &Game::execMessageCallback, "message");
 	dukglue_register_method(m_context, &Game::execMessageCallbackLog, "messageLog");
+	dukglue_register_method(m_context, &Game::enableNavigation, "enableNavigation");
+	dukglue_register_method(m_context, &Game::disableNavigation, "disableNavigation");
+	dukglue_register_method(m_context, &Game::isNavigationEnabled, "isNavigationEnabled");
 	dukglue_register_method(m_context, &Game::spawnNotification, "spawnNotification");
 	dukglue_register_method(m_context, &Game::prop, "prop");
 	dukglue_register_method(m_context, &Game::setProp, "setProp");

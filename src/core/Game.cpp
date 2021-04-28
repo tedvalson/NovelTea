@@ -21,6 +21,7 @@ Game::Game()
 	, m_room(nullptr)
 	, m_autosaveEnabled(true)
 	, m_quitting(false)
+	, m_navigationEnabled(true)
 	, m_messageCallback(nullptr)
 	, m_saveCallback(nullptr)
 	, m_saveData(new SaveData)
@@ -170,9 +171,24 @@ void Game::quit()
 	m_quitting = true;
 }
 
-bool Game::isQuitting()
+bool Game::isQuitting() const
 {
 	return m_quitting;
+}
+
+void Game::enableNavigation()
+{
+	m_navigationEnabled = true;
+}
+
+void Game::disableNavigation()
+{
+	m_navigationEnabled = false;
+}
+
+bool Game::isNavigationEnabled() const
+{
+	return m_navigationEnabled;
 }
 
 void Game::spawnNotification(const std::string &message, bool addToLog, int durationMs)

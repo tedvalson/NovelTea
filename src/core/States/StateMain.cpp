@@ -354,6 +354,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 				updateRoomText();
 				return;
 			}
+			GGame.enableNavigation();
 			room->runScriptAfterLeave();
 			GGame.setRoom(nextRoom);
 			nextRoom->runScriptAfterEnter();
@@ -569,12 +570,15 @@ bool StateMain::processTestSteps()
 		}
 		else if (type == "move")
 		{
-			auto direction = jstep["direction"].ToInt();
-			auto &paths = m_navigation.getPaths();
-			auto &jentity = paths[direction][1];
-			success = (paths[direction][0].ToBool() && jentity[0].ToInt() != -1);
-			if (success)
-				GGame.pushNextEntityJson(jentity);
+			success = GGame.isNavigationEnabled();
+			if (success) {
+				auto direction = jstep["direction"].ToInt();
+				auto &paths = m_navigation.getPaths();
+				auto &jentity = paths[direction][1];
+				success = (paths[direction][0].ToBool() && jentity[0].ToInt() != -1);
+				if (success)
+					GGame.pushNextEntityJson(jentity);
+			}
 		}
 
 		if (!success)
@@ -884,7 +888,8 @@ bool StateMain::processEvent(const sf::Event &event)
 
 		if (m_actionBuilder.processEvent(event))
 			return true;
-		m_navigation.processEvent(event);
+		if (GGame.isNavigationEnabled())
+			m_navigation.processEvent(event);
 
 		if (m_buttonInventory.processEvent(event) || m_roomScrollbar.processEvent(event))
 			return true;
@@ -922,6 +927,10 @@ bool StateMain::update(float delta)
 		quit();
 
 	m_dialogueRenderer.update(delta);
+	if (GGame.isNavigationEnabled())
+		m_navigation.show();
+	else
+		m_navigation.hide();
 
 	if (m_mode == Mode::Cutscene)
 	{

@@ -50,7 +50,11 @@ public:
 	void syncToSave();
 
 	void quit();
-	bool isQuitting();
+	bool isQuitting() const;
+
+	void enableNavigation();
+	void disableNavigation();
+	bool isNavigationEnabled() const;
 
 	void spawnNotification(const std::string &message, bool addToLog = true, int durationMs = 0);
 
@@ -76,6 +80,7 @@ private:
 	std::queue<std::shared_ptr<Entity>> m_entityQueue;
 	bool m_autosaveEnabled;
 	bool m_quitting;
+	bool m_navigationEnabled;
 
 	MessageCallback m_messageCallback;
 	SaveCallback m_saveCallback;
