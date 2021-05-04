@@ -15,6 +15,7 @@ namespace NovelTea
 DialogueRenderer::DialogueRenderer()
 : m_callback(nullptr)
 , m_textLineIndex(-1)
+, m_fontSizeMultiplier(1.0)
 , m_fadeTween(nullptr)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
@@ -22,6 +23,10 @@ DialogueRenderer::DialogueRenderer()
 
 	m_bg.setTexture(m_buttonTexture);
 	m_bg.setColor(sf::Color(0, 0, 0, 0));
+
+	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
+	m_scrollBar.setAutoHide(false);
+	m_scrollBar.attachObject(this);
 
 	setSize(sf::Vector2f(400.f, 400.f));
 	setDialogue(std::make_shared<Dialogue>());
@@ -51,22 +56,34 @@ void DialogueRenderer::reset()
 
 void DialogueRenderer::update(float delta)
 {
+	m_scrollBar.update(delta);
 	m_tweenManager.update(delta);
 }
 
 bool DialogueRenderer::processEvent(const sf::Event &event)
 {
-	if (event.type == sf::Event::MouseButtonPressed)
+	if (m_scrollBar.processEvent(event))
+		return false;
+
+	if (event.type == sf::Event::MouseButtonReleased)
 	{
 		if (m_text.getFadeAcrossPosition() < 1.f) {
 			if (m_fadeTween)
 				m_fadeTween->update(9999.f);
 			return true;
 		}
-		if (m_textLineIndex < m_textLines.size() - 1) {
+
+		auto sizeY = m_scrollBar.getScrollAreaSize().y;
+		if (m_scrollPos > 1.05f * sizeY - m_scrollAreaSize.y) {
+			TweenEngine::Tween::to(m_scrollBar, ScrollBar::SCROLLPOS, 0.3f)
+				.targetRelative(-0.75f * sizeY)
+				.start(m_tweenManager);
+			return true;
+		} else if (m_textLineIndex < m_textLines.size() - 1) {
 			changeLine(m_textLineIndex + 1);
 			return true;
 		}
+
 		if (m_buttons.empty()) {
 			changeSegment(m_nextForcedSegmentIndex);
 			return true;
@@ -101,55 +118,77 @@ void DialogueRenderer::setDialogueCallback(DialogueCallback callback)
 	m_callback = callback;
 }
 
-void DialogueRenderer::repositionButtons()
+void DialogueRenderer::repositionButtons(float fontSize)
 {
+	if (fontSize < 1.f)
+		return;
 	auto width = (m_size.x < m_size.y ? 0.98f : 0.6f) * m_size.x;
-	auto posY = m_text.getPosition().y + m_bg.getSize().y + m_fontSize * 0.4f;
+	auto posY = m_bg.getPosition().y + m_bg.getSize().y * 1.1f;
 	for (int i = 0; i < m_buttons.size(); ++i)
 	{
 		auto &button = m_buttons[i];
 		auto str = m_buttonStrings[i];
 		auto &text = button->getText();
 		auto &padding = button->getPadding();
+		auto lineSpacing = text.getFont()->getLineSpacing(fontSize);
 		button->setString(str);
-		text.setCharacterSize(m_fontSize);
+		text.setCharacterSize(fontSize);
 
 		if (wrapText(text, width))
 			str = text.getString().toAnsiString();
 		auto lineCount = 1 + std::count(str.begin(), str.end(), '\n');
-		button->setSize(width, m_fontSize * lineCount + (padding.top + padding.height) * 1.9f);
+		button->setSize(width, lineSpacing * lineCount + (padding.top + padding.height) * 1.9f);
 
 		button->setPosition(m_bg.getPosition().x, round(posY));
-		posY += button->getSize().y + m_fontSize * 0.1f;
+		posY += button->getSize().y + fontSize * 0.1f;
 	}
+
+	if (posY > m_size.y)
+		repositionButtons(0.9f * fontSize);
 }
 
 void DialogueRenderer::applyChanges()
 {
 	auto portrait = m_size.x < m_size.y;
 	auto posX = (portrait ? 0.01f : 0.2f) * m_size.x;
-	auto padding = (portrait ? 0.01f : 0.004f) * m_size.x;
+	m_padding = (portrait ? 0.01f : 0.004f) * m_size.x;
 	m_fontSize = m_fontSizeMultiplier * 22;
 	m_text.setSize(sf::Vector2f((portrait ? 0.95f : 0.58f) * m_size.x, m_size.y));
-	m_middleY = 7.f;
 
 	TextFormat format;
 	format.size(m_fontSize/2);
 	m_textName.setText(m_textName.getText(), format);
 	m_text.setText(m_text.getText(), format);
 
-	m_textName.setPosition(round(posX + padding), m_middleY);
-	m_text.setPosition(round(posX + padding * 2),
-					   round(padding + m_textName.getPosition().y + 1.2f * m_fontSize));
+	m_textName.setPosition(round(posX + m_padding), round(2.f * m_size.y / m_fontSize));
 	m_bg.setPosition(round(posX), m_textName.getPosition().y + 1.2f * m_fontSize);
-	m_bg.setSize((portrait ? 0.98f : 0.6f) * m_size.x, m_fontSize * 5);
+	m_bg.setSize((portrait ? 0.98f : 0.6f) * m_size.x,
+				 std::min(0.3f * m_size.y, m_fontSize * (portrait ? 6 : 5)));
 
-	repositionButtons();
+	m_scrollBar.setPosition(posX + m_bg.getSize().x - 4.f, m_bg.getPosition().y);
+	m_scrollBar.setSize(sf::Vector2u(2, m_bg.getSize().y));
+	m_scrollBar.setScrollAreaSize(sf::Vector2u(0, m_bg.getSize().y - m_padding*2));
+	m_scrollBar.setDragRect(sf::FloatRect(0.f, 0.f, m_size.x, m_bg.getPosition().y + m_bg.getSize().y));
+
+	m_scrollAreaSize.y = m_text.getCursorEnd().y + m_fontSize * 2;
+	updateScrollbar();
+
+	auto top = (m_bg.getPosition().y + m_padding) / m_size.y;
+	auto left = (m_bg.getPosition().x + m_padding) / m_size.x;
+	auto width = m_bg.getSize().x - m_padding*2;
+	auto height = m_bg.getSize().y - m_padding*2;
+	m_view.reset(sf::FloatRect(0.f, 0.f, width, height));
+	m_view.setViewport(sf::FloatRect(left, top, width / m_size.x, height / m_size.y));
+
+	m_scrollBar.setScroll(0.f);
+	repositionButtons(m_fontSize);
 }
 
 // Segment arg is a choice segment (or root/link)
 void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 {
+	m_bg.setColor(sf::Color(0, 0, 0, 30));
+
 	if (newSegmentIndex < 0) {
 		m_isComplete = true;
 		return;
@@ -231,6 +270,10 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_textName.setText(line.first, format);
 	m_text.setText(line.second, format);
 
+	m_scrollAreaSize.y = m_text.getCursorEnd().y + m_fontSize * 2;
+	updateScrollbar();
+	m_scrollBar.setScroll(0.f);
+
 	ActiveGame->getTextLog()->push(line.first, TextLogType::DialogueTextName);
 	ActiveGame->getTextLog()->push(line.second, TextLogType::DialogueText);
 
@@ -247,7 +290,7 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*)
 	{
 		if (m_textLineIndex + 1 == m_textLines.size()) {
-			repositionButtons();
+			repositionButtons(m_fontSize);
 			for (auto &button : m_buttons) {
 				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
 					.target(255.f)
@@ -292,6 +335,7 @@ void DialogueRenderer::show(float duration, int startSegmentIndex)
 {
 	if (startSegmentIndex < 0)
 		startSegmentIndex = m_dialogue->getRootIndex();
+	m_scrollBar.show();
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(30.f)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this, startSegmentIndex](TweenEngine::BaseTween*){
@@ -303,6 +347,7 @@ void DialogueRenderer::show(float duration, int startSegmentIndex)
 void DialogueRenderer::hide(float duration)
 {
 	m_tweenManager.killAll();
+	m_scrollBar.hide();
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
@@ -330,6 +375,27 @@ void DialogueRenderer::hide(float duration)
 	}
 }
 
+void DialogueRenderer::setScroll(float position)
+{
+	m_scrollPos = round(position);
+	repositionText();
+}
+
+float DialogueRenderer::getScroll()
+{
+	return m_scrollPos;
+}
+
+const sf::Vector2f &DialogueRenderer::getScrollSize()
+{
+	return m_scrollAreaSize;
+}
+
+void DialogueRenderer::repositionText()
+{
+	m_text.setPosition(m_padding, m_padding + m_scrollPos);
+}
+
 void DialogueRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
@@ -354,17 +420,22 @@ float DialogueRenderer::getFontSizeMultiplier() const
 
 void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-	states.transform *= getTransform();
 
 	target.draw(m_bg, states);
+
+	auto view = target.getView();
+	target.setView(m_view);
 	target.draw(m_text, states);
 	target.draw(m_textOld, states);
+	target.setView(view);
+
 	target.draw(m_textName, states);
 	target.draw(m_textNameOld, states);
 	for (auto &button : m_buttonsOld)
 		target.draw(*button, states);
 	for (auto &button : m_buttons)
 		target.draw(*button, states);
+	target.draw(m_scrollBar);
 }
 
 void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot)

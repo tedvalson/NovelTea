@@ -2,6 +2,7 @@
 #define NOVELTEA_DIALOGUERENDERER_HPP
 
 #include <NovelTea/TweenObjects.hpp>
+#include <NovelTea/GUI/ScrollBar.hpp>
 #include <TweenEngine/Tween.h>
 #include <NovelTea/ActiveText.hpp>
 #include <SFML/Graphics/Drawable.hpp>
@@ -20,7 +21,7 @@ class DialogueSegment;
 
 using DialogueCallback = std::function<void(int)>;
 
-class DialogueRenderer : public sf::Drawable, public TweenTransformable<sf::Transformable>
+class DialogueRenderer : public sf::Drawable, public Scrollable
 {
 public:
 	DialogueRenderer();
@@ -45,6 +46,11 @@ public:
 	void show(float duration = 1.f, int startSegmentIndex = -1);
 	void hide(float duration = 1.f);
 
+	void setScroll(float position) override;
+	float getScroll() override;
+	const sf::Vector2f &getScrollSize() override;
+	void repositionText();
+
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
 
@@ -55,7 +61,7 @@ protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	void genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot);
 
-	void repositionButtons();
+	void repositionButtons(float fontSize);
 	void applyChanges();
 
 private:
@@ -78,9 +84,14 @@ private:
 	sf::Vector2f m_size;
 	sf::Texture *m_buttonTexture;
 	TweenNinePatch m_bg;
-	float m_middleY;
 	float m_fontSize;
 	float m_fontSizeMultiplier;
+
+	float m_padding;
+	float m_scrollPos;
+	sf::Vector2f m_scrollAreaSize;
+	ScrollBar m_scrollBar;
+	sf::View m_view;
 
 	TweenEngine::Tween *m_fadeTween;
 	TweenEngine::TweenManager m_tweenManager;
