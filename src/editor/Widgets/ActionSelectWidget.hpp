@@ -2,6 +2,7 @@
 #define ACTIONSELECTWIDGET_HPP
 
 #include <QWidget>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/json.hpp>
 
 namespace Ui {
@@ -22,10 +23,15 @@ public:
 private slots:
 	void on_pushButton_clicked();
 
+public slots:
+	void renamed(NovelTea::EntityType entityType, const std::string &oldValue, const std::string &newValue);
+
 signals:
 	void valueChanged(sj::JSON value);
 
 private:
+	void refresh();
+
 	Ui::ActionSelectWidget *ui;
 	sj::JSON m_value;
 };

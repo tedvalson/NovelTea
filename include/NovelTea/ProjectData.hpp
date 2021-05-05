@@ -34,6 +34,8 @@ public:
 	size_t addTextFormat(const TextFormat &textFormat);
 	bool removeTextFormat(size_t index);
 
+	void renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName);
+
 	std::shared_ptr<sf::Font> getFont(size_t index) const;
 
 	template <typename T>

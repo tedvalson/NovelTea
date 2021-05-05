@@ -29,6 +29,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 
 	load();
 	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::onListViewChanged);
+	connect(&MainWindow::instance(), &MainWindow::renamed, this, &RoomWidget::refreshObjectList);
 }
 
 RoomWidget::~RoomWidget()
@@ -45,6 +46,20 @@ QString RoomWidget::tabText() const
 EditorTabWidget::Type RoomWidget::getType() const
 {
 	return EditorTabWidget::Room;
+}
+
+void RoomWidget::refreshObjectList()
+{
+	ui->listWidget->model()->blockSignals(true);
+	ui->listWidget->clear();
+	m_room = Proj.get<NovelTea::Room>(idName());
+	for (auto &roomObject : m_room->getObjects())
+	{
+		auto item = new QListWidgetItem(QString::fromStdString(roomObject.idName));
+		item->setCheckState(roomObject.placeInRoom ? Qt::Checked : Qt::Unchecked);
+		ui->listWidget->addItem(item);
+	}
+	ui->listWidget->model()->blockSignals(false);
 }
 
 void RoomWidget::onListViewChanged()
@@ -149,7 +164,6 @@ void RoomWidget::saveData() const
 void RoomWidget::loadData()
 {
 	m_room = Proj.get<NovelTea::Room>(idName());
-	ui->listWidget->clear();
 
 	qDebug() << "Loading room data... " << QString::fromStdString(idName());
 
@@ -160,12 +174,7 @@ void RoomWidget::loadData()
 		m_room = std::make_shared<NovelTea::Room>();
 	}
 
-	for (auto &roomObject : m_room->getObjects())
-	{
-		auto item = new QListWidgetItem(QString::fromStdString(roomObject.idName));
-		item->setCheckState(roomObject.placeInRoom ? Qt::Checked : Qt::Unchecked);
-		ui->listWidget->addItem(item);
-	}
+	refreshObjectList();
 
 	ui->lineNameEdit->setText(QString::fromStdString(m_room->getName()));
 	ui->propertyEditor->setValue(m_room->getProperties());

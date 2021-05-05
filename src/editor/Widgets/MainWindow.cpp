@@ -202,22 +202,22 @@ void MainWindow::warnIfInvalid() const
 		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
 }
 
-json &MainWindow::getDataFromTabType(EditorTabWidget::Type type)
+std::string MainWindow::getEntityIdFromTabType(EditorTabWidget::Type type)
 {
 	if (type == EditorTabWidget::Action)
-		return ProjData[NovelTea::Action::id];
+		return NovelTea::Action::id;
 	else if (type == EditorTabWidget::Cutscene)
-		return ProjData[NovelTea::Cutscene::id];
+		return NovelTea::Cutscene::id;
 	else if (type == EditorTabWidget::Dialogue)
-		return ProjData[NovelTea::Dialogue::id];
+		return NovelTea::Dialogue::id;
 	else if (type == EditorTabWidget::Object)
-		return ProjData[NovelTea::Object::id];
+		return NovelTea::Object::id;
 	else if (type == EditorTabWidget::Room)
-		return ProjData[NovelTea::Room::id];
+		return NovelTea::Room::id;
 	else if (type == EditorTabWidget::Script)
-		return ProjData[NovelTea::Script::id];
+		return NovelTea::Script::id;
 	else if (type == EditorTabWidget::Verb)
-		return ProjData[NovelTea::Verb::id];
+		return NovelTea::Verb::id;
 	else
 		throw std::exception();
 }
@@ -554,9 +554,10 @@ void MainWindow::on_actionRename_triggered()
 		auto newName = text.toStdString();
 		auto existingOldIndex = getEditorTabIndex(selectedType, selectedIdName);
 		auto existingNewIndex = getEditorTabIndex(selectedType, newName);
-		auto &j = getDataFromTabType(selectedType);
+		auto entityId = getEntityIdFromTabType(selectedType);
+		auto entityType = EditorTabWidget::tabTypeToEntityType(selectedType);
 
-		if (existingNewIndex >= 0 || j.hasKey(newName))
+		if (existingNewIndex >= 0 || ProjData[entityId].hasKey(newName))
 		{
 			QMessageBox::critical(this, "Failed to rename",
 				QString::fromStdString("\"" + newName + "\" already exists."));
@@ -572,12 +573,12 @@ void MainWindow::on_actionRename_triggered()
 		}
 
 		// Rename in project data, then save to file
-		j[newName] = j[selectedIdName];
-		j[newName][0] = newName;
-		j.erase(selectedIdName);
+		Proj.renameEntity(entityType, selectedIdName, newName);
 		Proj.saveToFile();
 
 		treeModel->rename(selectedType, QString::fromStdString(selectedIdName), QString::fromStdString(newName));
+
+		emit renamed(entityType, selectedIdName, newName);
 	}
 }
 
@@ -599,7 +600,7 @@ void MainWindow::on_actionDelete_triggered()
 
 	QModelIndex index = ui->treeView->selectionModel()->currentIndex();
 
-	auto &j = getDataFromTabType(selectedType);
+	auto &j = ProjData[getEntityIdFromTabType(selectedType)];
 	j.erase(selectedIdName);
 	Proj.saveToFile();
 
@@ -667,7 +668,7 @@ void MainWindow::on_actionSelectParent_triggered()
 		if (treeModel->changeParent(child, newParent))
 		{
 			auto newParentId = newParentItem->data(0).toString().toStdString();
-			auto &j = getDataFromTabType(selectedType);
+			auto &j = ProjData[getEntityIdFromTabType(selectedType)];
 			j[selectedIdName][NovelTea::ID::entityParentId] = newParentId;
 			Proj.saveToFile();
 		}
@@ -682,7 +683,7 @@ void MainWindow::on_actionClearParentSelection_triggered()
 		parent = parent.parent();
 	if (treeModel->changeParent(child, parent))
 	{
-		auto &j = getDataFromTabType(selectedType);
+		auto &j = ProjData[getEntityIdFromTabType(selectedType)];
 		j[selectedIdName][NovelTea::ID::entityParentId] = "";
 		Proj.saveToFile();
 	}

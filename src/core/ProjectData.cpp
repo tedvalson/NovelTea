@@ -3,6 +3,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
+#include <NovelTea/Room.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
@@ -107,6 +108,53 @@ size_t ProjectData::addTextFormat(const TextFormat &textFormat)
 bool ProjectData::removeTextFormat(size_t index)
 {
 	return true;
+}
+
+void ProjectData::renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName)
+{
+	if (oldName == newName || entityType == EntityType::Invalid)
+		return;
+	auto entityId = entityTypeToId(entityType);
+	auto &j = _json[entityId];
+
+	// Rename parent refs
+	for (auto &entityPair : j.ObjectRange())
+	{
+		auto &jparentId = entityPair.second[1];
+		if (jparentId.ToString() == oldName)
+			jparentId = newName;
+	}
+
+	auto room = std::make_shared<Room>();
+	for (auto &roomPair : _json[Room::id].ObjectRange())
+	{
+		room->fromJson(roomPair.second);
+
+		if (entityType == EntityType::Object)
+		{
+			auto objects = room->getObjects();
+			for (auto &object : objects)
+				if (object.idName == oldName)
+					object.idName = newName;
+			room->setObjects(objects);
+		}
+		else
+		{
+			auto paths = room->getPaths();
+			for (auto &jpath : paths.ArrayRange())
+			{
+				if (jpath[1][0].ToInt() == static_cast<int>(entityType) && jpath[1][1].ToString() == oldName)
+					jpath[1][1] = newName;
+			}
+			room->setPaths(paths);
+		}
+
+		_json[Room::id][roomPair.first] = room->toJson();
+	}
+
+	j[newName] = j[oldName];
+	j[newName][0] = newName;
+	j.erase(oldName);
 }
 
 std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const

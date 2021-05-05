@@ -28,7 +28,7 @@ public:
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
 
-	static json &getDataFromTabType(EditorTabWidget::Type type);
+	std::string getEntityIdFromTabType(EditorTabWidget::Type type);
 
 	QAbstractItemModel *getItemModel() const;
 
@@ -46,6 +46,9 @@ private:
 	void setColorOfSelected(const QColor &color);
 	void createMenus();
 	void updateRecentProjectList();
+
+signals:
+	void renamed(NovelTea::EntityType entityType, const std::string &oldValue, const std::string &newValue);
 
 public slots:
 	void refreshTabs();

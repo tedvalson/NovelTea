@@ -49,6 +49,7 @@ json Room::toJson() const
 
 void Room::loadJson(const json &j)
 {
+	m_objects.clear();
 	m_id = j[0].ToString();
 	m_parentId = j[1].ToString();
 	m_properties = j[2];

@@ -2,6 +2,7 @@
 #define NOVELTEA_UTILS_HPP
 
 #include <SFML/Graphics/Text.hpp>
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <vector>
 #include <string>
 
@@ -21,6 +22,9 @@ std::vector<std::string> split(const std::string &text, const std::string &delim
 std::string join(const std::vector<std::string> &words, const std::string &delimiter = "\n");
 std::string replace(const std::string &text, const std::string &textToReplace, const std::string &replacement = "");
 bool wrapText(sf::Text &text, float width);
+
+EntityType entityIdToType(const std::string &entityId);
+std::string entityTypeToId(EntityType entityType);
 
 } // namespace NovelTea
 

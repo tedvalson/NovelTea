@@ -28,6 +28,9 @@ public:
 	QString tabText() const override;
 	Type getType() const override;
 
+public slots:
+	void refreshObjectList();
+
 private slots:
 	void on_actionAddObject_triggered();
 	void on_actionRemoveObject_triggered();
