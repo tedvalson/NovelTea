@@ -29,13 +29,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 
 	load();
 	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::onListViewChanged);
-	connect(&MainWindow::instance(), &MainWindow::renamed, [this](){
-		m_room = Proj.get<NovelTea::Room>(this->idName());
-		refreshObjectList();
-		ui->scriptEdit->blockSignals(true);
-		ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescriptionRaw()));
-		ui->scriptEdit->blockSignals(false);
-	});
+	connect(&MainWindow::instance(), &MainWindow::renamed, this, &RoomWidget::renamed);
 }
 
 RoomWidget::~RoomWidget()
@@ -65,6 +59,15 @@ void RoomWidget::refreshObjectList()
 		ui->listWidget->addItem(item);
 	}
 	ui->listWidget->model()->blockSignals(false);
+}
+
+void RoomWidget::renamed(NovelTea::EntityType entityType, const std::string &oldName, const std::string &newName)
+{
+	m_room = Proj.get<NovelTea::Room>(idName());
+	refreshObjectList();
+	ui->scriptEdit->blockSignals(true);
+	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescriptionRaw()));
+	ui->scriptEdit->blockSignals(false);
 }
 
 void RoomWidget::onListViewChanged()

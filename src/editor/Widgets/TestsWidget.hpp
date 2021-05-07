@@ -34,6 +34,9 @@ protected:
 	void processSteps(bool startRecording);
 	void saveSettings() const;
 
+public slots:
+	void renamed(NovelTea::EntityType entityType, const std::string &oldName, const std::string &newName);
+
 private slots:
 	void on_actionAddTest_triggered();
 	void on_actionRemoveTest_triggered();

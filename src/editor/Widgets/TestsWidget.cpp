@@ -31,10 +31,7 @@ TestsWidget::TestsWidget(QWidget *parent)
 	buttonAdd->setPopupMode(QToolButton::InstantPopup);
 
 	connect(ui->listWidgetSteps->model(), &QAbstractItemModel::rowsMoved, this, &TestsWidget::on_rowsMoved);
-	connect(&MainWindow::instance(), &MainWindow::renamed, [this](){
-		m_json = ProjData[NovelTea::ID::tests];
-		loadTest(m_selectedTestId);
-	});
+	connect(&MainWindow::instance(), &MainWindow::renamed, this, &TestsWidget::renamed);
 }
 
 TestsWidget::~TestsWidget()
@@ -220,6 +217,12 @@ void TestsWidget::saveSettings() const
 	jtest[NovelTea::ID::entrypointEntity] = ui->actionSelect->getValue();
 	jtest[NovelTea::ID::testScriptInit] = ui->scriptEditInit->toPlainText().toStdString();
 	jtest[NovelTea::ID::testScriptCheck] = ui->scriptEditCheck->toPlainText().toStdString();
+}
+
+void TestsWidget::renamed(NovelTea::EntityType entityType, const std::string &oldName, const std::string &newName)
+{
+	m_json = ProjData[NovelTea::ID::tests];
+	loadTest(m_selectedTestId);
 }
 
 void TestsWidget::saveData() const

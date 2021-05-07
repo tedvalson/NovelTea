@@ -30,6 +30,7 @@ public:
 
 public slots:
 	void refreshObjectList();
+	void renamed(NovelTea::EntityType entityType, const std::string &oldName, const std::string &newName);
 
 private slots:
 	void on_actionAddObject_triggered();
