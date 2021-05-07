@@ -21,6 +21,7 @@ public:
 	bool loadProject(const QString &filename);
 	bool loadProject(const NovelTea::ProjectData &project);
 	bool reloadProject();
+	void saveProject();
 	bool closeProject();
 
 	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = true);

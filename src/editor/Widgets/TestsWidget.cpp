@@ -1,5 +1,6 @@
 #include "TestsWidget.hpp"
 #include "ui_TestsWidget.h"
+#include "MainWindow.hpp"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Verb.hpp>
@@ -30,6 +31,10 @@ TestsWidget::TestsWidget(QWidget *parent)
 	buttonAdd->setPopupMode(QToolButton::InstantPopup);
 
 	connect(ui->listWidgetSteps->model(), &QAbstractItemModel::rowsMoved, this, &TestsWidget::on_rowsMoved);
+	connect(&MainWindow::instance(), &MainWindow::renamed, [this](){
+		m_json = ProjData[NovelTea::ID::tests];
+		loadTest(m_selectedTestId);
+	});
 }
 
 TestsWidget::~TestsWidget()

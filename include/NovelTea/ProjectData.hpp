@@ -71,11 +71,11 @@ public:
 	json &data();
 
 private:
-	bool _loaded = false;
-	std::string _filename;
-	mutable json _json;
+	bool m_loaded = false;
+	std::string m_filename;
+	mutable json m_json;
 
-	std::vector<TextFormat> _textFormats;
+	std::vector<TextFormat> m_textFormats;
 	std::vector<std::shared_ptr<sf::Font>> m_fonts;
 };
 

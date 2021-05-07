@@ -3,6 +3,8 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
+#include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Room.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>
@@ -55,26 +57,26 @@ void ProjectData::newProject()
 
 void ProjectData::closeProject()
 {
-	_json = sj::Array();
-	_loaded = false;
-	_filename.clear();
+	m_json = sj::Array();
+	m_loaded = false;
+	m_filename.clear();
 }
 
 void ProjectData::clearFilename()
 {
-	_filename.clear();
+	m_filename.clear();
 }
 
 bool ProjectData::isLoaded() const
 {
-	return _loaded;
+	return m_loaded;
 }
 
 bool ProjectData::isValid(std::string &errorMessage) const
 {
 	auto entryPoint = sj::Array(-1, "");
-	if (_json.hasKey(ID::entrypointEntity))
-		entryPoint = _json[ID::entrypointEntity];
+	if (m_json.hasKey(ID::entrypointEntity))
+		entryPoint = m_json[ID::entrypointEntity];
 //	auto entryIdName = entryPoint.value(NT_ENTITY_ID, "");
 	if (entryPoint[1].IsEmpty())
 	{
@@ -87,22 +89,22 @@ bool ProjectData::isValid(std::string &errorMessage) const
 
 TextFormat ProjectData::textFormat(size_t index) const
 {
-	if (index >= _textFormats.size())
+	if (index >= m_textFormats.size())
 	{
 		// TODO: throw error? Return const ref?
 		return TextFormat();
 	}
 
-	return _textFormats[index];
+	return m_textFormats[index];
 }
 
 size_t ProjectData::addTextFormat(const TextFormat &textFormat)
 {
-	for (size_t i = 0; i < _textFormats.size(); ++i)
-		if (textFormat == _textFormats[i])
+	for (size_t i = 0; i < m_textFormats.size(); ++i)
+		if (textFormat == m_textFormats[i])
 			return i;
-	_textFormats.push_back(textFormat);
-	return _textFormats.size() - 1;
+	m_textFormats.push_back(textFormat);
+	return m_textFormats.size() - 1;
 }
 
 bool ProjectData::removeTextFormat(size_t index)
@@ -110,12 +112,23 @@ bool ProjectData::removeTextFormat(size_t index)
 	return true;
 }
 
+void renameJsonEntity(json &jentity, EntityType entityType, const std::string &oldName, const std::string &newName)
+{
+	if (jentity[0].ToInt() == static_cast<int>(entityType) && jentity[1].ToString() == oldName)
+		jentity[1] = newName;
+}
+
 void ProjectData::renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName)
 {
 	if (oldName == newName || entityType == EntityType::Invalid)
 		return;
 	auto entityId = entityTypeToId(entityType);
-	auto &j = _json[entityId];
+
+	// Perform the actual renaming
+	auto &j = m_json[entityId];
+	j[newName] = j[oldName];
+	j[newName][0] = newName;
+	j.erase(oldName);
 
 	// Rename parent refs
 	for (auto &entityPair : j.ObjectRange())
@@ -125,8 +138,53 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 			jparentId = newName;
 	}
 
+	// Project settings
+	renameJsonEntity(m_json[ID::entrypointEntity], entityType, oldName, newName);
+
+	// Actions
+	if (entityType == EntityType::Object || entityType == EntityType::Verb)
+	{
+		auto action = std::make_shared<Action>();
+		for (auto &actionPair : m_json[Action::id].ObjectRange())
+		{
+			action->fromJson(actionPair.second);
+			auto jcombo = action->getVerbObjectCombo();
+			if (entityType == EntityType::Verb && jcombo[0].ToString() == oldName)
+				jcombo[0] = newName;
+			else if (entityType == EntityType::Object)
+				for (auto &jobject : jcombo[1].ArrayRange())
+					if (jobject.ToString() == oldName)
+						jobject = newName;
+			action->setVerbObjectCombo(jcombo);
+			m_json[Action::id][actionPair.first] = action->toJson();
+		}
+	}
+
+	// Cutscenes
+	auto cutscene = std::make_shared<Cutscene>();
+	for (auto &pair : m_json[Cutscene::id].ObjectRange())
+	{
+		cutscene->fromJson(pair.second);
+		auto jentity = cutscene->getNextEntity();
+		renameJsonEntity(jentity, entityType, oldName, newName);
+		cutscene->setNextEntity(jentity);
+		m_json[Cutscene::id][pair.first] = cutscene->toJson();
+	}
+
+	// Dialogues
+	auto dialogue = std::make_shared<Dialogue>();
+	for (auto &pair : m_json[Dialogue::id].ObjectRange())
+	{
+		dialogue->fromJson(pair.second);
+		auto jentity = dialogue->getNextEntity();
+		renameJsonEntity(jentity, entityType, oldName, newName);
+		dialogue->setNextEntity(jentity);
+		m_json[Dialogue::id][pair.first] = dialogue->toJson();
+	}
+
+	// Rooms
 	auto room = std::make_shared<Room>();
-	for (auto &roomPair : _json[Room::id].ObjectRange())
+	for (auto &roomPair : m_json[Room::id].ObjectRange())
 	{
 		room->fromJson(roomPair.second);
 
@@ -137,24 +195,46 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 				if (object.idName == oldName)
 					object.idName = newName;
 			room->setObjects(objects);
+
+			// Rename object refs in room description
+			auto d = room->getDescriptionRaw();
+			room->setDescriptionRaw(replace(d, "|"+oldName+"]]", "|"+newName+"]]"));
 		}
 		else
 		{
 			auto paths = room->getPaths();
 			for (auto &jpath : paths.ArrayRange())
-			{
-				if (jpath[1][0].ToInt() == static_cast<int>(entityType) && jpath[1][1].ToString() == oldName)
-					jpath[1][1] = newName;
-			}
+				renameJsonEntity(jpath[1], entityType, oldName, newName);
 			room->setPaths(paths);
 		}
 
-		_json[Room::id][roomPair.first] = room->toJson();
+		m_json[Room::id][roomPair.first] = room->toJson();
 	}
 
-	j[newName] = j[oldName];
-	j[newName][0] = newName;
-	j.erase(oldName);
+	// Tests
+	for (auto &pair : m_json[ID::tests].ObjectRange())
+	{
+		auto &j = pair.second;
+		renameJsonEntity(j[ID::entrypointEntity], entityType, oldName, newName);
+		if (entityType == EntityType::Object)
+			for (auto &jobjectId : j[ID::startingInventory].ArrayRange())
+				if (jobjectId.ToString() == oldName)
+					jobjectId = newName;
+		if (entityType == EntityType::Object || entityType == EntityType::Verb)
+			for (auto &jstep : j[ID::testSteps].ArrayRange())
+				if (jstep["type"].ToString() == "action")
+				{
+					if (entityType == EntityType::Object) {
+						for (auto &jobjectId : jstep["objects"].ArrayRange())
+							if (jobjectId.ToString() == oldName)
+								jobjectId = newName;
+					} else {
+						auto &verbId = jstep["verb"];
+						if (verbId.ToString() == oldName)
+							verbId = newName;
+					}
+				}
+	}
 }
 
 std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
@@ -166,11 +246,11 @@ std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
 
 void ProjectData::saveToFile(const std::string &filename)
 {
-	if (filename.empty() && _filename.empty())
+	if (filename.empty() && m_filename.empty())
 		return;
 	if (!filename.empty())
-		_filename = filename;
-	std::ofstream file(_filename);
+		m_filename = filename;
+	std::ofstream file(m_filename);
 	auto j = toJson();
 //	json::to_msgpack(j, file);
 	file << j;
@@ -196,7 +276,7 @@ bool ProjectData::loadFromFile(const std::string &filename)
 		auto j = json::Load(s);
 		auto success = fromJson(j);
 		if (success)
-			_filename = filename;
+			m_filename = filename;
 		return success;
 	}
 	catch (std::exception &e)
@@ -209,7 +289,7 @@ bool ProjectData::loadFromFile(const std::string &filename)
 
 const std::string &ProjectData::filename() const
 {
-	return _filename;
+	return m_filename;
 }
 
 json ProjectData::toJson() const
@@ -225,7 +305,7 @@ json ProjectData::toJson() const
 
 	// TextFormat list
 	json jtextformats = sj::Array();
-	for (auto &format : _textFormats)
+	for (auto &format : m_textFormats)
 		jtextformats.append(format.toJson());
 
 	// Cutscene list
@@ -237,24 +317,24 @@ json ProjectData::toJson() const
 //		{"textformats", jtextformats}
 //	});
 
-	_json[ID::textFormats] = jtextformats;
+	m_json[ID::textFormats] = jtextformats;
 
-	return _json;
+	return m_json;
 //	return jproject;
 }
 
 bool ProjectData::fromJson(const json &j)
 {
-	_loaded = false;
-	_filename.clear();
-	_textFormats.clear();
+	m_loaded = false;
+	m_filename.clear();
+	m_textFormats.clear();
 	m_fonts.clear();
 
 	for (auto &jformat : j[ID::textFormats].ArrayRange())
 	{
 		TextFormat format;
 		format.fromJson(jformat);
-		_textFormats.push_back(format);
+		m_textFormats.push_back(format);
 	}
 
 	for (auto &jfont : j[ID::projectFonts].ArrayRange())
@@ -266,8 +346,8 @@ bool ProjectData::fromJson(const json &j)
 	}
 
 	GMan; // Make sure GameManager is initialized
-	_json = j;
-	_loaded = true;
+	m_json = j;
+	m_loaded = true;
 	ActiveGame->reset();
 
 	return true;
@@ -275,12 +355,12 @@ bool ProjectData::fromJson(const json &j)
 
 const json &ProjectData::data() const
 {
-	return _json;
+	return m_json;
 }
 
 json &ProjectData::data()
 {
-	return _json;
+	return m_json;
 }
 
 } // namespace NovelTea

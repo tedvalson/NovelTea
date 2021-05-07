@@ -101,6 +101,22 @@ bool MainWindow::reloadProject()
 	return loadProject(QString::fromStdString(Proj.filename()));
 }
 
+void MainWindow::saveProject()
+{
+	auto jtabs = sj::Array();
+	auto count = ui->tabWidget->count();
+	ProjData[NovelTea::ID::openTabIndex] = ui->tabWidget->currentIndex();
+	for (int i = 0; i < count; ++i) {
+		auto tab = qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(i));
+		if (tab->isModified())
+			tab->save();
+		jtabs.append(sj::Array(static_cast<int>(tab->getType()), tab->idName()));
+	}
+	ProjData[NovelTea::ID::openTabs] = jtabs;
+	ProjData[NovelTea::ID::entityColors] = treeModel->getColorJSON();
+	Proj.saveToFile();
+}
+
 bool MainWindow::closeProject()
 {
 	if (!Proj.isLoaded())
@@ -109,17 +125,10 @@ bool MainWindow::closeProject()
 	if (!reallyWantToClose())
 		return false;
 
-	auto jtabs = sj::Array();
+	saveProject();
 	auto count = ui->tabWidget->count();
-	ProjData[NovelTea::ID::openTabIndex] = ui->tabWidget->currentIndex();
-	for (int i = 0; i < count; ++i) {
-		auto tab = qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(0));
-		jtabs.append(sj::Array(static_cast<int>(tab->getType()), tab->idName()));
-		delete tab;
-	}
-	ProjData[NovelTea::ID::openTabs] = jtabs;
-	ProjData[NovelTea::ID::entityColors] = treeModel->getColorJSON();
-	Proj.saveToFile();
+	for (int i = 0; i < count; ++i)
+		delete qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(0));
 
 	Proj.closeProject();
 	treeModel->loadProject(Proj);
@@ -545,6 +554,20 @@ void MainWindow::on_tabWidget_tabBarClicked(int index)
 
 void MainWindow::on_actionRename_triggered()
 {
+	for (int i = 0; i < ui->tabWidget->count(); ++i)
+	{
+		auto widget = qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(i));
+		if (widget && widget->isModified())
+		{
+			auto msg = "Before renaming entities, you need to save current changes.\nWould you like to do that now?";
+			auto ret = QMessageBox::warning(this, "Save Project Changes?", QString::fromStdString(msg), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+			if (ret != QMessageBox::Yes)
+				return;
+			saveProject();
+			break;
+		}
+	}
+
 	bool ok;
 	QString text = QInputDialog::getText(this, tr("Rename"),
 			tr("Please enter a new name:"), QLineEdit::Normal,
@@ -579,6 +602,8 @@ void MainWindow::on_actionRename_triggered()
 		treeModel->rename(selectedType, QString::fromStdString(selectedIdName), QString::fromStdString(newName));
 
 		emit renamed(entityType, selectedIdName, newName);
+
+		saveProject();
 	}
 }
 

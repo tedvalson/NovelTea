@@ -52,7 +52,9 @@ void ActionSelectWidget::renamed(NovelTea::EntityType entityType, const std::str
 	if (entityType == type && oldValue == value[NovelTea::ID::selectEntityId].ToString())
 	{
 		value[NovelTea::ID::selectEntityId] = newValue;
+		blockSignals(true);
 		setValue(value);
+		blockSignals(false);
 	}
 }
 

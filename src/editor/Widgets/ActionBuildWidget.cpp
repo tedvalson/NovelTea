@@ -53,19 +53,38 @@ sj::JSON ActionBuildWidget::getValue() const
 	return m_value;
 }
 
+void ActionBuildWidget::renamed(NovelTea::EntityType entityType, const std::string &oldValue, const std::string &newValue)
+{
+	if (entityType != NovelTea::EntityType::Verb && entityType != NovelTea::EntityType::Object)
+		return;
+
+	auto value = m_value;
+	if (entityType == NovelTea::EntityType::Verb && value[0].ToString() == oldValue)
+		value[0] = newValue;
+	else // Is Object
+		for (auto &j : value[1].ArrayRange())
+			if (j.ToString() == oldValue)
+				j = newValue;
+
+	blockSignals(true);
+	refresh();
+	setValue(value);
+	blockSignals(false);
+}
+
 void ActionBuildWidget::refresh()
 {
 	auto model = qobject_cast<TreeModel*>(MainWindow::instance().getItemModel());
 	auto objectModelIndex = model->index(EditorTabWidget::Object);
 	auto verbModelIndex = model->index(EditorTabWidget::Verb);
 
+	m_objectStrings.clear();
+	fillObjects(model, objectModelIndex);
+
 	auto verbText = ui->comboVerb->currentText();
 	ui->comboVerb->clear();
 	fillVerbs(model, verbModelIndex);
 	ui->comboVerb->setCurrentIndex(ui->comboVerb->findText(verbText));
-
-	m_objectStrings.clear();
-	fillObjects(model, objectModelIndex);
 }
 
 void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)

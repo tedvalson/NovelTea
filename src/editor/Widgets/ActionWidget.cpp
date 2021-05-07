@@ -20,6 +20,7 @@ ActionWidget::ActionWidget(const std::string &idName, QWidget *parent)
 	MODIFIER(ui->checkBox, &QCheckBox::toggled);
 	MODIFIER(ui->actionBuilder, &ActionBuildWidget::valueChanged);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
+	connect(&MainWindow::instance(), &MainWindow::renamed, ui->actionBuilder, &ActionBuildWidget::renamed);
 }
 
 ActionWidget::~ActionWidget()

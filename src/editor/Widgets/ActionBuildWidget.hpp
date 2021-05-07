@@ -1,6 +1,7 @@
 #ifndef ACTIONBUILDWIDGET_HPP
 #define ACTIONBUILDWIDGET_HPP
 
+#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <QWidget>
 #include <QComboBox>
 #include <NovelTea/json.hpp>
@@ -22,6 +23,7 @@ public:
 	sj::JSON getValue() const;
 
 public slots:
+	void renamed(NovelTea::EntityType entityType, const std::string &oldValue, const std::string &newValue);
 	void refresh();
 
 private slots:
