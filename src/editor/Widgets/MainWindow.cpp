@@ -321,8 +321,11 @@ QAction *MainWindow::makeColorAction(const QString &string, const QColor &color)
 
 void MainWindow::setColorOfSelected(const QColor &color)
 {
+	auto entityType = EditorTabWidget::tabTypeToEntityType(selectedType);
 	auto selectedIndex = ui->treeView->mapToSource(ui->treeView->currentIndex());
 	treeModel->setColor(selectedIndex, color);
+	saveProject();
+	emit entityColorChanged(entityType, selectedIdName, color);
 }
 
 void MainWindow::createMenus()

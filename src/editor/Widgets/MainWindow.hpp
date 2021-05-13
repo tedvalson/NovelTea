@@ -50,6 +50,7 @@ private:
 
 signals:
 	void renamed(NovelTea::EntityType entityType, const std::string &oldValue, const std::string &newValue);
+	void entityColorChanged(NovelTea::EntityType entityType, const std::string &entityId, const QColor &color);
 
 public slots:
 	void refreshTabs();

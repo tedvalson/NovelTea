@@ -30,6 +30,7 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	load();
 	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::onListViewChanged);
 	connect(&MainWindow::instance(), &MainWindow::renamed, this, &RoomWidget::renamed);
+	connect(&MainWindow::instance(), &MainWindow::entityColorChanged, this, &RoomWidget::refreshObjectColors);
 }
 
 RoomWidget::~RoomWidget()
@@ -59,6 +60,26 @@ void RoomWidget::refreshObjectList()
 		ui->listWidget->addItem(item);
 	}
 	ui->listWidget->model()->blockSignals(false);
+
+	refreshObjectColors();
+}
+
+void RoomWidget::refreshObjectColors()
+{
+	auto &jcolors = ProjData[NovelTea::ID::entityColors][NovelTea::Object::id];
+	ui->listWidget->model()->blockSignals(true);
+	for (int i = 0; i < ui->listWidget->count(); ++i)
+	{
+		auto item = ui->listWidget->item(i);
+		auto entityId = item->text().toStdString();
+		if (jcolors.hasKey(entityId))
+			item->setBackgroundColor(QColor(QString::fromStdString(jcolors[entityId].ToString())));
+		else
+			item->setBackground(QBrush());
+	}
+	ui->listWidget->model()->blockSignals(false);
+	ui->listWidget->hide();
+	ui->listWidget->show();
 }
 
 void RoomWidget::renamed(NovelTea::EntityType entityType, const std::string &oldName, const std::string &newName)
