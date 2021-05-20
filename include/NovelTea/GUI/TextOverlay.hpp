@@ -51,6 +51,7 @@ private:
 	sf::Vector2f m_size;
 	mutable sf::FloatRect m_bounds;
 	mutable bool m_needsUpdate;
+	bool m_mousePressed;
 
 	float m_alpha;
 

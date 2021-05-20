@@ -10,6 +10,7 @@ namespace NovelTea
 
 TextOverlay::TextOverlay()
 : m_needsUpdate(true)
+, m_mousePressed(false)
 , m_alpha(255.f)
 , m_nextStringIndex(0)
 {
@@ -25,10 +26,17 @@ bool TextOverlay::processEvent(const sf::Event &event)
 {
 	if (m_isShowing)
 		return false;
-	if (m_scrollBar.processEvent(event))
-		return false;
-	if (event.type == sf::Event::MouseButtonReleased)
+	if (m_scrollBar.processEvent(event) && event.type != sf::Event::MouseButtonPressed)
 	{
+		m_mousePressed = false;
+		return false;
+	}
+
+	if (event.type == sf::Event::MouseButtonPressed)
+		m_mousePressed = true;
+	else if (event.type == sf::Event::MouseButtonReleased && m_mousePressed)
+	{
+		m_mousePressed = false;
 //		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
 		if (m_scrollPos > m_size.y - m_scrollAreaSize.y) {
 			TweenEngine::Tween::to(m_scrollBar, ScrollBar::SCROLLPOS, 0.3f)
