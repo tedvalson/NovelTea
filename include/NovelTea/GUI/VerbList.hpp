@@ -42,6 +42,8 @@ public:
 
 	void setSelectCallback(VerbSelectCallback callback);
 	void setShowHideCallback(VerbShowHideCallback callback);
+	VerbSelectCallback getSelectCallback() const;
+	VerbShowHideCallback getShowHideCallback() const;
 
 	void setScroll(float position) override;
 	float getScroll() override;

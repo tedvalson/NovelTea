@@ -26,6 +26,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_quitting(false)
 , m_roomTextChanging(false)
 , m_scrollPos(0.f)
+, m_quickVerbPressed(false)
 , m_cutsceneSpeed(1.f)
 {
 	ScriptMan.reset();
@@ -891,14 +892,33 @@ bool StateMain::processEvent(const sf::Event &event)
 		if (GGame.isNavigationEnabled())
 			m_navigation.processEvent(event);
 
-		if (m_buttonInventory.processEvent(event) || m_roomScrollbar.processEvent(event))
+		if (m_buttonInventory.processEvent(event))
 			return true;
-
-		if (event.type == sf::Event::MouseButtonReleased)
+		if (m_roomScrollbar.processEvent(event))
 		{
+			if (event.type != sf::Event::MouseButtonPressed)
 			{
-				auto p = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-				auto word = m_roomActiveText.objectFromPoint(p);
+				m_quickVerbPressed = false;
+				return true;
+			}
+		}
+
+		if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::MouseButtonReleased)
+		{
+			auto p = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+			auto word = m_roomActiveText.objectFromPoint(p);
+
+			if (event.type == sf::Event::MouseButtonPressed)
+			{
+				if (!word.empty()) {
+					m_quickVerbPressed = true;
+					m_selectedObjectId = word;
+					m_clock.restart();
+				}
+			}
+			else if (m_quickVerbPressed)
+			{
+				m_quickVerbPressed = false;
 				m_roomActiveText.setHighlightId(word);
 				if (!word.empty())
 				{
@@ -927,10 +947,20 @@ bool StateMain::update(float delta)
 		quit();
 
 	m_dialogueRenderer.update(delta);
-	if (GGame.isNavigationEnabled())
-		m_navigation.show();
-	else
-		m_navigation.hide();
+	if (m_mode == Mode::Room)
+	{
+		if (m_quickVerbPressed && m_clock.getElapsedTime() > sf::milliseconds(800))
+		{
+			auto callback = m_verbList.getSelectCallback();
+			m_quickVerbPressed = false;
+			if (callback)
+				callback(ProjData[ID::quickVerb].ToString());
+		}
+		if (GGame.isNavigationEnabled())
+			m_navigation.show();
+		else
+			m_navigation.hide();
+	}
 
 	if (m_mode == Mode::Cutscene)
 	{

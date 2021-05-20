@@ -98,6 +98,9 @@ private:
 	DukValue m_textOverlayFunc;
 	TweenRectangleShape m_bg;
 
+	sf::Clock m_clock;
+	bool m_quickVerbPressed;
+
 	// Cutscene
 	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;

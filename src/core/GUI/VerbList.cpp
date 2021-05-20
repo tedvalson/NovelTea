@@ -203,6 +203,16 @@ void VerbList::setShowHideCallback(VerbShowHideCallback callback)
 	m_showHideCallback = callback;
 }
 
+VerbSelectCallback VerbList::getSelectCallback() const
+{
+	return m_selectCallback;
+}
+
+VerbShowHideCallback VerbList::getShowHideCallback() const
+{
+	return m_showHideCallback;
+}
+
 void VerbList::setScroll(float position)
 {
 	m_scrollPos = round(position);

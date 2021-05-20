@@ -16,6 +16,7 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	defaultFontIndex(-1)
 {
 	ui->setupUi(this);
+	ui->comboVerb->lineEdit()->setPlaceholderText("[ Select Verb ]");
 	load();
 
 	// Set default font preview
@@ -33,6 +34,7 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	MODIFIER(ui->lineEditWebsite, &QLineEdit::textChanged);
 	MODIFIER(ui->buttonSetDefaultFont, &QPushButton::clicked);
 	MODIFIER(ui->actionSelect, &ActionSelectWidget::valueChanged);
+	MODIFIER(ui->comboVerb, &QComboBox::currentTextChanged);
 	MODIFIER(ui->scriptAfterActionEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->scriptBeforeActionEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->scriptUndefinedActionEdit, &ScriptEdit::textChanged);
@@ -102,6 +104,7 @@ void ProjectSettingsWidget::saveData() const
 	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
 	j[ID::projectFontDefault] = defaultFontIndex;
 	j[ID::entrypointEntity] = ui->actionSelect->getValue();
+	j[ID::quickVerb] = ui->comboVerb->currentText().toStdString();
 	j[ID::startingInventory] = jobjects;
 
 	j[ID::scriptAfterAction] = ui->scriptAfterActionEdit->toPlainText().toStdString();
@@ -123,6 +126,10 @@ void ProjectSettingsWidget::loadData()
 
 	auto entryPoint = j[ID::entrypointEntity];
 	ui->actionSelect->setValue(entryPoint);
+
+	auto quickVerbId = j[ID::quickVerb].ToString();
+	refreshVerbs();
+	ui->comboVerb->setCurrentText(QString::fromStdString(quickVerbId));
 
 	auto jobjects = j[ID::startingInventory];
 	ui->listInventory->clear();
@@ -157,6 +164,16 @@ void ProjectSettingsWidget::loadData()
 	}
 
 	makeFontDefault(j[ID::projectFontDefault].ToInt());
+}
+
+void ProjectSettingsWidget::refreshVerbs()
+{
+	auto model = qobject_cast<TreeModel*>(MainWindow::instance().getItemModel());
+	auto verbModelIndex = model->index(EditorTabWidget::Verb);
+	auto verbText = ui->comboVerb->currentText();
+	ui->comboVerb->clear();
+	fillVerbs(model, verbModelIndex);
+	ui->comboVerb->setCurrentIndex(ui->comboVerb->findText(verbText));
 }
 
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)
@@ -220,4 +237,12 @@ void ProjectSettingsWidget::on_actionRemoveObject_triggered()
 void ProjectSettingsWidget::on_listInventory_currentRowChanged(int currentRow)
 {
 	ui->actionRemoveObject->setEnabled(currentRow >= 0);
+}
+
+void ProjectSettingsWidget::fillVerbs(const TreeModel *model, const QModelIndex &index)
+{
+	for (auto i = 0; i < model->rowCount(index); ++i)
+		fillVerbs(model, model->index(i, 0, index));
+	if (index.parent().isValid())
+		ui->comboVerb->addItem(index.data().toString());
 }

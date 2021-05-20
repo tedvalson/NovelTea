@@ -2,6 +2,7 @@
 #define PROJECTSETTINGSWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include "TreeModel.hpp"
 #include <QAbstractItemModel>
 
 namespace Ui {
@@ -28,6 +29,9 @@ private:
 	void saveData() const override;
 	void loadData() override;
 
+public slots:
+	void refreshVerbs();
+
 private slots:
 	void on_lineEditFontPreview_textChanged(const QString &arg1);
 	void on_listFonts_currentRowChanged(int currentRow);
@@ -38,6 +42,8 @@ private slots:
 	void on_listInventory_currentRowChanged(int currentRow);
 
 private:
+	void fillVerbs(const TreeModel *model, const QModelIndex &index);
+
 	Ui::ProjectSettingsWidget *ui;
 	int defaultFontIndex;
 };

@@ -30,6 +30,7 @@ namespace ID
 	const auto startingInventory  = "startInv";
 	const auto entrypointEntity   = "entrypoint";
 	const auto entrypointMetadata = "entrydata";
+	const auto quickVerb          = "quickVerb";
 	const auto scriptAfterAction  = "saa";
 	const auto scriptBeforeAction = "sba";
 	const auto scriptUndefinedAction = "sua";
