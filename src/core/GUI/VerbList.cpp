@@ -84,6 +84,7 @@ void VerbList::refreshItems()
 {
 	float maxWidth = 0.f;
 	float posY = m_itemHeight * std::min(m_verbs.size(), 6u);
+	posY = std::min(posY, 0.5f * m_screenSize.y);
 	for (auto &verb : m_verbs) {
 		verb.text.setCharacterSize(m_itemHeight);
 		maxWidth = std::max(maxWidth, verb.text.getLocalBounds().width);
@@ -234,9 +235,11 @@ void VerbList::setPositionBounded(const sf::Vector2f &position)
 	auto p = position;
 	if (p.x + m_bounds.width > m_screenSize.x)
 		p.x = m_screenSize.x - m_bounds.width;
+	if (p.y + m_bounds.height > m_screenSize.y)
+		p.y = m_screenSize.y - m_bounds.height;
 	if (p.x < 0.f)
 		p.x = 0.f;
-	if (p.y  < 0.f)
+	if (p.y < 0.f)
 		p.y = 0.f;
 	setPosition(p);
 	m_scrollBar.setDragRect(getGlobalBounds());
