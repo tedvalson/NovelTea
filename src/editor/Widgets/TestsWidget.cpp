@@ -177,6 +177,7 @@ bool TestsWidget::processCallbackData(const json &jdata)
 	{
 		ui->listWidgetSteps->setCurrentRow(m_errorStepIndex);
 		addStep(jdata);
+		m_errorStepIndex++;
 	} else
 		addStep(jdata, true);
 
