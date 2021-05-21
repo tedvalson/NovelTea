@@ -61,6 +61,7 @@ void CutsceneRenderer::reset(bool preservePosition)
 	m_timeToNext = sf::Time::Zero;
 	m_cursorPos = sf::Vector2f();
 	m_scrollPos = 0.f;
+	m_scrollAreaSize = sf::Vector2f();
 
 	m_texts.clear();
 	m_textsOld.clear();
@@ -169,10 +170,7 @@ void CutsceneRenderer::setScrollTween(float position, float duration)
 	float minPos = m_size.y - m_margin*2 - m_scrollAreaSize.y;
 	if (minPos > 0.f)
 		minPos = 0.f;
-	if (position < minPos)
-		targetPos = minPos;
-	else
-		targetPos = position;
+	targetPos = std::max(position, minPos);
 
 	if (duration == 0.f) {
 		m_scrollPos = targetPos;
@@ -381,6 +379,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			m_cursorPos.x += seg->getOffsetX();
 			m_cursorPos.y += seg->getOffsetY();
 
+			auto startPos = m_cursorPos.y;
 			activeText->setCursorStart(m_cursorPos);
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getDelay());
@@ -390,7 +389,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			updateScrollbar();
 
 			if (m_cursorPos.y + 60.f > m_size.y - m_margin*2 - m_scrollPos) {
-				setScrollTween(-m_scrollAreaSize.y, 1.f);
+				setScrollTween(-startPos, 1.f);
 			}
 			repositionItems();
 		};
