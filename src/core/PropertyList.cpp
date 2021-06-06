@@ -50,6 +50,11 @@ void PropertyList::set(const std::string &key, const DukValue &value)
 	saveChanges();
 }
 
+void PropertyList::unset(const std::string &key)
+{
+	m_savedProperties.erase(key);
+}
+
 bool PropertyList::contains(const std::string &key) const
 {
 	return m_savedProperties.hasKey(key) || m_projectProperties.hasKey(key);

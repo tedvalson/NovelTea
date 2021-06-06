@@ -55,4 +55,9 @@ void Entity::setProp(const std::string &key, const DukValue &value)
 	m_propertyList->set(key, value);
 }
 
+void Entity::unsetProp(const std::string &key)
+{
+	m_propertyList->unset(key);
+}
+
 } // namespace NovelTea

@@ -29,6 +29,7 @@
 	dukglue_set_base_class<Entity, className>(m_context);  \
 	dukglue_register_method(m_context, &className::prop, "prop"); \
 	dukglue_register_method(m_context, &className::setProp, "setProp"); \
+	dukglue_register_method(m_context, &className::unsetProp, "unsetProp"); \
 	dukglue_register_property(m_context, &className::getId, nullptr, "id"); \
 	dukglue_register_method(m_context, &SaveData::get<className>, "load"#className); \
 	dukglue_register_method(m_context, &SaveData::exists<className>, "exists"#className);

@@ -24,6 +24,7 @@ public:
 	const std::shared_ptr<PropertyList> &getPropertyList() const;
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
 	void setProp(const std::string &key, const DukValue &value);
+	void unsetProp(const std::string &key);
 
 	ADD_ACCESSOR(std::string, ParentId, m_parentId)
 	ADD_ACCESSOR(json, Properties, m_properties)

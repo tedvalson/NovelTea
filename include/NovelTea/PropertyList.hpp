@@ -18,6 +18,7 @@ public:
 
 	DukValue get(const std::string &key, const DukValue &defaultValue) const;
 	void set(const std::string &key, const DukValue &value);
+	void unset(const std::string &key);
 	bool contains(const std::string &key) const;
 
 	void setValue(const std::string &key, const sj::JSON &value);
