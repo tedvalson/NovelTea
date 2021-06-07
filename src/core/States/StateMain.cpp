@@ -193,7 +193,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	processTest();
 }
 
-}
 
 void StateMain::render(sf::RenderTarget &target)
 {

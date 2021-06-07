@@ -83,7 +83,8 @@ bool VerbList::processEvent(const sf::Event &event)
 void VerbList::refreshItems()
 {
 	float maxWidth = 0.f;
-	float posY = m_itemHeight * std::min(m_verbs.size(), 6u);
+	const size_t maxItemsShown = 6;
+	float posY = m_itemHeight * std::min(m_verbs.size(), maxItemsShown);
 	posY = std::min(posY, 0.5f * m_screenSize.y);
 	for (auto &verb : m_verbs) {
 		verb.text.setCharacterSize(m_itemHeight);
