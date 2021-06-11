@@ -21,6 +21,16 @@ jobs:
           ${{ github.workspace }}/Qt
           SFML/install
         key: ${{ runner.os }}-NovelTea
+        
+    - name: Setup MacOS Environment
+      if: ${{ runner.os == 'macOS' }}
+      run: |
+        brew install doxygen
+        
+    - name: Setup Windows Environment
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        choco install doxygen.install
           
     - name: Setup Linux Environment
       if: ${{ runner.os == 'Linux' }}
@@ -59,8 +69,9 @@ jobs:
       run: |
         mkdir -p install/NovelTea
         mkdir -p doc/github.io/docs
-        cmake -DBUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML .
+        cmake -DBUILD_DOCS=ON -DBUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML .
         cmake --build . --config Release --target install
+        cmake --build . --config Release --target doc
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
@@ -69,6 +80,17 @@ jobs:
         path: |
           bin/
           res/assets/
+          
+    - name: Deploy Docs
+      uses: peaceiris/actions-gh-pages@v3
+      if: ${{ runner.os == 'Linux' && github.ref == 'refs/heads/master'}}
+      with:
+        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        external_repository: tedvalson/NovelTea-site
+        publish_dir: ./doc/github.io/docs
+        destination_dir: docs
+        enable_jekyll: true
+        commit_message: "AutoDocs: ${{ github.event.head_commit.message }}"
 
   build-android:
     runs-on: ubuntu-latest
