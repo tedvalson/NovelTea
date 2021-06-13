@@ -34,7 +34,9 @@ public:
 	void rename(const std::string &newIdName);
 
 	static Type entityTypeToTabType(NovelTea::EntityType entityType);
+	static Type entityTypeToTabType(int entityType);
 	static NovelTea::EntityType tabTypeToEntityType(Type tabType);
+	static NovelTea::EntityType tabTypeToEntityType(int tabType);
 
 private:
 	virtual void saveData() const = 0;

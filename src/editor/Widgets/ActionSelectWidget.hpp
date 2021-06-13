@@ -22,6 +22,7 @@ public:
 
 private slots:
 	void on_pushButton_clicked();
+	void on_label_linkActivated(const QString &link);
 
 public slots:
 	void renamed(NovelTea::EntityType entityType, const std::string &oldValue, const std::string &newValue);

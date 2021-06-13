@@ -57,6 +57,11 @@ EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(NovelTea::EntityType 
 	}
 }
 
+EditorTabWidget::Type EditorTabWidget::entityTypeToTabType(int entityType)
+{
+	return entityTypeToTabType(static_cast<NovelTea::EntityType>(entityType));
+}
+
 NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type tabType)
 {
 	switch (tabType)
@@ -78,6 +83,11 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 		default:
 			return NovelTea::EntityType::Invalid;
 	}
+}
+
+NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(int tabType)
+{
+	return tabTypeToEntityType(static_cast<Type>(tabType));
 }
 
 void EditorTabWidget::save()

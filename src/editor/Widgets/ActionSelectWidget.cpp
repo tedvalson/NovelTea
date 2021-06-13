@@ -68,19 +68,27 @@ void ActionSelectWidget::refresh()
 		idText += "...";
 	}
 	idText = idText.toHtmlEscaped();
+	idText = " <a href=\"" + QString::fromStdString(m_value.dump()).toHtmlEscaped() + "\">" + idText +  "</a>";
 
 	if (type == NovelTea::EntityType::Cutscene)
-		idText = "<b>Cutscene:</b> " + idText;
+		idText = "<b>Cutscene:</b>" + idText;
 	else if (type == NovelTea::EntityType::CustomScript)
-		idText = "<b>Custom:</b> " + idText;
+		idText = "<b>Custom:</b>" + idText;
 	else if (type == NovelTea::EntityType::Dialogue)
-		idText = "<b>Dialogue:</b> " + idText;
+		idText = "<b>Dialogue:</b>" + idText;
 	else if (type == NovelTea::EntityType::Room)
-		idText = "<b>Room:</b> " + idText;
+		idText = "<b>Room:</b>" + idText;
 	else if (type == NovelTea::EntityType::Script)
-		idText = "<b>Script:</b> " + idText;
+		idText = "<b>Script:</b>" + idText;
 	else
 		idText = "<Nothing Selected>";
 
 	ui->label->setText(idText);
+}
+
+void ActionSelectWidget::on_label_linkActivated(const QString &link)
+{
+	auto j = sj::JSON::Load(link.toStdString());
+	auto type = EditorTabWidget::entityTypeToTabType(j[NovelTea::ID::selectEntityType].ToInt());
+	MainWindow::instance().addEditorTab(type, j[NovelTea::ID::selectEntityId].ToString());
 }
