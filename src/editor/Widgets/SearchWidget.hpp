@@ -2,6 +2,7 @@
 #define SEARCHWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include <NovelTea/json.hpp>
 #include <QTreeWidgetItem>
 
 namespace Ui {
@@ -26,6 +27,7 @@ private:
 	void saveData() const override;
 	void loadData() override;
 
+	void processEntityJson(QTreeWidgetItem *treeItem, const sj::JSON &jentity, bool caseSensitive);
 	void processString(QTreeWidgetItem *treeItem, const std::string &value, bool caseSensitive);
 	void searchEntities(const std::string &entityId, const QString &name, bool caseSensitive);
 	void searchTests(bool caseSensitive);

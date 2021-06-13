@@ -64,6 +64,12 @@ void SearchWidget::loadData()
 	searchEntities(NovelTea::Verb::id, "Verbs", caseSensitive);
 }
 
+void SearchWidget::processEntityJson(QTreeWidgetItem *treeItem, const sj::JSON &jentity, bool caseSensitive)
+{
+	if (jentity[NovelTea::ID::selectEntityType].ToInt() == static_cast<int>(NovelTea::EntityType::CustomScript))
+		processString(treeItem, jentity[NovelTea::ID::selectEntityId].ToString(), caseSensitive);
+}
+
 void SearchWidget::processString(QTreeWidgetItem *treeItem, const std::string &value, bool caseSensitive)
 {
 	auto searchTerm = QString::fromStdString(m_searchTerm);
@@ -135,8 +141,9 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 				if (segment->type() != NovelTea::CutsceneSegment::Text)
 					continue;
 				auto textSeg = std::static_pointer_cast<NovelTea::CutsceneTextSegment>(segment);
-				processString(item, textSeg->getActiveText()->toPlainText(), caseSensitive);
+				processString(item, textSeg->getActiveText()->toPlainText(" "), caseSensitive);
 			}
+			processEntityJson(item, cutscene->getNextEntity(), caseSensitive);
 		}
 		else if (entityId == NovelTea::Dialogue::id) {
 			auto dialogue = std::static_pointer_cast<NovelTea::Dialogue>(entity);
@@ -150,6 +157,7 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 				processString(item, segment->getConditionScript(), caseSensitive);
 			}
 			processString(item, dialogue->getDefaultName(), caseSensitive);
+			processEntityJson(item, dialogue->getNextEntity(), caseSensitive);
 		}
 		else if (entityId == NovelTea::Object::id) {
 			auto object = std::static_pointer_cast<NovelTea::Object>(entity);
@@ -217,6 +225,7 @@ void SearchWidget::searchTests(bool caseSensitive)
 
 		count += item->childCount();
 		item->setText(0, QString::fromStdString(test.first + " (%1)").arg(item->childCount()));
+		item->setData(0, Qt::UserRole, EditorTabWidget::Tests);
 		parentItem->addChild(item);
 	}
 
