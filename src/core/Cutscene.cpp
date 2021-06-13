@@ -102,8 +102,15 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 				textSegment->setCanSkip(pageSegment->getCanSkip());
 				textSegment->setOffsetX(pageSegment->getOffsetX());
 				textSegment->setOffsetY(pageSegment->getOffsetY());
-				if (i > 0 && j == 0) // Don't wait for click on first seg of new page
-					textSegment->setWaitForClick(false);
+				if (j == 0) {
+					// Don't wait for click on first seg of new page
+					if (i > 0)
+						textSegment->setWaitForClick(false);
+					// Don't wait for first seg if previous seg was a page break
+					else if (m_internalSegments.size() > 1)
+						if (m_internalSegments[m_internalSegments.size()-2]->type() == CutsceneSegment::PageBreak)
+							textSegment->setWaitForClick(false);
+				}
 				m_segments.emplace_back(textSegment);
 			}
 		}
