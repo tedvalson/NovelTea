@@ -110,26 +110,52 @@
             <number>1</number>
            </property>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <property name="spacing">
-              <number>0</number>
+            <widget class="QWidget" name="widgetLeftSide" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>1</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <item>
-              <widget class="QToolBar" name="toolBarTests">
-               <property name="floatable">
-                <bool>false</bool>
-               </property>
-               <addaction name="actionAddTest"/>
-               <addaction name="actionRemoveTest"/>
-              </widget>
-             </item>
-             <item>
-              <widget class="QListWidget" name="listWidgetTests"/>
-             </item>
-            </layout>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QToolBar" name="toolBarTests">
+                <property name="floatable">
+                 <bool>false</bool>
+                </property>
+                <addaction name="actionAddTest"/>
+                <addaction name="actionRemoveTest"/>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="listWidgetTests"/>
+              </item>
+             </layout>
+            </widget>
            </item>
            <item>
             <widget class="QTabWidget" name="tabWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>3</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="tabPosition">
               <enum>QTabWidget::South</enum>
              </property>
