@@ -25,7 +25,6 @@ DialogueRenderer::DialogueRenderer()
 	m_bg.setColor(sf::Color(0, 0, 0, 0));
 
 	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
-	m_scrollBar.setAutoHide(false);
 	m_scrollBar.attachObject(this);
 
 	setSize(sf::Vector2f(400.f, 400.f));
@@ -185,7 +184,7 @@ void DialogueRenderer::applyChanges()
 }
 
 // Segment arg is a choice segment (or root/link)
-void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
+void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 {
 	m_bg.setColor(sf::Color(0, 0, 0, 30));
 
@@ -206,8 +205,8 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 	auto segText = startSegment->getText();
 	if (!segText.empty())
 		ActiveGame->getTextLog()->push(segText, TextLogType::DialogueOption);
-	if (runScript)
-		startSegment->runScript();
+	if (run)
+		startSegment->run();
 
 	// Get text line
 	for (auto childId : startSegment->getChildrenIds())
@@ -223,7 +222,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool runScript)
 		break;
 	}
 	if (textSegment)
-		textSegment->runScript();
+		textSegment->run();
 	else {
 		m_isComplete = true;
 		return;
@@ -335,6 +334,9 @@ void DialogueRenderer::show(float duration, int startSegmentIndex)
 {
 	if (startSegmentIndex < 0)
 		startSegmentIndex = m_dialogue->getRootIndex();
+	m_scrollBar.setAutoHide(false);
+	m_scrollAreaSize.y = 0.f;
+	updateScrollbar();
 	m_scrollBar.show();
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(30.f)
@@ -347,6 +349,7 @@ void DialogueRenderer::show(float duration, int startSegmentIndex)
 void DialogueRenderer::hide(float duration)
 {
 	m_tweenManager.killAll();
+	m_scrollBar.setAutoHide(true); // Prevent showing after hide
 	m_scrollBar.hide();
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(0.f)
@@ -467,8 +470,8 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 					// Children should exist if optionNext while seg is empty.
 					auto firstChild = m_dialogue->getSegment(seg->getChildrenIds()[0]);
 					if (firstChild->getTextRaw().empty()) {
-						seg->runScript();
-						firstChild->runScript();
+						seg->run();
+						firstChild->run();
 						genOptions(firstChild, false);
 						return;
 					}

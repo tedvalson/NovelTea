@@ -139,6 +139,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QCheckBox" name="checkBoxAutosave">
+               <property name="text">
+                <string>Autosave</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
            <item>

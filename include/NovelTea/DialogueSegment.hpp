@@ -32,7 +32,8 @@ public:
 	void appendChild(int id);
 	void clearChildren();
 
-	void runScript();
+	// If enabled, run script and autosave
+	void run();
 	bool conditionPasses() const;
 	std::string getText(bool *ok = nullptr) const;
 	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
@@ -53,6 +54,7 @@ public:
 	ADD_ACCESSOR(bool, ScriptedText, m_scriptedText)
 	ADD_ACCESSOR(bool, ScriptEnabled, m_scriptEnabled)
 	ADD_ACCESSOR(bool, ShowOnce, m_showOnce)
+	ADD_ACCESSOR(bool, Autosave, m_autosave)
 	ADD_ACCESSOR(std::string, ConditionScript, m_conditionScript)
 	ADD_ACCESSOR(std::string, Script, m_script)
 	ADD_ACCESSOR(std::string, TextRaw, m_textRaw)
@@ -66,6 +68,7 @@ private:
 	bool m_scriptedText;
 	bool m_scriptEnabled;
 	bool m_showOnce;
+	bool m_autosave;
 	std::string m_conditionScript;
 	std::string m_script;
 	std::string m_textRaw;

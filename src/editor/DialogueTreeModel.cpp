@@ -245,6 +245,8 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 			return QBrush(QColor(Qt::yellow).lighter());
 		else if(segment->getScriptEnabled())
 			return QBrush(QColor(Qt::gray).lighter());
+		else if(segment->getAutosave())
+			return QBrush(QColor(Qt::gray).lighter());
 	}
 	else if (role == Qt::DecorationRole)
 	{

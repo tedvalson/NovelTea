@@ -163,6 +163,7 @@ void DialogueWidget::fillItemSettings()
 	ui->checkBoxScript->setChecked(selectedSegment->getScriptEnabled());
 	ui->scriptEdit->setPlainText(QString::fromStdString(selectedSegment->getScript()));
 	ui->checkBoxShowOnce->setChecked(selectedSegment->getShowOnce());
+	ui->checkBoxAutosave->setChecked(selectedSegment->getAutosave());
 }
 
 void DialogueWidget::checkIndexChange()
@@ -199,6 +200,7 @@ void DialogueWidget::checkIndexChange()
 		segment->setScriptEnabled(ui->checkBoxScript->isChecked());
 		segment->setScript(ui->scriptEdit->toPlainText().toStdString());
 		segment->setShowOnce(ui->checkBoxShowOnce->isChecked());
+		segment->setAutosave(ui->checkBoxAutosave->isChecked());
 
 		if (m_treeModel->updateSegment(index, segment)) {
 			std::cout << "updated seg" << std::endl;

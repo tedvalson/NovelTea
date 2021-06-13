@@ -15,6 +15,7 @@ DialogueSegment::DialogueSegment()
 , m_scriptedText(false)
 , m_scriptEnabled(false)
 , m_showOnce(false)
+, m_autosave(false)
 , m_dialogue(nullptr)
 {
 
@@ -29,6 +30,7 @@ bool DialogueSegment::operator==(const DialogueSegment &segment) const
 			m_scriptedText == segment.m_scriptedText &&
 			m_scriptEnabled == segment.m_scriptEnabled &&
 			m_showOnce == segment.m_showOnce &&
+			m_autosave == segment.m_autosave &&
 			m_conditionScript == segment.m_conditionScript &&
 			m_script == segment.m_script &&
 			m_textRaw == segment.m_textRaw;
@@ -44,8 +46,10 @@ void DialogueSegment::clearChildren()
 	m_childrenIds.clear();
 }
 
-void DialogueSegment::runScript()
+void DialogueSegment::run()
 {
+	if (m_autosave)
+		ActiveGame->autosave();
 	if (!m_scriptEnabled)
 		return;
 	try {
@@ -187,6 +191,7 @@ json DialogueSegment::toJson() const
 		m_conditionalEnabled,
 		m_scriptedText,
 		m_scriptEnabled,
+		m_autosave,
 		m_showOnce,
 		m_conditionScript,
 		m_script,
@@ -198,7 +203,7 @@ json DialogueSegment::toJson() const
 
 bool DialogueSegment::fromJson(const json &j)
 {
-	if (!j.IsArray() || j.size() != 10)
+	if (!j.IsArray() || j.size() != 11)
 		return false;
 
 	m_type = static_cast<Type>(j[0].ToInt());
@@ -206,12 +211,13 @@ bool DialogueSegment::fromJson(const json &j)
 	m_conditionalEnabled = j[2].ToBool();
 	m_scriptedText = j[3].ToBool();
 	m_scriptEnabled = j[4].ToBool();
-	m_showOnce = j[5].ToBool();
-	m_conditionScript = j[6].ToString();
-	m_script = j[7].ToString();
-	m_textRaw = j[8].ToString();
+	m_autosave = j[5].ToBool();
+	m_showOnce = j[6].ToBool();
+	m_conditionScript = j[7].ToString();
+	m_script = j[8].ToString();
+	m_textRaw = j[9].ToString();
 	m_childrenIds.clear();
-	for (auto &jchildId : j[9].ArrayRange())
+	for (auto &jchildId : j[10].ArrayRange())
 		m_childrenIds.push_back(jchildId.ToInt());
 
 	return true;
