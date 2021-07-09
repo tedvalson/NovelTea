@@ -29,10 +29,14 @@ public:
 	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(int, RootIndex, m_rootIndex)
+	ADD_ACCESSOR(bool, EnableDisabledOptions, m_enableDisabledOptions)
+	ADD_ACCESSOR(bool, ShowDisabledOptions, m_showDisabledOptions)
 	ADD_ACCESSOR(std::string, DefaultName, m_defaultName)
 	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
 
 private:
+	bool m_enableDisabledOptions;
+	bool m_showDisabledOptions;
 	int m_rootIndex;
 	std::vector<std::shared_ptr<DialogueSegment>> m_segments;
 	std::string m_defaultName;

@@ -57,7 +57,7 @@ void DialogueSegment::run()
 		auto script = "function _f(dialogue){\n" + m_script + "}";
 		ActiveGame->getScriptManager()->call(script, "_f", dialogue);
 	} catch (std::exception &e) {
-		std::cerr << "DialogueSegment::runScript() " << e.what() << std::endl;
+		std::cerr << "DialogueSegment::run() " << e.what() << std::endl;
 	}
 }
 
@@ -141,6 +141,19 @@ std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultilin
 		result.push_back(getLinePair(buffer, defaultName));
 
 	return result;
+}
+
+bool DialogueSegment::isEmpty() const
+{
+	return isComment() || getText().empty();
+}
+
+bool DialogueSegment::isComment() const
+{
+	if (getScriptedText())
+		return false;
+	else
+		return getText().substr(0, 2) == "//";
 }
 
 bool DialogueSegment::isTextNext() const

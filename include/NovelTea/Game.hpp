@@ -81,6 +81,7 @@ private:
 	bool m_autosaveEnabled;
 	bool m_quitting;
 	bool m_navigationEnabled;
+	bool m_initialized;
 
 	MessageCallback m_messageCallback;
 	SaveCallback m_saveCallback;
@@ -99,6 +100,7 @@ public:
 	static GameManager &instance();
 
 	std::shared_ptr<Game> getActive() const;
+	std::shared_ptr<Game> getDefault() const;
 	void setActive(std::shared_ptr<Game> game);
 	void setDefault();
 

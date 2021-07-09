@@ -22,6 +22,7 @@ Game::Game()
 	, m_autosaveEnabled(true)
 	, m_quitting(false)
 	, m_navigationEnabled(true)
+	, m_initialized(false)
 	, m_messageCallback(nullptr)
 	, m_saveCallback(nullptr)
 	, m_saveData(new SaveData)
@@ -42,7 +43,13 @@ Game::~Game()
 // Game must be active before initialized
 void Game::initialize()
 {
+	if (m_initialized) {
+		std::cerr << "Game already initialized!" << std::endl;
+		return;
+	}
+
 	reset();
+	m_initialized = true;
 }
 
 void Game::reset()

@@ -38,6 +38,8 @@ public:
 	std::string getText(bool *ok = nullptr) const;
 	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
 
+	bool isEmpty() const;
+	bool isComment() const;
 	bool isTextNext() const;
 	bool isOptionNext() const;
 

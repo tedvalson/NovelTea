@@ -32,6 +32,7 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	m_menuTreeView->addAction(ui->actionPasteAsLink);
 
 	ui->radioText->setChecked(true);
+	ui->checkBoxEnableDisabled->setVisible(false);
 
 	load();
 	startTimer(100);
@@ -67,6 +68,8 @@ void DialogueWidget::saveData() const
 		m_dialogue->setProperties(ui->propertyEditor->getValue());
 		m_dialogue->setDefaultName(ui->lineEditDefaultName->text().toStdString());
 		m_dialogue->setNextEntity(ui->actionSelectWidget->getValue());
+		m_dialogue->setShowDisabledOptions(ui->checkBoxShowDisabled->isChecked());
+		m_dialogue->setEnableDisabledOptions(ui->checkBoxEnableDisabled->isChecked());
 		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
 	}
 }
@@ -86,6 +89,8 @@ void DialogueWidget::loadData()
 	ui->treeView->expandToDepth(0);
 	ui->propertyEditor->setValue(m_dialogue->getProperties());
 	ui->lineEditDefaultName->setText(QString::fromStdString(m_dialogue->getDefaultName()));
+	ui->checkBoxShowDisabled->setChecked(m_dialogue->getShowDisabledOptions());
+	ui->checkBoxEnableDisabled->setChecked(m_dialogue->getEnableDisabledOptions());
 	ui->actionSelectWidget->setValue(m_dialogue->getNextEntity());
 	fillItemSettings();
 
@@ -95,6 +100,8 @@ void DialogueWidget::loadData()
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsRemoved);
 	MODIFIER(m_treeModel, &QAbstractItemModel::rowsMoved);
 	MODIFIER(ui->lineEditDefaultName, &QLineEdit::textChanged);
+	MODIFIER(ui->checkBoxShowDisabled, &QCheckBox::clicked);
+	MODIFIER(ui->checkBoxEnableDisabled, &QCheckBox::clicked);
 	MODIFIER(ui->actionSelectWidget, &ActionSelectWidget::valueChanged);
 }
 
@@ -318,4 +325,10 @@ void DialogueWidget::on_treeView_expanded(const QModelIndex &index)
 void DialogueWidget::on_treeView_collapsed(const QModelIndex &index)
 {
 	ui->treeView->resizeColumnToContents(0);
+}
+
+void DialogueWidget::on_checkBoxShowDisabled_toggled(bool checked)
+{
+	ui->checkBoxEnableDisabled->setChecked(false);
+	ui->checkBoxEnableDisabled->setVisible(checked);
 }

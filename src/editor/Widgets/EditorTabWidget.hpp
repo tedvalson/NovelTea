@@ -50,6 +50,8 @@ signals:
 	void loaded();
 	void modified();
 protected:
+	void showEvent(QShowEvent*) override;
+	void hideEvent(QHideEvent*) override;
 	std::string m_idName;
 private:
 	bool m_modified = false;

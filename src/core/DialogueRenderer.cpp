@@ -235,7 +235,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 
 	// Exit properly when ended on empty text segment
 	auto &childIds = textSegment->getChildrenIds();
-	if (childIds.empty() && textSegment->getTextRaw().empty() && m_buttons.empty()) {
+	if (childIds.empty() && textSegment->isEmpty() && m_buttons.empty()) {
 		m_isComplete = true;
 		return;
 	}
@@ -454,14 +454,14 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 			continue;
 		if (!seg->conditionPasses())
 			continue;
-		if (seg->getTextRaw().empty()) {
+		if (seg->isEmpty()) {
 			// If first valid option is empty, pass through
 			if (m_buttons.empty()) {
 				if (isRoot)
 					m_nextForcedSegmentIndex = childId;
 				if (seg->getShowOnce())
 					m_dialogue->setSegmentHasShown(childId);
-				if (isRoot && parentNode->getTextRaw().empty()) {
+				if (isRoot && parentNode->isEmpty()) {
 					changeSegment(childId);
 					return;
 				}
@@ -469,7 +469,7 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 					// If first child [text] seg is empty, then recurse.
 					// Children should exist if optionNext while seg is empty.
 					auto firstChild = m_dialogue->getSegment(seg->getChildrenIds()[0]);
-					if (firstChild->getTextRaw().empty()) {
+					if (firstChild->isEmpty()) {
 						seg->run();
 						firstChild->run();
 						genOptions(firstChild, false);

@@ -1,5 +1,6 @@
 #include "EditorTabWidget.hpp"
 #include "EditorUtils.hpp"
+#include <NovelTea/Game.hpp>
 #include <QIcon>
 
 
@@ -114,4 +115,13 @@ void EditorTabWidget::setModified()
 		m_modified = true;
 		emit modified();
 	}
+}
+
+void EditorTabWidget::showEvent(QShowEvent *)
+{
+	ActiveGame->reset();
+}
+
+void EditorTabWidget::hideEvent(QHideEvent *)
+{
 }

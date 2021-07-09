@@ -348,7 +348,10 @@ bool ProjectData::fromJson(const json &j)
 	GMan; // Make sure GameManager is initialized
 	m_json = j;
 	m_loaded = true;
-	ActiveGame->reset();
+	if (ActiveGame == GMan.getDefault())
+		ActiveGame->initialize();
+	else
+		ActiveGame->reset();
 
 	return true;
 }

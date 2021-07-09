@@ -6,6 +6,8 @@ namespace NovelTea
 
 Dialogue::Dialogue()
 : m_rootIndex(0)
+, m_enableDisabledOptions(false)
+, m_showDisabledOptions(false)
 , m_nextEntity(sj::Array(-1,""))
 {
 	auto rootSegment = std::make_shared<DialogueSegment>();
@@ -15,7 +17,7 @@ Dialogue::Dialogue()
 
 size_t Dialogue::jsonSize() const
 {
-	return 7;
+	return 9;
 }
 
 json Dialogue::toJson() const
@@ -31,6 +33,8 @@ json Dialogue::toJson() const
 		m_defaultName,
 		m_nextEntity,
 		m_rootIndex,
+		m_enableDisabledOptions,
+		m_showDisabledOptions,
 		jsegments
 	);
 	return j;
@@ -44,8 +48,10 @@ void Dialogue::loadJson(const json &j)
 	m_defaultName = j[3].ToString();
 	m_nextEntity = j[4];
 	m_rootIndex = j[5].ToInt();
+	m_enableDisabledOptions = j[6].ToBool();
+	m_showDisabledOptions = j[7].ToBool();
 	m_segments.clear();
-	for (auto &jsegment : j[6].ArrayRange())
+	for (auto &jsegment : j[8].ArrayRange())
 	{
 		auto segment = std::make_shared<DialogueSegment>();
 		segment->fromJson(jsegment);

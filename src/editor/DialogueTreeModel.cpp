@@ -231,12 +231,15 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 	else if (role == Qt::ForegroundRole)
 	{
 		QBrush brush;
-		if (type == NovelTea::DialogueSegment::Option)
+		if (type == NovelTea::DialogueSegment::Link)
+			brush.setColor(Qt::gray);
+		else if (segment->isComment())
+			brush.setColor(Qt::darkGreen);
+		else if (type == NovelTea::DialogueSegment::Option)
 			brush.setColor(Qt::blue);
 		else if (type == NovelTea::DialogueSegment::Text)
 			brush.setColor(Qt::red);
-		else if (type == NovelTea::DialogueSegment::Link)
-			brush.setColor(Qt::gray);
+
 		return brush;
 	}
 	else if (role == Qt::BackgroundRole)
