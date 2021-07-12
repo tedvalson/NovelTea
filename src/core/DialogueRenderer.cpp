@@ -444,19 +444,23 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot)
 {
 	auto optionNext = parentNode->isOptionNext();
+	auto hasWorkingOption = false;
 
 	// Get player options
 	int i = 0;
 	for (auto childId : parentNode->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
-		if (seg->getShowOnce() && m_dialogue->getSegmentHasShown(childId))
-			continue;
-		if (!seg->conditionPasses())
-			continue;
+		auto hasShown = m_dialogue->getSegmentHasShown(childId);
+		if (!m_dialogue->getShowDisabledOptions()) {
+			if (seg->getShowOnce() && hasShown)
+				continue;
+			if (!seg->conditionPasses())
+				continue;
+		}
 		if (seg->isEmpty()) {
-			// If first valid option is empty, pass through
-			if (m_buttons.empty()) {
+			// If the one and only option is empty, pass through
+			if (parentNode->getChildrenIds().size() == 1) {
 				if (isRoot)
 					m_nextForcedSegmentIndex = childId;
 				if (seg->getShowOnce())
@@ -483,20 +487,39 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 		auto btn = new Button;
 		btn->setCentered(false);
 		btn->setTexture(m_buttonTexture);
-		btn->setColor(sf::Color(180, 180, 180, 180));
-		btn->setActiveColor(sf::Color(140, 140, 140));
-		btn->setTextColor(sf::Color::Black);
-		btn->onClick([this, seg, i, childId](){
-			if (m_callback)
-				m_callback(i);
-			if (seg->getShowOnce())
-				m_dialogue->setSegmentHasShown(childId);
-			changeSegment(childId);
-		});
+		// Check if button is NOT disabled
+		if (!hasShown || m_dialogue->getEnableDisabledOptions()) {
+			hasWorkingOption = true;
+			btn->setColor(sf::Color(180, 180, 180, 180));
+			btn->setActiveColor(sf::Color(140, 140, 140));
+			if (hasShown)
+				btn->setTextColor(sf::Color(0, 0, 0, 100));
+			else
+				btn->setTextColor(sf::Color::Black);
+			btn->onClick([this, seg, i, childId](){
+				if (m_callback)
+					m_callback(i);
+				if (seg->getShowOnce())
+					m_dialogue->setSegmentHasShown(childId);
+				changeSegment(childId);
+			});
+		} else {
+			auto bgColor = sf::Color(180, 180, 180, 100);
+			auto textColor = sf::Color(0, 0, 0, 100);
+			btn->setColor(bgColor);
+			btn->setActiveColor(bgColor);
+			btn->setTextColor(textColor);
+			btn->setTextActiveColor(textColor);
+		}
 
 		++i;
 		m_buttons.emplace_back(btn);
 		m_buttonStrings.emplace_back(seg->getText());
+	}
+
+	if (isRoot && !hasWorkingOption) {
+		m_buttons.clear();
+		m_buttonStrings.clear();
 	}
 }
 
