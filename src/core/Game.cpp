@@ -266,6 +266,11 @@ std::shared_ptr<Game> GameManager::getActive() const
 	return m_activeGame;
 }
 
+std::shared_ptr<Game> GameManager::getDefault() const
+{
+	return m_defaultGame;
+}
+
 void GameManager::setDefault()
 {
 	setActive(m_defaultGame);
