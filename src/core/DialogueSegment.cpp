@@ -117,6 +117,10 @@ std::pair<std::string,std::string> getLinePair(const std::string &line, const st
 std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultiline(bool *ok) const
 {
 	std::vector<std::pair<std::string,std::string>> result;
+	if (isComment()) {
+		result.emplace_back("", "");
+		return result;
+	}
 	auto text = getText(ok);
 	auto defaultName = m_dialogue ? m_dialogue->getDefaultName() : "";
 	if (ok && !*ok) {

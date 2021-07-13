@@ -203,7 +203,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 	std::shared_ptr<DialogueSegment> textSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
 	auto segText = startSegment->getText();
-	if (!segText.empty())
+	if (!startSegment->isEmpty())
 		ActiveGame->getTextLog()->push(segText, TextLogType::DialogueOption);
 	if (run)
 		startSegment->run();
