@@ -451,11 +451,9 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 	for (auto childId : parentNode->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
-		auto hasShown = m_dialogue->getSegmentHasShown(childId);
+		auto disabled = seg->isDisabled();
 		if (!m_dialogue->getShowDisabledOptions()) {
-			if (seg->getShowOnce() && hasShown)
-				continue;
-			if (!seg->conditionPasses())
+			if (disabled)
 				continue;
 		}
 		if (seg->isEmpty()) {
@@ -470,14 +468,16 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 					return;
 				}
 				if (optionNext) {
-					// If first child [text] seg is empty, then recurse.
+					// If you can find an enabled empty text, recurse.
 					// Children should exist if optionNext while seg is empty.
-					auto firstChild = m_dialogue->getSegment(seg->getChildrenIds()[0]);
-					if (firstChild->isEmpty()) {
-						seg->run();
-						firstChild->run();
-						genOptions(firstChild, false);
-						return;
+					for (auto id : seg->getChildrenIds()) {
+						auto textSeg = m_dialogue->getSegment(id);
+						if (textSeg->isEmpty() && !textSeg->isDisabled()) {
+							seg->run();
+							textSeg->run();
+							genOptions(textSeg, false);
+							return;
+						}
 					}
 				}
 				break;
@@ -487,12 +487,12 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 		auto btn = new Button;
 		btn->setCentered(false);
 		btn->setTexture(m_buttonTexture);
-		// Check if button is NOT disabled
-		if (!hasShown || m_dialogue->getEnableDisabledOptions()) {
+		// Check if button is enabled
+		if (m_dialogue->getEnableDisabledOptions() || !disabled) {
 			hasWorkingOption = true;
 			btn->setColor(sf::Color(180, 180, 180, 180));
 			btn->setActiveColor(sf::Color(140, 140, 140));
-			if (hasShown)
+			if (disabled)
 				btn->setTextColor(sf::Color(0, 0, 0, 100));
 			else
 				btn->setTextColor(sf::Color::Black);

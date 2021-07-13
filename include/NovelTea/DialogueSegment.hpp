@@ -37,9 +37,11 @@ public:
 	bool conditionPasses() const;
 	std::string getText(bool *ok = nullptr) const;
 	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
+	Type getNextType() const;
 
 	bool isEmpty() const;
 	bool isComment() const;
+	bool isDisabled() const;
 	bool isTextNext() const;
 	bool isOptionNext() const;
 

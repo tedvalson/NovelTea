@@ -1,5 +1,6 @@
 #include "DialogueTreeModel.hpp"
 #include "DialogueTreeItem.hpp"
+#include <NovelTea/Game.hpp>
 #include <QStringList>
 #include <QFont>
 #include <QIcon>
@@ -256,6 +257,7 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 		if (segment->getScriptedText())
 		{
 			bool ok;
+			ActiveGame->reset();
 			auto text = segment->getText(&ok);
 			if (!ok)
 				return QIcon::fromTheme("dialog-error");

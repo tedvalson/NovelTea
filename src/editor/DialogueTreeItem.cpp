@@ -48,6 +48,8 @@ QVariant DialogueTreeItem::data(int column) const
 			return "[SKIP]";
 		else if (segment->getType() == NovelTea::DialogueSegment::Option)
 			return QString::fromStdString(segment->getText());
+		else if (segment->isComment())
+			return QString::fromStdString(segment->getText());
 		else
 		{
 			QString str;

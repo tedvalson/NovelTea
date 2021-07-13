@@ -147,6 +147,35 @@ std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultilin
 	return result;
 }
 
+DialogueSegment::Type DialogueSegment::getNextType() const
+{
+	// TODO: Handle infinite recursion case with Link type
+	if (!m_dialogue || m_childrenIds.empty())
+		return Invalid;
+	auto seg = m_dialogue->getSegment(m_childrenIds[0]);
+	if (getType() == Text)
+	{
+		// If there are more than one child option, they are always next
+		if (m_childrenIds.size() > 1)
+			return Option;
+		if (!m_dialogue->getEnableDisabledOptions() && seg->isDisabled())
+			return Invalid;
+		return (seg->isEmpty()) ? seg->getNextType() : Option;
+	}
+	else // Option or Root
+	{
+		for (auto id : m_childrenIds)
+		{
+			seg = m_dialogue->getSegment(id);
+			if (seg->isDisabled())
+				continue;
+			return (seg->isEmpty()) ? seg->getNextType() : Text;
+		}
+	}
+
+	return Invalid;
+}
+
 bool DialogueSegment::isEmpty() const
 {
 	return isComment() || getText().empty();
@@ -160,25 +189,21 @@ bool DialogueSegment::isComment() const
 		return getText().substr(0, 2) == "//";
 }
 
+bool DialogueSegment::isDisabled() const
+{
+	if (!m_dialogue)
+		return false;
+	return (getShowOnce() && m_dialogue->getSegmentHasShown(getId())) || !conditionPasses();
+}
+
 bool DialogueSegment::isTextNext() const
 {
-	if (m_childrenIds.empty())
-		return false;
-	auto seg = m_dialogue->getSegment(m_childrenIds[0]);
-	if (!seg->getTextRaw().empty())
-		return seg->getType() == Text;
-	return seg->isTextNext();
+	return getNextType() == Text;
 }
 
 bool DialogueSegment::isOptionNext() const
 {
-	// TODO: Handle infinite recursion case with Link type
-	if (m_childrenIds.empty())
-		return false;
-	auto seg = m_dialogue->getSegment(m_childrenIds[0]);
-	if (!seg->getTextRaw().empty())
-		return seg->getType() == Option;
-	return seg->isOptionNext();
+	return getNextType() == Option;
 }
 
 void DialogueSegment::setDialogue(Dialogue *dialogue)
