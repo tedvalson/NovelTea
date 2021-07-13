@@ -48,6 +48,7 @@ namespace NovelTea
 ScriptManager::ScriptManager(Game *game)
 	: m_context(nullptr)
 	, m_game(game)
+	, m_randSeed(0)
 {
 	reset();
 }
@@ -62,6 +63,8 @@ void ScriptManager::reset()
 	if (m_context)
 		duk_destroy_heap(m_context);
 	m_context = duk_create_heap_default();
+
+	m_randEngine.seed(m_randSeed);
 
 	registerGlobals();
 	registerFunctions();
@@ -150,6 +153,17 @@ bool ScriptManager::runRoomScript(const std::string &roomId, const std::string &
 		std::cerr << "runRoomScript (" << roomId << ") " << e.what() << std::endl;
 		return false;
 	}
+}
+
+void ScriptManager::randSeed(int seed)
+{
+	m_randSeed = seed;
+	m_randEngine.seed(seed);
+}
+
+double ScriptManager::randGen()
+{
+	return m_uniformDist(m_randEngine);
 }
 
 void ScriptManager::registerFunctions()
@@ -281,6 +295,8 @@ void ScriptManager::registerGlobals()
 	// Script
 	dukglue_register_global(m_context, this, "Script");
 	dukglue_register_method(m_context, &ScriptManager::runScriptId, "run");
+	dukglue_register_method(m_context, &ScriptManager::randGen, "rand");
+	dukglue_register_method(m_context, &ScriptManager::randSeed, "seed");
 
 	// TimerManager
 	dukglue_register_global(m_context, m_game->getTimerManager(), "Timer");

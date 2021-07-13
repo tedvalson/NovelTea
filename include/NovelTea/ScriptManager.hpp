@@ -3,6 +3,7 @@
 
 #include <dukglue/dukglue.h>
 #include <NovelTea/json.hpp>
+#include <random>
 
 namespace NovelTea
 {
@@ -24,6 +25,9 @@ public:
 	bool runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds);
 	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds);
 	bool runRoomScript(const std::string &roomId, const std::string &script);
+
+	void randSeed(int seed);
+	double randGen();
 
 	inline void run(const std::string &script)
 	{
@@ -78,6 +82,10 @@ protected:
 private:
 	duk_context *m_context;
 	Game *m_game;
+
+	std::default_random_engine m_randEngine;
+	std::uniform_real_distribution<double> m_uniformDist;
+	int m_randSeed;
 };
 
 } // namespace NovelTea

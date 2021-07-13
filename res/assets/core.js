@@ -18,6 +18,16 @@ if (typeof console.log === 'undefined')
 	})();
 }
 
+Math.seed = function(seed)
+{
+	Script.seed(seed);
+}
+
+Math.random = function()
+{
+	return Script.rand();
+}
+
 function _jsonGet(jsonStr, key)
 {
 	if (jsonStr == "null")
