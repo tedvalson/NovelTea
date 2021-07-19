@@ -108,8 +108,6 @@ void MainWindow::saveProject()
 	ProjData[NovelTea::ID::openTabIndex] = ui->tabWidget->currentIndex();
 	for (int i = 0; i < count; ++i) {
 		auto tab = qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(i));
-		if (tab->isModified())
-			tab->save();
 		jtabs.append(sj::Array(static_cast<int>(tab->getType()), tab->idName()));
 	}
 	ProjData[NovelTea::ID::openTabs] = jtabs;
@@ -211,6 +209,35 @@ void MainWindow::warnIfInvalid() const
 		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
 }
 
+void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::string &entityId, json jMetaData)
+{
+	if (Proj.filename().empty()) {
+		QMessageBox::warning(this, "Cannot Play", "You need to save the project before you can play it.");
+		return;
+	}
+
+	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
+	QStringList args;
+	args << QString::fromStdString(Proj.filename());
+	if (entityType != NovelTea::EntityType::Invalid)
+	{
+		args << "entity";
+		args << QString::number(static_cast<int>(entityType));
+		args << QString::fromStdString(entityId);
+		if (entityType == NovelTea::EntityType::Dialogue)
+		{
+			if (jMetaData.size() == 2)
+				args << QString::number(jMetaData[1].ToInt());
+		}
+	}
+	QProcess::execute(launcherPath, args);
+}
+
+void MainWindow::launchPreview()
+{
+	launchPreview(NovelTea::EntityType::Invalid, "", json());
+}
+
 std::string MainWindow::getEntityIdFromTabType(EditorTabWidget::Type type)
 {
 	if (type == EditorTabWidget::Action)
@@ -275,7 +302,6 @@ bool MainWindow::reallyWantToClose()
 		{
 			for (auto &widget : modifiedWidgets)
 				widget->save();
-			Proj.saveToFile();
 		}
 		else if (ret == QMessageBox::Cancel)
 			return false;
@@ -643,26 +669,12 @@ void MainWindow::on_actionCloseProject_triggered()
 
 void MainWindow::on_actionPlayGame_triggered()
 {
-	if (Proj.filename().empty()) {
-		QMessageBox::warning(this, "Cannot Play", "You need to save the project before you can play it.");
-		return;
-	}
-
-	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
-	QStringList args;
-	args << QString::fromStdString(Proj.filename());
-	if (ui->tabWidget->currentIndex() != -1)
-	{
+	if (ui->tabWidget->currentIndex() != -1) {
 		auto widget = qobject_cast<EditorTabWidget*>(ui->tabWidget->currentWidget());
 		auto type = EditorTabWidget::tabTypeToEntityType(widget->getType());
-		if (type != NovelTea::EntityType::Invalid)
-		{
-			args << "entity";
-			args << QString::number(static_cast<int>(type));
-			args << QString::fromStdString(widget->idName());
-		}
-	}
-	QProcess::execute(launcherPath, args);
+		launchPreview(type, widget->idName(), json());
+	} else
+		launchPreview();
 }
 
 void MainWindow::on_actionSelectParent_triggered()

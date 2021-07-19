@@ -51,10 +51,13 @@ void Dialogue::loadJson(const json &j)
 	m_enableDisabledOptions = j[6].ToBool();
 	m_showDisabledOptions = j[7].ToBool();
 	m_segments.clear();
+
+	int i = 0;
 	for (auto &jsegment : j[8].ArrayRange())
 	{
 		auto segment = std::make_shared<DialogueSegment>();
 		segment->fromJson(jsegment);
+		segment->setId(i++);
 		segment->setDialogue(this);
 		m_segments.push_back(segment);
 	}

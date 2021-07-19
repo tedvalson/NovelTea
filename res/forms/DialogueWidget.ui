@@ -392,6 +392,14 @@
     <string>Cut</string>
    </property>
   </action>
+  <action name="actionPlayFromHere">
+   <property name="icon">
+    <iconset theme="media-playback-start"/>
+   </property>
+   <property name="text">
+    <string>Play From Here</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

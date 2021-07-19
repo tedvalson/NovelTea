@@ -31,6 +31,7 @@ private slots:
 	void on_treeView_pressed(const QModelIndex &index);
 	void on_actionAddObject_triggered();
 	void on_actionDelete_triggered();
+	void on_actionPlayFromHere_triggered();
 	void on_radioText_toggled(bool checked);
 	void on_plainTextEdit_textChanged();
 	void on_checkBoxConditional_toggled(bool checked);

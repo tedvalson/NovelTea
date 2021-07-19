@@ -29,6 +29,9 @@ public:
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
 
+	void launchPreview(NovelTea::EntityType entityType, const std::string &entityId, json jMetaData);
+	void launchPreview();
+
 	std::string getEntityIdFromTabType(EditorTabWidget::Type type);
 
 	QAbstractItemModel *getItemModel() const;

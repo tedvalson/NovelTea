@@ -200,30 +200,36 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 	m_buttonStrings.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
+
 	std::shared_ptr<DialogueSegment> textSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
-	auto segText = startSegment->getText();
-	if (!startSegment->isEmpty())
-		ActiveGame->getTextLog()->push(segText, TextLogType::DialogueOption);
-	if (run)
-		startSegment->run();
+
+	if (startSegment->getType() == DialogueSegment::Type::Text) {
+		textSegment = startSegment;
+	} else {
+		if (!startSegment->isEmpty())
+			ActiveGame->getTextLog()->push(startSegment->getText(), TextLogType::DialogueOption);
+		if (run)
+			startSegment->run();
+	}
 
 	// Get text line
-	for (auto childId : startSegment->getChildrenIds())
-	{
-		auto seg = m_dialogue->getSegment(childId);
-		if (!seg->conditionPasses())
-			continue;
-		if (seg->getShowOnce() && m_dialogue->segmentShown(childId))
-			continue;
+	if (!textSegment)
+		for (auto childId : startSegment->getChildrenIds())
+		{
+			auto seg = m_dialogue->getSegment(childId);
+			if (!seg->conditionPasses())
+				continue;
+			if (seg->getShowOnce() && m_dialogue->segmentShown(childId))
+				continue;
 
-		textSegment = seg;
+			textSegment = seg;
+			break;
+		}
+	if (textSegment) {
 		m_textLines = textSegment->getTextMultiline();
-		break;
-	}
-	if (textSegment)
 		textSegment->run();
-	else {
+	} else {
 		m_isComplete = true;
 		return;
 	}

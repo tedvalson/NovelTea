@@ -1,9 +1,11 @@
 #include "DialogueWidget.hpp"
 #include "ui_DialogueWidget.h"
 #include "DialogueTreeItem.hpp"
+#include "MainWindow.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <QMessageBox>
 #include <QDebug>
 
 using NovelTea::DialogueSegment;
@@ -22,6 +24,8 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 
 	m_menuTreeView->addAction(ui->actionAddObject);
 	m_menuTreeView->addAction(ui->actionDelete);
+	m_menuTreeView->addSeparator();
+	m_menuTreeView->addAction(ui->actionPlayFromHere);
 	m_menuTreeView->addSeparator();
 	m_menuTreeView->addAction(ui->actionMoveUp);
 	m_menuTreeView->addAction(ui->actionMoveDown);
@@ -331,4 +335,20 @@ void DialogueWidget::on_checkBoxShowDisabled_toggled(bool checked)
 {
 	ui->checkBoxEnableDisabled->setChecked(false);
 	ui->checkBoxEnableDisabled->setVisible(checked);
+}
+
+void DialogueWidget::on_actionPlayFromHere_triggered()
+{
+	// Dialogue needs to be saved first
+	if (isModified())
+	{
+		auto result = QMessageBox::warning(this, "Dialogue Changed", "You need to save changes before previewing.",
+				QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Save);
+		if (result == QMessageBox::Cancel)
+			return;
+		save();
+		Proj.saveToFile();
+	}
+	int i = m_selectedItem->getDialogueSegment()->getId();
+	MainWindow::instance().launchPreview(NovelTea::EntityType::Dialogue, idName(), sj::Array("", i));
 }
