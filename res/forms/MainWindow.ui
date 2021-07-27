@@ -157,11 +157,18 @@
     <addaction name="actionProjectSettings"/>
     <addaction name="actionTests"/>
     <addaction name="actionSearch"/>
+    <addaction name="actionSpellCheck"/>
+   </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
    <addaction name="menu_Project"/>
    <addaction name="menu_View"/>
+   <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
@@ -325,6 +332,11 @@
   <action name="actionClearColor">
    <property name="text">
     <string>None</string>
+   </property>
+  </action>
+  <action name="actionSpellCheck">
+   <property name="text">
+    <string>Spell Check</string>
    </property>
   </action>
  </widget>

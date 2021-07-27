@@ -1,4 +1,5 @@
 find_package(Qt5Widgets REQUIRED)
+find_package(hunspell REQUIRED)
 
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/editor)
 set(UIROOT ${PROJECT_SOURCE_DIR}/res/forms)
@@ -22,6 +23,7 @@ set(UIFILES
 	${UIROOT}/RichTextEditor.ui
 	${UIROOT}/SearchWidget.ui
 	${UIROOT}/ScriptWidget.ui
+	${UIROOT}/SpellCheckWidget.ui
 	${UIROOT}/TestsWidget.ui
 	${UIROOT}/VerbWidget.ui
 	${UIROOT}/WizardPageAction.ui
@@ -63,6 +65,7 @@ set(SRC
 	${SRCROOT}/Widgets/SearchWidget.cpp
 	${SRCROOT}/Widgets/ScriptEdit.cpp
 	${SRCROOT}/Widgets/ScriptWidget.cpp
+	${SRCROOT}/Widgets/SpellCheckWidget.cpp
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/TestsWidget.cpp
 	${SRCROOT}/Widgets/VerbWidget.cpp
@@ -90,7 +93,7 @@ qt5_add_resources(RESOURCES ${PROJECT_SOURCE_DIR}/res/NovelTeaEditor.qrc)
 
 add_executable(NovelTeaEditor ${SRC} ${UIOUT} ${RESOURCES})
 
-target_link_libraries(NovelTeaEditor Qt5::Core Qt5::Gui Qt5::Widgets NovelTea)
+target_link_libraries(NovelTeaEditor Qt5::Core Qt5::Gui Qt5::Widgets NovelTea hunspell)
 
 # Install executable
 install(TARGETS NovelTeaEditor

@@ -22,6 +22,9 @@ public:
 		Script,
 		Settings,
 		Verb,
+
+		// Icon files use above numeric values
+		SpellCheck,
 	};
 
 	explicit EditorTabWidget(QWidget *parent = 0);

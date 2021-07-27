@@ -4,6 +4,7 @@
 #include "EditorTabWidget.hpp"
 #include "TreeModel.hpp"
 #include <QMainWindow>
+#include <hunspell/hunspell.hxx>
 
 namespace Ui {
 class MainWindow;
@@ -35,6 +36,7 @@ public:
 	std::string getEntityIdFromTabType(EditorTabWidget::Type type);
 
 	QAbstractItemModel *getItemModel() const;
+	std::shared_ptr<Hunspell> getHunspell() const;
 
 protected:
 	explicit MainWindow(QWidget *parent = 0);
@@ -85,6 +87,7 @@ private slots:
 	void on_actionClearList_triggered();
 	void on_actionCustomColor_triggered();
 	void on_actionClearColor_triggered();
+	void on_actionSpellCheck_triggered();
 
 private:
 	static MainWindow *_instance;
@@ -96,6 +99,8 @@ private:
 
 	QStringList m_recentProjects;
 	QAction *m_recentProjectActions[MaxRecentProjects];
+
+	std::shared_ptr<Hunspell> m_hunspell;
 };
 
 #endif // MAINWINDOW_H

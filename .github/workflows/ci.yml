@@ -25,17 +25,18 @@ jobs:
     - name: Setup MacOS Environment
       if: ${{ runner.os == 'macOS' }}
       run: |
-        brew install doxygen
+        brew install doxygen hunspell
         
     - name: Setup Windows Environment
       if: ${{ runner.os == 'Windows' }}
       run: |
         choco install doxygen.install
+        choco install hunspell.portable
           
     - name: Setup Linux Environment
       if: ${{ runner.os == 'Linux' }}
       run: |
-        sudo apt install libxrandr-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev
+        sudo apt install libxrandr-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libhunspell-dev
         sudo apt install doxygen libgtest-dev
         
     - name: Install Qt

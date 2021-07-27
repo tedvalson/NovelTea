@@ -9,6 +9,7 @@
 #include "ScriptWidget.hpp"
 #include "VerbWidget.hpp"
 #include "SearchWidget.hpp"
+#include "SpellCheckWidget.hpp"
 #include "TestsWidget.hpp"
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
@@ -42,6 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	createMenus();
 
 	readSettings();
+
+	auto dictPath = QCoreApplication::applicationDirPath().toStdString() + "/dicts/";
+	auto affPath = dictPath + "en_US.aff";
+	auto dPath = dictPath + "en_US.dic";
+	m_hunspell = std::make_shared<Hunspell>(affPath.c_str(), dPath.c_str());
 }
 
 MainWindow::~MainWindow()
@@ -261,6 +267,11 @@ std::string MainWindow::getEntityIdFromTabType(EditorTabWidget::Type type)
 QAbstractItemModel *MainWindow::getItemModel() const
 {
 	return treeModel;
+}
+
+std::shared_ptr<Hunspell> MainWindow::getHunspell() const
+{
+	return m_hunspell;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -758,4 +769,9 @@ void MainWindow::on_actionCustomColor_triggered()
 void MainWindow::on_actionClearColor_triggered()
 {
 	setColorOfSelected(QColor());
+}
+
+void MainWindow::on_actionSpellCheck_triggered()
+{
+	addEditorTab(new SpellCheckWidget);
 }
