@@ -4,6 +4,7 @@
 #include "EditorTabWidget.hpp"
 #include "TreeModel.hpp"
 #include <QMainWindow>
+#include <QProcess>
 #include <hunspell/hunspell.hxx>
 
 namespace Ui {
@@ -46,6 +47,8 @@ protected:
 	bool reallyWantToClose();
 	void readSettings();
 	void writeSettings();
+
+	void onProcessReadyRead();
 
 private:
 	QAction *makeColorAction(const QString &string, const QColor &color);
@@ -100,6 +103,7 @@ private:
 	QStringList m_recentProjects;
 	QAction *m_recentProjectActions[MaxRecentProjects];
 
+	QProcess m_process;
 	std::shared_ptr<Hunspell> m_hunspell;
 };
 

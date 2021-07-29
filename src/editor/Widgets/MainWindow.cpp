@@ -22,7 +22,6 @@
 #include <QCloseEvent>
 #include <QInputDialog>
 #include <QSettings>
-#include <QProcess>
 #include "Wizard/Wizard.hpp"
 #include "QtPropertyBrowser/qtpropertymanager.h"
 #include "QtPropertyBrowser/qtvariantproperty.h"
@@ -48,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	auto affPath = dictPath + "en_US.aff";
 	auto dPath = dictPath + "en_US.dic";
 	m_hunspell = std::make_shared<Hunspell>(affPath.c_str(), dPath.c_str());
+
+	connect(&m_process, &QIODevice::readyRead, this, &MainWindow::onProcessReadyRead);
 }
 
 MainWindow::~MainWindow()
@@ -221,6 +222,14 @@ void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::strin
 		QMessageBox::warning(this, "Cannot Play", "You need to save the project before you can play it.");
 		return;
 	}
+	if (m_process.isOpen()) {
+		auto r = QMessageBox::warning(this, "Already Running", "Game preview is already running.\nWould you like to close it and proceed?",
+				QMessageBox::Close | QMessageBox::Cancel);
+		if (r == QMessageBox::Cancel)
+			return;
+		m_process.terminate();
+		m_process.waitForFinished();
+	}
 
 	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
 	QStringList args;
@@ -236,7 +245,7 @@ void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::strin
 				args << QString::number(jMetaData[1].ToInt());
 		}
 	}
-	QProcess::execute(launcherPath, args);
+	m_process.start(launcherPath, args);
 }
 
 void MainWindow::launchPreview()
@@ -344,6 +353,11 @@ void MainWindow::writeSettings()
 	settings.endGroup();
 
 	settings.setValue("recentProjects", m_recentProjects);
+}
+
+void MainWindow::onProcessReadyRead()
+{
+	std::cout << "READ: " << QString(m_process.readAll()).toStdString();
 }
 
 QAction *MainWindow::makeColorAction(const QString &string, const QColor &color)
