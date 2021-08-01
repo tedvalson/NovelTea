@@ -1,6 +1,8 @@
 find_package(Qt5Widgets REQUIRED)
 find_package(hunspell REQUIRED)
 
+include_directories(${HUNSPELL_INCLUDE_DIR})
+
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/editor)
 set(UIROOT ${PROJECT_SOURCE_DIR}/res/forms)
 
@@ -93,7 +95,7 @@ qt5_add_resources(RESOURCES ${PROJECT_SOURCE_DIR}/res/NovelTeaEditor.qrc)
 
 add_executable(NovelTeaEditor ${SRC} ${UIOUT} ${RESOURCES})
 
-target_link_libraries(NovelTeaEditor Qt5::Core Qt5::Gui Qt5::Widgets NovelTea hunspell)
+target_link_libraries(NovelTeaEditor Qt5::Core Qt5::Gui Qt5::Widgets NovelTea ${HUNSPELL_LIBRARY})
 
 # Install executable
 install(TARGETS NovelTeaEditor
