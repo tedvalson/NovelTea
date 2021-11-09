@@ -104,6 +104,7 @@ void loadColors(TreeItem *item, const sj::JSON &jcolors)
 
 void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, std::string typeIndex)
 {
+	root->setData(1, static_cast<int>(type));
 	if (!data.hasKey(typeIndex))
 		return;
 
@@ -112,7 +113,6 @@ void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, s
 	for (auto &item : data[typeIndex].ObjectRange())
 		addToJson(&j, item.second, data[typeIndex], keys);
 
-	root->setData(1, static_cast<int>(type));
 	addToTree(j, root, type);
 
 	// Load item colors

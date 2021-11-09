@@ -468,6 +468,9 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
 
 void MainWindow::on_treeView_activated(const QModelIndex &index)
 {
+	if (!index.parent().isValid())
+		return;
+
 	auto proxyIndex = ui->treeView->mapToSource(index);
 	auto item = static_cast<TreeItem*>(proxyIndex.internalPointer());
 	auto type = item->data(1);
