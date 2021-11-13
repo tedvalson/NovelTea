@@ -222,7 +222,7 @@ void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::strin
 		QMessageBox::warning(this, "Cannot Play", "You need to save the project before you can play it.");
 		return;
 	}
-	if (m_process.isOpen()) {
+	if (m_process.state() == QProcess::Running) {
 		auto r = QMessageBox::warning(this, "Already Running", "Game preview is already running.\nWould you like to close it and proceed?",
 				QMessageBox::Close | QMessageBox::Cancel);
 		if (r == QMessageBox::Cancel)
