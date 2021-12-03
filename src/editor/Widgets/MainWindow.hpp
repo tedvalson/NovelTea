@@ -5,7 +5,7 @@
 #include "TreeModel.hpp"
 #include <QMainWindow>
 #include <QProcess>
-#include <hunspell/hunspell.hxx>
+#include <hunspell.hxx>
 
 namespace Ui {
 class MainWindow;
