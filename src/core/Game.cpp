@@ -22,6 +22,7 @@ Game::Game()
 	, m_autosaveEnabled(true)
 	, m_quitting(false)
 	, m_navigationEnabled(true)
+	, m_saveEnabled(true)
 	, m_initialized(false)
 	, m_messageCallback(nullptr)
 	, m_saveCallback(nullptr)
@@ -132,6 +133,8 @@ std::shared_ptr<Entity> Game::popNextEntity()
 
 void Game::save(int slot)
 {
+	if (!isSaveEnabled())
+		return;
 	if (m_saveCallback)
 		m_saveCallback();
 	m_saveData->save(slot);
@@ -196,6 +199,21 @@ void Game::disableNavigation()
 bool Game::isNavigationEnabled() const
 {
 	return m_navigationEnabled;
+}
+
+void Game::enableSave()
+{
+	m_saveEnabled = true;
+}
+
+void Game::disableSave()
+{
+	m_saveEnabled = false;
+}
+
+bool Game::isSaveEnabled() const
+{
+	return m_saveEnabled;
 }
 
 void Game::spawnNotification(const std::string &message, bool addToLog, int durationMs)

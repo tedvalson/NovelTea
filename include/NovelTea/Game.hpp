@@ -56,6 +56,10 @@ public:
 	void disableNavigation();
 	bool isNavigationEnabled() const;
 
+	void enableSave();
+	void disableSave();
+	bool isSaveEnabled() const;
+
 	void spawnNotification(const std::string &message, bool addToLog = true, int durationMs = 0);
 
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
@@ -81,6 +85,7 @@ private:
 	bool m_autosaveEnabled;
 	bool m_quitting;
 	bool m_navigationEnabled;
+	bool m_saveEnabled;
 	bool m_initialized;
 
 	MessageCallback m_messageCallback;
