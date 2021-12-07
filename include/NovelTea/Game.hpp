@@ -93,9 +93,9 @@ private:
 
 	std::shared_ptr<SaveData> m_saveData;
 	std::shared_ptr<TimerManager> m_timerManager;
-	std::shared_ptr<ScriptManager> m_scriptManager;
 	std::shared_ptr<NotificationManager> m_notificationManager;
 	std::shared_ptr<TextLog> m_textLog;
+	std::shared_ptr<ScriptManager> m_scriptManager; // Initialize last
 };
 
 

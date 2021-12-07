@@ -137,6 +137,7 @@ void Game::save(int slot)
 		return;
 	if (m_saveCallback)
 		m_saveCallback();
+	m_saveData->data()[ID::log] = m_textLog->toJson();
 	m_saveData->save(slot);
 }
 
@@ -174,6 +175,7 @@ void Game::syncToSave()
 	}
 	m_objectList->attach("player", "inv");
 	m_propertyList->attach("game", "globals");
+	m_textLog->fromJson(m_saveData->data()[ID::log]);
 }
 
 void Game::quit()

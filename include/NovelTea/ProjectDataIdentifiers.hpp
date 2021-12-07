@@ -61,6 +61,7 @@ namespace ID
 	const auto objectLocations    = "objectLocations";
 	const auto roomDescriptions   = "roomDescriptions";
 	const auto properties         = "properties";
+	const auto log                = "log";
 
 } // namespace ID
 

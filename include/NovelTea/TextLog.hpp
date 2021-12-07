@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TEXTLOG_HPP
 #define NOVELTEA_TEXTLOG_HPP
 
+#include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
 
 namespace NovelTea
@@ -12,6 +13,7 @@ enum class TextLogType {
 	DialogueText,
 	DialogueTextName,
 	Notification,
+	Script,
 	TextOverlay,
 };
 
@@ -20,13 +22,17 @@ struct TextLogItem {
 	TextLogType type;
 };
 
-class TextLog
+class TextLog : public JsonSerializable
 {
 public:
 	TextLog();
 
 	void push(const std::string &text, TextLogType type);
+	void pushScript(const std::string &text);
 	const std::vector<TextLogItem> &items() const;
+
+	json toJson() const override;
+	bool fromJson(const json &j) override;
 
 	ADD_ACCESSOR(size_t, ItemLimit, m_itemLimit)
 
