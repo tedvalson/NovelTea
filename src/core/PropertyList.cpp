@@ -31,7 +31,7 @@ DukValue PropertyList::get(const std::string &key, const DukValue &defaultValue)
 
 	auto props = m_savedProperties.hasKey(key) ? &m_savedProperties : &m_projectProperties;
 	auto ctx = defaultValue.context();
-	auto fn = dukglue_peval<DukValue>(ctx, "_jsonGet");
+	auto fn = dukglue_peval<DukValue>(ctx, "_propGet");
 	auto result = dukglue_pcall<DukValue>(ctx, fn, props->dump(), key);
 	return (result.type() == DukValue::UNDEFINED) ? defaultValue : result;
 }

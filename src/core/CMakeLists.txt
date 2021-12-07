@@ -24,6 +24,7 @@ set(SOURCE_FILES
 	${SRCROOT}/ObjectList.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/PropertyList.cpp
+	${SRCROOT}/RegexUtils.cpp
 	${SRCROOT}/Room.cpp
 	${SRCROOT}/SaveData.cpp
 	${SRCROOT}/Script.cpp

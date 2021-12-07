@@ -36,6 +36,12 @@ function _jsonGet(jsonStr, key)
 	return (typeof key === 'undefined') ? v : v[key];
 }
 
+function _propGet(jsonStr, key)
+{
+	var v = _jsonGet(jsonStr, key);
+	return (typeof v === 'String') ? Script.evalExpressions(v) : v;
+}
+
 function toast(msg, addToLog, duration)
 {
 	if (typeof addToLog === 'undefined')

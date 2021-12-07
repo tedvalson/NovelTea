@@ -1,4 +1,6 @@
 #include <NovelTea/TextFragment.hpp>
+#include <NovelTea/Game.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/ProjectData.hpp>
 
 namespace NovelTea
@@ -38,7 +40,14 @@ void TextFragment::setText(const std::string &text)
 	m_text = text;
 }
 
-const std::string &TextFragment::getText() const
+std::string TextFragment::getText() const
+{
+	if (m_text.empty())
+		return m_text;
+	return ActiveGame->getScriptManager()->evalExpressions(m_text);
+}
+
+const std::string &TextFragment::getTextRaw() const
 {
 	return m_text;
 }

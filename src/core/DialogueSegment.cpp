@@ -89,7 +89,7 @@ std::string DialogueSegment::getText(bool *ok) const
 			auto script = "function _f(dialogue){\n" + m_textRaw + "\nreturn \"\";}";
 			return ActiveGame->getScriptManager()->call<std::string>(script, "_f", dialogue);
 		} else
-			return m_textRaw;
+			return ActiveGame->getScriptManager()->evalExpressions(m_textRaw);
 	} catch (std::exception &e) {
 		if (ok)
 			*ok = false;

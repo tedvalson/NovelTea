@@ -18,7 +18,8 @@ public:
 	const TextFormat &getTextFormat() const;
 
 	void setText(const std::string &text);
-	const std::string &getText() const;
+	const std::string &getTextRaw() const;
+	std::string getText() const;
 
 private:
 	TextFormat m_textFormat;

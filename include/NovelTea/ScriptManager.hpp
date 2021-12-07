@@ -26,6 +26,8 @@ public:
 	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds);
 	bool runRoomScript(const std::string &roomId, const std::string &script);
 
+	std::string evalExpressions(const std::string &s);
+
 	void randSeed(int seed);
 	double randGen();
 

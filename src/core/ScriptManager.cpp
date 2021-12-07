@@ -9,6 +9,7 @@
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/PropertyList.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/RegexUtils.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/CutsceneSegment.hpp>
@@ -155,6 +156,31 @@ bool ScriptManager::runRoomScript(const std::string &roomId, const std::string &
 	}
 }
 
+std::string ScriptManager::evalExpressions(const std::string &s)
+{
+	auto re = std::regex {R"(\{\{([\s\S]*?)\}\})"};
+
+	return replaceRegex(s, re, [this, &s](const RegexIterator& it)
+	{
+		std::string result = "#ERROR#";
+		std::string expr = (*it)[1];
+		try {
+			auto r = dukglue_peval<DukValue>(m_context, expr.c_str());
+			if (r.type() == DukValue::STRING)
+				result = r.as_string();
+			else if (r.type() == DukValue::UNDEFINED)
+				result = "";
+			else if (r.type() == DukValue::NUMBER) {
+				float f = r.as_float();
+				result = (f == round(f)) ? std::to_string(r.as_int()) : std::to_string(f);
+			}
+		} catch (std::exception &e) {
+			std::cout << "Error replacing expression: " << s << std::endl << e.what() << std::endl;
+		}
+		return result;
+	});
+}
+
 void ScriptManager::randSeed(int seed)
 {
 	m_randSeed = seed;
@@ -297,6 +323,7 @@ void ScriptManager::registerGlobals()
 
 	// Script
 	dukglue_register_global(m_context, this, "Script");
+	dukglue_register_method(m_context, &ScriptManager::evalExpressions, "evalExpressions");
 	dukglue_register_method(m_context, &ScriptManager::runScriptId, "run");
 	dukglue_register_method(m_context, &ScriptManager::randGen, "rand");
 	dukglue_register_method(m_context, &ScriptManager::randSeed, "seed");
