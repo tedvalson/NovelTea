@@ -155,7 +155,7 @@ std::string ActiveText::toPlainText(const std::string &newline) const
 			result += newline;
 		processedFirstBlock = true;
 		for (auto &frag : block->fragments())
-			result += frag->getText();
+			result += frag->getTextRaw();
 	}
 	return result;
 }
@@ -490,7 +490,7 @@ void ActiveText::ensureUpdate() const
 		{
 			m_cursorPos.x = 0.f;
 			m_cursorPos.y = m_bounds.height;
-			if (!frags.empty() && frags[0]->getText().empty())
+			if (!frags.empty() && frags[0]->getTextRaw().empty())
 				m_bounds.height += lineHeight + m_lineSpacing;
 		}
 		else

@@ -87,7 +87,7 @@ QTextDocument *RichTextEditor::activeTextToDocument(const std::shared_ptr<NovelT
 //			auto textformat = toQTextCharFormat(Proj.textFormat(jfrag[0]));
 //			cursor.insertText(QString::fromStdString(jfrag[1]), textformat);
 			auto textformat = EditorUtils::toQTextCharFormat(fragment->getTextFormat());
-			cursor.insertText(QString::fromStdString(fragment->getText()), textformat);
+			cursor.insertText(QString::fromStdString(fragment->getTextRaw()), textformat);
 		}
 	}
 	return doc;
