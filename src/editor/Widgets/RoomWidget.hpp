@@ -47,7 +47,7 @@ private slots:
 	void on_checkBoxAfterLeave_toggled(bool checked);
 
 private:
-	void onListViewChanged();
+	void updateAll();
 	void updateRoom() const;
 	void updatePreview();
 

@@ -28,7 +28,8 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	ui->scriptEditAfterLeave->hide();
 
 	load();
-	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::onListViewChanged);
+	connect(ui->propertyEditor, &PropertyEditor::valueChanged, this, &RoomWidget::updatePreview);
+	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::updateAll);
 	connect(&MainWindow::instance(), &MainWindow::renamed, this, &RoomWidget::renamed);
 	connect(&MainWindow::instance(), &MainWindow::entityColorChanged, this, &RoomWidget::refreshObjectColors);
 }
@@ -91,7 +92,7 @@ void RoomWidget::renamed(NovelTea::EntityType entityType, const std::string &old
 	ui->scriptEdit->blockSignals(false);
 }
 
-void RoomWidget::onListViewChanged()
+void RoomWidget::updateAll()
 {
 	updateRoom();
 	updatePreview();
@@ -155,6 +156,7 @@ void RoomWidget::updatePreview()
 		{
 			m_room->setDescriptionRaw(script);
 			m_room->getObjectList()->saveChanges();
+			GSave->data()[NovelTea::ID::properties][NovelTea::Room::id][m_room->getId()] = ui->propertyEditor->getValue();
 			// Save room in case changes aren't yet saved to project
 			GSave->set(m_room);
 			// Force reloading of room data we just saved in player
