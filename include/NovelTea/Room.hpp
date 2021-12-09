@@ -35,6 +35,7 @@ public:
 	std::string getDescription() const;
 	void sync();
 
+	bool runScript(const std::string &script) const;
 	bool runScriptBeforeEnter() const;
 	void runScriptAfterEnter() const;
 	bool runScriptBeforeLeave() const;

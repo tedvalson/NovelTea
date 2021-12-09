@@ -50,3 +50,14 @@ function toast(msg, addToLog, duration)
 		duration = 0;
 	Game.spawnNotification(msg, addToLog, duration);
 }
+
+var _entity;
+function prop(key, defaultValue)
+{
+	return _entity.prop(key, defaultValue);
+}
+
+function setProp(key, val)
+{
+	_entity.setProp(key, val);
+}

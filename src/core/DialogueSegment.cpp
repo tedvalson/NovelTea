@@ -54,8 +54,8 @@ void DialogueSegment::run()
 		return;
 	try {
 		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-		auto script = "function _f(dialogue){\n" + m_script + "}";
-		ActiveGame->getScriptManager()->call(script, "_f", dialogue);
+		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
+		ActiveGame->getScriptManager()->runInClosure(m_script);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::run() " << e.what() << std::endl;
 	}
@@ -70,8 +70,9 @@ bool DialogueSegment::conditionPasses() const
 
 	try {
 		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-		auto script = "function _f(dialogue){\n" + m_conditionScript + "\nreturn false;}";
-		return ActiveGame->getScriptManager()->call<bool>(script, "_f", dialogue);
+		auto script = m_script + "\nreturn false;";
+		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
+		return ActiveGame->getScriptManager()->runInClosure<bool>(script);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::conditionPasses() " << e.what() << std::endl;
 		return false;
@@ -83,11 +84,13 @@ std::string DialogueSegment::getText(bool *ok) const
 	try {
 		if (ok)
 			*ok = true;
+		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
+		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
+
 		if (m_scriptedText)
 		{
-			auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-			auto script = "function _f(dialogue){\n" + m_textRaw + "\nreturn \"\";}";
-			return ActiveGame->getScriptManager()->call<std::string>(script, "_f", dialogue);
+			auto script = m_textRaw + "\nreturn \"\"";
+			return ActiveGame->getScriptManager()->runInClosure<std::string>(script);
 		} else
 			return ActiveGame->getScriptManager()->evalExpressions(m_textRaw);
 	} catch (std::exception &e) {

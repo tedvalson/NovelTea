@@ -45,8 +45,8 @@ void CutsceneScriptSegment::runScript(const std::shared_ptr<Cutscene> &cutscene)
 	if (m_script.empty())
 		return;
 	try {
-		auto script = "function _f(cutscene){" + m_script + "}";
-		ActiveGame->getScriptManager()->call(script, "_f", cutscene);
+		ActiveGame->getScriptManager()->setActiveEntity(cutscene);
+		ActiveGame->getScriptManager()->runInClosure(m_script);
 	} catch (std::exception &e) {
 		std::cerr << "CutsceneScriptSegment::runScript() " << e.what() << std::endl;
 	}

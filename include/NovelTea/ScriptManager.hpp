@@ -8,6 +8,7 @@
 namespace NovelTea
 {
 
+class Entity;
 class Game;
 class Script;
 
@@ -24,7 +25,8 @@ public:
 	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script);
 	bool runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds);
 	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds);
-	bool runRoomScript(const std::string &roomId, const std::string &script);
+
+	void setActiveEntity(std::shared_ptr<Entity> entity);
 
 	std::string evalExpressions(const std::string &s);
 

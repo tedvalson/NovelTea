@@ -145,16 +145,9 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 	return runActionScript(verbId, verbId, objectIds);
 }
 
-bool ScriptManager::runRoomScript(const std::string &roomId, const std::string &script)
+void ScriptManager::setActiveEntity(std::shared_ptr<Entity> entity)
 {
-	auto room = m_game->getSaveData()->get<Room>(roomId);
-	auto s = "function _f(room){\n"+script+"\nreturn true;}";
-	try {
-		return call<bool>(s, "_f", room);
-	} catch (std::exception &e) {
-		std::cerr << "runRoomScript (" << roomId << ") " << e.what() << std::endl;
-		return false;
-	}
+	call("function _f(_e){_entity=_e;}", "_f", entity);
 }
 
 std::string ScriptManager::evalExpressions(const std::string &s)
