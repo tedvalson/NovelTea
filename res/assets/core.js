@@ -1,23 +1,18 @@
-if (typeof console === 'undefined')
-{
-	Object.defineProperty(this, 'console', {
-		value: {}, writable: true, enumerable: false, configurable: true
-	});
-}
+"use strict";
 
-if (typeof console.log === 'undefined')
-{
-	(function () {
-		var origPrint = print;  // capture in closure in case changed later
-		Object.defineProperty(this.console, 'log', {
-			value: function () {
-				var strArgs = Array.prototype.map.call(arguments, function (v) { return String(v); });
-				origPrint(Array.prototype.join.call(strArgs, ' '));
-			}, writable: true, enumerable: false, configurable: true
-		});
-	})();
-}
+print("Loaded core.js");
+print("--------------");
 
+this.global = this;
+
+var origPrint = print;  // capture in case changed later
+this.console = {
+	log : function(){
+		var strArgs = Array.prototype.map.call(arguments, function (v) { return String(v); });
+		origPrint(Array.prototype.join.call(strArgs, ' '));
+	}
+};
+		
 Math.seed = function(seed)
 {
 	Script.seed(seed);
@@ -28,7 +23,7 @@ Math.random = function()
 	return Script.rand();
 }
 
-function _jsonGet(jsonStr, key)
+this._jsonGet = function(jsonStr, key)
 {
 	if (jsonStr == "null")
 		jsonStr = '{}';
@@ -36,28 +31,33 @@ function _jsonGet(jsonStr, key)
 	return (typeof key === 'undefined') ? v : v[key];
 }
 
-function _propGet(jsonStr, key)
+this._propGet = function(jsonStr, key)
 {
 	var v = _jsonGet(jsonStr, key);
 	return (typeof v === 'String') ? Script.evalExpressions(v) : v;
-}
+};
 
-function toast(msg, addToLog, duration)
+this.toast = function(msg, addToLog, duration)
 {
 	if (typeof addToLog === 'undefined')
 		addToLog = true;
 	if (typeof duration === 'undefined')
 		duration = 0;
 	Game.spawnNotification(msg, addToLog, duration);
+};
+
+var entity;
+this._setActiveEntity = function(e)
+{
+	entity = e;
 }
 
-var _entity;
-function prop(key, defaultValue)
+this.prop = function(key, defaultValue)
 {
-	return _entity.prop(key, defaultValue);
+	return entity.prop(key, defaultValue);
 }
 
-function setProp(key, val)
+this.setProp = function(key, val)
 {
-	_entity.setProp(key, val);
+	entity.setProp(key, val);
 }

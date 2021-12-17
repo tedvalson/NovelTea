@@ -147,7 +147,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 
 void ScriptManager::setActiveEntity(std::shared_ptr<Entity> entity)
 {
-	call("function _f(_e){_entity=_e;}", "_f", entity);
+	call("", "_setActiveEntity", entity);
 }
 
 std::string ScriptManager::evalExpressions(const std::string &s)
@@ -158,6 +158,7 @@ std::string ScriptManager::evalExpressions(const std::string &s)
 	{
 		std::string result = "#ERROR#";
 		std::string expr = (*it)[1];
+		expr = strUseStrict + expr;
 		try {
 			auto r = dukglue_peval<DukValue>(m_context, expr.c_str());
 			if (r.type() == DukValue::STRING)

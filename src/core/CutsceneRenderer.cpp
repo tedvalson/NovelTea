@@ -7,6 +7,7 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 
@@ -67,6 +68,8 @@ void CutsceneRenderer::reset(bool preservePosition)
 	m_textsOld.clear();
 	m_icon.hide(0.f);
 	m_tweenManager.killAll();
+
+	ActiveGame->getScriptManager()->setActiveEntity(m_cutscene);
 
 	if (preservePosition) {
 		auto skipScripts = m_skipScriptSegments;

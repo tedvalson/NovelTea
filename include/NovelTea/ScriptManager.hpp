@@ -12,6 +12,8 @@ class Entity;
 class Game;
 class Script;
 
+const std::string strUseStrict = "\n\"use strict\";\n";
+
 class ScriptManager
 {
 public:
@@ -41,7 +43,8 @@ public:
 	template <typename T>
 	inline T run(const std::string &script)
 	{
-		return dukglue_peval<T>(m_context, script.c_str());
+		auto s = strUseStrict + script;
+		return dukglue_peval<T>(m_context, s.c_str());
 	}
 
 	inline void runInClosure(const std::string& script)
@@ -70,7 +73,7 @@ public:
 	template <typename T, typename... Args>
 	T call(const std::string &script, const std::string &funcName, Args&&... args)
 	{
-		auto s = script+";"+funcName+";";
+		auto s = strUseStrict + script + ";" + funcName + ";";
 		auto fn = dukglue_peval<DukValue>(m_context, s.c_str());
 		return dukglue_pcall<T>(m_context, fn, std::forward<Args>(args)...);
 	}
