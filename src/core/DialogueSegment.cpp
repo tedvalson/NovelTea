@@ -84,8 +84,12 @@ std::string DialogueSegment::getText(bool *ok) const
 	try {
 		if (ok)
 			*ok = true;
-		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
+
+		if (m_dialogue)
+		{
+			auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
+			ActiveGame->getScriptManager()->setActiveEntity(dialogue);
+		}
 
 		if (m_scriptedText)
 		{
