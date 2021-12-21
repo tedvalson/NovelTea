@@ -122,14 +122,14 @@ jobs:
         mkdir install
         mkdir build
         cd build
-        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }} -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=16 ..
+        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }} -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_static -DCMAKE_ANDROID_API=16 ..
         cmake --build . --config Release --target install
         cd ../..
         
     - name: Compile NovelTea
       run: |
         mkdir -p install/NovelTea
-        cmake -DBUILD_EDITOR=OFF -DBUILD_TEST=OFF -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }} -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_shared -DCMAKE_ANDROID_API=16 .
+        cmake -DBUILD_EDITOR=OFF -DBUILD_TEST=OFF -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }} -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_static -DCMAKE_ANDROID_API=16 .
         cmake --build . --config Release --target install
 
     - name: Build APK
@@ -137,6 +137,12 @@ jobs:
         cd android
         echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" > local.properties
         ./gradlew build
+
+    - name: Test APK
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 16
+        script: ./gradlew connectedCheck
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
