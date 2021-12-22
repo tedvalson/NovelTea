@@ -144,7 +144,7 @@ void RoomWidget::updateRoom() const
 void RoomWidget::updatePreview()
 {
 	auto script = ui->scriptEdit->toPlainText().toStdString();
-	script = "room=Game.room;text='';\n" + script + "\nreturn text;";
+	script = "var room=Game.room;var text='';\n" + script + "\nreturn text;";
 	if (ui->scriptEdit->checkErrors<std::string>(script))
 	{
 		json jdata;
