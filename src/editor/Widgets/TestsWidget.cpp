@@ -13,7 +13,8 @@ TestsWidget::TestsWidget(QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::TestsWidget)
 	, m_menuAdd(new QMenu)
-	, m_errorStepIndex(-1)
+	, m_menuList(new QMenu)
+	, m_stepRecordingIndex(-1)
 {
 	ui->setupUi(this);
 	load();
@@ -21,6 +22,8 @@ TestsWidget::TestsWidget(QWidget *parent)
 	m_menuAdd->addAction(ui->actionAddStepAction);
 	m_menuAdd->addAction(ui->actionAddStepDialogueOption);
 	m_menuAdd->addAction(ui->actionAddStepWait);
+	m_menuList->addAction(ui->actionRunHere);
+	m_menuList->addAction(ui->actionRecordHere);
 	ui->tabWidget->setEnabled(false);
 
 	m_callback = [this](const json &j){ return processCallbackData(j); };
@@ -122,7 +125,20 @@ void TestsWidget::addStepToList(const json &jstep, bool append)
 	else if (type == "move")
 	{
 		auto direction = jstep["direction"].ToInt();
-		std::string dir = std::to_string(direction);
+		std::string dir;
+		switch (direction) {
+			case 0: dir = "NW"; break;
+			case 1: dir = "N";  break;
+			case 2: dir = "NE"; break;
+			case 3: dir = "W";  break;
+			case 4: dir = "E";  break;
+			case 5: dir = "SW"; break;
+			case 6: dir = "S";  break;
+			case 7: dir = "SE"; break;
+			default:
+				dir = "INVALID";
+		}
+
 		text = "Move: " + dir;
 	}
 	else if (type == "dialogue")
@@ -156,8 +172,8 @@ bool TestsWidget::processCallbackData(const json &jdata)
 	if (jdata.hasKey("success") && !jdata["success"].ToBool())
 	{
 		if (jdata.hasKey("index")) {
-			m_errorStepIndex = jdata["index"].ToInt();
-			auto item = ui->listWidgetSteps->item(m_errorStepIndex);
+			m_stepRecordingIndex = jdata["index"].ToInt();
+			auto item = ui->listWidgetSteps->item(m_stepRecordingIndex);
 			item->setSelected(true);
 			item->setBackground(QBrush(Qt::red));
 		} else {
@@ -173,11 +189,11 @@ bool TestsWidget::processCallbackData(const json &jdata)
 		return true;
 	}
 
-	if (m_errorStepIndex != -1)
+	if (m_stepRecordingIndex != -1)
 	{
-		ui->listWidgetSteps->setCurrentRow(m_errorStepIndex);
+		ui->listWidgetSteps->setCurrentRow(m_stepRecordingIndex);
 		addStep(jdata);
-		m_errorStepIndex++;
+		m_stepRecordingIndex++;
 	} else
 		addStep(jdata, true);
 
@@ -185,20 +201,25 @@ bool TestsWidget::processCallbackData(const json &jdata)
 	return true;
 }
 
-void TestsWidget::processSteps(bool startRecording)
+void TestsWidget::processSteps(bool startRecording, int stopIndex)
 {
 	saveSettings();
 	resetListStyle();
 	ui->preview->reset();
-	m_errorStepIndex = -1;
+	m_stepRecordingIndex = stopIndex;
 	auto &jtest = m_json[m_selectedTestId];
 	auto j = json({
 		"event", "test",
 		"type", "playback",
 		"test", jtest,
 		"record", startRecording,
+		"stopIndex", stopIndex,
 		"callback", std::to_string(&m_callback),
 	});
+	if (stopIndex >= 0) {
+		auto item = ui->listWidgetSteps->item(stopIndex);
+		item->setBackground(QBrush(Qt::green));
+	}
 	ui->preview->processData(j);
 }
 
@@ -399,4 +420,23 @@ void TestsWidget::on_actionRemoveObject_triggered()
 void TestsWidget::on_listInventory_currentRowChanged(int currentRow)
 {
 	ui->actionRemoveObject->setEnabled(currentRow >= 0);
+}
+
+void TestsWidget::on_actionRunHere_triggered()
+{
+	auto row = ui->listWidgetSteps->currentRow();
+	processSteps(false, row);
+}
+
+void TestsWidget::on_actionRecordHere_triggered()
+{
+	auto row = ui->listWidgetSteps->currentRow();
+	processSteps(true, row);
+}
+
+void TestsWidget::on_listWidgetSteps_pressed(const QModelIndex &index)
+{
+	if (QApplication::mouseButtons() != Qt::RightButton)
+		return;
+	m_menuList->popup(QCursor::pos());
 }

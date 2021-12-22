@@ -105,6 +105,7 @@ void *StateEditor::processData(void *data)
 
 		getContext().data["test"] = jsonData["test"];
 		getContext().data["record"] = jsonData["record"];
+		getContext().data["stopIndex"] = jsonData["stopIndex"];
 
 		requestStackPop();
 		requestStackPush(StateID::Main, false, stateCallback);

@@ -31,7 +31,7 @@ public:
 protected:
 	void resetListStyle();
 	bool processCallbackData(const json &jdata);
-	void processSteps(bool startRecording);
+	void processSteps(bool startRecording, int stopIndex = -1);
 	void saveSettings() const;
 
 public slots:
@@ -46,11 +46,14 @@ private slots:
 	void on_actionAddStepDialogueOption_triggered();
 	void on_listWidgetTests_currentRowChanged(int currentRow);
 	void on_listWidgetSteps_currentRowChanged(int currentRow);
+	void on_listWidgetSteps_pressed(const QModelIndex &index);
+	void on_listInventory_currentRowChanged(int currentRow);
 	void on_actionRunSteps_triggered();
 	void on_actionRecordSteps_triggered();
 	void on_actionAddObject_triggered();
 	void on_actionRemoveObject_triggered();
-	void on_listInventory_currentRowChanged(int currentRow);
+	void on_actionRunHere_triggered();
+	void on_actionRecordHere_triggered();
 
 private:
 	void on_rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow);
@@ -60,9 +63,10 @@ private:
 	Ui::TestsWidget *ui;
 
 	QMenu *m_menuAdd;
+	QMenu *m_menuList;
 
 	mutable json m_json;
-	int m_errorStepIndex;
+	int m_stepRecordingIndex;
 	std::string m_selectedTestId;
 	NovelTea::TestCallback m_callback;
 };

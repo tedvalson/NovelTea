@@ -437,6 +437,16 @@
     <string>Remove Object</string>
    </property>
   </action>
+  <action name="actionRunHere">
+   <property name="text">
+    <string>Run Here</string>
+   </property>
+  </action>
+  <action name="actionRecordHere">
+   <property name="text">
+    <string>Record Here</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

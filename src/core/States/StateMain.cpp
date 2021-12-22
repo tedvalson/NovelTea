@@ -518,11 +518,15 @@ bool StateMain::processTestSteps()
 		});
 
 	auto success = true;
+	auto stopIndex = getContext().data["stopIndex"].ToInt();
 	auto &jtest = getContext().data["test"];
 	auto &jsteps = jtest[ID::testSteps];
 
+	if (stopIndex < 0)
+		stopIndex = jsteps.size();
+
 	m_cutsceneRenderer.setSkipWaitingForClick(true);
-	for (int i = 0; i < jsteps.size(); ++i)
+	for (int i = 0; i < stopIndex; ++i)
 	{
 		auto &jstep = jsteps[i];
 		auto type = jstep["type"].ToString();
@@ -619,6 +623,9 @@ bool StateMain::processTestInit()
 
 bool StateMain::processTestCheck()
 {
+	// Just return true if the test is only being partially run
+	if (getContext().data["stopIndex"].ToInt() >= 0)
+		return true;
 	auto &jtest = getContext().data["test"];
 	auto script = jtest[ID::testScriptCheck].ToString() + "\nreturn true;";
 	auto success = false;
