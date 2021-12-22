@@ -46,18 +46,19 @@ this.toast = function(msg, addToLog, duration)
 	Game.spawnNotification(msg, addToLog, duration);
 };
 
-var entity;
+this.thisEntity = 0;
+
 this._setActiveEntity = function(e)
 {
-	entity = e;
+	thisEntity = e;
 }
 
 this.prop = function(key, defaultValue)
 {
-	return entity.prop(key, defaultValue);
+	return thisEntity.prop(key, defaultValue);
 }
 
 this.setProp = function(key, val)
 {
-	entity.setProp(key, val);
+	thisEntity.setProp(key, val);
 }
