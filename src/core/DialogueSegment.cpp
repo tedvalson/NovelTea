@@ -70,7 +70,7 @@ bool DialogueSegment::conditionPasses() const
 
 	try {
 		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-		auto script = m_script + "\nreturn false;";
+		auto script = m_conditionScript + "\nreturn false;";
 		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
 		return ActiveGame->getScriptManager()->runInClosure<bool>(script);
 	} catch (std::exception &e) {
