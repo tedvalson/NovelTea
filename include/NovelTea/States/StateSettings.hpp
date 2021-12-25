@@ -24,7 +24,8 @@ private:
 	TweenText m_textTitle;
 	Button m_buttonBack;
 	Button m_buttonTextSize;
-	TweenRectangleShape m_bg;
+	TweenNinePatch m_bg;
+	TweenRectangleShape m_overlay;
 	TweenEngine::TweenManager m_tweenManager;
 };
 

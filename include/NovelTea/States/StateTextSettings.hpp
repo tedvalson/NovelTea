@@ -33,6 +33,7 @@ private:
 	Button m_buttonSizeDec;
 	Button m_buttonSizeInc;
 	TweenRectangleShape m_bg;
+	TweenRectangleShape m_toolbarBg;
 	TweenEngine::TweenManager m_tweenManager;
 };
 

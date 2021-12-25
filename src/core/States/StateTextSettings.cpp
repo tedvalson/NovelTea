@@ -42,17 +42,18 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 		changeSizeMultiplier(m_multiplier - 0.1f);
 	});
 	m_buttonCancel.onClick([this](){
-		close();
+		getContext().config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
+		getStack().resize(sf::Vector2f(getContext().config.width, getContext().config.height));
+		close(0.5f, StateID::Settings);
 	});
-	m_buttonFinish.onClick([this, &stack](){
-		getContext().config.fontSizeMultiplier = m_multiplier;
-		stack.resize(sf::Vector2f(getContext().config.width, getContext().config.height));
+	m_buttonFinish.onClick([this](){
 		GSettings.setFontSizeMultiplier(m_multiplier);
 		GSettings.save();
-		close();
+		close(0.5f, StateID::Settings);
 	});
 
 	m_bg.setFillColor(sf::Color(180, 180, 180));
+	m_toolbarBg.setFillColor(sf::Color(200, 200, 200));
 
 	changeSizeMultiplier(context.config.fontSizeMultiplier);
 
@@ -62,9 +63,8 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 
 void StateTextSettings::render(sf::RenderTarget &target)
 {
-	target.draw(m_bg);
 //	target.draw(m_textTitle);
-	target.draw(m_roomActiveText);
+	target.draw(m_toolbarBg);
 	target.draw(m_textValue);
 	target.draw(m_buttonCancel);
 	target.draw(m_buttonFinish);
@@ -82,6 +82,9 @@ void StateTextSettings::resize(const sf::Vector2f &size)
 	auto buttonTextSize = 0.8f * buttonHeight;
 
 	m_bg.setSize(size);
+
+	m_toolbarBg.setSize(sf::Vector2f(w, 1.5f * buttonHeight));
+	m_toolbarBg.setPosition(0.f, h - m_toolbarBg.getSize().y);
 
 	// Copy same sizing rules as StateMain::resize() for room text
 	float roomTextPadding = round(1.f / 16.f * std::min(w, h));
@@ -132,14 +135,15 @@ void StateTextSettings::setAlpha(float alpha)
 void StateTextSettings::changeSizeMultiplier(float multiplier)
 {
 	m_multiplier = std::max(0.1f, multiplier);
-	m_multiplier = std::min(9.9f, m_multiplier);
+	m_multiplier = std::min(4.0f, m_multiplier);
 
 	std::string str;
 	str.resize(4);
 	std::snprintf(&str[0], str.size()+1, "x%0.1f", m_multiplier);
 	m_textValue.setString(str);
 
-	resize(sf::Vector2f(getContext().config.width, getContext().config.height));
+	getContext().config.fontSizeMultiplier = m_multiplier;
+	getStack().resize(sf::Vector2f(getContext().config.width, getContext().config.height));
 }
 
 bool StateTextSettings::processEvent(const sf::Event &event)
