@@ -52,7 +52,7 @@ jobs:
       with:
         repository: SFML/SFML
         path: SFML
-        ref: '9b596cc8d9240b240c391abb8c784fddbec4e0df'
+        ref: '14fff20eb8bce92a150a5db836b78dc4d16db813'
 
     - name: Compile SFML
       if: ${{ !steps.cache.outputs.cache-hit }}
