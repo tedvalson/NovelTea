@@ -17,12 +17,10 @@ public:
 	static constexpr auto id = "script";
 	const std::string entityId() const override {return id;}
 
-	ADD_ACCESSOR(bool, Global, m_global)
 	ADD_ACCESSOR(bool, Autorun, m_autorun)
 	ADD_ACCESSOR(std::string, Content, m_content)
 
 private:
-	bool m_global;
 	bool m_autorun;
 	std::string m_content;
 };

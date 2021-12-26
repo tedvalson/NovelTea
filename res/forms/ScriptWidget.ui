@@ -64,13 +64,6 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QCheckBox" name="checkBoxGlobal">
-         <property name="text">
-          <string>Global</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="checkBoxAutorun">
          <property name="text">
           <string>Autorun</string>

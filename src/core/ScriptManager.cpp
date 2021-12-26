@@ -90,10 +90,7 @@ void ScriptManager::reset()
 
 void ScriptManager::runScript(std::shared_ptr<Script> script)
 {
-	if (script->getGlobal())
-		run(script->getContent());
-	else
-		runInClosure(script->getContent());
+	runInClosure(script->getContent());
 }
 
 void ScriptManager::runScriptId(const std::string &scriptId)
@@ -280,7 +277,6 @@ void ScriptManager::registerClasses()
 	REGISTER_CONSTRUCTOR(Script);
 	REGISTER_ENTITY(Script);
 	dukglue_register_property(m_context, &Script::getAutorun, &Script::setAutorun, "autorun");
-	dukglue_register_property(m_context, &Script::getGlobal, &Script::setGlobal, "global");
 	dukglue_register_property(m_context, &Script::getContent, &Script::setContent, "content");
 
 	// Verb
