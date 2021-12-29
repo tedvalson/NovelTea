@@ -84,15 +84,16 @@ jobs:
           res/assets/
           
     - name: Deploy Docs
-      uses: peaceiris/actions-gh-pages@v3
-      if: ${{ runner.os == 'Linux' && github.ref == 'refs/heads/master' && false}}
+      uses: JamesIves/github-pages-deploy-action@4.1.7
+      if: ${{ runner.os == 'Linux' && github.ref == 'refs/heads/master' }}
       with:
-        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        external_repository: tedvalson/NovelTea-site
-        publish_dir: ./doc/github.io/docs
-        destination_dir: docs
-        enable_jekyll: true
-        commit_message: "AutoDocs: ${{ github.event.head_commit.message }}"
+        token: ${{ secrets.DEPLOY_TOKEN }}
+        repository-name: tedvalson/NovelTea-site
+        branch: gh-pages
+        folder: ./doc/github.io/docs
+        target-folder: docs
+        single-commit: true
+        commit-message: "AutoDocs: ${{ github.event.head_commit.message }}"
 
   build-android:
     runs-on: ubuntu-latest
@@ -123,7 +124,6 @@ jobs:
       run: |
         cd android
         echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" > local.properties
-        export NDK_MODULE_PATH=${{ steps.setup-ndk.outputs.ndk-path }}/sources
         ./gradlew build
 
     - name: Test APK
