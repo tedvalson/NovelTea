@@ -9,17 +9,19 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            ndkBuild {
-                // cppFlags "-std=c++14 -frtti -fexceptions"
-            }
-
-        }
         ndk {
-            abiFilters 'armeabi-v7a'
+            abiFilters 'x86', 'armeabi-v7a'
         }
 
     }
+splits {
+   abi {
+      enable true
+      reset()
+      include "x86", "armeabi-v7a"
+      universalApk true
+   }
+}
     buildTypes {
         release {
             minifyEnabled false
@@ -29,7 +31,7 @@ android {
     externalNativeBuild {
         ndkBuild {
             path "src/main/jni/Android.mk"
-
+            // cppFlags "-std=c++14 -frtti -fexceptions"
         }
     }
 }

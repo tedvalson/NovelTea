@@ -52,7 +52,7 @@ jobs:
       with:
         repository: SFML/SFML
         path: SFML
-        ref: '14fff20eb8bce92a150a5db836b78dc4d16db813'
+        ref: '2f11710abc5aa478503a7ff3f9e654bd2078ebab'
 
     - name: Compile SFML
       if: ${{ !steps.cache.outputs.cache-hit }}
@@ -114,41 +114,31 @@ jobs:
       with:
         repository: SFML/SFML
         path: SFML
-        ref: '9b596cc8d9240b240c391abb8c784fddbec4e0df'
+        ref: '2f11710abc5aa478503a7ff3f9e654bd2078ebab'
 
-    - name: Compile SFML
-      run: |
-        cd SFML
-        mkdir install
-        mkdir build
-        cd build
-        cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=../install -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }} -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_static -DCMAKE_ANDROID_API=16 ..
-        cmake --build . --config Release --target install
-        cd ../..
-        
-    - name: Compile NovelTea
-      run: |
-        mkdir -p install/NovelTea
-        cmake -DBUILD_EDITOR=OFF -DBUILD_TEST=OFF -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }} -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang -DCMAKE_ANDROID_STL_TYPE=c++_static -DCMAKE_ANDROID_API=16 .
-        cmake --build . --config Release --target install
+    - name: Compile SFML and NovelTea
+      run: sh .github/build_android.sh ${{ steps.setup-ndk.outputs.ndk-path }}
 
     - name: Build APK
       run: |
         cd android
         echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" > local.properties
+        export NDK_MODULE_PATH=${{ steps.setup-ndk.outputs.ndk-path }}/sources
         ./gradlew build
 
     - name: Test APK
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 16
-        script: cd android && ./gradlew connectedCheck
+        script: |
+          cd android && ./gradlew installDebug
+          adb shell am start -n com.noveltea.launcher/android.app.NativeActivity
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: test-artifact-android
-        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+        path: android/app/build/outputs/apk/release/
 
   release:
     runs-on: ubuntu-latest
