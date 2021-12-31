@@ -66,6 +66,11 @@ void Room::loadJson(const json &j)
 	m_objectList->attach(id, m_id);
 }
 
+EntityType Room::entityType() const
+{
+	return EntityType::Room;
+}
+
 bool Room::contains(const std::shared_ptr<Object> &object)
 {
 	return m_objectList->contains(object);

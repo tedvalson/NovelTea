@@ -15,6 +15,7 @@ public:
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;
+	EntityType entityType() const override;
 
 	void clearSegments();
 	void addSegment(std::shared_ptr<DialogueSegment> segment);

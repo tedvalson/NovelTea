@@ -64,6 +64,11 @@ void Cutscene::loadJson(const json &j)
 	}
 }
 
+EntityType Cutscene::entityType() const
+{
+	return EntityType::Cutscene;
+}
+
 void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 {
 	m_internalSegments.push_back(segment);

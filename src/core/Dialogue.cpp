@@ -63,6 +63,11 @@ void Dialogue::loadJson(const json &j)
 	}
 }
 
+EntityType Dialogue::entityType() const
+{
+	return EntityType::Dialogue;
+}
+
 void Dialogue::clearSegments()
 {
 	m_segments.clear();

@@ -20,6 +20,7 @@ public:
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;
+	EntityType entityType() const override;
 
 	bool contains(const std::shared_ptr<Object> &object);
 	bool containsId(const std::string &objectId);

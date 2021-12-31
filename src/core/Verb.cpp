@@ -52,6 +52,11 @@ void Verb::loadJson(const json &j)
 		m_actionStructure.push_back(jpart.ToString());
 }
 
+EntityType Verb::entityType() const
+{
+	return EntityType::Verb;
+}
+
 bool Verb::checkConditionScript(const std::string &verbId, const std::string &objectId)
 {
 	if (m_scriptConditional.empty()) {

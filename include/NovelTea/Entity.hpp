@@ -15,6 +15,7 @@ public:
 	virtual size_t jsonSize() const = 0;
 	virtual void loadJson(const json &j) = 0;
 	virtual const std::string entityId() const = 0;
+	virtual EntityType entityType() const = 0;
 
 	bool fromJson(const json &j) override;
 

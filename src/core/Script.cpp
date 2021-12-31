@@ -34,4 +34,9 @@ void Script::loadJson(const json &j)
 	m_content = j[4].ToString();
 }
 
+EntityType Script::entityType() const
+{
+	return EntityType::Script;
+}
+
 } // namespace NovelTea

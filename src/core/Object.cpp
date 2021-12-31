@@ -35,4 +35,9 @@ void Object::loadJson(const json &j)
 	m_caseSensitive = j[4].ToBool();
 }
 
+EntityType Object::entityType() const
+{
+	return EntityType::Object;
+}
+
 } // namespace NovelTea

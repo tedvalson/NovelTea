@@ -13,6 +13,7 @@ public:
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;
+	EntityType entityType() const override;
 
 	static constexpr auto id = "script";
 	const std::string entityId() const override {return id;}

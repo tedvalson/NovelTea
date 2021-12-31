@@ -49,6 +49,11 @@ void Action::loadJson(const json &j)
 		m_objectIds.push_back(jobject.ToString());
 }
 
+EntityType Action::entityType() const
+{
+	return EntityType::Action;
+}
+
 void Action::setVerbObjectCombo(const json &j)
 {
 	if (!j.IsArray() || j.size() != 2 ||
