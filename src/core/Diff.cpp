@@ -8,9 +8,9 @@ std::string stripEmptyDiff(const std::string &diffString)
 {
 	auto result = diffString;
 	auto pos = 0;
-	while ((pos = result.find("^[]^")) != result.npos)
+	while ((pos = result.find(DIFF_OPEN_TAG DIFF_CLOSE_TAG)) != result.npos)
 		result.erase(pos, 4);
-	while ((pos = result.find("]^^[")) != result.npos)
+	while ((pos = result.find(DIFF_CLOSE_TAG DIFF_OPEN_TAG)) != result.npos)
 		result.erase(pos, 4);
 	return result;
 }
@@ -24,7 +24,7 @@ std::string snapDiffToWord(const std::string &diffString)
 {
 	auto result = stripEmptyDiff(diffString);
 	size_t startPos = 0;
-	while ((startPos = result.find("^[", startPos)) != result.npos)
+	while ((startPos = result.find(DIFF_OPEN_TAG, startPos)) != result.npos)
 	{
 		if (startPos == 0 ||
 				isSnapChar(result[startPos-1]) ||
@@ -37,7 +37,7 @@ std::string snapDiffToWord(const std::string &diffString)
 		for (int i = startPos-1; i >= 0; --i) {
 			if (isSnapChar(result[i])) {
 				result.erase(startPos, 2);
-				result.insert(i, "^[");
+				result.insert(i, DIFF_OPEN_TAG);
 				break;
 			}
 		}
@@ -46,7 +46,7 @@ std::string snapDiffToWord(const std::string &diffString)
 	}
 
 	startPos = 0;
-	while ((startPos = result.find("]^", startPos)) != result.npos)
+	while ((startPos = result.find(DIFF_CLOSE_TAG, startPos)) != result.npos)
 	{
 		if (startPos == result.size() - 2 ||
 				isSnapChar(result[startPos-1]) ||
@@ -58,7 +58,7 @@ std::string snapDiffToWord(const std::string &diffString)
 
 		for (int i = startPos+3; i < result.size(); ++i) {
 			if (isSnapChar(result[i])) {
-				result.insert(i, "]^");
+				result.insert(i, DIFF_CLOSE_TAG);
 				result.erase(startPos, 2);
 				break;
 			}
@@ -85,21 +85,21 @@ std::string snapDiffToObject(const std::string &diffString)
 	for (auto &bounds : objectBounds)
 	{
 		pos = 0;
-		while ((pos = result.find("^[", pos)) != diffString.npos)
+		while ((pos = result.find(DIFF_OPEN_TAG, pos)) != diffString.npos)
 		{
 			if (pos > bounds.first && pos < bounds.second)
 			{
 				result.erase(pos, 2);
-				result.insert(bounds.first, "^[");
+				result.insert(bounds.first, DIFF_OPEN_TAG);
 			}
 			++pos;
 		}
 		pos = 0;
-		while ((pos = result.find("]^", pos)) != diffString.npos)
+		while ((pos = result.find(DIFF_CLOSE_TAG, pos)) != diffString.npos)
 		{
 			if (pos > bounds.first && pos < bounds.second)
 			{
-				result.insert(bounds.second + 2, "]^");
+				result.insert(bounds.second + 2, DIFF_CLOSE_TAG);
 				result.erase(pos, 2);
 			}
 			++pos;
@@ -119,14 +119,14 @@ std::string removeNestedDiff(const std::string &diffString)
 	for (int i = 0; i < result.size()-2;)
 	{
 		auto s = result.substr(i, 2);
-		if (s == "^[") {
+		if (s == DIFF_OPEN_TAG) {
 			count++;
 			if (count > 1)
 				result.erase(i, 2);
 			else
 				i++;
 		}
-		else if (s == "]^") {
+		else if (s == DIFF_CLOSE_TAG) {
 			count--;
 			if (count > 0)
 				result.erase(i, 2);
@@ -155,22 +155,22 @@ std::string diff(const std::string &oldString, const std::string &newString)
 		if (s.second.type == dtl::SES_ADD) {
 			if (!startNew) {
 				startNew = true;
-				result += "^[";
+				result += DIFF_OPEN_TAG;
 			}
 		} else if (startNew) {
 			startNew = false;
-			result += "]^";
+			result += DIFF_CLOSE_TAG;
 		}
 		
 		if (s.second.type != dtl::SES_DELETE) {
 			if (startNew && s.first == '\n')
-				result += "]^\n^[";
+				result += DIFF_CLOSE_TAG "\n" DIFF_OPEN_TAG;
 			else
 				result += s.first;
 		}
 	}
 	if (startNew)
-		result += "]^";
+		result += DIFF_CLOSE_TAG;
 
 	return removeNestedDiff(snapDiffToObject(snapDiffToWord(result)));
 }
@@ -179,10 +179,10 @@ std::string stripDiff(const std::string &diffString)
 {
 	auto result = diffString;
 	auto pos = 0;
-	while ((pos = result.find("^[", pos)) != result.npos)
+	while ((pos = result.find(DIFF_OPEN_TAG, pos)) != result.npos)
 		result.erase(pos, 2);
 	pos = 0;
-	while ((pos = result.find("]^", pos)) != result.npos)
+	while ((pos = result.find(DIFF_CLOSE_TAG, pos)) != result.npos)
 		result.erase(pos, 2);
 	return result;
 }

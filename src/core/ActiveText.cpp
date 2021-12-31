@@ -105,9 +105,9 @@ std::vector<std::pair<bool, std::string>> getNewTextPairs(const sf::String &s)
 		   processedPos = 0,
 		   startPos;
 
-	while ((startPos = s.find("^[", searchPos)) != sf::String::InvalidPos)
+	while ((startPos = s.find(DIFF_OPEN_TAG, searchPos)) != sf::String::InvalidPos)
 	{
-		auto endPos = s.find("]^", startPos);
+		auto endPos = s.find(DIFF_CLOSE_TAG, startPos);
 		if (endPos == sf::String::InvalidPos)
 			break;
 		auto text = s.substring(startPos + 2, endPos - startPos - 2);

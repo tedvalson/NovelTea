@@ -3,6 +3,9 @@
 
 #include <string>
 
+#define DIFF_OPEN_TAG "^<"
+#define DIFF_CLOSE_TAG ">^"
+
 namespace NovelTea
 {
 
