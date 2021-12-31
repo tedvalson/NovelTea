@@ -7,7 +7,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    defaults:
+      run:
+        shell: bash
+
     steps:
     
     - name: Checkout
@@ -26,13 +30,17 @@ jobs:
       if: ${{ runner.os == 'macOS' }}
       run: |
         brew install doxygen hunspell
-        
+
     - name: Setup Windows Environment
       if: ${{ runner.os == 'Windows' }}
+      id: setup
       run: |
-        choco install doxygen.install
-        choco install hunspell.portable
-          
+        choco install doxygen.install wget unzip
+        wget https://github.com/tedvalson/NovelTea-site/releases/download/hunspell/hunspell.zip
+        unzip hunspell.zip
+        echo ::set-output name=include::$(pwd)/hunspell
+        echo ::set-output name=library::$(pwd)/hunspell
+        
     - name: Setup Linux Environment
       if: ${{ runner.os == 'Linux' }}
       run: |
@@ -56,7 +64,6 @@ jobs:
 
     - name: Compile SFML
       if: ${{ !steps.cache.outputs.cache-hit }}
-      shell: bash
       run: |
         cd SFML
         mkdir install
@@ -67,8 +74,9 @@ jobs:
         cd ../..
         
     - name: Compile NovelTea
-      shell: bash
       run: |
+        export CMAKE_LIBRARY_PATH=${{ steps.setup.outputs.include }}
+        export CMAKE_INCLUDE_PATH=${{ steps.setup.outputs.library }}
         mkdir -p install/NovelTea
         mkdir -p doc/github.io/docs
         cmake -DBUILD_DOCS=ON -DBUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML .

@@ -3,6 +3,10 @@ find_package(hunspell REQUIRED)
 
 include_directories(${HUNSPELL_INCLUDE_DIR})
 
+if (MSVC)
+    add_definitions(-DHUNSPELL_STATIC)
+endif()
+
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/editor)
 set(UIROOT ${PROJECT_SOURCE_DIR}/res/forms)
 

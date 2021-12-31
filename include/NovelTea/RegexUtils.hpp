@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_REGEXUTILS_HPP
 #define NOVELTEA_REGEXUTILS_HPP
 
+#include <functional>
 #include <regex>
 
 namespace NovelTea
