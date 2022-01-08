@@ -17,6 +17,7 @@ namespace NovelTea
 CutsceneRenderer::CutsceneRenderer()
 : m_skipWaitingForClick(false)
 , m_skipScriptSegments(false)
+, m_skipConditionChecks(false)
 , m_size(400.f, 400.f)
 , m_margin(10.f)
 , m_fontSizeMultiplier(1.f)
@@ -68,6 +69,8 @@ void CutsceneRenderer::reset(bool preservePosition)
 	m_textsOld.clear();
 	m_icon.hide(0.f);
 	m_tweenManager.killAll();
+
+	m_cutscene->setSkipConditionChecks(m_skipConditionChecks);
 
 	ActiveGame->getScriptManager()->setActiveEntity(m_cutscene);
 
@@ -357,6 +360,11 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	auto segment = segments[segmentIndex];
 	m_currentSegment = segment;
 	auto type = segment->type();
+
+	if (!m_skipConditionChecks && !segment->conditionPasses()) {
+		addSegmentToQueue(m_segmentIndex + 1);
+		return;
+	}
 
 	TweenEngine::TweenCallbackFunction beginCallback = nullptr;
 	TweenEngine::TweenCallbackFunction endCallback = nullptr;

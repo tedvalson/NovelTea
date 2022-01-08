@@ -62,11 +62,11 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	ui->richTextEditor->hide();
 	auto showBrowser = [this]() {
 		ui->richTextEditor->hide();
-		ui->propertyBrowser->show();
+		ui->tabWidgetSegmentProps->show();
 	};
 	connect(ui->richTextEditor, &RichTextEditor::invoked, [this](){
 		ui->richTextEditor->show();
-		ui->propertyBrowser->hide();
+		ui->tabWidgetSegmentProps->hide();
 	});
 	connect(ui->richTextEditor, &RichTextEditor::saved, showBrowser);
 	connect(ui->richTextEditor, &RichTextEditor::canceled, showBrowser);
@@ -146,7 +146,8 @@ void CutsceneWidget::createMenus()
 void CutsceneWidget::fillPropertyEditor()
 {
 	ui->propertyBrowser->clear();
-	ui->propertyBrowser->show();
+	ui->tabWidgetSegmentProps->show();
+	ui->tabWidgetSegmentProps->setCurrentIndex(0);
 	ui->richTextEditor->hide();
 	ui->scriptEdit->hide();
 
@@ -159,10 +160,13 @@ void CutsceneWidget::fillPropertyEditor()
 
 	segmentsVariantManager->blockSignals(true);
 	ui->scriptEdit->blockSignals(true);
+	ui->scriptEditCondition->blockSignals(true);
 
 	QtVariantProperty *prop;
 	auto segment = m_cutscene->internalSegments()[selectedIndex];
 	auto type = segment->type();
+
+	ui->scriptEditCondition->setPlainText(QString::fromStdString(segment->getConditionScript()));
 
 	if (type == NovelTea::CutsceneSegment::Text)
 	{
@@ -263,6 +267,7 @@ void CutsceneWidget::fillPropertyEditor()
 
 	segmentsVariantManager->blockSignals(false);
 	ui->scriptEdit->blockSignals(false);
+	ui->scriptEditCondition->blockSignals(false);
 }
 
 void CutsceneWidget::fillSettingsPropertyEditor()
@@ -381,8 +386,11 @@ void CutsceneWidget::loadData()
 	qDebug() << "Loading cutscene data... " << QString::fromStdString(idName());
 
 	if (m_cutscene)
+	{
+		m_cutscene->setSkipConditionChecks(true);
 		for (auto &seg : m_cutscene->internalSegments())
 			addItem(seg, false);
+	}
 	else
 	{
 		// Cutscene is new, so show it as modified
@@ -399,6 +407,7 @@ void CutsceneWidget::loadData()
 	MODIFIER(ui->listWidget->model(), &QAbstractItemModel::rowsInserted);
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
 	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptEditCondition, &ScriptEdit::textChanged);
 }
 
 void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant &value)
@@ -750,4 +759,10 @@ void CutsceneWidget::on_scriptEdit_textChanged()
 	scriptSegment->setScript(ui->scriptEdit->toPlainText().toStdString());
 
 	setModified();
+}
+
+void CutsceneWidget::on_scriptEditCondition_textChanged()
+{
+	auto &segment = m_cutscene->internalSegments()[selectedIndex];
+	segment->setConditionScript(ui->scriptEditCondition->toPlainText().toStdString());
 }

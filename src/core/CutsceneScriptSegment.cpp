@@ -21,7 +21,8 @@ json CutsceneScriptSegment::toJson() const
 		m_autosaveAfter,
 		m_autosaveBefore,
 		m_comment,
-		m_script
+		m_script,
+		getConditionScript()
 	);
 	return j;
 }
@@ -32,6 +33,7 @@ bool CutsceneScriptSegment::fromJson(const json &j)
 	m_autosaveBefore = j[2].ToBool();
 	m_comment = j[3].ToString();
 	m_script = j[4].ToString();
+	setConditionScript(j[5].ToString());
 	return true;
 }
 

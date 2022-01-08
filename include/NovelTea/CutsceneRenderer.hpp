@@ -60,6 +60,7 @@ public:
 
 	ADD_ACCESSOR(bool, SkipWaitingForClick, m_skipWaitingForClick)
 	ADD_ACCESSOR(bool, SkipScriptSegments, m_skipScriptSegments)
+	ADD_ACCESSOR(bool, SkipConditionChecks, m_skipConditionChecks)
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -77,6 +78,7 @@ private:
 	bool m_isWaitingForClick;
 	bool m_skipWaitingForClick;
 	bool m_skipScriptSegments;
+	bool m_skipConditionChecks;
 
 	IconGlow m_icon;
 

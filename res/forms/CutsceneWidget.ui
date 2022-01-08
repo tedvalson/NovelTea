@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>327</height>
+    <height>389</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -114,13 +114,37 @@
           <property name="childrenCollapsible">
            <bool>false</bool>
           </property>
-          <widget class="QWidget" name="verticalLayoutWidgetBottom">
+          <widget class="QWidget" name="verticalWidgetBottom" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <layout class="QVBoxLayout" name="verticalLayoutBottom">
             <property name="spacing">
              <number>1</number>
             </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <widget class="QToolBar" name="toolBarEntities">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="floatable">
                <bool>false</bool>
               </property>
@@ -164,17 +188,72 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <widget class="QTabWidget" name="tabWidgetSegmentProps">
+              <property name="tabPosition">
+               <enum>QTabWidget::South</enum>
               </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="tab">
+               <attribute name="title">
+                <string>Segment Properties</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_7">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QtTreePropertyBrowser" name="propertyBrowser" native="true">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="ScriptEdit" name="scriptEdit"/>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="tab_2">
+               <attribute name="title">
+                <string>Condition Script</string>
+               </attribute>
+               <layout class="QVBoxLayout" name="verticalLayout_8">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="ScriptEdit" name="scriptEditCondition">
+                  <property name="placeholderText">
+                   <string>return true;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
              </widget>
-            </item>
-            <item>
-             <widget class="ScriptEdit" name="scriptEdit"/>
             </item>
             <item>
              <widget class="RichTextEditor" name="richTextEditor" native="true">
@@ -289,13 +368,16 @@
           <number>100</number>
          </property>
          <property name="pageStep">
-          <number>500</number>
+          <number>1000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="tickPosition">
           <enum>QSlider::TicksAbove</enum>
+         </property>
+         <property name="tickInterval">
+          <number>1000</number>
          </property>
         </widget>
        </item>

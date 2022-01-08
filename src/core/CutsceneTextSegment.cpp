@@ -13,7 +13,7 @@ json CutsceneTextSegment::toJson() const
 	json j = sj::Array(
 		static_cast<int>(type()),
 		getWaitForClick(),
-		"",
+		getConditionScript(),
 		m_transition,
 		getDuration(),
 		getDelay(),
@@ -29,6 +29,7 @@ json CutsceneTextSegment::toJson() const
 bool CutsceneTextSegment::fromJson(const json &j)
 {
 	setWaitForClick(j[1].ToBool());
+	setConditionScript(j[2].ToString());
 	m_transition = j[3].ToInt();
 	setDuration(j[4].ToInt());
 	setDelay(j[5].ToInt());

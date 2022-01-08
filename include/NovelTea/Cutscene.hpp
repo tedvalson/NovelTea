@@ -44,6 +44,7 @@ public:
 	ADD_ACCESSOR(bool, CanFastForward, m_canFastForward)
 	ADD_ACCESSOR(float, SpeedFactor, m_speedFactor)
 	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
+	ADD_ACCESSOR(bool, SkipConditionChecks, m_skipConditionChecks)
 
 private:
 	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
@@ -53,6 +54,8 @@ private:
 	bool m_canFastForward;
 	float m_speedFactor;
 	json m_nextEntity;
+
+	bool m_skipConditionChecks;
 };
 
 } // namespace NovelTea

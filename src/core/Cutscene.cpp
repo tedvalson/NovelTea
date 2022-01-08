@@ -12,6 +12,7 @@ Cutscene::Cutscene()
 	, m_canFastForward(true)
 	, m_speedFactor(1.f)
 	, m_nextEntity(sj::Array(-1,""))
+	, m_skipConditionChecks(false)
 {
 }
 
@@ -155,7 +156,8 @@ size_t Cutscene::getDurationMs(size_t indexEnd) const
 {
 	auto duration = 0u;
 	for (auto i = 0u; i < indexEnd; ++i)
-		duration += m_internalSegments[i]->getDuration();
+		if (m_skipConditionChecks || m_internalSegments[i]->conditionPasses())
+			duration += m_internalSegments[i]->getDuration();
 	return duration;
 }
 
@@ -171,7 +173,8 @@ size_t Cutscene::getDelayMs(size_t indexEnd) const
 {
 	auto delay = 0u;
 	for (auto i = 0u; i < indexEnd; ++i)
-		delay += m_internalSegments[i]->getDelay();
+		if (m_skipConditionChecks || m_internalSegments[i]->conditionPasses())
+			delay += m_internalSegments[i]->getDelay();
 	return delay;
 }
 

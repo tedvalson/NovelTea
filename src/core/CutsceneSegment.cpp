@@ -3,16 +3,29 @@
 #include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/CutscenePageSegment.hpp>
 #include <NovelTea/CutsceneScriptSegment.hpp>
+#include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/Game.hpp>
 
 namespace NovelTea
 {
 
 CutsceneSegment::CutsceneSegment()
+: m_duration(1000)
+, m_delay(1000)
+, m_waitForClick(false)
+, m_canSkip(true)
 {
 }
 
 CutsceneSegment::~CutsceneSegment()
 {
+}
+
+bool CutsceneSegment::conditionPasses() const
+{
+	if (m_conditionScript.empty())
+		return true;
+	return ActiveGame->getScriptManager()->runInClosure<bool>(m_conditionScript);
 }
 
 std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)

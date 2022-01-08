@@ -37,7 +37,8 @@ json CutscenePageSegment::toJson() const
 		getCanSkip(),
 		getBeginWithNewLine(),
 		getOffsetX(),
-		getOffsetY()
+		getOffsetY(),
+		getConditionScript()
 	);
 	return j;
 }
@@ -58,6 +59,7 @@ bool CutscenePageSegment::fromJson(const json &j)
 	setBeginWithNewLine(j[12].ToBool());
 	setOffsetX(j[13].ToInt());
 	setOffsetY(j[14].ToInt());
+	setConditionScript(j[15].ToString());
 	return true;
 }
 

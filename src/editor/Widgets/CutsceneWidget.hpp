@@ -40,6 +40,7 @@ private slots:
 	void on_actionLoop_toggled(bool checked);
 	void on_listWidget_clicked(const QModelIndex &index);
 	void on_scriptEdit_textChanged();
+	void on_scriptEditCondition_textChanged();
 
 protected:
 	void timerEvent(QTimerEvent*) override;

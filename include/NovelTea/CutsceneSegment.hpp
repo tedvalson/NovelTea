@@ -34,6 +34,7 @@ public:
 	virtual ~CutsceneSegment();
 
 	virtual Type type() const = 0;
+	bool conditionPasses() const;
 
 	static std::shared_ptr<CutsceneSegment> createSegment(const json &j);
 
@@ -41,12 +42,14 @@ public:
 	ADD_ACCESSOR(size_t, Delay, m_delay)
 	ADD_ACCESSOR(bool, WaitForClick, m_waitForClick)
 	ADD_ACCESSOR(bool, CanSkip, m_canSkip)
+	ADD_ACCESSOR(std::string, ConditionScript, m_conditionScript)
 
 private:
-	size_t m_duration = 1000;
-	size_t m_delay = 1000;
-	bool m_waitForClick = false;
-	bool m_canSkip = true;
+	size_t m_duration;
+	size_t m_delay;
+	bool m_waitForClick;
+	bool m_canSkip;
+	std::string m_conditionScript;
 };
 
 } // namespace NovelTea
