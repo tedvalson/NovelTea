@@ -105,7 +105,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 		objects.push_back(m_game->getSaveData()->get<Object>(objectId));
 	auto verb = m_game->getSaveData()->get<Verb>(verbId);
 	auto objectCount = objects.size();
-	auto s = "function f(verb,object1,object2,object3,object4){\n"+script+"\nreturn true;}";
+	auto s = "function f(verb,object1,object2,object3,object4){\n"+script+"\nreturn false;}";
 	try {
 		if (objectCount == 0)
 			return call<bool>(s, "f", verb);
@@ -126,15 +126,20 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 bool ScriptManager::runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds)
 {
 	auto verb = m_game->getSaveData()->get<Verb>(verbId);
-	auto script = verb->getScriptDefault();;
-	if (script.empty()) {
+	auto script = verb->getScriptDefault();
+	auto result = false;
+	if (!script.empty())
+		result = runActionScript(verbIdOrig, objectIds, script);
+
+	if (!result) {
+		// If script returns false and has no parent, execute "undefined action" script.
 		if (verb->getParentId().empty())
-			return runActionScript(verbId, objectIds, ProjData[ID::scriptUndefinedAction].ToString());
+			result = runActionScript(verbIdOrig, objectIds, ProjData[ID::scriptUndefinedAction].ToString());
 		else
-			return runActionScript(verb->getParentId(), verbIdOrig, objectIds);
+			result = runActionScript(verb->getParentId(), verbIdOrig, objectIds);
 	}
-	else
-		return runActionScript(verbIdOrig, objectIds, script);
+
+	return result;
 }
 
 bool ScriptManager::runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds)

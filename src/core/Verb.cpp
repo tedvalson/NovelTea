@@ -59,22 +59,28 @@ EntityType Verb::entityType() const
 
 bool Verb::checkConditionScript(const std::string &verbId, const std::string &objectId)
 {
-	if (m_scriptConditional.empty()) {
-		if (m_parentId.empty())
-			return true;
-		auto parentVerb = GSave->get<Verb>(m_parentId);
-		return parentVerb->checkConditionScript(verbId, objectId);
+	auto result = true;
+
+	if (!m_scriptConditional.empty())
+	{
+		try {
+			auto object = GSave->get<Object>(objectId);
+			auto verb = GSave->get<Verb>(verbId);
+			auto script = "function _f(verb,object){\n" + m_scriptConditional + "\nreturn true;}";
+			result = ActiveGame->getScriptManager()->call<bool>(script, "_f", verb, object);
+		} catch (std::exception &e) {
+			std::cerr << "Verb::checkConditionScript " << e.what() << std::endl;
+			result = false;
+		}
 	}
 
-	try {
-		auto object = GSave->get<Object>(objectId);
-		auto verb = GSave->get<Verb>(verbId);
-		auto script = "function _f(verb,object){\n" + m_scriptConditional + "\nreturn true;}";
-		return ActiveGame->getScriptManager()->call<bool>(script, "_f", verb, object);
-	} catch (std::exception &e) {
-		std::cerr << "Verb::checkConditionScript " << e.what() << std::endl;
-		return false;
+	if (result && !m_parentId.empty())
+	{
+		auto parentVerb = GSave->get<Verb>(m_parentId);
+		result = parentVerb->checkConditionScript(verbId, objectId);
 	}
+
+	return result;
 }
 
 std::string Verb::getActionText(std::vector<std::shared_ptr<Object>> objects, std::string blankStr) const
