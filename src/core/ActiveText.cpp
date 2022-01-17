@@ -97,30 +97,57 @@ std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::St
 	return v;
 }
 
-std::vector<std::pair<bool, std::string>> getNewTextPairs(const sf::String &s)
-{
-	std::vector<std::pair<bool, std::string>> v;
-
-	size_t searchPos = 0,
-		   processedPos = 0,
-		   startPos;
-
-	while ((startPos = s.find(DIFF_OPEN_TAG, searchPos)) != sf::String::InvalidPos)
-	{
-		auto endPos = s.find(DIFF_CLOSE_TAG, startPos);
-		if (endPos == sf::String::InvalidPos)
-			break;
-		auto text = s.substring(startPos + 2, endPos - startPos - 2);
-		if (startPos != processedPos)
-			v.emplace_back(false, s.substring(processedPos, startPos - processedPos));
-		v.emplace_back(true, text);
-		processedPos = searchPos = endPos + 2;
+struct TextPart {
+	TextPart(const sf::String &text) : text(text){}
+	TextPart& mod(bool flag, const sf::String &s) {
+		text = s;
+		if (!flags.empty())
+			flags[flags.size()-1] = flag;
+		return *this;
 	}
 
-	// Push remaining unprocessed string
-	if (processedPos < s.getSize())
-		v.emplace_back(false, s.substring(processedPos));
-	return v;
+	sf::String text;
+	std::vector<bool> flags;
+};
+
+void findTextParts(std::vector<TextPart> &parts, const sf::String &openTag, const sf::String &closeTag)
+{
+	std::vector<TextPart> v;
+	bool isOpen = false;
+
+	for (auto &part : parts)
+	{
+		size_t searchPos = 0,
+			   processedPos = 0,
+			   startPos = 0;
+
+		TextPart p = part;
+		p.flags.push_back(false);
+		sf::String s = part.text;
+
+		while (isOpen || (startPos = s.find(openTag, searchPos)) != sf::String::InvalidPos)
+		{
+			auto tagSize = (isOpen ? 0 : openTag.getSize());
+			isOpen = true;
+			auto endPos = s.find(closeTag, startPos);
+			// Process content before the start of the tag.
+			if (startPos != processedPos)
+				v.push_back(p.mod(false, s.substring(processedPos, startPos - processedPos)));
+			processedPos = startPos;
+			if (endPos == sf::String::InvalidPos)
+				break;
+			auto text = s.substring(startPos + tagSize, endPos - startPos - tagSize);
+			v.push_back(p.mod(true, text));
+			processedPos = searchPos = endPos + closeTag.getSize();
+			isOpen = false;
+		}
+
+		// Push remaining unprocessed string
+		if (processedPos < s.getSize())
+			v.push_back(p.mod(isOpen, s.substring(processedPos + (startPos > 0 && isOpen ? openTag.getSize() : 0))));
+	}
+
+	parts = v;
 }
 
 json ActiveText::toJson() const
@@ -512,15 +539,25 @@ void ActiveText::ensureUpdate() const
 			sf::RectangleShape shape;
 			shape.setFillColor(sf::Color(0, 0, 0, 30));
 
-			auto newTextPairs = getNewTextPairs(frag->getText());
-			for (auto &newTextPair : newTextPairs)
+			std::vector<TextPart> parts;
+			parts.emplace_back(frag->getText());
+			findTextParts(parts, DIFF_OPEN_TAG, DIFF_CLOSE_TAG);
+			findTextParts(parts, "[b]", "[/b]");
+			findTextParts(parts, "[i]", "[/i]");
+
+			for (auto &part : parts)
 			{
-				auto textObjectPairs = getTextObjectPairs(newTextPair.second);
+				auto textObjectPairs = getTextObjectPairs(part.text.toAnsiString());
 
 				TweenText text;
+				auto s = style;
 				text.setFont(*font);
 				text.setCharacterSize(2.f * m_fontSizeMultiplier * format.size());
-				text.setStyle(style);
+				if (part.flags[1])
+					s |= sf::Text::Bold;
+				if (part.flags[2])
+					s |= sf::Text::Italic;
+				text.setStyle(s);
 
 				text.setString(" ");
 				auto spaceWidth = text.getLocalBounds().width;
@@ -538,7 +575,7 @@ void ActiveText::ensureUpdate() const
 					auto string = textObjectPair.first;
 					auto objectId = textObjectPair.second;
 					auto objectExists = false;
-					auto color = (newTextPair.first ? sf::Color(150, 0, 0) : format.color());
+					auto color = (part.flags[0] ? sf::Color(150, 0, 0) : format.color());
 					if (!objectId.empty()) {
 						objectExists = ActiveGame->getRoom()->containsId(objectId) ||
 									  ActiveGame->getObjectList()->containsId(objectId);
