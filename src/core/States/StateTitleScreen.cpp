@@ -3,6 +3,7 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/Settings.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -11,7 +12,9 @@ namespace NovelTea
 
 StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
+, m_startPressed(false)
 {
+	auto bgColor = context.config.backgroundColor;
 
 	// Buttons
 	m_buttonStart.getText().setFont(*Proj.getFont(0));
@@ -19,9 +22,12 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 	m_buttonStart.setTextColor(sf::Color(80, 80, 80));
 	m_buttonStart.setActiveColor(sf::Color(0, 0, 0, 50));
 	m_buttonStart.setColor(sf::Color(0, 0, 0, 30));
-	m_buttonStart.onClick([this](){
-		if (m_tweenManager.getRunningTweensCount() > 0)
+	m_buttonStart.onClick([this, bgColor](){
+		if (m_startPressed)
 			return;
+		m_startPressed = true;
+		m_tweenManager.killAll();
+		GSettings.save();
 		TweenEngine::Tween::to(*this, ALPHA, 1.f)
 			.target(0.f)
 			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
@@ -30,6 +36,9 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 				requestStackClear();
 				requestStackPush(StateID::Main);
 			})
+			.start(m_tweenManager);
+		TweenEngine::Tween::to(m_bg, TweenRectangleShape::FILL_COLOR_RGB, 1.f)
+			.target(bgColor.r, bgColor.g, bgColor.b)
 			.start(m_tweenManager);
 	});
 
@@ -44,9 +53,8 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 		.target(255.f)
 		.start(m_tweenManager);
 
-	auto c = context.config.backgroundColor;
 	TweenEngine::Tween::to(m_bg, TweenRectangleShape::FILL_COLOR_RGB, 2.f)
-		.target(c.r, c.g, c.b)
+		.target(bgColor.r, bgColor.g, bgColor.b)
 		.start(m_tweenManager);
 }
 

@@ -28,6 +28,7 @@ private:
 	ActiveText m_textTitle;
 	ActiveText m_textAuthor;
 	TweenEngine::TweenManager m_tweenManager;
+	bool m_startPressed;
 };
 
 } // namespace NovelTea
