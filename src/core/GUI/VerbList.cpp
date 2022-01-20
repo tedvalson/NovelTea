@@ -38,6 +38,7 @@ VerbList::VerbList()
 
 bool VerbList::update(float delta)
 {
+	m_tweenManager.update(delta);
 	m_scrollBar.update(delta);
 	Hideable::update(delta);
 	return true;
@@ -69,6 +70,10 @@ bool VerbList::processEvent(const sf::Event &event)
 		{
 			if (posY > p.y)
 			{
+				m_verbs[i].text.setFillColor(sf::Color::Red);
+				TweenEngine::Tween::to(m_verbs[i].text, TweenText::SCALE_XY, 0.6f)
+					.target(1.2f, 1.2f)
+					.start(m_tweenManager);
 				if (m_selectCallback)
 					m_selectCallback(m_verbs[i].verbId);
 				return true;
@@ -106,7 +111,7 @@ void VerbList::refreshItems()
 
 void VerbList::setFontSizeMultiplier(float fontSizeMultiplier)
 {
-	m_itemHeight = 26.f * fontSizeMultiplier;
+	m_itemHeight = 32.f * fontSizeMultiplier;
 	m_margin = 0.3f * m_itemHeight;
 	m_fontSizeMultiplier = fontSizeMultiplier;
 	refreshItems();

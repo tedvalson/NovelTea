@@ -72,6 +72,7 @@ private:
 	sf::Vector2f m_screenSize;
 	sf::Vector2f m_scrollAreaSize;
 
+	TweenEngine::TweenManager m_tweenManager;
 	ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
 	TweenText m_text;
