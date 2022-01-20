@@ -42,6 +42,11 @@ public:
 	bool runScriptBeforeLeave() const;
 	void runScriptAfterLeave() const;
 
+	void setPathEntity(int direction, std::shared_ptr<Entity> entity);
+	void setPathScript(int direction, const std::string &script);
+	void enablePath(int direction);
+	void disablePath(int direction);
+
 	ADD_ACCESSOR(std::string, Name, m_name)
 	ADD_ACCESSOR(std::string, DescriptionRaw, m_descriptionRaw)
 	ADD_ACCESSOR(std::string, ScriptBeforeEnter, m_scriptBeforeEnter)

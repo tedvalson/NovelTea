@@ -276,6 +276,10 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &Room::contains, "contains");
 	dukglue_register_method(m_context, &Room::containsId, "containsId");
 	dukglue_register_method(m_context, &Room::sync, "sync");
+	dukglue_register_method(m_context, &Room::setPathEntity, "setPathEntity");
+	dukglue_register_method(m_context, &Room::setPathScript, "setPathScript");
+	dukglue_register_method(m_context, &Room::enablePath, "enablePath");
+	dukglue_register_method(m_context, &Room::disablePath, "disablePath");
 	dukglue_register_property(m_context, &Room::getObjectList, nullptr, "objects");
 
 	// Script

@@ -184,4 +184,24 @@ void Room::runScriptAfterLeave() const
 		runScript(m_scriptAfterLeave);
 }
 
+void Room::setPathEntity(int direction, std::shared_ptr<Entity> entity)
+{
+	m_paths[direction] = sj::Array(true, sj::Array(static_cast<int>(entity->entityType()), entity->getId()));
+}
+
+void Room::setPathScript(int direction, const std::string &script)
+{
+	m_paths[direction] = sj::Array(true, sj::Array(static_cast<int>(EntityType::CustomScript), script));
+}
+
+void Room::enablePath(int direction)
+{
+	m_paths[direction][0] = true;
+}
+
+void Room::disablePath(int direction)
+{
+	m_paths[direction][0] = false;
+}
+
 } // namespace NovelTea
