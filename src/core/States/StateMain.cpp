@@ -773,8 +773,8 @@ void StateMain::setActionBuilderShowPos(float position)
 
 	m_actionBuilder.setPosition(m_actionBuilder.getPosition().x, height - toolbarHeight - pos);
 
-	m_roomScrollbar.setSize(sf::Vector2u(2, height - toolbarHeight - pos - 8.f));
-	m_roomScrollbar.setScrollAreaSize(sf::Vector2u(width, height - toolbarHeight - pos));
+	m_roomScrollbar.setSize(sf::Vector2f(2, height - toolbarHeight - pos - 8.f));
+	m_roomScrollbar.setScrollAreaSize(sf::Vector2f(width, height - toolbarHeight - pos));
 	m_roomScrollbar.setDragRect(sf::FloatRect(0.f, 0.f, width, height - toolbarHeight - pos));
 	updateScrollbar();
 	m_roomScrollbar.setScroll(m_scrollPos);

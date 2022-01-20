@@ -49,8 +49,8 @@ void StateTextLog::resize(const sf::Vector2f &size)
 
 	m_bg.setSize(size);
 
-	m_scrollbar.setScrollAreaSize(sf::Vector2u(size.x, size.y - margin*2));
-	m_scrollbar.setSize(sf::Vector2u(4, size.y - 6));
+	m_scrollbar.setScrollAreaSize(sf::Vector2f(size.x, size.y - margin*2));
+	m_scrollbar.setSize(sf::Vector2f(4, size.y - 6));
 	m_scrollbar.setPosition(size.x - 4.f, 4.f);
 
 	m_textView.reset(sf::FloatRect(0.f, 0.f, size.x, size.y - margin * 2));

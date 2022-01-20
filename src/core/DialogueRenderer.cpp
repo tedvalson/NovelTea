@@ -165,8 +165,8 @@ void DialogueRenderer::applyChanges()
 				 std::min(0.3f * m_size.y, m_fontSize * (portrait ? 6 : 5)));
 
 	m_scrollBar.setPosition(posX + m_bg.getSize().x - 4.f, m_bg.getPosition().y);
-	m_scrollBar.setSize(sf::Vector2u(2, m_bg.getSize().y));
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(0, m_bg.getSize().y - m_padding*2));
+	m_scrollBar.setSize(sf::Vector2f(2, m_bg.getSize().y));
+	m_scrollBar.setScrollAreaSize(sf::Vector2f(0, m_bg.getSize().y - m_padding*2));
 	m_scrollBar.setDragRect(sf::FloatRect(0.f, 0.f, m_size.x, m_bg.getPosition().y + m_bg.getSize().y));
 
 	m_scrollAreaSize.y = m_text.getCursorEnd().y + m_fontSize * 2;

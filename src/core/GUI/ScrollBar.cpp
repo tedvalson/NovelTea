@@ -156,7 +156,7 @@ void ScrollBar::setDragRect(const sf::FloatRect &rect)
 	m_needsUpdate = true;
 }
 
-void ScrollBar::setScrollAreaSize(const sf::Vector2u &size)
+void ScrollBar::setScrollAreaSize(const sf::Vector2f &size)
 {
 	m_scrollAreaSize = size;
 	m_needsUpdate = true;
@@ -167,7 +167,7 @@ void ScrollBar::setDeceleration(float rate)
 	m_deceleration = rate;
 }
 
-void ScrollBar::setSize(const sf::Vector2u &size)
+void ScrollBar::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
 	m_needsUpdate = true;
@@ -193,7 +193,7 @@ void ScrollBar::ensureUpdateScrollBar() const
 	if (m_scrollPosMin > 0)
 		m_scrollPosMin = 0;
 
-	float visibleRatio = m_scrollAreaSize.y / (m_scrollSize+1);
+	float visibleRatio = m_scrollAreaSize.y / m_scrollSize;
 	if (visibleRatio < 0.05f)
 		visibleRatio = 0.05f;
 	m_scrollBar.setSize(0.f, m_size.y * visibleRatio);
@@ -277,12 +277,12 @@ sf::FloatRect ScrollBar::getDragRect() const
 	return m_dragRect;
 }
 
-sf::Vector2u ScrollBar::getSize() const
+sf::Vector2f ScrollBar::getSize() const
 {
 	return m_size;
 }
 
-sf::Vector2u ScrollBar::getScrollAreaSize() const
+sf::Vector2f ScrollBar::getScrollAreaSize() const
 {
 	return m_scrollAreaSize;
 }
@@ -332,7 +332,7 @@ void ScrollBar::setScrollRelative(float scrollDelta)
 void ScrollBar::setPosition(const sf::Vector2f &position)
 {
 	m_position = position;
-	float visibleRatio = m_size.y / (m_scrollSize+1);
+	float visibleRatio = m_size.y / m_scrollSize;
 	Transformable::setPosition(position + sf::Vector2f(0.f, -m_scrollPos * visibleRatio));
 }
 

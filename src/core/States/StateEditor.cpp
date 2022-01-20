@@ -51,8 +51,8 @@ void StateEditor::resize(const sf::Vector2f &size)
 	m_cutsceneRenderer.setSize(size);
 
 	m_roomScrollbar.setPosition(size.x - 4.f, 4.f);
-	m_roomScrollbar.setSize(sf::Vector2u(2, size.y - 8.f));
-	m_roomScrollbar.setScrollAreaSize(sf::Vector2u(size.x, size.y));
+	m_roomScrollbar.setSize(sf::Vector2f(2, size.y - 8.f));
+	m_roomScrollbar.setScrollAreaSize(size);
 	m_roomScrollbar.setDragRect(sf::FloatRect(0.f, 0.f, size.x, size.y));
 
 	m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;

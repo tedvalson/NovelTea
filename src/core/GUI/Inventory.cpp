@@ -120,9 +120,9 @@ void Inventory::refreshItems()
 
 	m_bg.setSize(sf::Vector2f(std::min(width, m_screenSize.x) + m_margin*2 + 4.f, height + m_margin*2));
 	m_bg.setPosition(m_startPosition.x - m_bg.getSize().x, m_startPosition.y - m_bg.getSize().y);
-	m_scrollBar.setSize(sf::Vector2u(2, m_bg.getSize().y));
+	m_scrollBar.setSize(sf::Vector2f(2, m_bg.getSize().y));
 	m_scrollBar.setPosition(m_startPosition.x - 4.f, m_bg.getPosition().y);
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(0, height));
+	m_scrollBar.setScrollAreaSize(sf::Vector2f(0, height));
 
 	m_scrollAreaSize.y = m_itemHeight * m_objectTexts.size();
 	updateScrollbar();

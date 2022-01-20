@@ -92,8 +92,8 @@ void VerbList::refreshItems()
 	}
 
 	m_bounds = sf::FloatRect(0.f, 0.f, maxWidth + m_margin*2, posY + m_margin*2);
-	m_scrollBar.setSize(sf::Vector2u(2, posY + m_margin*2));
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(320, posY));
+	m_scrollBar.setSize(sf::Vector2f(2, posY + m_margin*2));
+	m_scrollBar.setScrollAreaSize(sf::Vector2f(320, posY));
 	m_scrollBar.setPosition(m_bounds.width - 4.f, 0.f);
 	m_scrollBar.setDragRect(getGlobalBounds());
 	m_scrollAreaSize.y = m_itemHeight * m_verbs.size();

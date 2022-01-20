@@ -348,8 +348,8 @@ void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *seg
 void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 {
 	m_scrollBar.setPosition(m_size.x - 4.f, 4.f);
-	m_scrollBar.setSize(sf::Vector2u(2, m_size.y - 8.f));
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(m_size.x, m_size.y - m_margin*2));
+	m_scrollBar.setSize(sf::Vector2f(2, m_size.y - 8.f));
+	m_scrollBar.setScrollAreaSize(sf::Vector2f(m_size.x, m_size.y - m_margin*2));
 
 	m_segmentIndex = segmentIndex;
 	m_segmentSaveIndex = segmentIndex;

@@ -32,15 +32,15 @@ public:
 	const sf::Vector2f& getPosition() const;
 
 	void setDragRect(const sf::FloatRect &rect);
-	void setSize(const sf::Vector2u &size);
-	void setScrollAreaSize(const sf::Vector2u &size);
+	void setSize(const sf::Vector2f &size);
+	void setScrollAreaSize(const sf::Vector2f &size);
 	void setDeceleration(float rate);
 	void setColor(const sf::Color &color);
 	void setAutoHide(bool autoHide);
 
 	sf::FloatRect getDragRect() const;
-	sf::Vector2u getSize() const;
-	sf::Vector2u getScrollAreaSize() const;
+	sf::Vector2f getSize() const;
+	sf::Vector2f getScrollAreaSize() const;
 	float getDeceleration() const;
 	sf::Color getColor() const;
 	bool getAutoHide() const;
@@ -77,8 +77,8 @@ private:
 	mutable bool m_needsUpdate;
 	mutable std::vector<Scrollable*> m_scrollObjects;
 	sf::FloatRect m_dragRect;
-	sf::Vector2u m_scrollAreaSize;
-	sf::Vector2u m_size;
+	sf::Vector2f m_scrollAreaSize;
+	sf::Vector2f m_size;
 	sf::Vector2f m_position;
 
 	NinePatch m_scrollBar;

@@ -139,8 +139,8 @@ void TextOverlay::setSize(const sf::Vector2f &size)
 	m_text.setSize(sf::Vector2f((portrait ? 1.f : 0.6f) * size.x - m_padding * 2.f, size.y));
 
 	m_scrollBar.setPosition(size.x - 4.f, 4.f);
-	m_scrollBar.setSize(sf::Vector2u(2, size.y - 8.f));
-	m_scrollBar.setScrollAreaSize(sf::Vector2u(size.x, size.y));
+	m_scrollBar.setSize(sf::Vector2f(2, size.y - 8.f));
+	m_scrollBar.setScrollAreaSize(sf::Vector2f(size.x, size.y));
 
 	m_size = size;
 
