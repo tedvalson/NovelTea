@@ -1,10 +1,6 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
-#include <NovelTea/Action.hpp>
 #include <NovelTea/Room.hpp>
-#include <NovelTea/Cutscene.hpp>
-#include <NovelTea/Dialogue.hpp>
-#include <NovelTea/Script.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/ScriptManager.hpp>
@@ -28,9 +24,9 @@ Game::Game()
 	, m_saveCallback(nullptr)
 	, m_saveData(new SaveData)
 	, m_timerManager(new TimerManager)
-	, m_scriptManager(new ScriptManager(this))
 	, m_notificationManager(new NotificationManager)
 	, m_textLog(new TextLog)
+	, m_scriptManager(new ScriptManager(this))
 {
 }
 
@@ -103,23 +99,7 @@ void Game::pushNextEntity(std::shared_ptr<Entity> entity)
 
 void Game::pushNextEntityJson(json jentity)
 {
-	auto type = static_cast<EntityType>(jentity[ID::selectEntityType].ToInt());
-	auto idName = jentity[ID::selectEntityId].ToString();
-	if (type == EntityType::Action)
-		pushNextEntity(m_saveData->get<Action>(idName));
-	else if (type == EntityType::Cutscene)
-		pushNextEntity(m_saveData->get<Cutscene>(idName));
-	else if (type == EntityType::Room)
-		pushNextEntity(m_saveData->get<Room>(idName));
-	else if (type == EntityType::Dialogue)
-		pushNextEntity(m_saveData->get<Dialogue>(idName));
-	else if (type == EntityType::Script)
-		pushNextEntity(m_saveData->get<Script>(idName));
-	else if (type == EntityType::CustomScript) {
-		auto script = std::make_shared<Script>();
-		script->setContent(idName);
-		pushNextEntity(script);
-	}
+	pushNextEntity(Entity::fromEntityJson(jentity));
 }
 
 std::shared_ptr<Entity> Game::popNextEntity()

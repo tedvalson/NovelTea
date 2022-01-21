@@ -29,16 +29,19 @@ public:
 	static constexpr auto id = "dialogue";
 	const std::string entityId() const override {return id;}
 
+	void setNextEntity(std::shared_ptr<Entity> entity);
+	std::shared_ptr<Entity> getNextEntity() const;
+
 	ADD_ACCESSOR(int, RootIndex, m_rootIndex)
 	ADD_ACCESSOR(bool, EnableDisabledOptions, m_enableDisabledOptions)
 	ADD_ACCESSOR(bool, ShowDisabledOptions, m_showDisabledOptions)
 	ADD_ACCESSOR(std::string, DefaultName, m_defaultName)
-	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
+	ADD_ACCESSOR(json, NextEntityJson, m_nextEntity)
 
 private:
+	int m_rootIndex;
 	bool m_enableDisabledOptions;
 	bool m_showDisabledOptions;
-	int m_rootIndex;
 	std::vector<std::shared_ptr<DialogueSegment>> m_segments;
 	std::string m_defaultName;
 	json m_nextEntity;

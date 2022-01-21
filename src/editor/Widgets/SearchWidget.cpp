@@ -143,7 +143,7 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 				auto textSeg = std::static_pointer_cast<NovelTea::CutsceneTextSegment>(segment);
 				processString(item, textSeg->getActiveText()->toPlainText(" "), caseSensitive);
 			}
-			processEntityJson(item, cutscene->getNextEntity(), caseSensitive);
+			processEntityJson(item, cutscene->getNextEntityJson(), caseSensitive);
 		}
 		else if (entityId == NovelTea::Dialogue::id) {
 			auto dialogue = std::static_pointer_cast<NovelTea::Dialogue>(entity);
@@ -157,7 +157,7 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 				processString(item, segment->getConditionScript(), caseSensitive);
 			}
 			processString(item, dialogue->getDefaultName(), caseSensitive);
-			processEntityJson(item, dialogue->getNextEntity(), caseSensitive);
+			processEntityJson(item, dialogue->getNextEntityJson(), caseSensitive);
 		}
 		else if (entityId == NovelTea::Object::id) {
 			auto object = std::static_pointer_cast<NovelTea::Object>(entity);

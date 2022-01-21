@@ -113,4 +113,14 @@ bool Dialogue::segmentShown(int index)
 	return v;
 }
 
+void Dialogue::setNextEntity(std::shared_ptr<Entity> entity)
+{
+	m_nextEntity = sj::Array(static_cast<int>(entity->entityType()), entity->getId());
+}
+
+std::shared_ptr<Entity> Dialogue::getNextEntity() const
+{
+	return Entity::fromEntityJson(m_nextEntity);
+}
+
 } // namespace NovelTea

@@ -1,4 +1,12 @@
 #include <NovelTea/Entity.hpp>
+#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Action.hpp>
+#include <NovelTea/Cutscene.hpp>
+#include <NovelTea/Dialogue.hpp>
+#include <NovelTea/Object.hpp>
+#include <NovelTea/Room.hpp>
+#include <NovelTea/Script.hpp>
+#include <NovelTea/Verb.hpp>
 #include <iostream>
 
 namespace NovelTea
@@ -58,6 +66,33 @@ void Entity::setProp(const std::string &key, const DukValue &value)
 void Entity::unsetProp(const std::string &key)
 {
 	m_propertyList->unset(key);
+}
+
+std::shared_ptr<Entity> Entity::fromEntityJson(const json &j)
+{
+	auto saveData = ActiveGame->getSaveData();
+	auto type = static_cast<EntityType>(j[ID::selectEntityType].ToInt());
+	auto idName = j[ID::selectEntityId].ToString();
+	if (type == EntityType::Action)
+		return saveData->get<Action>(idName);
+	else if (type == EntityType::Cutscene)
+		return saveData->get<Cutscene>(idName);
+	else if (type == EntityType::Dialogue)
+		return saveData->get<Dialogue>(idName);
+	else if (type == EntityType::Object)
+		return saveData->get<Object>(idName);
+	else if (type == EntityType::Room)
+		return saveData->get<Room>(idName);
+	else if (type == EntityType::Script)
+		return saveData->get<Script>(idName);
+	else if (type == EntityType::Verb)
+		return saveData->get<Verb>(idName);
+	else if (type == EntityType::CustomScript) {
+		auto script = std::make_shared<Script>();
+		script->setContent(idName);
+		return script;
+	}
+	return nullptr;
 }
 
 } // namespace NovelTea

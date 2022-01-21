@@ -71,7 +71,7 @@ void DialogueWidget::saveData() const
 		m_treeModel->saveDialogue(m_dialogue);
 		m_dialogue->setProperties(ui->propertyEditor->getValue());
 		m_dialogue->setDefaultName(ui->lineEditDefaultName->text().toStdString());
-		m_dialogue->setNextEntity(ui->actionSelectWidget->getValue());
+		m_dialogue->setNextEntityJson(ui->actionSelectWidget->getValue());
 		m_dialogue->setShowDisabledOptions(ui->checkBoxShowDisabled->isChecked());
 		m_dialogue->setEnableDisabledOptions(ui->checkBoxEnableDisabled->isChecked());
 		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
@@ -95,7 +95,7 @@ void DialogueWidget::loadData()
 	ui->lineEditDefaultName->setText(QString::fromStdString(m_dialogue->getDefaultName()));
 	ui->checkBoxShowDisabled->setChecked(m_dialogue->getShowDisabledOptions());
 	ui->checkBoxEnableDisabled->setChecked(m_dialogue->getEnableDisabledOptions());
-	ui->actionSelectWidget->setValue(m_dialogue->getNextEntity());
+	ui->actionSelectWidget->setValue(m_dialogue->getNextEntityJson());
 	fillItemSettings();
 
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);

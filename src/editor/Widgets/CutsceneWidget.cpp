@@ -77,7 +77,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 
 	connect(ui->actionSelect, &ActionSelectWidget::valueChanged, [this](){
 		setModified();
-		m_cutscene->setNextEntity(ui->actionSelect->getValue());
+		m_cutscene->setNextEntityJson(ui->actionSelect->getValue());
 	});
 }
 
@@ -292,7 +292,7 @@ void CutsceneWidget::fillSettingsPropertyEditor()
 	prop->setValue(m_cutscene->getSpeedFactor());
 	ui->propertyBrowserSettings->addProperty(prop);
 
-	ui->actionSelect->setValue(m_cutscene->getNextEntity());
+	ui->actionSelect->setValue(m_cutscene->getNextEntityJson());
 
 	ui->actionSelect->blockSignals(false);
 	settingsVariantManager->blockSignals(false);

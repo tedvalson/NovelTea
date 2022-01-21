@@ -178,4 +178,14 @@ size_t Cutscene::getDelayMs(size_t indexEnd) const
 	return delay;
 }
 
+void Cutscene::setNextEntity(std::shared_ptr<Entity> entity)
+{
+	m_nextEntity = sj::Array(static_cast<int>(entity->entityType()), entity->getId());
+}
+
+std::shared_ptr<Entity> Cutscene::getNextEntity() const
+{
+	return Entity::fromEntityJson(m_nextEntity);
+}
+
 } // namespace NovelTea

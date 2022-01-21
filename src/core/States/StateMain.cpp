@@ -540,12 +540,12 @@ bool StateMain::processTestSteps()
 			if (m_mode == Mode::Cutscene) {
 				m_cutsceneRenderer.update(0.001f * m_cutscene->getDelayMs());
 				if (m_cutsceneRenderer.isComplete())
-					GGame.pushNextEntityJson(m_cutscene->getNextEntity());
+					GGame.pushNextEntityJson(m_cutscene->getNextEntityJson());
 			}
 			else if (m_mode == Mode::Dialogue) {
 				m_dialogueRenderer.processLines();
 				if (m_dialogueRenderer.isComplete())
-					GGame.pushNextEntityJson(m_dialogue->getNextEntity());
+					GGame.pushNextEntityJson(m_dialogue->getNextEntityJson());
 				else
 					break;
 			}
@@ -973,7 +973,7 @@ bool StateMain::update(float delta)
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
 		{
-			GGame.pushNextEntityJson(m_cutscene->getNextEntity());
+			GGame.pushNextEntityJson(m_cutscene->getNextEntityJson());
 			gotoNextEntity();
 		}
 	}
@@ -981,7 +981,7 @@ bool StateMain::update(float delta)
 	{
 		if (m_dialogueRenderer.isComplete())
 		{
-			GGame.pushNextEntityJson(m_dialogue->getNextEntity());
+			GGame.pushNextEntityJson(m_dialogue->getNextEntityJson());
 			gotoNextEntity();
 		}
 	}

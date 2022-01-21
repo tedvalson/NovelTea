@@ -40,10 +40,13 @@ public:
 	Cutscene(const Cutscene&) = delete;
 	Cutscene& operator=(const Cutscene&) = delete;
 
+	void setNextEntity(std::shared_ptr<Entity> entity);
+	std::shared_ptr<Entity> getNextEntity() const;
+
 	ADD_ACCESSOR(bool, FullScreen, m_fullScreen)
 	ADD_ACCESSOR(bool, CanFastForward, m_canFastForward)
 	ADD_ACCESSOR(float, SpeedFactor, m_speedFactor)
-	ADD_ACCESSOR(json, NextEntity, m_nextEntity)
+	ADD_ACCESSOR(json, NextEntityJson, m_nextEntity)
 	ADD_ACCESSOR(bool, SkipConditionChecks, m_skipConditionChecks)
 
 private:

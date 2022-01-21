@@ -8,6 +8,8 @@
 namespace NovelTea
 {
 
+class SaveData;
+
 class Entity : public JsonSerializable
 {
 public:
@@ -29,6 +31,8 @@ public:
 
 	ADD_ACCESSOR(std::string, ParentId, m_parentId)
 	ADD_ACCESSOR(json, Properties, m_properties)
+
+	static std::shared_ptr<Entity> fromEntityJson(const json &j);
 
 protected:
 	std::string m_id;

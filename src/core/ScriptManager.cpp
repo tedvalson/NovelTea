@@ -240,6 +240,7 @@ void ScriptManager::registerClasses()
 	dukglue_register_property(m_context, &Cutscene::getFullScreen, &Cutscene::setFullScreen, "fullScreen");
 	dukglue_register_property(m_context, &Cutscene::getCanFastForward, &Cutscene::setCanFastForward, "canFastForward");
 	dukglue_register_property(m_context, &Cutscene::getSpeedFactor, &Cutscene::setSpeedFactor, "speedFactor");
+	dukglue_register_property(m_context, &Cutscene::getNextEntity, &Cutscene::setNextEntity, "nextEntity");
 
 	// Dialogue
 	REGISTER_CONSTRUCTOR(Dialogue);
@@ -249,6 +250,7 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &Dialogue::clearSegments, "clearSegments");
 	dukglue_register_property(m_context, &Dialogue::getRootIndex, &Dialogue::setRootIndex, "rootIndex");
 	dukglue_register_property(m_context, &Dialogue::getDefaultName, &Dialogue::setDefaultName, "defaultName");
+	dukglue_register_property(m_context, &Dialogue::getNextEntity, &Dialogue::setNextEntity, "nextEntity");
 
 	REGISTER_CONSTRUCTOR(DialogueSegment);
 	dukglue_register_method(m_context, &DialogueSegment::appendChild, "appendChildId");
