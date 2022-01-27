@@ -234,12 +234,12 @@ void StateMain::render(sf::RenderTarget &target)
 	if (!ActiveGame->getObjectList()->objects().empty())
 		target.draw(m_buttonInventory);
 	target.draw(m_inventory);
-	if (m_verbList.isVisible())
-		target.draw(m_verbList);
 
 	target.draw(m_textOverlay);
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonTextLog);
+	if (m_verbList.isVisible())
+		target.draw(m_verbList);
 
 	target.draw(*GGame->getNotificationManager());
 }
@@ -360,6 +360,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 			GGame->setRoom(nextRoom);
 			nextRoom->runScriptAfterEnter();
 		}
+		m_mode = mode;
 		showToolbar();
 		updateRoomText();
 		m_roomScrollbar.setScroll(0.f);
@@ -590,7 +591,7 @@ bool StateMain::processTestSteps()
 		{
 			json j({
 				"success", false,
-				"index", i
+				"index", i,
 			});
 			runCallback(&j);
 			std::cout << "FAILED" << std::endl;
@@ -755,6 +756,7 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 	auto highlightDelay = firstVisit ? 2.f : 0.f;
 	m_roomActiveText.setHighlightFactor(0.f);
 	m_navigation.setHighlightFactor(0.f);
+	m_navigation.setPaths(room->getPaths());
 	TweenEngine::Tween::to(m_roomActiveText, ActiveText::HIGHLIGHTS, highlightDuration)
 		.target(1.f)
 		.delay(highlightDelay)
@@ -857,8 +859,8 @@ bool StateMain::processEvent(const sf::Event &event)
 	{
 		if (m_textOverlay.processEvent(event))
 			m_textOverlay.hide(0.5f, TextOverlay::ALPHA, [this](){
-				callOverlayFunc();
 				showToolbar(0.5f);
+				callOverlayFunc();
 			});
 		return true;
 	}
@@ -877,7 +879,6 @@ bool StateMain::processEvent(const sf::Event &event)
 		}
 		else if (event.type == sf::Event::MouseButtonPressed)
 		{
-			m_cutsceneSpeed = 10.f;
 		}
 	}
 	else if (m_mode == Mode::Dialogue)
