@@ -165,9 +165,9 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	for (auto &pair : m_json[Cutscene::id].ObjectRange())
 	{
 		cutscene->fromJson(pair.second);
-		auto jentity = cutscene->getNextEntity();
+		auto jentity = cutscene->getNextEntityJson();
 		renameJsonEntity(jentity, entityType, oldName, newName);
-		cutscene->setNextEntity(jentity);
+		cutscene->setNextEntityJson(jentity);
 		m_json[Cutscene::id][pair.first] = cutscene->toJson();
 	}
 
@@ -176,9 +176,9 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	for (auto &pair : m_json[Dialogue::id].ObjectRange())
 	{
 		dialogue->fromJson(pair.second);
-		auto jentity = dialogue->getNextEntity();
+		auto jentity = dialogue->getNextEntityJson();
 		renameJsonEntity(jentity, entityType, oldName, newName);
-		dialogue->setNextEntity(jentity);
+		dialogue->setNextEntityJson(jentity);
 		m_json[Dialogue::id][pair.first] = dialogue->toJson();
 	}
 

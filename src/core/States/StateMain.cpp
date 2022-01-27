@@ -170,7 +170,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			entityId
 		);
 		GSave->data()[ID::entrypointMetadata] = metaData;
-		GSave->data()[ID::playTime] = m_playTime;
 	});
 
 	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
