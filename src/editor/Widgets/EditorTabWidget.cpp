@@ -119,7 +119,6 @@ void EditorTabWidget::setModified()
 
 void EditorTabWidget::showEvent(QShowEvent *)
 {
-	ActiveGame->reset();
 }
 
 void EditorTabWidget::hideEvent(QHideEvent *)
