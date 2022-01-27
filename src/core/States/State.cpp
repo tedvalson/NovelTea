@@ -4,7 +4,7 @@
 
 namespace NovelTea {
 
-State::Context::Context(EngineConfig& config, Game& game, sj::JSON& data)
+State::Context::Context(EngineConfig& config, std::shared_ptr<Game>& game, sj::JSON& data)
 : config(config)
 , game(game)
 , data(data)

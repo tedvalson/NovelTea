@@ -15,12 +15,23 @@ using namespace std::chrono;
 namespace NovelTea
 {
 
+EngineConfig::EngineConfig()
+	: width(1024)
+	, height(720)
+	, fps(30)
+	, fontSizeMultiplier(1.f)
+	, backgroundColor(sf::Color(200, 200, 200))
+	, initialState(StateID::Intro)
+	, orientation(EngineOrientation::Auto)
+{
+
+}
+
 Engine::Engine(EngineConfig config)
 	: m_config(config)
+	, m_game(new Game)
 {
-	m_game = std::make_shared<Game>();
-
-	auto stateStack = new StateStack(State::Context(m_config, *m_game, m_data));
+	auto stateStack = new StateStack(State::Context(m_config, m_game, m_data));
 	m_stateStack = std::unique_ptr<StateStack>(stateStack);
 
 	m_stateStack->registerState<StateEditor>(StateID::Editor);

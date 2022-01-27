@@ -21,13 +21,15 @@ enum class EngineOrientation
 
 struct EngineConfig
 {
-	float fontSizeMultiplier = 1.f;
-	size_t width = 1024;
-	size_t height = 720;
-	unsigned short fps = 30;
-	sf::Color backgroundColor = sf::Color(200, 200, 200);
-	StateID initialState = StateID::Intro;
-	EngineOrientation orientation = EngineOrientation::Auto;
+	EngineConfig();
+	size_t width;
+	size_t height;
+	unsigned fps;
+	float fontSizeMultiplier;
+	sf::Color backgroundColor;
+	StateID initialState;
+	EngineOrientation orientation;
+	std::string saveDir;
 };
 
 class Engine

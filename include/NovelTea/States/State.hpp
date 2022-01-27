@@ -11,7 +11,7 @@
 #include <vector>
 
 #define GGame getContext().game
-#define ScriptMan getContext().game.getScriptManager()
+#define ScriptMan getContext().game->getScriptManager()
 
 namespace sf
 {
@@ -32,9 +32,9 @@ public:
 
 	struct Context
 	{
-		Context(EngineConfig& config, Game& game, sj::JSON& data);
+		Context(EngineConfig& config, std::shared_ptr<Game>& game, sj::JSON& data);
 		EngineConfig& config;
-		Game& game;
+		std::shared_ptr<Game>& game;
 		sj::JSON& data;
 	};
 

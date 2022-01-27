@@ -49,7 +49,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			});
 			runCallback(&jtestItem);
 		}
-		GGame.pushNextEntityJson(jentity);
+		GGame->pushNextEntityJson(jentity);
 	});
 
 	// Toolbar
@@ -138,7 +138,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	// TextOverlay setup
 	m_textOverlay.hide(0.f);
-	GGame.setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
+	GGame->setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
 		m_textOverlayFunc = callback;
 		if (!m_testPlaybackMode)
 		{
@@ -150,7 +150,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			callOverlayFunc();
 	});
 
-	GGame.setSaveCallback([this](){
+	GGame->setSaveCallback([this](){
 		auto entityType = EntityType::Room;
 		auto entityId = ActiveGame->getRoom()->getId();
 		auto metaData = sj::Array(entityId);
@@ -170,6 +170,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			entityId
 		);
 		GSave->data()[ID::entrypointMetadata] = metaData;
+		GSave->data()[ID::playTime] = m_playTime;
 	});
 
 	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
@@ -178,9 +179,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	if (!saveEntryPoint.IsEmpty())
 	{
 		auto roomId = entryMetadata[0].ToString();
-		GGame.pushNextEntityJson(saveEntryPoint);
+		GGame->pushNextEntityJson(saveEntryPoint);
 		if (!roomId.empty())
-			GGame.pushNextEntity(GSave->get<Room>(roomId));
+			GGame->pushNextEntity(GSave->get<Room>(roomId));
 		if (entryMetadata.size() > 1 && gotoNextEntity()) {
 			if (m_mode == Mode::Cutscene)
 				m_cutsceneRenderer.restoreState(entryMetadata[1]);
@@ -189,7 +190,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		}
 	}
 	else if (!projEntryPoint.IsEmpty())
-		GGame.pushNextEntityJson(projEntryPoint);
+		GGame->pushNextEntityJson(projEntryPoint);
 	processTest();
 }
 
@@ -240,7 +241,7 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonTextLog);
 
-	target.draw(*GGame.getNotificationManager());
+	target.draw(*GGame->getNotificationManager());
 }
 
 void StateMain::resize(const sf::Vector2f &size)
@@ -291,8 +292,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_inventory.refreshItems();
 
 	// Notification setup
-	GGame.getNotificationManager()->setScreenSize(size);
-	GGame.getNotificationManager()->setFontSizeMultiplier(fontSizeMultiplier);
+	GGame->getNotificationManager()->setScreenSize(size);
+	GGame->getNotificationManager()->setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_textOverlay.setFontSizeMultiplier(fontSizeMultiplier);
 
@@ -347,16 +348,16 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	else if (mode == Mode::Room)
 	{
 		auto nextRoom = GSave->get<Room>(idName);
-		auto room = GGame.getRoom();
+		auto room = GGame->getRoom();
 		if (room->getId() != idName)
 		{
 			if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
 				updateRoomText();
 				return;
 			}
-			GGame.enableNavigation();
+			GGame->enableNavigation();
 			room->runScriptAfterLeave();
-			GGame.setRoom(nextRoom);
+			GGame->setRoom(nextRoom);
 			nextRoom->runScriptAfterEnter();
 		}
 		showToolbar();
@@ -387,7 +388,7 @@ void StateMain::setMode(const json &jEntity)
 
 	if (type == EntityType::Script || type == EntityType::CustomScript) {
 		mode = Mode::Room;
-		idName = GGame.getRoom()->getId();
+		idName = GGame->getRoom()->getId();
 	}
 
 	setMode(mode, idName);
@@ -447,8 +448,8 @@ void StateMain::hideToolbar(float duration)
 
 void StateMain::setScroll(float position)
 {
-	std::cout << "StateMain::setScroll " << position << std::endl;
-	std::cout << "  scroll area: " << m_scrollAreaSize.x << " " << m_scrollAreaSize.y << std::endl;
+//	std::cout << "StateMain::setScroll " << position << std::endl;
+//	std::cout << "  scroll area: " << m_scrollAreaSize.x << " " << m_scrollAreaSize.y << std::endl;
 	m_scrollPos = round(position);
 	repositionText();
 }
@@ -490,15 +491,15 @@ void StateMain::processTest()
 	auto &jtest = getContext().data["test"];
 	m_testRecordMode = getContext().data["record"].ToBool();
 
-	GGame.reset();
-	GGame.getObjectList()->clear();
+	GGame->reset();
+	GGame->getObjectList()->clear();
 	for (auto &jobject : jtest[ID::startingInventory].ArrayRange())
-		GGame.getObjectList()->addId(jobject.ToString());
+		GGame->getObjectList()->addId(jobject.ToString());
 
 	if (jtest[ID::entrypointEntity][ID::selectEntityType].ToInt() == -1)
-		GGame.pushNextEntityJson(ProjData[ID::entrypointEntity]);
+		GGame->pushNextEntityJson(ProjData[ID::entrypointEntity]);
 	else
-		GGame.pushNextEntityJson(jtest[ID::entrypointEntity]);
+		GGame->pushNextEntityJson(jtest[ID::entrypointEntity]);
 
 	if (processTestInit() && processTestSteps() && !m_testRecordMode)
 		processTestCheck();
@@ -540,18 +541,18 @@ bool StateMain::processTestSteps()
 			if (m_mode == Mode::Cutscene) {
 				m_cutsceneRenderer.update(0.001f * m_cutscene->getDelayMs());
 				if (m_cutsceneRenderer.isComplete())
-					GGame.pushNextEntityJson(m_cutscene->getNextEntityJson());
+					GGame->pushNextEntityJson(m_cutscene->getNextEntityJson());
 			}
 			else if (m_mode == Mode::Dialogue) {
 				m_dialogueRenderer.processLines();
 				if (m_dialogueRenderer.isComplete())
-					GGame.pushNextEntityJson(m_dialogue->getNextEntityJson());
+					GGame->pushNextEntityJson(m_dialogue->getNextEntityJson());
 				else
 					break;
 			}
 
 			if (waiting && waitTimeLeft > 0.f) {
-				if (GGame.getTimerManager()->update(0.01f))
+				if (GGame->getTimerManager()->update(0.01f))
 					updateRoomText();
 				waitTimeLeft -= 0.01f;
 			}
@@ -574,14 +575,14 @@ bool StateMain::processTestSteps()
 		}
 		else if (type == "move")
 		{
-			success = GGame.isNavigationEnabled();
+			success = GGame->isNavigationEnabled();
 			if (success) {
 				auto direction = jstep["direction"].ToInt();
 				auto &paths = m_navigation.getPaths();
 				auto &jentity = paths[direction][1];
 				success = (paths[direction][0].ToBool() && jentity[0].ToInt() != -1);
 				if (success)
-					GGame.pushNextEntityJson(jentity);
+					GGame->pushNextEntityJson(jentity);
 			}
 		}
 
@@ -648,7 +649,7 @@ bool StateMain::processTestCheck()
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
 	for (auto &objectId : objectIds)
-		if (!GGame.getRoom()->containsId(objectId) && !GGame.getObjectList()->containsId(objectId))
+		if (!GGame->getRoom()->containsId(objectId) && !GGame->getObjectList()->containsId(objectId))
 			return false;
 
 	auto success = ScriptMan->runActionScript(verbId, objectIds, ProjData[ID::scriptBeforeAction].ToString());
@@ -691,11 +692,11 @@ bool StateMain::gotoNextEntity()
 	if (m_quitting)
 		return false;
 
-	auto nextEntity = GGame.popNextEntity();
+	auto nextEntity = GGame->popNextEntity();
 	if (!nextEntity)
 	{
 		if (m_mode != Mode::Room)
-			nextEntity = GGame.getRoom();
+			nextEntity = GGame->getRoom();
 		if (!nextEntity || nextEntity->getId().empty())
 			return false;
 	}
@@ -714,7 +715,7 @@ bool StateMain::gotoNextEntity()
 	else if (nextEntity->entityId() == Script::id) {
 		auto script = std::static_pointer_cast<Script>(nextEntity);
 		ScriptMan->runScript(script);
-		setMode(Mode::Room, GGame.getRoom()->getId());
+		setMode(Mode::Room, GGame->getRoom()->getId());
 		return true;
 	}
 	setMode(mode, nextEntity->getId());
@@ -723,7 +724,7 @@ bool StateMain::gotoNextEntity()
 
 void StateMain::updateRoomText(const std::string &newText, float duration)
 {
-	auto room = GGame.getRoom();
+	auto room = GGame->getRoom();
 	auto text = newText;
 	auto firstVisit = !GSave->data()[ID::roomDescriptions].hasKey(room->getId());
 	if (text == " ")
@@ -895,7 +896,7 @@ bool StateMain::processEvent(const sf::Event &event)
 
 		if (m_actionBuilder.processEvent(event))
 			return true;
-		if (GGame.isNavigationEnabled())
+		if (GGame->isNavigationEnabled())
 			m_navigation.processEvent(event);
 
 		if (m_buttonInventory.processEvent(event))
@@ -949,7 +950,7 @@ bool StateMain::processEvent(const sf::Event &event)
 
 bool StateMain::update(float delta)
 {
-	if (GGame.isQuitting())
+	if (GGame->isQuitting())
 		quit();
 
 	m_dialogueRenderer.update(delta);
@@ -962,7 +963,7 @@ bool StateMain::update(float delta)
 			if (callback)
 				callback(ProjData[ID::quickVerb].ToString());
 		}
-		if (GGame.isNavigationEnabled())
+		if (GGame->isNavigationEnabled())
 			m_navigation.show();
 		else
 			m_navigation.hide();
@@ -973,7 +974,7 @@ bool StateMain::update(float delta)
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
 		{
-			GGame.pushNextEntityJson(m_cutscene->getNextEntityJson());
+			GGame->pushNextEntityJson(m_cutscene->getNextEntityJson());
 			gotoNextEntity();
 		}
 	}
@@ -981,7 +982,7 @@ bool StateMain::update(float delta)
 	{
 		if (m_dialogueRenderer.isComplete())
 		{
-			GGame.pushNextEntityJson(m_dialogue->getNextEntityJson());
+			GGame->pushNextEntityJson(m_dialogue->getNextEntityJson());
 			gotoNextEntity();
 		}
 	}
@@ -996,8 +997,8 @@ bool StateMain::update(float delta)
 	m_navigation.update(delta);
 	m_textOverlay.update(delta);
 
-	GGame.getNotificationManager()->update(delta);
-	if (GGame.getTimerManager()->update(delta)) {
+	GGame->getNotificationManager()->update(delta);
+	if (GGame->getTimerManager()->update(delta)) {
 		if (m_mode == Mode::Room)
 			updateRoomText();
 	}
