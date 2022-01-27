@@ -94,7 +94,7 @@ void StateTextLog::refreshItems()
 	m_texts.clear();
 	m_scrollAreaSize.y = 0.f;
 
-	for (auto &logItem : GGame.getTextLog()->items())
+	for (auto &logItem : GGame->getTextLog()->items())
 	{
 		format.bold(logItem.type == TextLogType::DialogueOption);
 
