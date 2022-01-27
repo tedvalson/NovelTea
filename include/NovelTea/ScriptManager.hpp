@@ -55,7 +55,7 @@ public:
 	template <typename T>
 	inline T runInClosure(const std::string &script)
 	{
-		return run<T>("(function(){" + script + "})();");
+		return run<T>("(function(){\n" + script + "\n})();");
 	}
 
 	template <typename T>
@@ -73,7 +73,7 @@ public:
 	template <typename T, typename... Args>
 	T call(const std::string &script, const std::string &funcName, Args&&... args)
 	{
-		auto s = strUseStrict + script + ";" + funcName + ";";
+		auto s = strUseStrict + "\n" + script + ";\n" + funcName + ";";
 		auto fn = dukglue_peval<DukValue>(m_context, s.c_str());
 		return dukglue_pcall<T>(m_context, fn, std::forward<Args>(args)...);
 	}
