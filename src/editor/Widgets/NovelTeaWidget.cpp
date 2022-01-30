@@ -52,6 +52,7 @@ void NovelTeaWidget::reset()
 	config.width = m_internalSize.x;
 	config.height = m_internalSize.y;
 	config.initialState = NovelTea::StateID::Editor;
+	config.fontSizeMultiplier = 0.7f;
 
 	if (m_engine)
 		delete m_engine;

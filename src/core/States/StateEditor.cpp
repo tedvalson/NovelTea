@@ -46,6 +46,7 @@ void StateEditor::resize(const sf::Vector2f &size)
 	m_roomTextPadding = round(1.f / 16.f * std::min(size.x, size.y));
 
 	m_roomActiveText.setSize(sf::Vector2f((size.x < size.y ? 1.f : 0.6f) * size.x - m_roomTextPadding*2, 0.f));
+	m_roomActiveText.setFontSizeMultiplier(getContext().config.fontSizeMultiplier);
 
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setSize(size);
