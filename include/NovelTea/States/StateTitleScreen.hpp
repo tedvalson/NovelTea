@@ -21,9 +21,12 @@ public:
 
 	void setAlpha(float alpha) override;
 
+	void updateProfileButton();
+
 private:
 	Button m_buttonStart;
 	Button m_buttonSettings;
+	Button m_buttonProfile;
 	TweenRectangleShape m_bg;
 	ActiveText m_textTitle;
 	ActiveText m_textAuthor;

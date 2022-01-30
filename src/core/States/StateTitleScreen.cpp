@@ -48,6 +48,15 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 		requestStackPush(StateID::Settings);
 	});
 
+	m_buttonProfile = m_buttonStart;
+	m_buttonProfile.onClick([this](){
+		requestStackPush(StateID::ProfileManager, false, [this](void*){
+			updateProfileButton();
+			return true;
+		});
+	});
+	updateProfileButton();
+
 	setAlpha(0.f);
 	TweenEngine::Tween::to(*this, ALPHA, 2.f)
 		.target(255.f)
@@ -61,9 +70,11 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 void StateTitleScreen::render(sf::RenderTarget &target)
 {
 	target.clear(m_bg.getFillColor());
+	target.draw(m_imageSprite);
 	target.draw(m_textTitle);
 	target.draw(m_textAuthor);
 	target.draw(m_buttonSettings);
+	target.draw(m_buttonProfile);
 	target.draw(m_buttonStart);
 }
 
@@ -94,15 +105,19 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), format);
 
 	auto buttonWidth = (portrait ? 0.85f : 0.4f) * w;
-	auto buttonHeight = (portrait ? 0.09f : 0.12f) * h;
+	auto buttonHeight = (portrait ? 0.09f : 0.12f) * h * 0.8f;
 	auto buttonFontSize = buttonHeight * 0.7f;
 	m_buttonStart.getText().setCharacterSize(buttonFontSize);
 	m_buttonStart.setSize(buttonWidth, buttonHeight);
-	m_buttonStart.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 3.f));
+	m_buttonStart.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 4.2f));
 
 	m_buttonSettings.getText().setCharacterSize(buttonFontSize);
 	m_buttonSettings.setSize(buttonWidth, buttonHeight);
-	m_buttonSettings.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 1.8f));
+	m_buttonSettings.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 3.f));
+
+	m_buttonProfile.getText().setCharacterSize(buttonFontSize);
+	m_buttonProfile.setSize(buttonWidth, buttonHeight);
+	m_buttonProfile.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 1.8f));
 }
 
 void StateTitleScreen::setAlpha(float alpha)
@@ -111,13 +126,20 @@ void StateTitleScreen::setAlpha(float alpha)
 	m_textAuthor.setAlpha(alpha);
 	m_buttonStart.setAlpha(alpha);
 	m_buttonSettings.setAlpha(alpha);
+	m_buttonProfile.setAlpha(alpha);
 	State::setAlpha(alpha);
+}
+
+void StateTitleScreen::updateProfileButton()
+{
+	m_buttonProfile.setString("Profile: " + std::to_string(GSettings.getActiveProfileIndex() + 1));
 }
 
 bool StateTitleScreen::processEvent(const sf::Event &event)
 {
 	m_buttonStart.processEvent(event);
 	m_buttonSettings.processEvent(event);
+	m_buttonProfile.processEvent(event);
 	return true;
 }
 
