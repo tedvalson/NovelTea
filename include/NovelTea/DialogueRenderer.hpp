@@ -70,6 +70,7 @@ private:
 	int m_currentSegmentIndex;
 	int m_nextForcedSegmentIndex;
 	bool m_isComplete;
+	bool m_isShowing;
 
 	int m_textLineIndex;
 	std::vector<std::pair<std::string,std::string>> m_textLines;

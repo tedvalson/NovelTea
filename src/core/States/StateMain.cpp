@@ -178,9 +178,12 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	if (!saveEntryPoint.IsEmpty())
 	{
 		auto roomId = entryMetadata[0].ToString();
-		GGame->pushNextEntityJson(saveEntryPoint);
 		if (!roomId.empty())
+		{
 			GGame->pushNextEntity(GSave->get<Room>(roomId));
+			gotoNextEntity();
+		}
+		GGame->pushNextEntityJson(saveEntryPoint);
 		if (entryMetadata.size() > 1 && gotoNextEntity()) {
 			if (m_mode == Mode::Cutscene)
 				m_cutsceneRenderer.restoreState(entryMetadata[1]);

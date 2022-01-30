@@ -14,6 +14,7 @@ namespace NovelTea
 
 DialogueRenderer::DialogueRenderer()
 : m_callback(nullptr)
+, m_isShowing(false)
 , m_textLineIndex(-1)
 , m_fontSizeMultiplier(1.0)
 , m_fadeTween(nullptr)
@@ -61,6 +62,8 @@ void DialogueRenderer::update(float delta)
 
 bool DialogueRenderer::processEvent(const sf::Event &event)
 {
+	if (m_isShowing)
+		return true;
 	if (m_scrollBar.processEvent(event))
 		return false;
 
@@ -338,6 +341,8 @@ bool DialogueRenderer::isComplete() const
 
 void DialogueRenderer::show(float duration, int startSegmentIndex)
 {
+	m_isShowing = true;
+	m_tweenManager.killAll();
 	if (startSegmentIndex < 0)
 		startSegmentIndex = m_dialogue->getRootIndex();
 	m_scrollBar.setAutoHide(false);
@@ -347,6 +352,7 @@ void DialogueRenderer::show(float duration, int startSegmentIndex)
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(30.f)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this, startSegmentIndex](TweenEngine::BaseTween*){
+			m_isShowing = false;
 			changeSegment(startSegmentIndex, false);
 		})
 		.start(m_tweenManager);
