@@ -99,6 +99,7 @@ private:
 	TweenRectangleShape m_bg;
 
 	sf::Clock m_clock;
+	double m_playTime;
 	bool m_quickVerbPressed;
 
 	// Cutscene

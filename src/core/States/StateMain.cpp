@@ -26,6 +26,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_quitting(false)
 , m_roomTextChanging(false)
 , m_scrollPos(0.f)
+, m_playTime(0.d)
 , m_quickVerbPressed(false)
 , m_cutsceneSpeed(1.f)
 {
@@ -170,6 +171,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			entityId
 		);
 		GSave->data()[ID::entrypointMetadata] = metaData;
+		GSave->data()[ID::playTime] = m_playTime;
 	});
 
 	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
@@ -193,6 +195,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	}
 	else if (!projEntryPoint.IsEmpty())
 		GGame->pushNextEntityJson(projEntryPoint);
+
+	m_playTime = GSave->data()[ID::playTime].ToFloat();
+
 	processTest();
 }
 
@@ -955,6 +960,8 @@ bool StateMain::update(float delta)
 {
 	if (GGame->isQuitting())
 		quit();
+
+	m_playTime += delta;
 
 	m_dialogueRenderer.update(delta);
 	if (m_mode == Mode::Room)
