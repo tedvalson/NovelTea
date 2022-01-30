@@ -861,9 +861,9 @@ bool StateMain::processEvent(const sf::Event &event)
 	{
 		if (m_textOverlay.processEvent(event))
 			m_textOverlay.hide(0.5f, TextOverlay::ALPHA, [this](){
-				showToolbar(0.5f);
 				callOverlayFunc();
 			});
+		showToolbar(0.5f);
 		return true;
 	}
 
@@ -892,6 +892,8 @@ bool StateMain::processEvent(const sf::Event &event)
 		if (m_verbList.processEvent(event)) {
 			return false;
 		} else {
+			if (m_buttonInventory.processEvent(event))
+				return true;
 			// Returns true if an object is clicked on
 			if (m_inventory.processEvent(event))
 				return true;
@@ -902,8 +904,6 @@ bool StateMain::processEvent(const sf::Event &event)
 		if (GGame->isNavigationEnabled())
 			m_navigation.processEvent(event);
 
-		if (m_buttonInventory.processEvent(event))
-			return true;
 		if (m_roomScrollbar.processEvent(event))
 		{
 			if (event.type != sf::Event::MouseButtonPressed)
