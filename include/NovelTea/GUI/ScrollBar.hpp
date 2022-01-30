@@ -45,6 +45,8 @@ public:
 	sf::Color getColor() const;
 	bool getAutoHide() const;
 
+	bool isScrolling() const;
+
 	void show();
 	void hide();
 	void markDirty();

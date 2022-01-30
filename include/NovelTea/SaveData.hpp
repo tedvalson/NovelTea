@@ -11,6 +11,7 @@ namespace NovelTea
 class SaveData: public JsonSerializable
 {
 	friend class Game;
+	friend class Settings;
 protected:
 	SaveData();
 
@@ -18,6 +19,12 @@ protected:
 	bool load(int slot);
 	bool loadLast();
 	std::string getSlotFilename(int slot) const;
+	std::string getProfileDirName() const;
+	std::string getProfileDirName(int index) const;
+
+	void setProfileIndex(int index);
+	int getProfileIndex() const;
+	void removeProfile(int index, int profileCount);
 
 public:
 	bool isLoaded() const;
@@ -70,10 +77,12 @@ public:
 	}
 
 private:
-	bool m_loaded = false;
+	bool m_loaded;
+	bool m_saveEnabled;
 	std::string m_directory;
 	std::string m_filename;
 	mutable json m_json;
+	int m_profileIndex;
 };
 
 } // namespace NovelTea

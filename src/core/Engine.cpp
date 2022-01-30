@@ -1,8 +1,10 @@
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/States/StateIntro.hpp>
 #include <NovelTea/States/StateMain.hpp>
+#include <NovelTea/States/StateProfileManager.hpp>
 #include <NovelTea/States/StateSettings.hpp>
 #include <NovelTea/States/StateTextLog.hpp>
 #include <NovelTea/States/StateTextSettings.hpp>
@@ -37,6 +39,7 @@ Engine::Engine(EngineConfig config)
 	m_stateStack->registerState<StateEditor>(StateID::Editor);
 	m_stateStack->registerState<StateIntro>(StateID::Intro);
 	m_stateStack->registerState<StateMain>(StateID::Main);
+	m_stateStack->registerState<StateProfileManager>(StateID::ProfileManager);
 	m_stateStack->registerState<StateSettings>(StateID::Settings);
 	m_stateStack->registerState<StateTextLog>(StateID::TextLog);
 	m_stateStack->registerState<StateTextSettings>(StateID::TextSettings);
@@ -202,6 +205,7 @@ void Engine::initialize()
 {
 	GMan.setActive(m_game);
 	m_game->initialize();
+	m_game->getSaveData()->setDirectory(m_config.saveDir);
 	m_lastTime = getSystemTimeMs();
 	m_deltaPerFrame = 1.f / m_config.fps;
 

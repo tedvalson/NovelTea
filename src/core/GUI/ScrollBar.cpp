@@ -302,6 +302,11 @@ bool ScrollBar::getAutoHide() const
 	return m_autoHide;
 }
 
+bool ScrollBar::isScrolling() const
+{
+	return m_isScrolling;
+}
+
 void ScrollBar::setScroll(float scrollPos)
 {
 	ensureUpdateScrollBar();

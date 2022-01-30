@@ -8,6 +8,7 @@ enum class StateID {
 	Editor,
 	Intro,
 	Main,
+	ProfileManager,
 	Settings,
 	TextLog,
 	TextSettings,

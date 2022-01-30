@@ -5,6 +5,7 @@
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/Settings.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <iostream>
 
@@ -58,7 +59,7 @@ void Game::reset()
 		m_entityQueue.pop();
 
 	m_quitting = false;
-	m_saveData->reset();
+	m_saveData->setProfileIndex(GSettings.getActiveProfileIndex()); // Should reset() SaveData
 	m_timerManager->reset();
 	m_scriptManager->reset();
 	syncToSave();

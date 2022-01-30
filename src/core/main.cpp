@@ -15,6 +15,7 @@ int main(int argc, char **argv)
 	config.width = 480;
 	config.height = 700;
 	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
+	config.saveDir = dir;
 	if (argc >= 5)
 		config.initialState = NovelTea::StateID::Main;
 	else

@@ -8,19 +8,23 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
+#include <NovelTea/FileUtils.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
 
 namespace {
-	const auto lastFilename = "/lastSave";
+	const auto lastFilename = "lastSave";
 }
 
 namespace NovelTea
 {
 
 SaveData::SaveData()
-	: m_directory(".")
+	: m_loaded(false)
+	, m_saveEnabled(false)
+	, m_directory(".")
+	, m_profileIndex(0)
 {
 }
 
@@ -31,6 +35,8 @@ bool SaveData::isLoaded() const
 
 void SaveData::saveToFile(const std::string &filename)
 {
+	if (!m_saveEnabled)
+		return;
 	if (filename.empty() && m_filename.empty())
 		return;
 	std::ofstream file(filename.empty() ? m_filename : filename);
@@ -138,6 +144,7 @@ json &SaveData::data()
 
 void SaveData::setDirectory(const std::string &path)
 {
+	m_saveEnabled = !path.empty();
 	m_directory = path;
 }
 
@@ -148,21 +155,27 @@ const std::string &SaveData::getDirectory() const
 
 void SaveData::save(int slot)
 {
+	if (!m_saveEnabled)
+		return;
 	saveToFile(getSlotFilename(slot));
 
-	std::ofstream file(m_directory + lastFilename);
+	std::ofstream file(getProfileDirName() + "/" + lastFilename);
 	file << slot;
 }
 
 bool SaveData::load(int slot)
 {
+	if (!m_saveEnabled)
+		return true;
 	return loadFromFile(getSlotFilename(slot));
 }
 
 bool SaveData::loadLast()
 {
+	if (!m_saveEnabled)
+		return true;
 	int slot;
-	std::ifstream file(m_directory + lastFilename);
+	std::ifstream file(getProfileDirName() + "/" + lastFilename);
 	if (file.is_open()) {
 		file >> slot;
 		return load(slot);
@@ -173,7 +186,49 @@ bool SaveData::loadLast()
 
 std::string SaveData::getSlotFilename(int slot) const
 {
-	return m_directory + "/" + std::to_string(slot) + ".ntsav";
+	return getProfileDirName() + "/" + std::to_string(slot) + ".ntsav";
+}
+
+std::string SaveData::getProfileDirName() const
+{
+	return getProfileDirName(m_profileIndex);
+}
+
+std::string SaveData::getProfileDirName(int index) const
+{
+	return m_directory + "/" + std::to_string(index);
+}
+
+void SaveData::setProfileIndex(int index)
+{
+	if (index < 0)
+		return;
+	m_profileIndex = index;
+	if (m_saveEnabled)
+		createDir(getProfileDirName());
+	reset();
+}
+
+int SaveData::getProfileIndex() const
+{
+	return m_profileIndex;
+}
+
+void SaveData::removeProfile(int index, int profileCount)
+{
+	removeDir(getProfileDirName(index));
+
+	// Move save files
+	for (int i = index+1; i < profileCount; ++i)
+	{
+		if (!dirExists(getProfileDirName(i)))
+			continue;
+		if (!moveDir(getProfileDirName(i), getProfileDirName(i-1)))
+		{
+			std::cout << "ERROR: Failed to move dir (" << getProfileDirName(i) << ")" << std::endl;
+			return;
+		}
+	}
 }
 
 void SaveData::set(std::shared_ptr<Entity> obj, const std::string &idName)

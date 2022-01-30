@@ -18,10 +18,12 @@ set(SOURCE_FILES
 	${SRCROOT}/Diff.cpp
 	${SRCROOT}/Engine.cpp
 	${SRCROOT}/Entity.cpp
+	${SRCROOT}/FileUtils.cpp
 	${SRCROOT}/Game.cpp
 	${SRCROOT}/json.cpp
 	${SRCROOT}/Object.cpp
 	${SRCROOT}/ObjectList.cpp
+	${SRCROOT}/Profile.cpp
 	${SRCROOT}/ProjectData.cpp
 	${SRCROOT}/PropertyList.cpp
 	${SRCROOT}/RegexUtils.cpp
@@ -53,6 +55,7 @@ set(SOURCE_FILES
 	${SRCROOT}/States/StateEditor.cpp
 	${SRCROOT}/States/StateIntro.cpp
 	${SRCROOT}/States/StateMain.cpp
+	${SRCROOT}/States/StateProfileManager.cpp
 	${SRCROOT}/States/StateSettings.cpp
 	${SRCROOT}/States/StateStack.cpp
 	${SRCROOT}/States/StateTextLog.cpp
