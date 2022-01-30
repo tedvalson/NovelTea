@@ -52,7 +52,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 		close(0.5f, StateID::Settings);
 	});
 
-	m_bg.setFillColor(sf::Color(180, 180, 180));
+	m_bg.setFillColor(sf::Color::Black);
 	m_toolbarBg.setFillColor(sf::Color(200, 200, 200));
 
 	changeSizeMultiplier(context.config.fontSizeMultiplier);
@@ -63,6 +63,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 
 void StateTextSettings::render(sf::RenderTarget &target)
 {
+	target.draw(m_bg);
 //	target.draw(m_textTitle);
 	target.draw(m_toolbarBg);
 	target.draw(m_textValue);
@@ -123,7 +124,7 @@ void StateTextSettings::setAlpha(float alpha)
 	float *newValues = &alpha;
 	SET_ALPHA(m_textTitle.getFillColor, m_textTitle.setFillColor, 245.f);
 	SET_ALPHA(m_textValue.getFillColor, m_textValue.setFillColor, 245.f);
-	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 245.f);
+	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 80.f);
 	m_buttonCancel.setAlpha(alpha);
 	m_buttonFinish.setAlpha(alpha);
 	m_buttonSizeDec.setAlpha(alpha);
