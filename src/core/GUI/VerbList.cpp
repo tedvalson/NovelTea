@@ -152,7 +152,7 @@ void VerbList::setAlpha(float alpha)
 {
 	sf::Color color;
 	float *newValues = &alpha;
-	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 230.f);
+	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 245.f);
 	SET_ALPHA(m_scrollBar.getColor, m_scrollBar.setColor, 40.f);
 	for (auto &verb : m_verbs) {
 		SET_ALPHA(verb.text.getFillColor, verb.text.setFillColor, 255.f);
@@ -161,7 +161,7 @@ void VerbList::setAlpha(float alpha)
 
 float VerbList::getAlpha() const
 {
-	return m_bg.getFillColor().a / 230.f * 255.f;
+	return m_bg.getFillColor().a / 245.f * 255.f;
 }
 
 void VerbList::setVerbs(const std::vector<std::string> &verbIds)
@@ -299,7 +299,7 @@ void VerbList::repositionItems()
 	float posY = m_margin + m_scrollPos;
 	for (auto &verb : m_verbs)
 	{
-		verb.text.setPosition(m_margin, posY);
+		verb.text.setPosition(round(m_margin), round(posY));
 		posY += m_itemHeight;
 	}
 //	m_size.y = posY - m_scrollPos;
