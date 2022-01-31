@@ -1,6 +1,12 @@
 #include <NovelTea/FileUtils.hpp>
 #include <sys/stat.h>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#include <direct.h>
+#else
 #include <dirent.h>
+#endif
 
 namespace NovelTea
 {
@@ -11,6 +17,9 @@ std::vector<std::string> getFileList(const std::string &path, const std::string 
 	if (!dirExists(path))
 		return v;
 
+#ifdef _MSC_VER
+
+#else
 	struct dirent* de;
 	auto dirPath = path;
 	if (!endsWith(dirPath, "/"))
@@ -33,6 +42,7 @@ std::vector<std::string> getFileList(const std::string &path, const std::string 
 		}
 		closedir(dir);
 	}
+#endif
 
 	return v;
 }
@@ -77,7 +87,11 @@ bool createDir(const std::string &path, bool recreateExisting)
 		else
 			return true;
 	}
+#ifdef _MSC_VER
+	return _mkdir(path.c_str()) == 0;
+#else
 	return mkdir(path.c_str(), S_IRWXU) == 0;
+#endif
 }
 
 bool moveDir(const std::string &oldPath, const std::string &newPath)

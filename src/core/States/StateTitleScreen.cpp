@@ -70,7 +70,6 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 void StateTitleScreen::render(sf::RenderTarget &target)
 {
 	target.clear(m_bg.getFillColor());
-	target.draw(m_imageSprite);
 	target.draw(m_textTitle);
 	target.draw(m_textAuthor);
 	target.draw(m_buttonSettings);

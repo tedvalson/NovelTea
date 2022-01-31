@@ -26,7 +26,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_quitting(false)
 , m_roomTextChanging(false)
 , m_scrollPos(0.f)
-, m_playTime(0.d)
+, m_playTime(0.f)
 , m_quickVerbPressed(false)
 , m_cutsceneSpeed(1.f)
 {

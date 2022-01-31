@@ -27,7 +27,7 @@ SaveData::SaveData()
 	, m_profileIndex(0)
 {
 	m_json = sj::JSON({
-		ID::playTime, 0.d,
+		ID::playTime, 0.f,
 	});
 }
 
