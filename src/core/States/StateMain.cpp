@@ -33,6 +33,10 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	ScriptMan.reset();
 
 
+	auto &text = m_iconSave.getText();
+	text.setString(L"\uf0c7");
+	text.setFillColor(sf::Color(160, 160, 160, 0));
+	m_iconSave.setSpeed(2.f);
 
 	// Room
 	m_roomScrollbar.setColor(sf::Color(0, 0, 0, 40));
@@ -172,6 +176,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		);
 		GSave->data()[ID::entrypointMetadata] = metaData;
 		GSave->data()[ID::playTime] = m_playTime;
+		m_iconSave.show(0.4f, 3.f);
 	});
 
 	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
@@ -248,6 +253,7 @@ void StateMain::render(sf::RenderTarget &target)
 	if (m_verbList.isVisible())
 		target.draw(m_verbList);
 
+	target.draw(m_iconSave);
 	target.draw(*GGame->getNotificationManager());
 }
 
@@ -316,6 +322,10 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_verbList.setScreenSize(size);
 	m_verbList.setFontSizeMultiplier(fontSizeMultiplier);
 	m_verbList.hide(0.f);
+
+	auto iconHeight = wi * 0.05f;
+	m_iconSave.getText().setCharacterSize(iconHeight);
+	m_iconSave.setPosition(w - iconHeight, iconHeight);
 
 	setActionBuilderShowPos(m_actionBuilderShowPos);
 	m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
@@ -1006,6 +1016,7 @@ bool StateMain::update(float delta)
 	m_inventory.update(delta);
 	m_navigation.update(delta);
 	m_textOverlay.update(delta);
+	m_iconSave.update(delta);
 
 	GGame->getNotificationManager()->update(delta);
 	if (GGame->getTimerManager()->update(delta)) {

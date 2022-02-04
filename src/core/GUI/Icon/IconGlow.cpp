@@ -9,7 +9,7 @@ namespace NovelTea
 IconGlow::IconGlow()
 : m_speedFactor(1.f)
 {
-	m_text.setFont(*Proj.getFont(01));
+	m_text.setFont(*Proj.getFont(1));
 	m_text.setString(L"\uf138");
 	reset();
 }
@@ -33,20 +33,24 @@ TweenText &IconGlow::getText()
 	return m_text;
 }
 
-void IconGlow::show(float duration)
+void IconGlow::show(float duration, float expiration)
 {
 	m_tweenManager.killAll();
 	reset();
 
 	TweenEngine::Tween::to(m_text, TweenText::FILL_COLOR_ALPHA, duration)
 		.target(255.f)
-		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-			//
-		})
 		.start(m_tweenManager);
 
-	TweenEngine::Tween::to(m_text, TweenText::SCALE_XY, 1.f)
-		.target(0.8f, 0.8f)
+	if (expiration > 0.f)
+		TweenEngine::Tween::mark()
+			.delay(expiration)
+			.setCallback(TweenEngine::TweenCallback::BEGIN, [this](TweenEngine::BaseTween*){
+				hide();
+			}).start(m_tweenManager);
+
+	TweenEngine::Tween::to(m_text, TweenText::SCALE_XY, 1.f / m_speedFactor)
+		.target(1.2f, 1.2f)
 		.repeatYoyo(-1, 0.f)
 		.start(m_tweenManager);
 }
@@ -67,7 +71,7 @@ void IconGlow::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 void IconGlow::update(float delta)
 {
-	m_tweenManager.update(delta * m_speedFactor);
+	m_tweenManager.update(delta);
 }
 
 

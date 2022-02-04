@@ -13,6 +13,7 @@
 #include <NovelTea/GUI/Inventory.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
 #include <NovelTea/GUI/TextOverlay.hpp>
+#include <NovelTea/GUI/Icon/IconGlow.hpp>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
@@ -97,6 +98,8 @@ private:
 	std::string m_selectedObjectId;
 	DukValue m_textOverlayFunc;
 	TweenRectangleShape m_bg;
+
+	IconGlow m_iconSave;
 
 	sf::Clock m_clock;
 	double m_playTime;

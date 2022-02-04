@@ -18,7 +18,7 @@ public:
 
 	TweenText &getText();
 
-	void show(float duration = 1.f);
+	void show(float duration = 1.f, float expiration = 0.f);
 	void hide(float duration = 1.f);
 
 	void update(float delta);
