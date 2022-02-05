@@ -4,6 +4,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Settings.hpp>
+#include <NovelTea/TextInput.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -49,13 +50,13 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 	});
 
 	m_buttonProfile = m_buttonStart;
+	m_buttonProfile.setString("Profiles");
 	m_buttonProfile.onClick([this](){
 		requestStackPush(StateID::ProfileManager, false, [this](void*){
-			updateProfileButton();
+			updateProfileText();
 			return true;
 		});
 	});
-	updateProfileButton();
 
 	setAlpha(0.f);
 	TweenEngine::Tween::to(*this, ALPHA, 2.f)
@@ -72,6 +73,7 @@ void StateTitleScreen::render(sf::RenderTarget &target)
 	target.clear(m_bg.getFillColor());
 	target.draw(m_textTitle);
 	target.draw(m_textAuthor);
+	target.draw(m_textProfile);
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonProfile);
 	target.draw(m_buttonStart);
@@ -82,6 +84,7 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	auto w = size.x;
 	auto h = size.y;
 	auto portrait = (h > w);
+	m_size = size;
 
 	// Title
 	TextFormat format;
@@ -117,21 +120,37 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	m_buttonProfile.getText().setCharacterSize(buttonFontSize);
 	m_buttonProfile.setSize(buttonWidth, buttonHeight);
 	m_buttonProfile.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 1.8f));
+
+	m_formatProfile.color(sf::Color(120, 120, 120));
+	m_formatProfile.size(0.3f * buttonFontSize);
+	updateProfileText();
 }
 
 void StateTitleScreen::setAlpha(float alpha)
 {
 	m_textTitle.setAlpha(alpha);
 	m_textAuthor.setAlpha(alpha);
+	m_textProfile.setAlpha(alpha);
 	m_buttonStart.setAlpha(alpha);
 	m_buttonSettings.setAlpha(alpha);
 	m_buttonProfile.setAlpha(alpha);
 	State::setAlpha(alpha);
 }
 
-void StateTitleScreen::updateProfileButton()
+void StateTitleScreen::updateProfileText()
 {
-	m_buttonProfile.setString("Profile: " + std::to_string(GSettings.getActiveProfileIndex() + 1));
+	if (GSettings.getProfiles().empty())
+	{
+		if (GTextInput.finished())
+			GTextInput.run("Enter Profile Name", [this](const std::string &name){
+				GSettings.addProfile(name);
+				updateProfileText();
+			});
+		return;
+	}
+	m_textProfile.setText(GSettings.getActiveProfile()->getName(), m_formatProfile);
+	auto b = m_textProfile.getGlobalBounds();
+	m_textProfile.setPosition((m_size.x - b.width) / 2, m_size.y - b.height * 1.1f);
 }
 
 bool StateTitleScreen::processEvent(const sf::Event &event)

@@ -3,9 +3,8 @@
 namespace NovelTea
 {
 
-Profile::Profile(int index)
-: m_index(index)
-, m_name("Profile Name")
+Profile::Profile(const std::string &name)
+: m_name(name)
 {
 }
 

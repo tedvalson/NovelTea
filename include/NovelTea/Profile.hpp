@@ -9,12 +9,11 @@ namespace NovelTea
 class Profile
 {
 public:
-	Profile(int index);
+	Profile(const std::string &name);
 
 	ADD_ACCESSOR(std::string, Name, m_name)
 
 private:
-	int m_index;
 	std::string m_name;
 };
 

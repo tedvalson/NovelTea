@@ -27,7 +27,7 @@ public:
 	void repositionItems();
 	void setActiveProfile(int index);
 
-	void add();
+	void add(const std::string &text);
 	void remove();
 	void refresh();
 

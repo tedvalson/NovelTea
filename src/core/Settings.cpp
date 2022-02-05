@@ -22,23 +22,23 @@ Settings::Settings()
 , m_fontSizeMultiplier(1.f)
 , m_activeProfileIndex(-1)
 {
-	reloadProfiles();
 }
 
 void Settings::reloadProfiles()
 {
 	m_profiles.clear();
-	int index = 1;
 	for (auto &jprofile : m_json[propProfiles].ArrayRange())
 	{
-		auto profile = new Profile(index++);
+		auto profile = new Profile(jprofile[0].ToString());
 		m_profiles.emplace_back(profile);
 	}
+}
 
+void Settings::ensureProfileExists()
+{
 	if (m_profiles.empty())
 	{
-		addProfile();
-		setActiveProfileIndex(0);
+		addProfile("Default");
 	}
 }
 
@@ -53,19 +53,20 @@ void Settings::load()
 	try
 	{
 		std::ifstream file(m_directory + fileName);
-		if (!file.is_open())
-			return;
+		if (file.is_open())
+		{
+			std::string s;
+			file.seekg(0, std::ios_base::end);
+			s.resize(file.tellg());
+			file.seekg(0);
+			file.read(&s[0], s.size());
 
-		std::string s;
-		file.seekg(0, std::ios_base::end);
-		s.resize(file.tellg());
-		file.seekg(0);
-		file.read(&s[0], s.size());
-
-		m_json = sj::JSON::Load(s);
-		reloadProfiles();
-		m_fontSizeMultiplier = m_json[propFontSizeMultiplier].ToFloat();
-		setActiveProfileIndex(m_json[propActiveProfile].ToInt());
+			m_json = sj::JSON::Load(s);
+			m_fontSizeMultiplier = m_json[propFontSizeMultiplier].ToFloat();
+			reloadProfiles();
+			setActiveProfileIndex(m_json[propActiveProfile].ToInt());
+		} else
+			reloadProfiles();
 	}
 	catch (std::exception &e)
 	{
@@ -78,7 +79,7 @@ void Settings::save() const
 {
 	auto jprofiles = sj::Array();
 	for (auto &profile : m_profiles)
-		jprofiles.append(sj::Array());
+		jprofiles.append(sj::Array(profile->getName()));
 	m_json = sj::JSON({
 		propFontSizeMultiplier, m_fontSizeMultiplier,
 		propProfiles, jprofiles,
@@ -107,10 +108,19 @@ int Settings::getActiveProfileIndex() const
 	return m_activeProfileIndex;
 }
 
-void Settings::addProfile()
+std::shared_ptr<Profile> Settings::getActiveProfile()
 {
-	auto profile = new Profile(0);
+	if (m_activeProfileIndex < 0)
+		return nullptr;
+	ensureProfileExists();
+	return m_profiles[m_activeProfileIndex];
+}
+
+void Settings::addProfile(const std::string &name)
+{
+	auto profile = new Profile(name);
 	m_profiles.emplace_back(profile);
+	setActiveProfileIndex(m_profiles.size() - 1);
 	save();
 }
 
@@ -118,18 +128,14 @@ void Settings::removeProfile(int index)
 {
 	GSave->removeProfile(index, m_profiles.size());
 	m_profiles.erase(m_profiles.begin() + index);
-	if (m_profiles.empty())
-	{
-		addProfile();
-		setActiveProfileIndex(0);
-	}
-	else if (m_activeProfileIndex == index && index >= m_profiles.size())
+	ensureProfileExists();
+	if (m_activeProfileIndex == index && index >= m_profiles.size())
 	{
 		setActiveProfileIndex(m_profiles.size() - 1);
 	}
 }
 
-const std::vector<std::unique_ptr<Profile> > &Settings::getProfiles() const
+const std::vector<std::shared_ptr<Profile>> &Settings::getProfiles() const
 {
 	return m_profiles;
 }

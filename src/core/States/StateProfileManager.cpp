@@ -3,6 +3,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/Settings.hpp>
+#include <NovelTea/TextInput.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -45,7 +46,9 @@ StateProfileManager::StateProfileManager(StateStack& stack, Context& context, St
 	});
 	m_buttonAdd.onClick([this](){
 		if (!m_cancelButtonPress)
-			add();
+			GTextInput.run("Enter Profile Name", [this](const std::string &text){
+				add(text);
+			});
 	});
 	m_buttonRemove.onClick([this](){
 		if (!m_cancelButtonPress)
@@ -178,9 +181,9 @@ void StateProfileManager::setActiveProfile(int index)
 	runCallback(&index);
 }
 
-void StateProfileManager::add()
+void StateProfileManager::add(const std::string &text)
 {
-	GSettings.addProfile();
+	GSettings.addProfile(text);
 	refresh();
 }
 
@@ -200,7 +203,7 @@ void StateProfileManager::refresh()
 	{
 		auto button = new Button;
 		button->getText().setCharacterSize(m_buttonHeight * 0.7f);
-		button->setString("Profile " + std::to_string(i+1));
+		button->setString(profile->getName());
 		button->setSize(m_bg.getSize().x * 0.7f, m_buttonHeight);
 		button->setActiveColor(sf::Color::Blue);
 		button->onClick([this, i](){

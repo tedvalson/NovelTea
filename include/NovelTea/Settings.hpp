@@ -20,10 +20,12 @@ public:
 
 	void setActiveProfileIndex(int index);
 	int getActiveProfileIndex() const;
-	void addProfile();
+	std::shared_ptr<Profile> getActiveProfile();
+	void addProfile(const std::string &text);
 	void removeProfile(int index);
+	void ensureProfileExists();
 
-	const std::vector<std::unique_ptr<Profile>> &getProfiles() const;
+	const std::vector<std::shared_ptr<Profile>> &getProfiles() const;
 
 	void setDirectory(const std::string &dirName);
 	const std::string &getDirectory() const;
@@ -41,7 +43,7 @@ private:
 	std::string m_directory;
 	bool m_saveEnabled;
 
-	std::vector<std::unique_ptr<Profile>> m_profiles;
+	std::vector<std::shared_ptr<Profile>> m_profiles;
 
 	float m_fontSizeMultiplier;
 	int m_activeProfileIndex;

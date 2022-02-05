@@ -21,15 +21,18 @@ public:
 
 	void setAlpha(float alpha) override;
 
-	void updateProfileButton();
+	void updateProfileText();
 
 private:
+	sf::Vector2f m_size;
 	Button m_buttonStart;
 	Button m_buttonSettings;
 	Button m_buttonProfile;
 	TweenRectangleShape m_bg;
 	ActiveText m_textTitle;
 	ActiveText m_textAuthor;
+	ActiveText m_textProfile;
+	TextFormat m_formatProfile;
 	TweenEngine::TweenManager m_tweenManager;
 	bool m_startPressed;
 };

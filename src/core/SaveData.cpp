@@ -9,6 +9,7 @@
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/FileUtils.hpp>
+#include <NovelTea/Settings.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
@@ -24,7 +25,7 @@ SaveData::SaveData()
 	: m_loaded(false)
 	, m_saveEnabled(false)
 	, m_directory(".")
-	, m_profileIndex(0)
+	, m_profileIndex(-1)
 {
 	m_json = sj::JSON({
 		ID::playTime, 0.f,
@@ -160,6 +161,8 @@ void SaveData::save(int slot)
 {
 	if (!m_saveEnabled)
 		return;
+	if (m_profileIndex < 0)
+		GSettings.ensureProfileExists();
 	saveToFile(getSlotFilename(slot));
 
 	std::ofstream file(getProfileDirName() + "/" + lastFilename);
