@@ -1,5 +1,6 @@
 #include "Widgets/MainWindow.hpp"
 #include "Widgets/CutsceneWidget.hpp"
+#include <NovelTea/Settings.hpp>
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -9,6 +10,8 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("NovelTea");
 	QCoreApplication::setOrganizationDomain("noveltea.com");
 	QCoreApplication::setApplicationName("NovelTea Editor");
+
+	GSettings.setSaveEnabled(false);
 
 	QApplication a(argc, argv);
 	auto &window = MainWindow::instance();
