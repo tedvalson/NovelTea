@@ -9,6 +9,7 @@
 
 namespace {
 	bool gettingInput = false;
+	JNIEnv* attachedEnv = NULL;
 }
 
 jint attachThread(JNIEnv** pEnv)
@@ -47,18 +48,17 @@ void triggerTextInput(const std::string &message, int ref)
 {
 	auto activity = sf::getNativeActivity();
 	JavaVM* vm = activity->vm;
-	JNIEnv* env;
-	if (attachThread(&env) == JNI_ERR)
-		return;
+	if (!gettingInput) {
+		gettingInput = true;
+		if (attachThread(&attachedEnv) == JNI_ERR)
+			return;
+	}
 
-	jclass c = fetchClass(env);
+	jclass c = fetchClass(attachedEnv);
 	jobject na = activity->clazz;
-	jstring s = env->NewStringUTF(message.c_str());
-	jmethodID m = env->GetStaticMethodID(c, "launch", "(Ljava/lang/String;ILandroid/app/NativeActivity;)V");
-	env->CallStaticObjectMethod(c, m, s, ref, na);
-	
-	detachThread();
-	gettingInput = true;
+	jstring s = attachedEnv->NewStringUTF(message.c_str());
+	jmethodID m = attachedEnv->GetStaticMethodID(c, "launch", "(Ljava/lang/String;ILandroid/app/NativeActivity;)V");
+	attachedEnv->CallStaticVoidMethod(c, m, s, ref, na);
 }
 
 extern "C"
@@ -143,6 +143,11 @@ int main(int argc, char *argv[])
 			if (gettingInput) {
 				engine->update(0.f);
 			}
+		}
+		
+		if (attachedEnv && !gettingInput) {
+			attachedEnv = NULL;
+			detachThread();
 		}
 	}
 	
