@@ -31,6 +31,7 @@ public:
 	void setActiveEntity(std::shared_ptr<Entity> entity);
 
 	std::string evalExpressions(const std::string &s);
+	void getTextInput(const std::string &message, const DukValue &func);
 
 	void randSeed(int seed);
 	double randGen();

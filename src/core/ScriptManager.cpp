@@ -15,6 +15,7 @@
 #include <NovelTea/CutsceneSegment.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
+#include <NovelTea/TextInput.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/SaveData.hpp>
@@ -178,6 +179,13 @@ std::string ScriptManager::evalExpressions(const std::string &s)
 	});
 }
 
+void ScriptManager::getTextInput(const std::string &message, const DukValue &func)
+{
+	GTextInput.run(message, [this, func](const std::string &text){
+		dukglue_pcall<void>(m_context, func, text);
+	});
+}
+
 void ScriptManager::randSeed(int seed)
 {
 	m_randSeed = seed;
@@ -326,6 +334,7 @@ void ScriptManager::registerGlobals()
 	// Script
 	dukglue_register_global(m_context, this, "Script");
 	dukglue_register_method(m_context, &ScriptManager::evalExpressions, "evalExpressions");
+	dukglue_register_method(m_context, &ScriptManager::getTextInput, "getTextInput");
 	dukglue_register_method(m_context, &ScriptManager::runScriptId, "run");
 	dukglue_register_method(m_context, &ScriptManager::randGen, "rand");
 	dukglue_register_method(m_context, &ScriptManager::randSeed, "seed");
