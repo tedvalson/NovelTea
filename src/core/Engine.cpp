@@ -110,28 +110,23 @@ void Engine::render(sf::RenderTarget &target)
 
 void Engine::update()
 {
-	GMan.setActive(m_game);
-	auto time = getSystemTimeMs();
-	auto elapsed = sf::milliseconds(time - m_lastTime);
+	auto elapsed = sf::milliseconds(getSystemTimeMs() - m_lastTime);
 	auto delta = elapsed.asSeconds();
 	if (delta < m_deltaPerFrame)
 	{
 		sf::sleep(sf::seconds(m_deltaPerFrame - delta));
-		m_lastTime = getSystemTimeMs();
-		m_stateStack->update(m_deltaPerFrame);
+		update(m_deltaPerFrame);
 	}
 	else
-	{
-		m_lastTime = time;
-		m_stateStack->update(delta);
-	}
+		update(delta);
 }
 
 void Engine::update(float deltaSeconds)
 {
 	GMan.setActive(m_game);
 	m_lastTime = getSystemTimeMs();
-	m_stateStack->update(deltaSeconds);
+	if (deltaSeconds > 0.f)
+		m_stateStack->update(deltaSeconds);
 }
 
 void Engine::processEvent(const sf::Event &event)

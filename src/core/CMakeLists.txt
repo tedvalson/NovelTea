@@ -35,6 +35,7 @@ set(SOURCE_FILES
 	${SRCROOT}/TextBlock.cpp
 	${SRCROOT}/TextFormat.cpp
 	${SRCROOT}/TextFragment.cpp
+	${SRCROOT}/TextInput.cpp
 	${SRCROOT}/TextLog.cpp
 	${SRCROOT}/Timer.cpp
 	${SRCROOT}/Utils.cpp
