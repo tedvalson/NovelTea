@@ -58,7 +58,7 @@ void NovelTeaWidget::reset()
 		delete m_engine;
 	m_engine = new NovelTea::Engine(config);
 	m_engine->initialize();
-	m_engine->update(0.f); // This triggers update of state stack
+	m_engine->update(0.01f); // This triggers update of state stack
 	onResize();
 }
 

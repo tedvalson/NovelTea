@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("NovelTea Editor");
 
 	GSettings.setSaveEnabled(false);
+	GSettings.ensureProfileExists();
 
 	QApplication a(argc, argv);
 	auto &window = MainWindow::instance();
