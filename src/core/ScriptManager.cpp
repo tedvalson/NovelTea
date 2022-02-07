@@ -119,7 +119,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 		else
 			return call<bool>(s, "f", verb, objects[0], objects[1], objects[2], objects[3]);
 	} catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		sf::err() << e.what() << std::endl;
 		return false;
 	}
 }
@@ -182,7 +182,11 @@ std::string ScriptManager::evalExpressions(const std::string &s)
 void ScriptManager::getTextInput(const std::string &message, const DukValue &func)
 {
 	GTextInput.run(message, [this, func](const std::string &text){
-		dukglue_pcall<void>(m_context, func, text);
+		try {
+			dukglue_pcall<void>(m_context, func, text);
+		} catch (std::exception e) {
+			sf::err() << "Error Script::getTextInput: " << e.what() << std::endl;
+		}
 	});
 }
 

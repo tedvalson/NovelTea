@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_SCRIPTMANAGER_HPP
 #define NOVELTEA_SCRIPTMANAGER_HPP
 
+#include <SFML/System/Err.hpp>
 #include <dukglue/dukglue.h>
 #include <NovelTea/json.hpp>
 #include <random>
@@ -44,8 +45,16 @@ public:
 	template <typename T>
 	inline T run(const std::string &script)
 	{
-		auto s = strUseStrict + script;
-		return dukglue_peval<T>(m_context, s.c_str());
+		try
+		{
+			auto s = strUseStrict + script;
+			return dukglue_peval<T>(m_context, s.c_str());
+		}
+		catch (std::exception &e)
+		{
+			sf::err() << e.what() << std::endl;
+			throw e;
+		}
 	}
 
 	inline void runInClosure(const std::string& script)
@@ -62,7 +71,15 @@ public:
 	template <typename T>
 	T call(const DukValue &func)
 	{
-		return dukglue_pcall<T>(m_context, func);
+		try
+		{
+			return dukglue_pcall<T>(m_context, func);
+		}
+		catch (std::exception &e)
+		{
+			sf::err() << e.what() << std::endl;
+			throw e;
+		}
 	}
 
 	template <typename... Args>
@@ -74,9 +91,17 @@ public:
 	template <typename T, typename... Args>
 	T call(const std::string &script, const std::string &funcName, Args&&... args)
 	{
-		auto s = strUseStrict + "\n" + script + ";\n" + funcName + ";";
-		auto fn = dukglue_peval<DukValue>(m_context, s.c_str());
-		return dukglue_pcall<T>(m_context, fn, std::forward<Args>(args)...);
+		try
+		{
+			auto s = strUseStrict + "\n" + script + ";\n" + funcName + ";";
+			auto fn = dukglue_peval<DukValue>(m_context, s.c_str());
+			return dukglue_pcall<T>(m_context, fn, std::forward<Args>(args)...);
+		}
+		catch (std::exception &e)
+		{
+			sf::err() << e.what() << std::endl;
+			throw e;
+		}
 	}
 
 protected:
