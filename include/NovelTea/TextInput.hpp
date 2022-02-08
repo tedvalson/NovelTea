@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TEXTINPUT_HPP
 #define NOVELTEA_TEXTINPUT_HPP
 
+#include <string>
 #include <vector>
 #include <memory>
 #include <functional>
