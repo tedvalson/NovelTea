@@ -94,11 +94,13 @@ void SFMLWidget::resizeEvent(QResizeEvent *)
 void SFMLWidget::setFPS(float fps)
 {
 	m_fps = fps;
+	_timer.stop();
+	_timer.disconnect();
 	if (fps > 0.f) {
 		connect(&_timer, SIGNAL(timeout()), this, SLOT(repaint()));
-		_timer.setInterval(1000.f / fps);
-	} else
-		_timer.disconnect();
+//		_timer.setInterval(1000.f / fps);
+		_timer.start(1000.f / fps);
+	}
 }
 
 float SFMLWidget::getFPS() const

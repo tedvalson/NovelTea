@@ -41,6 +41,8 @@ private slots:
 	void on_listWidget_clicked(const QModelIndex &index);
 	void on_scriptEdit_textChanged();
 	void on_scriptEditCondition_textChanged();
+	void on_horizontalSlider_sliderPressed();
+	void on_horizontalSlider_sliderReleased();
 
 protected:
 	void timerEvent(QTimerEvent*) override;

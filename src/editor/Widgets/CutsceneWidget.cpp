@@ -55,6 +55,7 @@ CutsceneWidget::CutsceneWidget(const std::string &idName, QWidget *parent) :
 	m_idName = idName;
 	ui->setupUi(this);
 	ui->preview->setMode(NovelTea::StateEditorMode::Cutscene);
+	ui->preview->setFPS(1.f);
 	createMenus();
 	load();
 
@@ -702,6 +703,8 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 
 void CutsceneWidget::on_actionPlayPause_toggled(bool checked)
 {
+	ui->preview->setFPS(checked ? 60.f : 1.f);
+
 	if (checked)
 	{
 		if (m_segmentLooping)
@@ -722,9 +725,8 @@ void CutsceneWidget::on_actionPlayPause_toggled(bool checked)
 
 void CutsceneWidget::on_actionStop_triggered()
 {
-	if (!m_cutscenePlaying)
-		return;
 	ui->actionPlayPause->setChecked(false);
+	ui->actionLoop->setChecked(false);
 }
 
 void CutsceneWidget::on_actionLoop_toggled(bool checked)
@@ -734,6 +736,8 @@ void CutsceneWidget::on_actionLoop_toggled(bool checked)
 	checkIndexChange();
 	ui->horizontalSlider->setEnabled(!checked);
 	m_segmentLooping = checked;
+
+	ui->preview->setFPS(checked ? 60.f : 1.f);
 
 	if (checked)
 		m_lastTimeMs = NovelTea::Engine::getSystemTimeMs();
@@ -765,4 +769,14 @@ void CutsceneWidget::on_scriptEditCondition_textChanged()
 {
 	auto &segment = m_cutscene->internalSegments()[selectedIndex];
 	segment->setConditionScript(ui->scriptEditCondition->toPlainText().toStdString());
+}
+
+void CutsceneWidget::on_horizontalSlider_sliderPressed()
+{
+	ui->preview->setFPS(60.f);
+}
+
+void CutsceneWidget::on_horizontalSlider_sliderReleased()
+{
+	ui->preview->setFPS(1.f);
 }
