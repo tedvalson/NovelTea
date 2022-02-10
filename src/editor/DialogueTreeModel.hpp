@@ -44,6 +44,8 @@ public:
 	bool insertSegment(int row, const QModelIndex &parent, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 	bool updateSegment(const QModelIndex &index, const std::shared_ptr<NovelTea::DialogueSegment> &segment);
 
+	QVariant decorationFromSegment(std::shared_ptr<NovelTea::DialogueSegment> &segment) const;
+
 private:
 	DialogueTreeItem *getItem(const QModelIndex &index) const;
 

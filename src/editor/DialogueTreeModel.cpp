@@ -2,6 +2,7 @@
 #include "DialogueTreeItem.hpp"
 #include <NovelTea/Game.hpp>
 #include <QStringList>
+#include <QPainter>
 #include <QFont>
 #include <QIcon>
 #include <iostream>
@@ -213,6 +214,52 @@ DialogueTreeItem *DialogueTreeModel::getItem(const QModelIndex &index) const
 	return m_rootItem;
 }
 
+QVariant DialogueTreeModel::decorationFromSegment(std::shared_ptr<NovelTea::DialogueSegment> &segment) const
+{
+	if (segment->getScriptedText())
+	{
+		bool ok;
+		ActiveGame->reset();
+		auto text = segment->getText(&ok);
+		if (!ok) {
+			if (QIcon::hasThemeIcon("dialog-error"))
+				return QIcon::fromTheme("dialog-error");
+			else
+				return QColor(Qt::red);
+		}
+	}
+
+	auto conditional = segment->getConditionalEnabled();
+	auto runScript = segment->getScriptEnabled();
+	auto showOnce = segment->getShowOnce();
+	auto autoSave = segment->getAutosave();
+
+	QPainter p;
+	QPixmap pixmap(16, 16);
+	pixmap.fill(Qt::transparent);
+	p.begin(&pixmap);
+		p.setPen(QPen(Qt::black, 1));
+		if (conditional) {
+			p.fillRect(0, 0, 8, 8, Qt::blue);
+			p.drawRect(0, 0, 7, 7);
+		}
+		if (runScript) {
+			p.fillRect(8, 0, 8, 8, Qt::yellow);
+			p.drawRect(8, 0, 7, 7);
+		}
+		if (showOnce) {
+			p.fillRect(0, 8, 8, 8, Qt::red);
+			p.drawRect(0, 8, 7, 7);
+		}
+		if (autoSave) {
+			p.fillRect(8, 8, 8, 8, Qt::green);
+			p.drawRect(8, 8, 7, 7);
+		}
+	p.end();
+
+	return QIcon(pixmap);
+}
+
 QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
@@ -247,25 +294,10 @@ QVariant DialogueTreeModel::data(const QModelIndex &index, int role) const
 	{
 		if (segment->getScriptedText())
 			return QBrush(QColor(Qt::yellow).lighter());
-		else if(segment->getScriptEnabled())
-			return QBrush(QColor(Qt::gray).lighter());
-		else if(segment->getAutosave())
-			return QBrush(QColor(Qt::gray).lighter());
 	}
 	else if (role == Qt::DecorationRole)
 	{
-		if (segment->getScriptedText())
-		{
-			bool ok;
-			ActiveGame->reset();
-			auto text = segment->getText(&ok);
-			if (!ok)
-				return QIcon::fromTheme("dialog-error");
-		}
-		if (segment->getConditionalEnabled())
-			return QIcon::fromTheme("emblem-important");
-		if (segment->getType() != NovelTea::DialogueSegment::Root)
-			return QColor(Qt::transparent);
+		return decorationFromSegment(segment);
 	}
 	else if (role == Qt::DisplayRole)
 		return item->data(index.column());

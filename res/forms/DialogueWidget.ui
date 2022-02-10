@@ -46,6 +46,22 @@
        <verstretch>2</verstretch>
       </sizepolicy>
      </property>
+     <property name="styleSheet">
+      <string notr="true">QTreeView {
+    show-decoration-selected: 1;
+}
+
+QTreeView::item {
+    border-top: 1px solid palette(shadow);
+}
+
+QTreeView::item:selected{
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);
+}</string>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>false</bool>
+     </property>
      <property name="verticalScrollMode">
       <enum>QAbstractItemView::ScrollPerPixel</enum>
      </property>
@@ -394,7 +410,9 @@
   </action>
   <action name="actionPlayFromHere">
    <property name="icon">
-    <iconset theme="media-playback-start"/>
+    <iconset theme="media-playback-start">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Play From Here</string>
@@ -402,11 +420,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ScriptEdit</class>
-   <extends>QPlainTextEdit</extends>
-   <header>Widgets/ScriptEdit.hpp</header>
-  </customwidget>
   <customwidget>
    <class>PropertyEditor</class>
    <extends>QWidget</extends>
@@ -418,6 +431,11 @@
    <extends>QWidget</extends>
    <header>Widgets/ActionSelectWidget.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Widgets/ScriptEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>
