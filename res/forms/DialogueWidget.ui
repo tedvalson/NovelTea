@@ -175,7 +175,11 @@ QTreeView::item:selected{
             </widget>
            </item>
            <item>
-            <widget class="QPlainTextEdit" name="plainTextEdit"/>
+            <widget class="QPlainTextEdit" name="plainTextEdit">
+             <property name="tabStopWidth">
+              <number>30</number>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

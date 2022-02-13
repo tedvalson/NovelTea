@@ -268,6 +268,7 @@ void DialogueRenderer::changeLine(int newLineIndex)
 {
 	if (newLineIndex + 1 > m_textLines.size())
 		return;
+	auto fadeAcrossSpeed = 1.1f;
 	auto &line = m_textLines[newLineIndex];
 	TextFormat format;
 	format.size(m_fontSize/2);
@@ -292,7 +293,7 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
-	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f)
+	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f / fadeAcrossSpeed)
 		.ease(TweenEngine::TweenEquations::easeInOutLinear)
 		.target(1.f);
 	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*)

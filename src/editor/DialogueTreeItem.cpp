@@ -61,7 +61,7 @@ QVariant DialogueTreeItem::data(int column) const
 					str += QString::fromStdString("["+line.first+"] ");
 				str += QString::fromStdString(line.second).replace("\n"," ");
 			}
-			return str;
+			return str.replace("\t", " ");
 		}
 	}
 	else
