@@ -91,6 +91,7 @@ void ScriptManager::reset()
 
 void ScriptManager::runScript(std::shared_ptr<Script> script)
 {
+	setActiveEntity(script);
 	runInClosure(script->getContent());
 }
 

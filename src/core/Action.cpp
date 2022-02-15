@@ -91,7 +91,8 @@ bool Action::runScript(const std::string &verbId, const std::vector<std::string>
 		if (parentAction && !parentAction->runScript(verbId, objectIds))
 			return false;
 	}
-	return ActiveGame->getScriptManager()->runActionScript(verbId, objectIds, m_script);
+	ActiveGame->getScriptManager()->setActiveEntity(GSave->get<Action>(m_id));
+	return ActiveGame->getScriptManager()->runActionScript(verbId, objectIds, m_script + "\nreturn true;");
 }
 
 bool Action::runScript()
