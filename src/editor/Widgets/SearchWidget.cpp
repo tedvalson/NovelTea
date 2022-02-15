@@ -6,6 +6,8 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
+#include <NovelTea/CutscenePageSegment.hpp>
+#include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/Object.hpp>
@@ -138,10 +140,18 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 			auto cutscene = std::static_pointer_cast<NovelTea::Cutscene>(entity);
 			auto &segments = cutscene->segments();
 			for (auto &segment : segments) {
-				if (segment->type() != NovelTea::CutsceneSegment::Text)
+				processString(item, segment->getConditionScript(), caseSensitive);
+				if (segment->type() == NovelTea::CutsceneSegment::Text){
+					auto textSeg = std::static_pointer_cast<NovelTea::CutsceneTextSegment>(segment);
+					processString(item, textSeg->getActiveText()->toPlainText(" "), caseSensitive);
+				} else if (segment->type() == NovelTea::CutsceneSegment::Page){
+					auto pageSeg = std::static_pointer_cast<NovelTea::CutscenePageSegment>(segment);
+					processString(item, pageSeg->getText(), caseSensitive);
+				} else if (segment->type() == NovelTea::CutsceneSegment::Script){
+					auto scriptSeg = std::static_pointer_cast<NovelTea::CutsceneScriptSegment>(segment);
+					processString(item, scriptSeg->getScript(), caseSensitive);
+				} else
 					continue;
-				auto textSeg = std::static_pointer_cast<NovelTea::CutsceneTextSegment>(segment);
-				processString(item, textSeg->getActiveText()->toPlainText(" "), caseSensitive);
 			}
 			processEntityJson(item, cutscene->getNextEntityJson(), caseSensitive);
 		}
