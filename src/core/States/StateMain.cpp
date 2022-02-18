@@ -368,14 +368,17 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		auto room = GGame->getRoom();
 		if (room->getId() != idName)
 		{
-			if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
-				updateRoomText();
-				return;
+			if (room->getId().empty()) {
+				GGame->setRoom(nextRoom);
+			} else {
+				if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
+					updateRoomText();
+					return;
+				}
+				room->runScriptAfterLeave();
+				GGame->setRoom(nextRoom);
+				nextRoom->runScriptAfterEnter();
 			}
-			GGame->enableNavigation();
-			room->runScriptAfterLeave();
-			GGame->setRoom(nextRoom);
-			nextRoom->runScriptAfterEnter();
 		}
 		m_mode = mode;
 		showToolbar();

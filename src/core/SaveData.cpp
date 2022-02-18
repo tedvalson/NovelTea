@@ -100,7 +100,10 @@ void SaveData::reset()
 {
 	if (!Proj.isLoaded())
 		return;
-	m_json = sj::Object();
+	m_json = sj::JSON({
+		ID::playTime, 0.f,
+		ID::navigationEnabled, true,
+	});
 	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
 	m_json[ID::roomDescriptions] = sj::Object();
 	m_json[ID::properties] = sj::Object();

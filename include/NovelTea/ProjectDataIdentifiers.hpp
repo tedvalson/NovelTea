@@ -60,6 +60,7 @@ namespace ID
 	const auto entityQueue        = "entityQueue";
 	const auto objectLocations    = "objectLocations";
 	const auto roomDescriptions   = "roomDescriptions";
+	const auto navigationEnabled  = "navEnabled";
 	const auto playTime           = "playTime";
 	const auto properties         = "properties";
 	const auto log                = "log";
