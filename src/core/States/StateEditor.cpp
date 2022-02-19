@@ -43,12 +43,14 @@ void StateEditor::render(sf::RenderTarget &target)
 
 void StateEditor::resize(const sf::Vector2f &size)
 {
+	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier;
 	m_roomTextPadding = round(1.f / 16.f * std::min(size.x, size.y));
 
 	m_roomActiveText.setSize(sf::Vector2f((size.x < size.y ? 1.f : 0.6f) * size.x - m_roomTextPadding*2, 0.f));
-	m_roomActiveText.setFontSizeMultiplier(getContext().config.fontSizeMultiplier);
+	m_roomActiveText.setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
+	m_cutsceneRenderer.setFontSizeMultiplier(fontSizeMultiplier);
 	m_cutsceneRenderer.setSize(size);
 
 	m_roomScrollbar.setPosition(size.x - 4.f, 4.f);
