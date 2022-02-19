@@ -80,8 +80,6 @@ void CutsceneRenderer::reset(bool preservePosition)
 		m_skipScriptSegments = true;
 		m_skipWaitingForClick = true;
 
-		if (timePassed.asSeconds() > 0.2f)
-			timePassed -= sf::seconds(0.2f);
 
 		addSegmentToQueue(0);
 		update(timePassed.asSeconds());
@@ -240,6 +238,7 @@ int CutsceneRenderer::getInternalSegmentIndex(int index) const
 void CutsceneRenderer::setSize(const sf::Vector2f &size)
 {
 	m_size = size;
+	m_icon.getText().setCharacterSize(size.y * 0.05f);
 	reset(true);
 }
 
