@@ -51,15 +51,23 @@ int main(int argc, char **argv)
 	sf::RenderWindow window(sf::VideoMode(480/2, 700/2, 16), "NovelTea Launcher");
 	
 	GSave->setDirectory(dir);
+	
+	auto active = true;
 	while (window.isOpen())
 	{
 		sf::Event event;
-		while (window.pollEvent(event))
+		while (active ? window.pollEvent(event) : window.waitEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
 				window.close();
 			else if (event.type == sf::Event::Resized)
 				engine->resize(event.size.width, event.size.height);
+			else if (event.type == sf::Event::LostFocus)
+				active = false;
+			else if (event.type == sf::Event::GainedFocus) {
+				engine->update(0.f);
+				active = true;
+			}
 
 			engine->processEvent(event);
 		}
