@@ -28,6 +28,8 @@ DialogueRenderer::DialogueRenderer()
 	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
 	m_scrollBar.attachObject(this);
 
+	m_iconContinue.hide(0.f);
+
 	setSize(sf::Vector2f(400.f, 400.f));
 	setDialogue(std::make_shared<Dialogue>());
 }
@@ -57,6 +59,7 @@ void DialogueRenderer::reset()
 void DialogueRenderer::update(float delta)
 {
 	m_scrollBar.update(delta);
+	m_iconContinue.update(delta);
 	m_tweenManager.update(delta);
 }
 
@@ -166,6 +169,9 @@ void DialogueRenderer::applyChanges()
 	m_bg.setPosition(round(posX), m_textName.getPosition().y + 1.2f * m_fontSize);
 	m_bg.setSize((portrait ? 0.98f : 0.6f) * m_size.x,
 				 std::min(0.3f * m_size.y, m_fontSize * (portrait ? 6 : 5)));
+
+	m_iconContinue.getText().setCharacterSize(m_fontSize);
+	m_iconContinue.setPosition(posX + m_bg.getSize().x - m_fontSize, m_bg.getPosition().y + m_bg.getSize().y - m_fontSize * 1.1f);
 
 	m_scrollBar.setPosition(posX + m_bg.getSize().x - 4.f, m_bg.getPosition().y);
 	m_scrollBar.setSize(sf::Vector2f(2, m_bg.getSize().y));
@@ -305,8 +311,14 @@ void DialogueRenderer::changeLine(int newLineIndex)
 					.target(255.f)
 					.start(m_tweenManager);
 			}
+			if (m_buttons.empty())
+				m_iconContinue.show();
+		} else {
+			m_iconContinue.show();
 		}
 	}).start(m_tweenManager);
+
+	m_iconContinue.hide(0.4f);
 
 	m_textName.setAlpha(0.f);
 	m_textNameOld.setAlpha(255.f);
@@ -364,6 +376,7 @@ void DialogueRenderer::hide(float duration)
 	m_tweenManager.killAll();
 	m_scrollBar.setAutoHide(true); // Prevent showing after hide
 	m_scrollBar.hide();
+	m_iconContinue.hide(duration);
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
@@ -452,6 +465,7 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	for (auto &button : m_buttons)
 		target.draw(*button, states);
 	target.draw(m_scrollBar);
+	target.draw(m_iconContinue);
 }
 
 void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot)

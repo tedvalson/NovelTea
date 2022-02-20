@@ -3,6 +3,7 @@
 
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
+#include <NovelTea/GUI/Icon/IconContinue.hpp>
 #include <TweenEngine/Tween.h>
 #include <NovelTea/ActiveText.hpp>
 #include <SFML/Graphics/Drawable.hpp>
@@ -84,6 +85,7 @@ private:
 	ActiveText m_textOld;
 	sf::Vector2f m_size;
 	sf::Texture *m_buttonTexture;
+	IconContinue m_iconContinue;
 	TweenNinePatch m_bg;
 	float m_fontSize;
 	float m_fontSizeMultiplier;

@@ -51,6 +51,7 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/ScrollBar.cpp
 	${SRCROOT}/GUI/TextOverlay.cpp
 	${SRCROOT}/GUI/VerbList.cpp
+	${SRCROOT}/GUI/Icon/IconContinue.cpp
 	${SRCROOT}/GUI/Icon/IconGlow.cpp
 	${SRCROOT}/States/State.cpp
 	${SRCROOT}/States/StateEditor.cpp
