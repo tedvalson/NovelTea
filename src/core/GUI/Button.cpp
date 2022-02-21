@@ -74,6 +74,7 @@ void Button::setSize(float width, float height)
 {
 	NinePatch::setSize(width, height);
 	m_autoSize = false;
+	m_needsUpdate = true;
 }
 
 const sf::Vector2f& Button::getContentSize() const

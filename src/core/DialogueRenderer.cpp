@@ -132,19 +132,19 @@ void DialogueRenderer::repositionButtons(float fontSize)
 	for (int i = 0; i < m_buttons.size(); ++i)
 	{
 		auto &button = m_buttons[i];
-		auto str = m_buttonStrings[i];
-		auto &text = button->getText();
+		auto &text = m_buttonTexts[i];
 		auto &padding = button->getPadding();
-		auto lineSpacing = text.getFont()->getLineSpacing(fontSize);
-		button->setString(str);
-		text.setCharacterSize(fontSize);
 
-		if (wrapText(text, width))
-			str = text.getString().toAnsiString();
-		auto lineCount = 1 + std::count(str.begin(), str.end(), '\n');
-		button->setSize(width, lineSpacing * lineCount + (padding.top + padding.height) * 1.9f);
+		TextFormat format;
+		text->setLineSpacing(0.1f * fontSize);
+		format.size(0.5f * fontSize);
+		format.color(button->getTextColor());
+		text->setSize(sf::Vector2f(width - padding.left * 2, 0.f));
+		text->setText(text->getText(), format);
+		button->setSize(width, text->getLocalBounds().height + (padding.top + padding.height) * fontSize * 0.08f);
 
 		button->setPosition(m_bg.getPosition().x, round(posY));
+		text->setPosition(m_bg.getPosition().x + padding.left, round(posY) + padding.top);
 		posY += button->getSize().y + fontSize * 0.1f;
 	}
 
@@ -206,7 +206,8 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 	m_tweenManager.killAll();
 	m_buttonsOld = m_buttons;
 	m_buttons.clear();
-	m_buttonStrings.clear();
+	m_buttonTextsOld = m_buttonTexts;
+	m_buttonTexts.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
 
@@ -265,6 +266,12 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 			.target(0.f)
 			.start(m_tweenManager);
 	}
+	for (auto &text : m_buttonTexts)
+		text->setAlpha(0.f);
+	for (auto &text : m_buttonTextsOld)
+		TweenEngine::Tween::to(*text, ActiveText::ALPHA, 0.4f)
+			.target(0.f)
+			.start(m_tweenManager);
 	m_tweenManager.update(0.0001f);
 
 	changeLine(0);
@@ -306,13 +313,18 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	{
 		if (m_textLineIndex + 1 == m_textLines.size()) {
 			repositionButtons(m_fontSize);
+			if (m_buttons.empty())
+				m_iconContinue.show();
 			for (auto &button : m_buttons) {
 				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
 					.target(255.f)
 					.start(m_tweenManager);
 			}
-			if (m_buttons.empty())
-				m_iconContinue.show();
+			for (auto &text : m_buttonTexts) {
+				TweenEngine::Tween::to(*text, ActiveText::ALPHA, 1.f)
+					.target(255.f)
+					.start(m_tweenManager);
+			}
 		} else {
 			m_iconContinue.show();
 		}
@@ -402,6 +414,14 @@ void DialogueRenderer::hide(float duration)
 			.target(0.f)
 			.start(m_tweenManager);
 	}
+	for (auto &text : m_buttonTexts)
+		TweenEngine::Tween::to(*text, ActiveText::ALPHA, duration)
+			.target(0.f)
+			.start(m_tweenManager);
+	for (auto &text : m_buttonTextsOld)
+		TweenEngine::Tween::to(*text, ActiveText::ALPHA, duration)
+			.target(0.f)
+			.start(m_tweenManager);
 }
 
 void DialogueRenderer::setScroll(float position)
@@ -464,6 +484,10 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 		target.draw(*button, states);
 	for (auto &button : m_buttons)
 		target.draw(*button, states);
+	for (auto &text : m_buttonTextsOld)
+		target.draw(*text, states);
+	for (auto &text : m_buttonTexts)
+		target.draw(*text, states);
 	target.draw(m_scrollBar);
 	target.draw(m_iconContinue);
 }
@@ -520,7 +544,7 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 			btn->setColor(sf::Color(180, 180, 180, 180));
 			btn->setActiveColor(sf::Color(140, 140, 140));
 			if (disabled)
-				btn->setTextColor(sf::Color(0, 0, 0, 100));
+				btn->setTextColor(sf::Color(100, 100, 100));
 			else
 				btn->setTextColor(sf::Color::Black);
 			btn->onClick([this, seg, i, childId](){
@@ -532,21 +556,23 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 			});
 		} else {
 			auto bgColor = sf::Color(180, 180, 180, 100);
-			auto textColor = sf::Color(0, 0, 0, 100);
+			auto textColor = sf::Color(100, 100, 100);
 			btn->setColor(bgColor);
 			btn->setActiveColor(bgColor);
 			btn->setTextColor(textColor);
-			btn->setTextActiveColor(textColor);
 		}
 
 		++i;
 		m_buttons.emplace_back(btn);
-		m_buttonStrings.emplace_back(seg->getText());
+
+		auto text = new ActiveText();
+		text->setText(seg->getText());
+		m_buttonTexts.emplace_back(text);
 	}
 
 	if (isRoot && !hasWorkingOption) {
 		m_buttons.clear();
-		m_buttonStrings.clear();
+		m_buttonTexts.clear();
 	}
 }
 
