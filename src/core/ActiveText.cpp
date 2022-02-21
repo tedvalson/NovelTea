@@ -114,6 +114,7 @@ void findTextParts(std::vector<TextPart> &parts, const sf::String &openTag, cons
 {
 	std::vector<TextPart> v;
 	bool isOpen = false;
+	bool processedTag = false;
 
 	for (auto &part : parts)
 	{
@@ -127,7 +128,6 @@ void findTextParts(std::vector<TextPart> &parts, const sf::String &openTag, cons
 
 		while (isOpen || (startPos = s.find(openTag, searchPos)) != sf::String::InvalidPos)
 		{
-			auto tagSize = (isOpen ? 0 : openTag.getSize());
 			isOpen = true;
 			auto endPos = s.find(closeTag, startPos);
 			// Process content before the start of the tag.
@@ -136,15 +136,21 @@ void findTextParts(std::vector<TextPart> &parts, const sf::String &openTag, cons
 			processedPos = startPos;
 			if (endPos == sf::String::InvalidPos)
 				break;
-			auto text = s.substring(startPos + tagSize, endPos - startPos - tagSize);
+			auto tagOffset = (processedTag ? 0 : openTag.getSize());
+			auto text = s.substring(startPos + tagOffset, endPos - startPos - tagOffset);
 			v.push_back(p.mod(true, text));
 			processedPos = searchPos = endPos + closeTag.getSize();
 			isOpen = false;
 		}
 
 		// Push remaining unprocessed string
-		if (processedPos < s.getSize())
-			v.push_back(p.mod(isOpen, s.substring(processedPos + (startPos > 0 && isOpen ? openTag.getSize() : 0))));
+		if (processedPos < s.getSize()){
+			if (isOpen && !processedTag) {
+				processedTag = true;
+				v.push_back(p.mod(isOpen, s.substring(processedPos + openTag.getSize())));
+			} else
+				v.push_back(p.mod(isOpen, s.substring(processedPos)));
+		}
 	}
 
 	parts = v;
@@ -499,7 +505,7 @@ void ActiveText::ensureUpdate() const
 		return;
 
 	auto padding = 6.f;
-	float lineHeight = 24.f; // TODO: Don't use fixed value
+	float lineHeight = 4.f; // TODO: Don't use fixed value
 	auto processedFirstBlock = false;
 	m_cursorPos = m_cursorStart;
 	m_segments.clear();
