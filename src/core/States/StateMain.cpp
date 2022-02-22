@@ -861,10 +861,15 @@ void StateMain::quit()
 	m_inventory.hide(duration);
 	m_verbList.hide(duration);
 	m_actionBuilder.hide(duration);
-	m_navigation.hide(duration, Navigation::ALPHA, [this](){
-		requestStackClear();
-		requestStackPush(StateID::TitleScreen);
-	});
+	m_navigation.hide(duration);
+
+	TweenEngine::Tween::mark()
+		.delay(duration)
+		.setCallback(TweenEngine::TweenCallback::BEGIN, [this](TweenEngine::BaseTween*){
+			requestStackClear();
+			requestStackPush(StateID::TitleScreen);
+		})
+		.start(m_tweenManager);
 }
 
 bool StateMain::processEvent(const sf::Event &event)
@@ -881,7 +886,8 @@ bool StateMain::processEvent(const sf::Event &event)
 			m_textOverlay.hide(0.5f, TextOverlay::ALPHA, [this](){
 				callOverlayFunc();
 			});
-		showToolbar(0.5f);
+		if (m_mode == Mode::Room)
+			showToolbar(0.5f);
 		return true;
 	}
 
@@ -986,7 +992,7 @@ bool StateMain::update(float delta)
 			if (callback)
 				callback(ProjData[ID::quickVerb].ToString());
 		}
-		if (GGame->isNavigationEnabled())
+		if (GGame->isNavigationEnabled() && !m_quitting)
 			m_navigation.show();
 		else
 			m_navigation.hide();
