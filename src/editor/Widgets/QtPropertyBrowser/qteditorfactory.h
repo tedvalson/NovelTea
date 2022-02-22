@@ -195,6 +195,29 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
 
+class QtTextEditFactoryPrivate;
+
+class QT_QTPROPERTYBROWSER_EXPORT QtTextEditFactory : public QtAbstractEditorFactory<QtMultiLinePropertyManager>
+{
+	Q_OBJECT
+public:
+	QtTextEditFactory(QObject *parent = 0);
+	~QtTextEditFactory();
+protected:
+	void connectPropertyManager(QtMultiLinePropertyManager *manager);
+	QWidget *createEditor(QtMultiLinePropertyManager *manager, QtProperty *property,
+				QWidget *parent);
+	void disconnectPropertyManager(QtMultiLinePropertyManager *manager);
+private:
+	QtTextEditFactoryPrivate *d_ptr;
+	Q_DECLARE_PRIVATE(QtTextEditFactory)
+	Q_DISABLE_COPY(QtTextEditFactory)
+	Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
+	Q_PRIVATE_SLOT(d_func(), void slotSetValue())
+	Q_PRIVATE_SLOT(d_func(), void slotResize())
+	Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+};
+
 class QtDateEditFactoryPrivate;
 
 class QT_QTPROPERTYBROWSER_EXPORT QtDateEditFactory : public QtAbstractEditorFactory<QtDatePropertyManager>

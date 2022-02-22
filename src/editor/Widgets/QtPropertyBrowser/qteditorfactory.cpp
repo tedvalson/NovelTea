@@ -46,7 +46,9 @@
 #include <QScrollBar>
 #include <QComboBox>
 #include <QAbstractItemView>
+#include <QAbstractTextDocumentLayout>
 #include <QLineEdit>
+#include <QTextEdit>
 #include <QDateTimeEdit>
 #include <QHBoxLayout>
 #include <QMenu>
@@ -1143,9 +1145,9 @@ QWidget *QtLineEditFactory::createEditor(QtStringPropertyManager *manager,
     }
     editor->setText(manager->value(property));
 
-    connect(editor, SIGNAL(textChanged(const QString &)),
-                this, SLOT(slotSetValue(const QString &)));
-    connect(editor, SIGNAL(destroyed(QObject *)),
+	connect(editor, SIGNAL(textChanged(const QString &)),
+				this, SLOT(slotSetValue(const QString &)));
+	connect(editor, SIGNAL(destroyed(QObject *)),
                 this, SLOT(slotEditorDestroyed(QObject *)));
     return editor;
 }
@@ -1165,6 +1167,138 @@ void QtLineEditFactory::disconnectPropertyManager(QtStringPropertyManager *manag
                 this, SLOT(slotEchoModeChanged(QtProperty *, int)));
     disconnect(manager, SIGNAL(readOnlyChanged(QtProperty*, bool)),
         this, SLOT(slotReadOnlyChanged(QtProperty *, bool)));
+
+}
+
+
+// QtTextEditFactory
+
+class QtTextEditFactoryPrivate : public EditorFactoryPrivate<QTextEdit>
+{
+	QtTextEditFactory *q_ptr;
+	Q_DECLARE_PUBLIC(QtTextEditFactory)
+public:
+
+	void slotPropertyChanged(QtProperty *property, const QString &value);
+	void slotSetValue();
+	void slotResize();
+};
+
+void QtTextEditFactoryPrivate::slotPropertyChanged(QtProperty *property,
+				const QString &value)
+{
+	if (!m_createdEditors.contains(property))
+		return;
+
+	QListIterator<QTextEdit *> itEditor( m_createdEditors[property]);
+	while (itEditor.hasNext()) {
+		QTextEdit *editor = itEditor.next();
+		if (editor->toPlainText() != value) {
+			editor->blockSignals(true);
+			editor->setText(value);
+			editor->blockSignals(false);
+		}
+	}
+}
+
+void QtTextEditFactoryPrivate::slotSetValue()
+{
+	QObject *object = q_ptr->sender();
+	const QMap<QTextEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
+	for (QMap<QTextEdit *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor){
+		QTextEdit* editor = itEditor.key();
+		if (editor == object) {
+			QtProperty *property = itEditor.value();
+			QtMultiLinePropertyManager *manager = q_ptr->propertyManager(property);
+			if (!manager)
+				return;
+			manager->setValue(property, editor->toPlainText());
+			return;
+		}
+	}
+}
+
+void QtTextEditFactoryPrivate::slotResize()
+{
+	auto editor = qobject_cast<QTextEdit*>(q_ptr->sender());
+	auto s = editor->document()->documentLayout()->documentSize().toSize();
+	editor->setFixedHeight(std::min(s.height(), 150));
+}
+
+
+
+/*!
+	\class QtTextEditFactory
+
+	\brief The QtTextEditFactory class provides QLineEdit widgets for
+	properties created by QtStringPropertyManager objects.
+
+	\sa QtAbstractEditorFactory, QtStringPropertyManager
+*/
+
+/*!
+	Creates a factory with the given \a parent.
+*/
+QtTextEditFactory::QtTextEditFactory(QObject *parent)
+	: QtAbstractEditorFactory<QtMultiLinePropertyManager>(parent)
+{
+	d_ptr = new QtTextEditFactoryPrivate();
+	d_ptr->q_ptr = this;
+
+}
+
+/*!
+	Destroys this factory, and all the widgets it has created.
+*/
+QtTextEditFactory::~QtTextEditFactory()
+{
+	qDeleteAll(d_ptr->m_editorToProperty.keys());
+	delete d_ptr;
+}
+
+/*!
+	\internal
+
+	Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtTextEditFactory::connectPropertyManager(QtMultiLinePropertyManager *manager)
+{
+	connect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+			this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
+}
+
+/*!
+	\internal
+
+	Reimplemented from the QtAbstractEditorFactory class.
+*/
+QWidget *QtTextEditFactory::createEditor(QtMultiLinePropertyManager *manager,
+		QtProperty *property, QWidget *parent)
+{
+	QTextEdit *editor = d_ptr->createEditor(property, parent);
+	editor->setTabStopWidth(30);
+	editor->setAcceptRichText(false);
+	editor->document()->adjustSize();
+
+	connect(editor, SIGNAL(textChanged()),
+				this, SLOT(slotResize()));
+	editor->setText(manager->value(property));
+	connect(editor, SIGNAL(textChanged()),
+				this, SLOT(slotSetValue()));
+	connect(editor, SIGNAL(destroyed(QObject *)),
+				this, SLOT(slotEditorDestroyed(QObject *)));
+	return editor;
+}
+
+/*!
+	\internal
+
+	Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtTextEditFactory::disconnectPropertyManager(QtMultiLinePropertyManager *manager)
+{
+	disconnect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+				this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
 
 }
 

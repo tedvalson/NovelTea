@@ -71,6 +71,10 @@ class QtGroupPropertyType
 {
 };
 
+class QtMultiLineType
+{
+};
+
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif
@@ -79,6 +83,7 @@ Q_DECLARE_METATYPE(QtEnumPropertyType)
 Q_DECLARE_METATYPE(QtFlagPropertyType)
 Q_DECLARE_METATYPE(QtGroupPropertyType)
 Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
+Q_DECLARE_METATYPE(QtMultiLineType)
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -134,6 +139,16 @@ int QtVariantPropertyManager::groupTypeId()
 int QtVariantPropertyManager::richTextTypeId()
 {
 	return qMetaTypeId<std::shared_ptr<NovelTea::ActiveText>>();
+}
+
+/*!
+	Returns the type id for a multi-line property.
+
+	\sa propertyType(), valueType()
+*/
+int QtVariantPropertyManager::multiLineTypeId()
+{
+	return qMetaTypeId<QtMultiLineType>();
 }
 
 /*!
@@ -1058,7 +1073,16 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
     connect(stringPropertyManager, SIGNAL(readOnlyChanged(QtProperty*, bool)),
                 this, SLOT(slotReadOnlyChanged(QtProperty*, bool)));
 
-    // DatePropertyManager
+	// MultiLinePropertyManager
+	int multiLineId = multiLineTypeId();
+	QtMultiLinePropertyManager *multiLinePropertyManager = new QtMultiLinePropertyManager(this);
+	d_ptr->m_typeToPropertyManager[multiLineId] = multiLinePropertyManager;
+	d_ptr->m_typeToValueType[multiLineId] = QVariant::String;
+
+	connect(multiLinePropertyManager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+				this, SLOT(slotValueChanged(QtProperty *, const QString &)));
+
+	// DatePropertyManager
     QtDatePropertyManager *datePropertyManager = new QtDatePropertyManager(this);
     d_ptr->m_typeToPropertyManager[QVariant::Date] = datePropertyManager;
     d_ptr->m_typeToValueType[QVariant::Date] = QVariant::Date;
@@ -1243,7 +1267,7 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent)
 				this, SLOT(slotPropertyInserted(QtProperty *, QtProperty *, QtProperty *)));
 	connect(richTextPropertyManager, SIGNAL(propertyRemoved(QtProperty *, QtProperty *)),
 				this, SLOT(slotPropertyRemoved(QtProperty *, QtProperty *)));
-    // EnumPropertyManager
+	// EnumPropertyManager
     int enumId = enumTypeId();
     QtEnumPropertyManager *enumPropertyManager = new QtEnumPropertyManager(this);
     d_ptr->m_typeToPropertyManager[enumId] = enumPropertyManager;
@@ -1419,9 +1443,11 @@ QVariant QtVariantPropertyManager::value(const QtProperty *property) const
         return doubleManager->value(internProp);
     } else if (QtBoolPropertyManager *boolManager = qobject_cast<QtBoolPropertyManager *>(manager)) {
         return boolManager->value(internProp);
-    } else if (QtStringPropertyManager *stringManager = qobject_cast<QtStringPropertyManager *>(manager)) {
-        return stringManager->value(internProp);
-    } else if (QtDatePropertyManager *dateManager = qobject_cast<QtDatePropertyManager *>(manager)) {
+	} else if (QtStringPropertyManager *stringManager = qobject_cast<QtStringPropertyManager *>(manager)) {
+		return stringManager->value(internProp);
+	} else if (QtMultiLinePropertyManager *multiLineManager = qobject_cast<QtMultiLinePropertyManager *>(manager)) {
+		return multiLineManager->value(internProp);
+	} else if (QtDatePropertyManager *dateManager = qobject_cast<QtDatePropertyManager *>(manager)) {
         return dateManager->value(internProp);
     } else if (QtTimePropertyManager *timeManager = qobject_cast<QtTimePropertyManager *>(manager)) {
         return timeManager->value(internProp);
@@ -1691,7 +1717,6 @@ void QtVariantPropertyManager::setValue(QtProperty *property, const QVariant &va
     if (internProp == 0)
         return;
 
-
     QtAbstractPropertyManager *manager = internProp->propertyManager();
     if (QtIntPropertyManager *intManager = qobject_cast<QtIntPropertyManager *>(manager)) {
 		intManager->setValue(internProp, qvariant_cast<int>(val));
@@ -1702,10 +1727,13 @@ void QtVariantPropertyManager::setValue(QtProperty *property, const QVariant &va
     } else if (QtBoolPropertyManager *boolManager = qobject_cast<QtBoolPropertyManager *>(manager)) {
 		boolManager->setValue(internProp, qvariant_cast<bool>(val));
         return;
-    } else if (QtStringPropertyManager *stringManager = qobject_cast<QtStringPropertyManager *>(manager)) {
+	} else if (QtStringPropertyManager *stringManager = qobject_cast<QtStringPropertyManager *>(manager)) {
 		stringManager->setValue(internProp, qvariant_cast<QString>(val));
-        return;
-    } else if (QtDatePropertyManager *dateManager = qobject_cast<QtDatePropertyManager *>(manager)) {
+		return;
+	} else if (QtMultiLinePropertyManager *multiLineManager = qobject_cast<QtMultiLinePropertyManager *>(manager)) {
+		multiLineManager->setValue(internProp, qvariant_cast<QString>(val));
+		return;
+	} else if (QtDatePropertyManager *dateManager = qobject_cast<QtDatePropertyManager *>(manager)) {
 		dateManager->setValue(internProp, qvariant_cast<QDate>(val));
         return;
     } else if (QtTimePropertyManager *timeManager = qobject_cast<QtTimePropertyManager *>(manager)) {
@@ -1993,6 +2021,7 @@ public:
     QtCheckBoxFactory          *m_checkBoxFactory;
     QtLineEditFactory          *m_lineEditFactory;
     QtDateEditFactory          *m_dateEditFactory;
+	QtTextEditFactory          *m_textEditFactory;
     QtTimeEditFactory          *m_timeEditFactory;
     QtDateTimeEditFactory      *m_dateTimeEditFactory;
     QtKeySequenceEditorFactory *m_keySequenceEditorFactory;
@@ -2089,6 +2118,11 @@ QtVariantEditorFactory::QtVariantEditorFactory(QObject *parent)
     d_ptr->m_factoryToType[d_ptr->m_lineEditFactory] = QVariant::String;
     d_ptr->m_typeToFactory[QVariant::String] = d_ptr->m_lineEditFactory;
 
+	int multiLineTypeId = QtVariantPropertyManager::multiLineTypeId();
+	d_ptr->m_textEditFactory = new QtTextEditFactory(this);
+	d_ptr->m_factoryToType[d_ptr->m_textEditFactory] = multiLineTypeId;
+	d_ptr->m_typeToFactory[multiLineTypeId] = d_ptr->m_textEditFactory;
+
     d_ptr->m_dateEditFactory = new QtDateEditFactory(this);
     d_ptr->m_factoryToType[d_ptr->m_dateEditFactory] = QVariant::Date;
     d_ptr->m_typeToFactory[QVariant::Date] = d_ptr->m_dateEditFactory;
@@ -2166,6 +2200,11 @@ void QtVariantEditorFactory::connectPropertyManager(QtVariantPropertyManager *ma
     QListIterator<QtStringPropertyManager *> itString(stringPropertyManagers);
     while (itString.hasNext())
         d_ptr->m_lineEditFactory->addPropertyManager(itString.next());
+
+	QList<QtMultiLinePropertyManager *> multiLinePropertyManagers = manager->findChildren<QtMultiLinePropertyManager *>();
+	QListIterator<QtMultiLinePropertyManager *> itMultiLine(multiLinePropertyManagers);
+	while (itMultiLine.hasNext())
+		d_ptr->m_textEditFactory->addPropertyManager(itMultiLine.next());
 
 	QList<QtDatePropertyManager *> datePropertyManagers = manager->findChildren<QtDatePropertyManager *>();
     QListIterator<QtDatePropertyManager *> itDate(datePropertyManagers);
@@ -2318,6 +2357,11 @@ void QtVariantEditorFactory::disconnectPropertyManager(QtVariantPropertyManager 
     QListIterator<QtStringPropertyManager *> itString(stringPropertyManagers);
     while (itString.hasNext())
         d_ptr->m_lineEditFactory->removePropertyManager(itString.next());
+
+	QList<QtMultiLinePropertyManager *> multiLinePropertyManagers = manager->findChildren<QtMultiLinePropertyManager *>();
+	QListIterator<QtMultiLinePropertyManager *> itMultiLine(multiLinePropertyManagers);
+	while (itMultiLine.hasNext())
+		d_ptr->m_textEditFactory->removePropertyManager(itMultiLine.next());
 
 	QList<QtDatePropertyManager *> datePropertyManagers = manager->findChildren<QtDatePropertyManager *>();
     QListIterator<QtDatePropertyManager *> itDate(datePropertyManagers);

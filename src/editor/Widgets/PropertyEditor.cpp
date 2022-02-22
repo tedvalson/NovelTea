@@ -55,9 +55,9 @@ void PropertyEditor::setValue(sj::JSON value)
 		{
 			auto &jval = item.second;
 			auto val = QVariant();
-			auto type = QVariant::String;
+			auto type = QtVariantPropertyManager::multiLineTypeId();
 			if (jval.JSONType() == json::Class::String) {
-				val = EditorUtils::escape(QString::fromStdString(jval.ToString()));
+				val = QString::fromStdString(jval.ToString());
 			} else if (jval.JSONType() == json::Class::Boolean) {
 				type = QVariant::Bool;
 				val = jval.ToBool();
@@ -118,7 +118,7 @@ void PropertyEditor::update()
 		auto type = m_variantManager->valueType(prop);
 		auto value = m_variantManager->value(prop);
 		if (type == QVariant::String)
-			m_value[name] = EditorUtils::unescape(value.toString()).toStdString();
+			m_value[name] = value.toString().toStdString();
 		else if (type == QVariant::Double)
 			m_value[name] = value.toDouble();
 		else if (type == QVariant::Bool)
@@ -135,7 +135,7 @@ void PropertyEditor::on_actionRemoveProperty_triggered()
 
 void PropertyEditor::on_actionAddTextProperty_triggered()
 {
-	addProperty(QVariant::String);
+	addProperty(QtVariantPropertyManager::multiLineTypeId());
 }
 
 void PropertyEditor::on_actionAddNumberProperty_triggered()

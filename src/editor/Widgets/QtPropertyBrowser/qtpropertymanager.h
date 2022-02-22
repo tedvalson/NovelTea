@@ -212,6 +212,34 @@ private:
     Q_DISABLE_COPY(QtStringPropertyManager)
 };
 
+class QtMultiLinePropertyManagerPrivate;
+
+class QT_QTPROPERTYBROWSER_EXPORT QtMultiLinePropertyManager : public QtAbstractPropertyManager
+{
+	Q_OBJECT
+public:
+	QtMultiLinePropertyManager(QObject *parent = 0);
+	~QtMultiLinePropertyManager();
+
+	QString value(const QtProperty *property) const;
+
+public Q_SLOTS:
+	void setValue(QtProperty *property, const QString &val);
+
+Q_SIGNALS:
+	void valueChanged(QtProperty *property, const QString &val);
+
+protected:
+	QString valueText(const QtProperty *property) const;
+	QString displayText(const QtProperty *property) const;
+	virtual void initializeProperty(QtProperty *property);
+	virtual void uninitializeProperty(QtProperty *property);
+private:
+	QtMultiLinePropertyManagerPrivate *d_ptr;
+	Q_DECLARE_PRIVATE(QtMultiLinePropertyManager)
+	Q_DISABLE_COPY(QtMultiLinePropertyManager)
+};
+
 class QtDatePropertyManagerPrivate;
 
 class QT_QTPROPERTYBROWSER_EXPORT QtDatePropertyManager : public QtAbstractPropertyManager

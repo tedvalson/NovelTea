@@ -100,6 +100,7 @@ public:
     static int flagTypeId();
 	static int richTextTypeId();
     static int groupTypeId();
+	static int multiLineTypeId();
     static int iconMapTypeId();
 public Q_SLOTS:
     virtual void setValue(QtProperty *property, const QVariant &val);

@@ -1562,6 +1562,157 @@ void QtStringPropertyManager::uninitializeProperty(QtProperty *property)
     d_ptr->m_values.remove(property);
 }
 
+// QtMultiLinePropertyManager
+
+class QtMultiLinePropertyManagerPrivate
+{
+	QtMultiLinePropertyManager *q_ptr;
+	Q_DECLARE_PUBLIC(QtMultiLinePropertyManager)
+public:
+
+	struct Data
+	{
+		QString val;
+	};
+
+	typedef QMap<const QtProperty *, Data> PropertyValueMap;
+	QMap<const QtProperty *, Data> m_values;
+};
+
+/*!
+	\class QtMultiLinePropertyManager
+
+	\brief The QtMultiLinePropertyManager provides and manages QString properties.
+
+	A string property's value can be retrieved using the value()
+	function, and set using the setValue() slot.
+
+	The current value can be checked against a regular expression. To
+	set the regular expression use the setRegExp() slot, use the
+	regExp() function to retrieve the currently set expression.
+
+	In addition, QtMultiLinePropertyManager provides the valueChanged() signal
+	which is emitted whenever a property created by this manager
+	changes, and the regExpChanged() signal which is emitted whenever
+	such a property changes its currently set regular expression.
+
+	\sa QtAbstractPropertyManager, QtLineEditFactory
+*/
+
+/*!
+	\fn void QtMultiLinePropertyManager::valueChanged(QtProperty *property, const QString &value)
+
+	This signal is emitted whenever a property created by this manager
+	changes its value, passing a pointer to the \a property and the
+	new \a value as parameters.
+
+	\sa setValue()
+*/
+
+/*!
+	Creates a manager with the given \a parent.
+*/
+QtMultiLinePropertyManager::QtMultiLinePropertyManager(QObject *parent)
+	: QtAbstractPropertyManager(parent)
+{
+	d_ptr = new QtMultiLinePropertyManagerPrivate;
+	d_ptr->q_ptr = this;
+}
+
+/*!
+	Destroys this manager, and all the properties it has created.
+*/
+QtMultiLinePropertyManager::~QtMultiLinePropertyManager()
+{
+	clear();
+	delete d_ptr;
+}
+
+/*!
+	Returns the given \a property's value.
+
+	If the given property is not managed by this manager, this
+	function returns an empty string.
+
+	\sa setValue()
+*/
+QString QtMultiLinePropertyManager::value(const QtProperty *property) const
+{
+	return getValue<QString>(d_ptr->m_values, property);
+}
+
+/*!
+	\reimp
+*/
+QString QtMultiLinePropertyManager::valueText(const QtProperty *property) const
+{
+	const QtMultiLinePropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
+	if (it == d_ptr->m_values.constEnd())
+		return QString();
+
+	return it.value().val;
+}
+
+/*!
+	\reimp
+*/
+QString QtMultiLinePropertyManager::displayText(const QtProperty *property) const
+{
+	const QtMultiLinePropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
+	if (it == d_ptr->m_values.constEnd())
+		return QString();
+
+	QString val = it.value().val;
+	val.replace("\t", " ");
+	val.replace("\n", " | ");
+	return val;
+}
+
+/*!
+	\fn void QtMultiLinePropertyManager::setValue(QtProperty *property, const QString &value)
+
+	Sets the value of the given \a property to \a value.
+
+	If the specified \a value doesn't match the given \a property's
+	regular expression, this function does nothing.
+
+	\sa value(), setRegExp(), valueChanged()
+*/
+void QtMultiLinePropertyManager::setValue(QtProperty *property, const QString &val)
+{
+	const QtMultiLinePropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
+	if (it == d_ptr->m_values.end())
+		return;
+
+	QtMultiLinePropertyManagerPrivate::Data data = it.value();
+
+	if (data.val == val)
+		return;
+
+	data.val = val;
+
+	it.value() = data;
+
+	emit propertyChanged(property);
+	emit valueChanged(property, data.val);
+}
+
+/*!
+	\reimp
+*/
+void QtMultiLinePropertyManager::initializeProperty(QtProperty *property)
+{
+	d_ptr->m_values[property] = QtMultiLinePropertyManagerPrivate::Data();
+}
+
+/*!
+	\reimp
+*/
+void QtMultiLinePropertyManager::uninitializeProperty(QtProperty *property)
+{
+	d_ptr->m_values.remove(property);
+}
+
 // QtBoolPropertyManager
 //     Return an icon containing a check box indicator
 static QIcon drawCheckBox(bool value)
@@ -6594,7 +6745,7 @@ QString QtRichTextPropertyManager::valueText(const QtProperty *property) const
 	if (!activeText)
 		return QString();
 
-	return QString::fromStdString(activeText->toPlainText(" | "));
+	return QString::fromStdString(activeText->toPlainText(" | ")).replace("\t", " ");
 }
 
 /*!
