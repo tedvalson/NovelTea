@@ -94,7 +94,7 @@ json Room::getProjectRoomObjects()
 			{
 				bool placeInRoom = jroomObject[1].ToBool();
 				if (placeInRoom)
-					jobjects.append(jroomObject[0].ToString());
+					jobjects.append(sj::Array(jroomObject[0].ToString(), 1));
 			}
 			j[item.first] = jobjects;
 		}

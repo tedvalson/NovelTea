@@ -54,20 +54,19 @@ bool Inventory::processEvent(const sf::Event &event)
 	}
 	else if (event.type == sf::Event::MouseButtonReleased)
 	{
-		if (m_objectTexts.empty())
+		if (m_items.empty())
 			return false;
 		auto p = getInverseTransform().transformPoint(event.mouseButton.x, event.mouseButton.y);
-		auto posY = m_objectTexts[0]->getPosition().y + m_itemHeight;
-		for (auto &t : m_objectTexts)
-			t->setFillColor(sf::Color::Black);
-		for (int i = 0; i < m_objectTexts.size(); ++i)
+		auto posY = m_items[0]->text.getPosition().y + m_itemHeight;
+		for (auto &item : m_items)
+			item->text.setFillColor(sf::Color::Black);
+		for (int i = 0; i < m_items.size(); ++i)
 		{
 			if (posY > p.y)
 			{
-				auto &text = m_objectTexts[i];
-				text->setFillColor(sf::Color::Red);
+				m_items[i]->text.setFillColor(sf::Color::Red);
 				if (m_callback)
-					m_callback(m_objectIds[i], m_bg.getPosition().x, posY);
+					m_callback(m_items[i]->objectId, m_bg.getPosition().x, posY);
 				return true;
 			}
 			posY += m_itemHeight;
@@ -100,23 +99,26 @@ void Inventory::refreshItems()
 {
 	auto width = 0.f;
 	auto height = 0.f;
-	m_objectTexts.clear();
-	m_objectIds.clear();
-	for (auto &object : ActiveGame->getObjectList()->objects())
+	m_items.clear();
+	for (auto &objectItem : ActiveGame->getObjectList()->items())
 	{
-		auto text = new TweenText;
-		text->setString(object->getName());
-		text->setFont(*Proj.getFont(0));
-		text->setFillColor(sf::Color::Black);
-		text->setCharacterSize(m_itemHeight);
-		if (text->getLocalBounds().width > width)
-			width = text->getLocalBounds().width;
+		auto &object = objectItem->object;
+		auto item = new InventoryItem;
+		if (objectItem->count > 1)
+			item->text.setString(object->getName() + " (" + std::to_string(objectItem->count) + ")");
+		else
+			item->text.setString(object->getName());
+		item->text.setFont(*Proj.getFont(0));
+		item->text.setFillColor(sf::Color::Black);
+		item->text.setCharacterSize(m_itemHeight);
+		if (item->text.getLocalBounds().width > width)
+			width = item->text.getLocalBounds().width;
 		height += m_itemHeight;
-		m_objectTexts.emplace_back(text);
-		m_objectIds.emplace_back(object->getId());
+		item->objectId = object->getId();
+		m_items.emplace_back(item);
 	}
 
-	height = std::min(height, 50.f);
+	height = std::min(height, m_startPosition.y);
 
 	m_bg.setSize(sf::Vector2f(std::min(width, m_screenSize.x) + m_margin*2 + 4.f, height + m_margin*2));
 	m_bg.setPosition(m_startPosition.x - m_bg.getSize().x, m_startPosition.y - m_bg.getSize().y);
@@ -124,7 +126,7 @@ void Inventory::refreshItems()
 	m_scrollBar.setPosition(m_startPosition.x - 4.f, m_bg.getPosition().y);
 	m_scrollBar.setScrollAreaSize(sf::Vector2f(0, height));
 
-	m_scrollAreaSize.y = m_itemHeight * m_objectTexts.size();
+	m_scrollAreaSize.y = m_itemHeight * m_items.size();
 	updateScrollbar();
 	repositionItems();
 }
@@ -133,9 +135,9 @@ void Inventory::repositionItems()
 {
 	auto posX = round(m_bg.getPosition().x + m_margin);
 	auto posY = m_margin + m_scrollPos + m_bg.getPosition().y;
-	for (auto &text : m_objectTexts)
+	for (auto &item : m_items)
 	{
-		text->setPosition(posX, round(posY));
+		item->text.setPosition(posX, round(posY));
 		posY += m_itemHeight;
 	}
 }
@@ -143,7 +145,7 @@ void Inventory::repositionItems()
 void Inventory::setFontSizeMultiplier(float fontSizeMultiplier)
 {
 	m_fontSizeMultiplier = fontSizeMultiplier;
-	m_itemHeight = 26.f * fontSizeMultiplier;
+	m_itemHeight = 32.f * fontSizeMultiplier;
 	m_margin = 0.3f * m_itemHeight;
 	refreshItems();
 	m_scrollBar.setScroll(0.f);
@@ -247,8 +249,8 @@ void Inventory::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 		target.setView(m_view);
 
-		for (auto &objectText : m_objectTexts)
-			target.draw(*objectText, states);
+		for (auto &item : m_items)
+			target.draw(item->text, states);
 
 		target.setView(view);
 

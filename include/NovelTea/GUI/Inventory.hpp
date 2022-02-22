@@ -13,6 +13,12 @@ namespace NovelTea
 
 using InventoryCallback = std::function<void(const std::string&, float, float)>;
 
+struct InventoryItem
+{
+	TweenText text;
+	std::string objectId;
+};
+
 class Inventory : public sf::Drawable, public Scrollable, public Hideable
 {
 public:
@@ -64,8 +70,7 @@ private:
 
 	mutable ScrollBar m_scrollBar;
 	TweenRectangleShape m_bg;
-	std::vector<std::unique_ptr<TweenText>> m_objectTexts;
-	std::vector<std::string> m_objectIds;
+	std::vector<std::unique_ptr<InventoryItem>> m_items;
 	float m_scrollPos;
 	sf::Vector2f m_startPosition;
 	sf::Vector2f m_scrollAreaSize;

@@ -243,7 +243,7 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_bgToolbar);
 	target.draw(m_navigation);
 
-	if (!ActiveGame->getObjectList()->objects().empty())
+	if (!ActiveGame->getObjectList()->items().empty())
 		target.draw(m_buttonInventory);
 	target.draw(m_inventory);
 

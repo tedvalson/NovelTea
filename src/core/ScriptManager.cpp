@@ -224,11 +224,17 @@ void ScriptManager::registerClasses()
 
 	// ObjectList
 	dukglue_register_method(m_context, &ObjectList::add, "add");
-	dukglue_register_method(m_context, &ObjectList::remove, "remove");
 	dukglue_register_method(m_context, &ObjectList::addId, "addId");
+	dukglue_register_method(m_context, &ObjectList::addCount, "addCount");
+	dukglue_register_method(m_context, &ObjectList::addIdCount, "addIdCount");
+	dukglue_register_method(m_context, &ObjectList::remove, "remove");
 	dukglue_register_method(m_context, &ObjectList::removeId, "removeId");
+	dukglue_register_method(m_context, &ObjectList::removeCount, "removeCount");
+	dukglue_register_method(m_context, &ObjectList::removeIdCount, "removeIdCount");
 	dukglue_register_method(m_context, &ObjectList::contains, "contains");
 	dukglue_register_method(m_context, &ObjectList::containsId, "containsId");
+	dukglue_register_method(m_context, &ObjectList::containsCount, "containsCount");
+	dukglue_register_method(m_context, &ObjectList::containsIdCount, "containsIdCount");
 	dukglue_register_method(m_context, &ObjectList::sync, "sync");
 
 	// PropertyList
