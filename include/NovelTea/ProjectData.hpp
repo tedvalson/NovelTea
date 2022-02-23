@@ -71,7 +71,7 @@ public:
 	json &data();
 
 private:
-	bool m_loaded = false;
+	bool m_loaded;
 	std::string m_filename;
 	mutable json m_json;
 

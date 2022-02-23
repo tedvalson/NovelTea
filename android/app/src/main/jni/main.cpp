@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 	std::string projDir = getenv("EXTERNAL_STORAGE");
 	projDir += "/test";
 	Proj.loadFromFile(projDir + "/test.ntp");
+	Proj.loadFromFile("test.ntp");
 	
 
 	// We shouldn't try drawing to the screen while in background

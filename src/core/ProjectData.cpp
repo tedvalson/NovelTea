@@ -14,6 +14,7 @@ namespace NovelTea
 {
 
 ProjectData::ProjectData()
+: m_loaded(false)
 {
 }
 
@@ -51,7 +52,7 @@ void ProjectData::newProject()
 		ID::openTabIndex, -1,
 	});
 
-	j[ID::projectFonts] = sj::Array("fontawesome");
+	j[ID::projectFonts] = sj::Array("LiberationSans", "fontawesome");
 	fromJson(j);
 }
 
@@ -260,15 +261,24 @@ bool ProjectData::loadFromFile(const std::string &filename)
 {
 	try
 	{
+		std::string s;
+
+		sf::FileInputStream file;
+		if (!file.open(filename))
+			return false;
+		s.resize(file.getSize());
+		file.read(&s[0], s.size());
+
+/*
 		std::ifstream file(filename);
 		if (!file.is_open())
 			return false;
 
-		std::string s;
 		file.seekg(0, std::ios_base::end);
 		s.resize(file.tellg());
 		file.seekg(0);
 		file.read(&s[0], s.size());
+*/
 
 //		auto j = json::from_msgpack(file);
 //		auto j = json::parse(file);
@@ -339,7 +349,7 @@ bool ProjectData::fromJson(const json &j)
 
 	for (auto &jfont : j[ID::projectFonts].ArrayRange())
 	{
-		auto font = AssetManager<sf::Font>::get("fonts/DejaVuSerif.ttf");
+		auto font = AssetManager<sf::Font>::get("fonts/" + jfont.ToString() + ".ttf");
 		std::cout << "Loading font: " << jfont.ToString() << std::endl;
 		if (font)
 			m_fonts.push_back(font);
