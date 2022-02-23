@@ -50,7 +50,7 @@ include_directories(
 )
 
 # C++11 support
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # disable the rpath stuff
 set(CMAKE_SKIP_BUILD_RPATH TRUE)
