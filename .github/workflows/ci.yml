@@ -58,9 +58,9 @@ jobs:
       if: ${{ !steps.cache.outputs.cache-hit }}
       uses: actions/checkout@v2
       with:
-        repository: SFML/SFML
+        repository: tedvalson/SFML
         path: SFML
-        ref: '3a95fdee352b69c3b3caaf4dd8f2e0052b7878cb'
+        ref: 'noveltea'
 
     - name: Compile SFML
       if: ${{ !steps.cache.outputs.cache-hit }}
@@ -113,17 +113,17 @@ jobs:
       with:
         java-version: 1.8
     - name: Setup Android NDK
-      uses: nttld/setup-ndk@v1
+      uses: nttld/setup-ndk@v1.0.6
       id: setup-ndk
       with:
-        ndk-version: r18b
+        ndk-version: r21e
 
     - name: Checkout SFML
       uses: actions/checkout@v2
       with:
-        repository: SFML/SFML
+        repository: tedvalson/SFML
         path: SFML
-        ref: '3a95fdee352b69c3b3caaf4dd8f2e0052b7878cb'
+        ref: 'noveltea'
 
     - name: Compile SFML and NovelTea
       run: sh .github/build_android.sh ${{ steps.setup-ndk.outputs.ndk-path }}
