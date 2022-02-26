@@ -26,6 +26,7 @@ struct EngineConfig
 	size_t height;
 	unsigned fps;
 	float fontSizeMultiplier;
+	float dpiMultiplier;
 	sf::Color backgroundColor;
 	StateID initialState;
 	EngineOrientation orientation;

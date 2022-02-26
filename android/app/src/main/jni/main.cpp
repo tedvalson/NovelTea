@@ -71,9 +71,33 @@ Java_com_noveltea_launcher_TextInputActivity_showAlertCallback(JNIEnv *env, jcla
 		gettingInput = false;
 }
 
+float getDPI()
+{
+	auto activity = sf::getNativeActivity();
+	JavaVM* vm = activity->vm;
+	if (attachThread(&attachedEnv) == JNI_ERR)
+		return 0.f;
+
+	jclass c = fetchClass(attachedEnv);
+	jobject na = activity->clazz;
+	jmethodID m = attachedEnv->GetStaticMethodID(c, "getDPI", "(Landroid/app/NativeActivity;)Landroid/util/DisplayMetrics;");
+	jobject displayMetrics = attachedEnv->CallStaticObjectMethod(c, m, na);
+	
+	jclass displayMetricsClass = attachedEnv->FindClass("android/util/DisplayMetrics");
+	jfieldID xdpi_id = attachedEnv->GetFieldID(displayMetricsClass, "xdpi", "F");
+	jfieldID ydpi_id = attachedEnv->GetFieldID(displayMetricsClass, "ydpi", "F");
+	float xdpi = attachedEnv->GetFloatField(displayMetrics, xdpi_id);
+	float ydpi = attachedEnv->GetFloatField(displayMetrics, ydpi_id);
+	
+	attachedEnv = NULL;
+	detachThread();
+	return xdpi;
+}
+
 int main(int argc, char *argv[])
 {
 	auto nativeActivity = sf::getNativeActivity();
+	float dpi = getDPI();
 	
 	GTextInput.textInputTrigger = triggerTextInput;
 	
@@ -89,6 +113,7 @@ int main(int argc, char *argv[])
 	config.width = window.getSize().x;
 	config.height = window.getSize().y;
 	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
+	config.dpiMultiplier = dpi / 160.f;
 	config.fps = 30;
 	config.initialState = NovelTea::StateID::Intro;
 	config.saveDir = nativeActivity->internalDataPath;

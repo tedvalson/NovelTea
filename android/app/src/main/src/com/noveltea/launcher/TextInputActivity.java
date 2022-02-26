@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.util.DisplayMetrics;
 
 
 public class TextInputActivity extends Activity {
@@ -23,6 +24,10 @@ public class TextInputActivity extends Activity {
 			.putExtra("message", message)
 			.putExtra("ref", ref);
 		activity.startActivity(intent);
+	}
+	
+	public static DisplayMetrics getDPI(NativeActivity activity) {
+		return activity.getResources().getDisplayMetrics();
 	}
 
 	@Override

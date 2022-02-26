@@ -267,7 +267,7 @@ void StateMain::resize(const sf::Vector2f &size)
 	auto toolbarPadding = toolbarHeight / 10.f;
 
 	// Room
-	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier;
+	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier * getContext().config.dpiMultiplier;
 	m_roomScrollbar.setPosition(w - 4.f, 4.f);
 	m_roomTextPadding = round(1.f / 16.f * wi);
 	m_roomActiveText.setFontSizeMultiplier(fontSizeMultiplier);

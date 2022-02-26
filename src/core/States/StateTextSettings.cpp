@@ -138,10 +138,9 @@ void StateTextSettings::changeSizeMultiplier(float multiplier)
 	m_multiplier = std::max(0.1f, multiplier);
 	m_multiplier = std::min(4.0f, m_multiplier);
 
-	std::string str;
-	str.resize(4);
-	std::snprintf(&str[0], str.size()+1, "x%0.1f", m_multiplier);
-	m_textValue.setString(str);
+	auto str = std::to_string(m_multiplier);
+	str.resize(3);
+	m_textValue.setString("x" + str);
 
 	getContext().config.fontSizeMultiplier = m_multiplier;
 	getStack().resize(sf::Vector2f(getContext().config.width, getContext().config.height));

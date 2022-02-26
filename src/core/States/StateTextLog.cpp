@@ -89,7 +89,7 @@ const sf::Vector2f &StateTextLog::getScrollSize()
 void StateTextLog::refreshItems()
 {
 	TextFormat format;
-	format.size(getContext().config.fontSizeMultiplier * 12);
+	format.size(getContext().config.fontSizeMultiplier * getContext().config.dpiMultiplier * 12);
 
 	m_texts.clear();
 	m_scrollAreaSize.y = 0.f;
