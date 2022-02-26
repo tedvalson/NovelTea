@@ -12,7 +12,6 @@ android {
         ndk {
             abiFilters 'x86', 'armeabi-v7a'
         }
-
     }
 splits {
    abi {

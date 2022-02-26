@@ -4,9 +4,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := noveltea
 LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libNovelTea.a
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_SHARED_LIBRARIES := sfml-system sfml-window sfml-graphics
-LOCAL_SHARED_LIBRARIES += sfml-audio sfml-network sfml-activity
 LOCAL_WHOLE_STATIC_LIBRARIES := sfml-main
+LOCAL_STATIC_LIBRARIES := sfml-system-s sfml-window-s sfml-graphics-s
+LOCAL_EXPORT_LDFLAGS := -Wl,--allow-multiple-definition
 
 prebuilt_path := $(call local-prebuilt-path,$(LOCAL_SRC_FILES))
 prebuilt := $(strip $(wildcard $(prebuilt_path)))

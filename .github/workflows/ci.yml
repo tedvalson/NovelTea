@@ -116,7 +116,7 @@ jobs:
       uses: nttld/setup-ndk@v1.0.6
       id: setup-ndk
       with:
-        ndk-version: r21e
+        ndk-version: r20b
 
     - name: Checkout SFML
       uses: actions/checkout@v2
