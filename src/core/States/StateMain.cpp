@@ -593,6 +593,7 @@ bool StateMain::processTestSteps()
 		{
 			if (!m_dialogueRenderer.processSelection(jstep["index"].ToInt()))
 				success = false;
+			m_dialogueRenderer.processLines();
 		}
 		else if (type == "move")
 		{

@@ -105,6 +105,8 @@ void DialogueRenderer::processLines()
 {
 	while (m_buttons.empty() && !isComplete())
 		changeSegment(m_nextForcedSegmentIndex);
+	if (!m_textLines.empty())
+		changeLine(m_textLines.size() - 1);
 }
 
 bool DialogueRenderer::processSelection(int buttonIndex)
@@ -210,6 +212,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 	m_buttonTexts.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
+	m_isShowing = false;
 
 	std::shared_ptr<DialogueSegment> textSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
@@ -281,7 +284,7 @@ void DialogueRenderer::changeLine(int newLineIndex)
 {
 	if (newLineIndex + 1 > m_textLines.size())
 		return;
-	auto fadeAcrossSpeed = 1.1f;
+	auto fadeAcrossSpeed = 1.2f;
 	auto &line = m_textLines[newLineIndex];
 	TextFormat format;
 	format.size(m_fontSize/2);
