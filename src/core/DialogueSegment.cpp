@@ -110,12 +110,22 @@ std::pair<std::string,std::string> getLinePair(const std::string &line, const st
 	if (line[0] != '[')
 		return result;
 
-	auto p = line.find(']');
-	if (p == line.npos)
+	int bracketCount = 0;
+	int endPos = 0;
+	for (auto &c : line) {
+		if (c == '[')
+			++bracketCount;
+		else if (c == ']')
+			--bracketCount;
+		if (bracketCount == 0)
+			break;
+		++endPos;
+	}
+	if (bracketCount != 0)
 		return result;
 
-	result.first = line.substr(1, p - 1);
-	result.second = line.substr(p + 1);
+	result.first = line.substr(1, endPos - 1);
+	result.second = line.substr(endPos + 1);
 	if (!result.second.empty() && result.second[0] == ' ')
 		result.second = result.second.substr(1);
 	return result;
