@@ -12,6 +12,16 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
+#include <QTextCursor>
+
+namespace {
+enum DataType {
+	TabType = Qt::UserRole,
+	EntityId = Qt::UserRole + 1,
+	ContextPosition,
+	ContextString,
+};
+}
 
 SpellCheckWidget::SpellCheckWidget(QWidget *parent)
 : EditorTabWidget(parent)
@@ -84,10 +94,8 @@ void SpellCheckWidget::processJavascript(QTreeWidgetItem *treeItem, const QStrin
 		if (pos >= 0) {
 			pos += rx.matchedLength();
 			v += rx.cap(1);
-			std::cout << "CAP: " << rx.cap(1).toStdString() << std::endl;
 		}
 	}
-	std::cout << "SCRIPT: " << v.toStdString() << std::endl;
 	processString(treeItem, v);
 }
 
@@ -113,16 +121,20 @@ void SpellCheckWidget::processString(QTreeWidgetItem *treeItem, const QString &s
 	}
 
 	int info;
+	QMap<QString, int> counts;
+
 	for (auto str : words)
 	{
 		auto word = str.toStdString();
 		if (!m_hunspell->spell(word, &info))
 		{
-			if (info == SPELL_WARN) {
-				std::cout << "WARNING" << std::endl;
-			}
 			auto subItem = new QTreeWidgetItem(treeItem);
 			subItem->setText(0,  str);
+			subItem->setData(0, ContextString, s);
+
+			int pos = counts.value(str, 0) + 1;
+			counts[str] = pos;
+			subItem->setData(0, ContextPosition, pos);
 		}
 	}
 }
@@ -139,25 +151,25 @@ void SpellCheckWidget::checkEntities(const std::string &entityId, const QString 
 
 		if (entityId == NovelTea::Cutscene::id) {
 			entity = std::make_shared<NovelTea::Cutscene>();
-			item->setData(0, Qt::UserRole, EditorTabWidget::Cutscene);
+			item->setData(0, TabType, EditorTabWidget::Cutscene);
 		}
 		else if (entityId == NovelTea::Dialogue::id) {
 			entity = std::make_shared<NovelTea::Dialogue>();
-			item->setData(0, Qt::UserRole, EditorTabWidget::Dialogue);
+			item->setData(0, TabType, EditorTabWidget::Dialogue);
 		}
 		else if (entityId == NovelTea::Object::id) {
 			entity = std::make_shared<NovelTea::Object>();
-			item->setData(0, Qt::UserRole, EditorTabWidget::Object);
+			item->setData(0, TabType, EditorTabWidget::Object);
 		}
 		else if (entityId == NovelTea::Room::id) {
 			entity = std::make_shared<NovelTea::Room>();
-			item->setData(0, Qt::UserRole, EditorTabWidget::Room);
+			item->setData(0, TabType, EditorTabWidget::Room);
 		}
 		else
 			throw std::exception();
 
 		entity->fromJson(entityMap.second);
-		item->setData(0, Qt::UserRole+1, QString::fromStdString(entity->getId()));
+		item->setData(0, EntityId, QString::fromStdString(entity->getId()));
 
 		if (entityId == NovelTea::Cutscene::id) {
 			auto cutscene = std::static_pointer_cast<NovelTea::Cutscene>(entity);
@@ -218,8 +230,8 @@ void SpellCheckWidget::on_treeWidget_activated(const QModelIndex &index)
 {
 	if (!index.parent().parent().isValid())
 		return;
-	auto type = static_cast<EditorTabWidget::Type>(index.parent().data(Qt::UserRole).toInt());
-	auto idName = index.parent().data(Qt::UserRole+1).toString().toStdString();
+	auto type = static_cast<EditorTabWidget::Type>(index.parent().data(TabType).toInt());
+	auto idName = index.parent().data(EntityId).toString().toStdString();
 	MainWindow::instance().addEditorTab(type, idName);
 }
 
@@ -255,5 +267,17 @@ void SpellCheckWidget::fillWordInfo()
 		{
 			ui->listWidget->addItem(QString::fromStdString(suggestion));
 		}
+
+		QTextCursor c;
+		QTextCharFormat fmt;
+		fmt.setBackground(QBrush(Qt::yellow));
+		fmt.setAnchor(true);
+		fmt.setAnchorName("x");
+		auto pos = m_selectedItem->data(0, ContextPosition).toInt();
+		ui->textEdit->setText(m_selectedItem->data(0, ContextString).toString());
+		while (pos-- > 0)
+			c = ui->textEdit->document()->find(QRegExp(QString::fromStdString("\\b"+word+"\\b")), c);
+		c.mergeCharFormat(fmt);
+		ui->textEdit->scrollToAnchor("x");
 	}
 }
