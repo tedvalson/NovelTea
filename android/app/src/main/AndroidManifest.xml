@@ -33,6 +33,14 @@
 			<category android:name="android.intent.category.DEFAULT" />
 		</intent-filter>
 	</activity>
+	<activity android:name=".DownloadActivity">
+		<intent-filter>
+			<action android:name="android.intent.action.VIEW" />
+			<category android:name="android.intent.category.DEFAULT" />
+			<category android:name="android.intent.category.BROWSABLE" />
+			<data android:scheme="noveltea" />
+		</intent-filter>
+	</activity>
 
     </application>
 </manifest>

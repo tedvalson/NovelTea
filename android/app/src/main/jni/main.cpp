@@ -38,7 +38,7 @@ jclass fetchClass(JNIEnv* env)
 	jobject cls = env->CallObjectMethod(na, getClassLoader);
 	jclass classLoader = env->FindClass("java/lang/ClassLoader");
 	jmethodID findClass = env->GetMethodID(classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-	jstring strClassName = env->NewStringUTF("com.noveltea.launcher.TextInputActivity");
+	jstring strClassName = env->NewStringUTF("com.noveltea.launcher.Helper");
 	auto res = (jclass)(env->CallObjectMethod(cls, findClass, strClassName));
 	env->DeleteLocalRef(strClassName);
 	return res;
@@ -71,41 +71,35 @@ Java_com_noveltea_launcher_TextInputActivity_showAlertCallback(JNIEnv *env, jcla
 		gettingInput = false;
 }
 
-float getDPI()
-{
-	auto activity = sf::getNativeActivity();
-	JavaVM* vm = activity->vm;
-	if (attachThread(&attachedEnv) == JNI_ERR)
-		return 0.f;
-
-	jclass c = fetchClass(attachedEnv);
-	jobject na = activity->clazz;
-	jmethodID m = attachedEnv->GetStaticMethodID(c, "getDPI", "(Landroid/app/NativeActivity;)Landroid/util/DisplayMetrics;");
-	jobject displayMetrics = attachedEnv->CallStaticObjectMethod(c, m, na);
-	
-	jclass displayMetricsClass = attachedEnv->FindClass("android/util/DisplayMetrics");
-	jfieldID xdpi_id = attachedEnv->GetFieldID(displayMetricsClass, "xdpi", "F");
-	jfieldID ydpi_id = attachedEnv->GetFieldID(displayMetricsClass, "ydpi", "F");
-	float xdpi = attachedEnv->GetFloatField(displayMetrics, xdpi_id);
-	float ydpi = attachedEnv->GetFloatField(displayMetrics, ydpi_id);
-	
-	attachedEnv = NULL;
-	detachThread();
-	return xdpi;
-}
-
 int main(int argc, char *argv[])
 {
+	if (attachThread(&attachedEnv) == JNI_ERR)
+		return EXIT_FAILURE;
 	auto nativeActivity = sf::getNativeActivity();
-	float dpi = getDPI();
+	jclass helperClass = fetchClass(attachedEnv);
+	jobject na = nativeActivity->clazz;
+	
+	// Get DPI so engine can adjust font size accordingly
+	jmethodID methodID = attachedEnv->GetStaticMethodID(helperClass, "getDPI", "(Landroid/app/NativeActivity;)Landroid/util/DisplayMetrics;");
+	jobject displayMetrics = attachedEnv->CallStaticObjectMethod(helperClass, methodID, na);
+	jclass displayMetricsClass = attachedEnv->FindClass("android/util/DisplayMetrics");
+	jfieldID xdpi_id = attachedEnv->GetFieldID(displayMetricsClass, "xdpi", "F");
+	float xdpi = attachedEnv->GetFloatField(displayMetrics, xdpi_id);
+
+	// Get project file name passed to activity's Intent
+	std::string projectFileName;
+	methodID = attachedEnv->GetStaticMethodID(helperClass, "getProjectFileName", "(Landroid/app/NativeActivity;)Ljava/lang/String;");
+	jstring jstr = static_cast<jstring>(attachedEnv->CallStaticObjectMethod(helperClass, methodID, na));
+	auto cs = attachedEnv->GetStringUTFChars(jstr, 0);
+	if (cs)
+		projectFileName = cs;
+	attachedEnv->ReleaseStringUTFChars(jstr, cs);
 	
 	GTextInput.textInputTrigger = triggerTextInput;
-	
 	GSettings.setDirectory(nativeActivity->internalDataPath);
 	GSettings.load();
 
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
-
 	sf::RenderWindow window(screen, "");
 	window.setFramerateLimit(30);
 	
@@ -113,9 +107,11 @@ int main(int argc, char *argv[])
 	config.width = window.getSize().x;
 	config.height = window.getSize().y;
 	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
-	config.dpiMultiplier = dpi / 160.f;
+	config.dpiMultiplier = xdpi / 160.f;
 	config.fps = 30;
 	config.initialState = NovelTea::StateID::Intro;
+	if (!projectFileName.empty()) // Skip intro
+		config.initialState = NovelTea::StateID::TitleScreen;
 	config.saveDir = nativeActivity->internalDataPath;
 	
 	auto engine = new NovelTea::Engine(config);
@@ -123,11 +119,8 @@ int main(int argc, char *argv[])
 
 	GSave->setDirectory(nativeActivity->internalDataPath);
 
-	std::string projDir = getenv("EXTERNAL_STORAGE");
-	projDir += "/test";
-	Proj.loadFromFile(projDir + "/test.ntp");
-	Proj.loadFromFile("test.ntp");
-	
+	if (projectFileName.empty())
+		Proj.loadFromFile("test.ntp");
 
 	// We shouldn't try drawing to the screen while in background
 	// so we'll have to track that. You can do minor background
@@ -157,6 +150,7 @@ int main(int argc, char *argv[])
 
 			engine->processEvent(event);
 		}
+		
 		if (active && !gettingInput)
 		{
 			engine->update();
