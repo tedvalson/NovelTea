@@ -18,7 +18,7 @@ public:
 	void loadJson(const json &j) override;
 	EntityType entityType() const override;
 
-	static constexpr auto id = "verb";
+	static constexpr auto id = ID::Verb;
 	const std::string entityId() const override {return id;}
 
 	bool checkConditionScript(const std::string &verbId, const std::string &objectId);

@@ -1,13 +1,6 @@
 #include "TreeModel.hpp"
 #include "TreeItem.hpp"
 #include "EditorUtils.hpp"
-#include <NovelTea/Action.hpp>
-#include <NovelTea/Object.hpp>
-#include <NovelTea/Cutscene.hpp>
-#include <NovelTea/Dialogue.hpp>
-#include <NovelTea/Room.hpp>
-#include <NovelTea/Script.hpp>
-#include <NovelTea/Verb.hpp>
 #include <QStringList>
 #include <QContextMenuEvent>
 #include <QFont>
@@ -147,13 +140,13 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	{
 		auto jdata = project.data();
 
-		loadEntities(jdata, actionRoot, NovelTea::EntityType::Action, NovelTea::Action::id);
-		loadEntities(jdata, cutsceneRoot, NovelTea::EntityType::Cutscene, NovelTea::Cutscene::id);
-		loadEntities(jdata, dialogueRoot, NovelTea::EntityType::Dialogue, NovelTea::Dialogue::id);
-		loadEntities(jdata, objectRoot, NovelTea::EntityType::Object, NovelTea::Object::id);
-		loadEntities(jdata, roomRoot, NovelTea::EntityType::Room, NovelTea::Room::id);
-		loadEntities(jdata, scriptRoot, NovelTea::EntityType::Script, NovelTea::Script::id);
-		loadEntities(jdata, verbRoot, NovelTea::EntityType::Verb, NovelTea::Verb::id);
+		loadEntities(jdata, actionRoot, NovelTea::EntityType::Action, NovelTea::ID::Action);
+		loadEntities(jdata, cutsceneRoot, NovelTea::EntityType::Cutscene, NovelTea::ID::Cutscene);
+		loadEntities(jdata, dialogueRoot, NovelTea::EntityType::Dialogue, NovelTea::ID::Dialogue);
+		loadEntities(jdata, objectRoot, NovelTea::EntityType::Object, NovelTea::ID::Object);
+		loadEntities(jdata, roomRoot, NovelTea::EntityType::Room, NovelTea::ID::Room);
+		loadEntities(jdata, scriptRoot, NovelTea::EntityType::Script, NovelTea::ID::Script);
+		loadEntities(jdata, verbRoot, NovelTea::EntityType::Verb, NovelTea::ID::Verb);
 	}
 
 	endResetModel();
@@ -214,13 +207,13 @@ void TreeModel::setColor(const QModelIndex &index, const QColor &color)
 sj::JSON TreeModel::getColorJSON() const
 {
 	auto result = sj::Object();
-	saveColors(result[NovelTea::Action::id], actionRoot);
-	saveColors(result[NovelTea::Cutscene::id], cutsceneRoot);
-	saveColors(result[NovelTea::Dialogue::id], dialogueRoot);
-	saveColors(result[NovelTea::Object::id], objectRoot);
-	saveColors(result[NovelTea::Room::id], roomRoot);
-	saveColors(result[NovelTea::Script::id], scriptRoot);
-	saveColors(result[NovelTea::Verb::id], verbRoot);
+	saveColors(result[NovelTea::ID::Action], actionRoot);
+	saveColors(result[NovelTea::ID::Cutscene], cutsceneRoot);
+	saveColors(result[NovelTea::ID::Dialogue], dialogueRoot);
+	saveColors(result[NovelTea::ID::Object], objectRoot);
+	saveColors(result[NovelTea::ID::Room], roomRoot);
+	saveColors(result[NovelTea::ID::Script], scriptRoot);
+	saveColors(result[NovelTea::ID::Verb], verbRoot);
 	return result;
 }
 

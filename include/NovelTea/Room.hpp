@@ -27,7 +27,7 @@ public:
 
 	static json getProjectRoomObjects();
 
-	static constexpr auto id = "room";
+	static constexpr auto id = ID::Room;
 	const std::string entityId() const override {return id;}
 
 	void setId(const std::string &idName) override;

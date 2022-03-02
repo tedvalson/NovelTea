@@ -15,7 +15,7 @@ public:
 	void loadJson(const json &j) override;
 	EntityType entityType() const override;
 
-	static constexpr auto id = "object";
+	static constexpr auto id = ID::Object;
 	const std::string entityId() const override {return id;}
 
 	ADD_ACCESSOR(std::string, Name, m_name)

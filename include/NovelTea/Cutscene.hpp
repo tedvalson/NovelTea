@@ -19,7 +19,7 @@ public:
 	void loadJson(const json &j) override;
 	EntityType entityType() const override;
 
-	static constexpr auto id = "cutscene";
+	static constexpr auto id = ID::Cutscene;
 	const std::string entityId() const override {return id;}
 
 	void addSegment(std::shared_ptr<CutsceneSegment> segment);

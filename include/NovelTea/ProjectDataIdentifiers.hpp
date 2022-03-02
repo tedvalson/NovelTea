@@ -47,6 +47,15 @@ namespace ID
 	const auto textFormats        = "textformats";
 	const auto player             = "player";
 
+	// Entity IDs
+	constexpr auto Action   = "action";
+	constexpr auto Cutscene = "cutscene";
+	constexpr auto Dialogue = "dialogue";
+	constexpr auto Object   = "object";
+	constexpr auto Room     = "room";
+	constexpr auto Script   = "script";
+	constexpr auto Verb     = "verb";
+
 	// For Editor
 	const auto tests              = "tests";
 	const auto testScriptInit     = "init";

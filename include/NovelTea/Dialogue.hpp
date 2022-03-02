@@ -26,7 +26,7 @@ public:
 	bool getSegmentHasShown(int index) const;
 	bool segmentShown(int index);
 
-	static constexpr auto id = "dialogue";
+	static constexpr auto id = ID::Dialogue;
 	const std::string entityId() const override {return id;}
 
 	void setNextEntity(std::shared_ptr<Entity> entity);
