@@ -45,7 +45,7 @@ jobs:
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt-get update
-        sudo apt-get install libxrandr-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libhunspell-dev
+        sudo apt-get install libxrandr-dev libudev-dev libxcursor-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libhunspell-dev
         sudo apt-get install doxygen libgtest-dev
         
     - name: Install Qt

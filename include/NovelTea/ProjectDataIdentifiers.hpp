@@ -45,6 +45,7 @@ namespace ID
 	const auto entityProperties   = 2;
 	const auto cutsceneSegType    = 0;
 	const auto textFormats        = "textformats";
+	const auto titleImageFile     = "titleImage";
 	const auto player             = "player";
 
 	// Entity IDs
@@ -64,6 +65,7 @@ namespace ID
 	const auto openTabs           = "tabs";
 	const auto openTabIndex       = "tabIndex";
 	const auto entityColors       = "colors";
+	const auto spellWhitelist     = "whitelist";
 
 	// For SaveData
 	const auto entityQueue        = "entityQueue";
