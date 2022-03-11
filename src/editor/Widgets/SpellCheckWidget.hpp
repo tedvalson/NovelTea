@@ -9,7 +9,7 @@
 namespace Ui {
 class SpellCheckWidget;
 }
-class Hunspell;
+class SpellChecker;
 
 class SpellCheckWidget : public EditorTabWidget
 {
@@ -18,12 +18,15 @@ public:
 	explicit SpellCheckWidget(QWidget *parent = 0);
 	virtual ~SpellCheckWidget();
 
+	void refresh();
+
 	QString tabText() const override;
 	Type getType() const override;
 
 private slots:
 	void on_buttonSearchAgain_clicked();
 	void on_treeWidget_activated(const QModelIndex &index);
+	void on_buttonAddToWhitelist_clicked();
 
 protected:
 	void timerEvent(QTimerEvent*) override;
@@ -40,7 +43,7 @@ private:
 	void checkEntities(const std::string &entityId, const QString &name, bool checkProps);
 
 	Ui::SpellCheckWidget *ui;
-	std::shared_ptr<Hunspell> m_hunspell;
+	std::unique_ptr<SpellChecker> m_spellChecker;
 	QTreeWidgetItem *m_selectedItem;
 };
 

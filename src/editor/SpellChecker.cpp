@@ -1,0 +1,38 @@
+#include "SpellChecker.hpp"
+#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Utils.hpp>
+#include <QCoreApplication>
+#include <iostream>
+
+
+SpellChecker::SpellChecker()
+{
+	auto dictPath = QCoreApplication::applicationDirPath().toStdString() + "/dicts/";
+	auto affPath = dictPath + "en_US.aff";
+	auto dPath = dictPath + "en_US.dic";
+	m_hunspell = std::make_shared<Hunspell>(affPath.c_str(), dPath.c_str());
+
+	addEntityIds(NovelTea::ID::Action);
+	addEntityIds(NovelTea::ID::Dialogue);
+	addEntityIds(NovelTea::ID::Cutscene);
+	addEntityIds(NovelTea::ID::Object);
+	addEntityIds(NovelTea::ID::Room);
+	addEntityIds(NovelTea::ID::Script);
+	addEntityIds(NovelTea::ID::Verb);
+
+	for (auto &jitem : ProjData[NovelTea::ID::spellWhitelist].ArrayRange())
+		m_hunspell->add(jitem.ToString());
+}
+
+std::shared_ptr<Hunspell> SpellChecker::hunspell()
+{
+	return m_hunspell;
+}
+
+// Add entity IDs to white list.
+void SpellChecker::addEntityIds(const std::string &entityId)
+{
+	for (auto &item : ProjData[entityId].ObjectRange())
+		for (auto &word : NovelTea::split(item.first, " "))
+			m_hunspell->add(word);
+}

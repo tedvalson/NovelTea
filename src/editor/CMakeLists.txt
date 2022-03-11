@@ -51,6 +51,7 @@ set(SRC
 	${SRCROOT}/EditorUtils.cpp
 	${SRCROOT}/EntitySortFilterProxyModel.cpp
 	${SRCROOT}/EntityTreeView.cpp
+	${SRCROOT}/SpellChecker.cpp
 	${SRCROOT}/SyntaxHighlighter.cpp
 	${SRCROOT}/TreeItem.cpp
 	${SRCROOT}/TreeModel.cpp

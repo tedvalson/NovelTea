@@ -5,7 +5,6 @@
 #include "TreeModel.hpp"
 #include <QMainWindow>
 #include <QProcess>
-#include <hunspell.hxx>
 
 namespace Ui {
 class MainWindow;
@@ -37,7 +36,6 @@ public:
 	std::string getEntityIdFromTabType(EditorTabWidget::Type type);
 
 	QAbstractItemModel *getItemModel() const;
-	std::shared_ptr<Hunspell> getHunspell() const;
 
 protected:
 	explicit MainWindow(QWidget *parent = 0);
@@ -104,7 +102,6 @@ private:
 	QAction *m_recentProjectActions[MaxRecentProjects];
 
 	QProcess m_process;
-	std::shared_ptr<Hunspell> m_hunspell;
 };
 
 #endif // MAINWINDOW_H

@@ -1,7 +1,7 @@
 #include "SpellCheckWidget.hpp"
+#include "../SpellChecker.hpp"
 #include "MainWindow.hpp"
 #include "ui_SpellCheckWidget.h"
-#include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
@@ -29,7 +29,6 @@ SpellCheckWidget::SpellCheckWidget(QWidget *parent)
 , m_selectedItem(nullptr)
 {
 	m_idName = "";
-	m_hunspell = MainWindow::instance().getHunspell();
 	ui->setupUi(this);
 	load();
 
@@ -40,6 +39,16 @@ SpellCheckWidget::SpellCheckWidget(QWidget *parent)
 SpellCheckWidget::~SpellCheckWidget()
 {
 	delete ui;
+}
+
+void SpellCheckWidget::refresh()
+{
+	auto checkProps = true;
+	ui->treeWidget->clear();
+	checkEntities(NovelTea::Cutscene::id, "Cutscenes", checkProps);
+	checkEntities(NovelTea::Dialogue::id, "Dialogues", checkProps);
+	checkEntities(NovelTea::Object::id, "Objects", checkProps);
+	checkEntities(NovelTea::Room::id, "Rooms", checkProps);
 }
 
 QString SpellCheckWidget::tabText() const
@@ -54,22 +63,29 @@ EditorTabWidget::Type SpellCheckWidget::getType() const
 
 void SpellCheckWidget::on_buttonSearchAgain_clicked()
 {
-	loadData();
+	refresh();
 }
 
 void SpellCheckWidget::saveData() const
 {
-	//
+	auto jitems = sj::Array();
+	for (int i = 0; i < ui->listWhitelist->count(); ++i)
+	{
+		auto item = ui->listWhitelist->item(i);
+		jitems.append(item->text().toStdString());
+	}
+	ProjData[NovelTea::ID::spellWhitelist] = jitems;
 }
 
 void SpellCheckWidget::loadData()
 {
-	auto checkProps = true;
-	ui->treeWidget->clear();
-	checkEntities(NovelTea::Cutscene::id, "Cutscenes", checkProps);
-	checkEntities(NovelTea::Dialogue::id, "Dialogues", checkProps);
-	checkEntities(NovelTea::Object::id, "Objects", checkProps);
-	checkEntities(NovelTea::Room::id, "Rooms", checkProps);
+	m_spellChecker.reset(new SpellChecker);
+	ui->listWhitelist->clear();
+	for (auto &jitem : ProjData[NovelTea::ID::spellWhitelist].ArrayRange())
+		ui->listWhitelist->addItem(QString::fromStdString(jitem.ToString()));
+	refresh();
+	MODIFIER(ui->listWhitelist->model(), &QAbstractItemModel::rowsInserted);
+	MODIFIER(ui->listWhitelist->model(), &QAbstractItemModel::rowsRemoved);
 }
 
 void SpellCheckWidget::processPropJson(QTreeWidgetItem *treeItem, const sj::JSON &jprops)
@@ -126,11 +142,13 @@ void SpellCheckWidget::processString(QTreeWidgetItem *treeItem, const QString &s
 	for (auto str : words)
 	{
 		auto word = str.toStdString();
-		if (!m_hunspell->spell(word, &info))
+		if (!m_spellChecker->hunspell()->spell(word, &info))
 		{
 			auto subItem = new QTreeWidgetItem(treeItem);
 			subItem->setText(0,  str);
 			subItem->setData(0, ContextString, s);
+			if (info == SPELL_WARN)
+				subItem->setBackgroundColor(0, Qt::yellow);
 
 			int pos = counts.value(str, 0) + 1;
 			counts[str] = pos;
@@ -238,6 +256,7 @@ void SpellCheckWidget::on_treeWidget_activated(const QModelIndex &index)
 void SpellCheckWidget::timerEvent(QTimerEvent *)
 {
 	checkIndexChange();
+	ui->widgetButtons->setEnabled(ui->listSuggestions->currentItem());
 }
 
 void SpellCheckWidget::checkIndexChange()
@@ -246,6 +265,8 @@ void SpellCheckWidget::checkIndexChange()
 	auto selectedItem = ui->treeWidget->currentItem();
 	if (!index.isValid() || !index.parent().parent().isValid())
 		selectedItem = nullptr;
+
+	ui->buttonAddToWhitelist->setEnabled(selectedItem);
 
 	if (m_selectedItem != selectedItem)
 	{
@@ -261,15 +282,16 @@ void SpellCheckWidget::fillWordInfo()
 	if (m_selectedItem)
 	{
 		auto word = m_selectedItem->text(0).toStdString();
-		auto suggestions = m_hunspell->suggest(word);
-		ui->listWidget->clear();
+		auto suggestions = m_spellChecker->hunspell()->suggest(word);
+		ui->listSuggestions->clear();
 		for (auto &suggestion : suggestions)
 		{
-			ui->listWidget->addItem(QString::fromStdString(suggestion));
+			ui->listSuggestions->addItem(QString::fromStdString(suggestion));
 		}
 
 		QTextCursor c;
 		QTextCharFormat fmt;
+		fmt.setFontWeight(QFont::Bold);
 		fmt.setBackground(QBrush(Qt::yellow));
 		fmt.setAnchor(true);
 		fmt.setAnchorName("x");
@@ -280,4 +302,11 @@ void SpellCheckWidget::fillWordInfo()
 		c.mergeCharFormat(fmt);
 		ui->textEdit->scrollToAnchor("x");
 	}
+}
+
+void SpellCheckWidget::on_buttonAddToWhitelist_clicked()
+{
+	auto word = m_selectedItem->text(0);
+	ui->listWhitelist->addItem(word);
+	m_spellChecker->hunspell()->add(word.toStdString());
 }

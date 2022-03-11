@@ -43,11 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	readSettings();
 
-	auto dictPath = QCoreApplication::applicationDirPath().toStdString() + "/dicts/";
-	auto affPath = dictPath + "en_US.aff";
-	auto dPath = dictPath + "en_US.dic";
-	m_hunspell = std::make_shared<Hunspell>(affPath.c_str(), dPath.c_str());
-
 	connect(&m_process, &QIODevice::readyRead, this, &MainWindow::onProcessReadyRead);
 }
 
@@ -276,11 +271,6 @@ std::string MainWindow::getEntityIdFromTabType(EditorTabWidget::Type type)
 QAbstractItemModel *MainWindow::getItemModel() const
 {
 	return treeModel;
-}
-
-std::shared_ptr<Hunspell> MainWindow::getHunspell() const
-{
-	return m_hunspell;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
