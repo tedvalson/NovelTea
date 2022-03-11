@@ -19,7 +19,7 @@ public:
 	void save() const;
 
 	void setActiveProfileIndex(int index);
-	int getActiveProfileIndex() const;
+	int getActiveProfileIndex();
 	std::shared_ptr<Profile> getActiveProfile();
 	void addProfile(const std::string &text);
 	void removeProfile(int index);

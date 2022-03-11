@@ -103,15 +103,13 @@ void Settings::setActiveProfileIndex(int index)
 	save();
 }
 
-int Settings::getActiveProfileIndex() const
+int Settings::getActiveProfileIndex()
 {
 	return m_activeProfileIndex;
 }
 
 std::shared_ptr<Profile> Settings::getActiveProfile()
 {
-	if (m_activeProfileIndex < 0)
-		return nullptr;
 	ensureProfileExists();
 	return m_profiles[m_activeProfileIndex];
 }
