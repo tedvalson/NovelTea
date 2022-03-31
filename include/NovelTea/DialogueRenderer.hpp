@@ -37,7 +37,7 @@ public:
 	bool processSelection(int buttonIndex);
 	void setDialogueCallback(DialogueCallback callback);
 
-	void changeSegment(int newSegmentIndex, bool run = true);
+	void changeSegment(int newSegmentIndex, bool run = true, int buttonSubindex = -1);
 	void changeLine(int newLineIndex);
 
 	sj::JSON saveState() const;

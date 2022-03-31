@@ -33,15 +33,16 @@ public:
 	void clearChildren();
 
 	// If enabled, run script and autosave
-	void run();
-	bool conditionPasses() const;
+	void run(int buttonSubindex = -1);
+	bool conditionPasses(int buttonSubindex = -1) const;
 	std::string getText(bool *ok = nullptr) const;
 	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
+	std::vector<std::string> getOptionMultiline(bool *ok = nullptr) const;
 	Type getNextType() const;
 
 	bool isEmpty() const;
 	bool isComment() const;
-	bool isDisabled() const;
+	bool isDisabled(int buttonSubindex = -1) const;
 	bool isTextNext() const;
 	bool isOptionNext() const;
 

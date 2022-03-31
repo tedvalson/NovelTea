@@ -46,10 +46,21 @@ QVariant DialogueTreeItem::data(int column) const
 			return "ROOT";
 		else if (segment->getTextRaw().empty())
 			return "[SKIP]";
-		else if (segment->getType() == NovelTea::DialogueSegment::Option)
-			return QString::fromStdString(segment->getText());
 		else if (segment->isComment())
 			return QString::fromStdString(segment->getText());
+		else if (segment->getType() == NovelTea::DialogueSegment::Option)
+		{
+			QString str;
+			auto lines = segment->getTextMultiline();
+			for (auto &line : lines) {
+				if (!str.isEmpty())
+					str += "\n";
+				if (!line.first.empty())
+					str += QString::fromStdString("["+line.first+"] ");
+				str += QString::fromStdString(line.second).replace("\n"," ");
+			}
+			return str.replace("\t", " ");
+		}
 		else
 		{
 			QString str;

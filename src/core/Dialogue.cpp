@@ -92,24 +92,28 @@ std::vector<std::shared_ptr<DialogueSegment>> &Dialogue::segments()
 	return m_segments;
 }
 
-void Dialogue::setSegmentHasShown(int index)
+void Dialogue::setSegmentHasShown(int index, int subIndex)
 {
 	auto key = "_d" + std::to_string(index);
+	if (subIndex >= 0)
+		key += "_" + std::to_string(subIndex);
 	getPropertyList()->sync();
 	getPropertyList()->setValue(key, 0);
 }
 
-bool Dialogue::getSegmentHasShown(int index) const
+bool Dialogue::getSegmentHasShown(int index, int subIndex) const
 {
 	auto key = "_d" + std::to_string(index);
+	if (subIndex >= 0)
+		key += "_" + std::to_string(subIndex);
 	getPropertyList()->sync();
 	return getPropertyList()->contains(key);
 }
 
-bool Dialogue::segmentShown(int index)
+bool Dialogue::segmentShown(int index, int subIndex)
 {
-	auto v = getSegmentHasShown(index);
-	setSegmentHasShown(index);
+	auto v = getSegmentHasShown(index, subIndex);
+	setSegmentHasShown(index, subIndex);
 	return v;
 }
 

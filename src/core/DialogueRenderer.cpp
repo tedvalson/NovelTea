@@ -136,7 +136,6 @@ void DialogueRenderer::repositionButtons(float fontSize)
 		auto &button = m_buttons[i];
 		auto &text = m_buttonTexts[i];
 		auto &padding = button->getPadding();
-
 		TextFormat format;
 		text->setLineSpacing(0.1f * fontSize);
 		format.size(0.5f * fontSize);
@@ -195,7 +194,7 @@ void DialogueRenderer::applyChanges()
 }
 
 // Segment arg is a choice segment (or root/link)
-void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
+void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSubindex)
 {
 	m_bg.setColor(sf::Color(0, 0, 0, 30));
 
@@ -223,7 +222,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 		if (!startSegment->isEmpty())
 			ActiveGame->getTextLog()->push(startSegment->getText(), TextLogType::DialogueOption);
 		if (run)
-			startSegment->run();
+			startSegment->run(buttonSubindex);
 	}
 
 	// Get text line
@@ -233,7 +232,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run)
 			auto seg = m_dialogue->getSegment(childId);
 			if (!seg->conditionPasses())
 				continue;
-			if (seg->getShowOnce() && m_dialogue->segmentShown(childId))
+			if (seg->getShowOnce() && m_dialogue->segmentShown(seg->getId()))
 				continue;
 
 			textSegment = seg;
@@ -501,7 +500,7 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 	auto hasWorkingOption = false;
 
 	// Get player options
-	int i = 0;
+	int buttonIndex = 0;
 	for (auto childId : parentNode->getChildrenIds())
 	{
 		auto seg = m_dialogue->getSegment(childId);
@@ -514,11 +513,11 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 			// If the one and only option is empty, pass through
 			if (parentNode->getChildrenIds().size() == 1) {
 				if (isRoot)
-					m_nextForcedSegmentIndex = childId;
+					m_nextForcedSegmentIndex = seg->getId();
 				if (seg->getShowOnce())
-					m_dialogue->setSegmentHasShown(childId);
+					m_dialogue->setSegmentHasShown(seg->getId());
 				if (isRoot && parentNode->isEmpty()) {
-					changeSegment(childId);
+					changeSegment(seg->getId());
 					return;
 				}
 				if (optionNext) {
@@ -538,39 +537,53 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 			} else
 				continue;
 		}
-		auto btn = new Button;
-		btn->setCentered(false);
-		btn->setTexture(m_buttonTexture);
-		// Check if button is enabled
-		if (m_dialogue->getEnableDisabledOptions() || !disabled) {
-			hasWorkingOption = true;
-			btn->setColor(sf::Color(180, 180, 180, 180));
-			btn->setActiveColor(sf::Color(140, 140, 140));
-			if (disabled)
-				btn->setTextColor(sf::Color(100, 100, 100));
-			else
-				btn->setTextColor(sf::Color::Black);
-			btn->onClick([this, seg, i, childId](){
-				if (m_callback)
-					m_callback(i);
-				if (seg->getShowOnce())
-					m_dialogue->setSegmentHasShown(childId);
-				changeSegment(childId);
-			});
-		} else {
-			auto bgColor = sf::Color(180, 180, 180, 100);
-			auto textColor = sf::Color(100, 100, 100);
-			btn->setColor(bgColor);
-			btn->setActiveColor(bgColor);
-			btn->setTextColor(textColor);
+
+		int i = 0;
+		for (auto &buttonText : seg->getOptionMultiline())
+		{
+			disabled = seg->isDisabled(i);
+			if (!m_dialogue->getShowDisabledOptions()) {
+				if (disabled) {
+					++i;
+					continue;
+				}
+			}
+
+			auto btn = new Button;
+			btn->setCentered(false);
+			btn->setTexture(m_buttonTexture);
+			// Check if button is enabled
+			if (m_dialogue->getEnableDisabledOptions() || !disabled) {
+				hasWorkingOption = true;
+				btn->setColor(sf::Color(180, 180, 180, 180));
+				btn->setActiveColor(sf::Color(140, 140, 140));
+				if (disabled)
+					btn->setTextColor(sf::Color(100, 100, 100));
+				else
+					btn->setTextColor(sf::Color::Black);
+				btn->onClick([=](){
+					if (m_callback)
+						m_callback(buttonIndex);
+					if (seg->getShowOnce())
+						m_dialogue->setSegmentHasShown(seg->getId(), i);
+					changeSegment(seg->getId(), true, i);
+				});
+			} else {
+				auto bgColor = sf::Color(180, 180, 180, 100);
+				auto textColor = sf::Color(100, 100, 100);
+				btn->setColor(bgColor);
+				btn->setActiveColor(bgColor);
+				btn->setTextColor(textColor);
+			}
+
+			++buttonIndex;
+			++i;
+			m_buttons.emplace_back(btn);
+
+			auto text = new ActiveText();
+			text->setText(buttonText);
+			m_buttonTexts.emplace_back(text);
 		}
-
-		++i;
-		m_buttons.emplace_back(btn);
-
-		auto text = new ActiveText();
-		text->setText(seg->getText());
-		m_buttonTexts.emplace_back(text);
 	}
 
 	if (isRoot && !hasWorkingOption) {

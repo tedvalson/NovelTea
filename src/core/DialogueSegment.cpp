@@ -46,7 +46,7 @@ void DialogueSegment::clearChildren()
 	m_childrenIds.clear();
 }
 
-void DialogueSegment::run()
+void DialogueSegment::run(int buttonSubindex)
 {
 	if (m_autosave)
 		ActiveGame->autosave();
@@ -54,14 +54,15 @@ void DialogueSegment::run()
 		return;
 	try {
 		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
+		auto script = "var buttonIndex=" + std::to_string(buttonSubindex) + ";\n" + m_script;
 		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
-		ActiveGame->getScriptManager()->runInClosure(m_script);
+		ActiveGame->getScriptManager()->runInClosure(script);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::run() " << e.what() << std::endl;
 	}
 }
 
-bool DialogueSegment::conditionPasses() const
+bool DialogueSegment::conditionPasses(int buttonSubindex) const
 {
 	if (!m_conditionalEnabled || m_conditionScript.empty())
 		return true;
@@ -70,7 +71,7 @@ bool DialogueSegment::conditionPasses() const
 
 	try {
 		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-		auto script = m_conditionScript + "\nreturn false;";
+		auto script = "var buttonIndex=" + std::to_string(buttonSubindex) + ";\n" + m_conditionScript + "\nreturn false;";
 		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
 		return ActiveGame->getScriptManager()->runInClosure<bool>(script);
 	} catch (std::exception &e) {
@@ -164,6 +165,34 @@ std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultilin
 	return result;
 }
 
+std::vector<std::string> DialogueSegment::getOptionMultiline(bool *ok) const
+{
+	std::vector<std::string> result;
+	auto text = getText(ok);
+	if (ok && !*ok) {
+		result.push_back(text);
+		return result;
+	}
+
+	auto lines = split(text);
+	std::string buffer;
+	for (auto &line : lines)
+	{
+		if (line.empty()) {
+			result.push_back(buffer);
+			buffer.clear();
+		}
+		else if (buffer.empty())
+			buffer += line;
+		else
+			buffer += "\n" + line;
+	}
+	if (!buffer.empty())
+		result.push_back(buffer);
+
+	return result;
+}
+
 DialogueSegment::Type DialogueSegment::getNextType() const
 {
 	// TODO: Handle infinite recursion case with Link type
@@ -206,11 +235,11 @@ bool DialogueSegment::isComment() const
 		return getText().substr(0, 2) == "//";
 }
 
-bool DialogueSegment::isDisabled() const
+bool DialogueSegment::isDisabled(int buttonSubindex) const
 {
 	if (!m_dialogue)
 		return false;
-	return (getShowOnce() && m_dialogue->getSegmentHasShown(getId())) || !conditionPasses();
+	return (getShowOnce() && m_dialogue->getSegmentHasShown(getId(), buttonSubindex)) || !conditionPasses(buttonSubindex);
 }
 
 bool DialogueSegment::isTextNext() const
