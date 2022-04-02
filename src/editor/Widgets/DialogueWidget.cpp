@@ -214,7 +214,6 @@ void DialogueWidget::checkIndexChange()
 		segment->setAutosave(ui->checkBoxAutosave->isChecked());
 
 		if (m_treeModel->updateSegment(index, segment)) {
-			std::cout << "updated seg" << std::endl;
 			ui->treeView->resizeColumnToContents(0);
 		}
 	}
@@ -222,7 +221,6 @@ void DialogueWidget::checkIndexChange()
 
 void DialogueWidget::on_plainTextEdit_textChanged()
 {
-	std::cout << "text changed" << std::endl;
 }
 
 void DialogueWidget::on_checkBoxConditional_toggled(bool checked)

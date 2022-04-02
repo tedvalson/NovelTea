@@ -35,8 +35,8 @@ public:
 	// If enabled, run script and autosave
 	void run(int buttonSubindex = -1);
 	bool conditionPasses(int buttonSubindex = -1) const;
-	std::string getText(bool *ok = nullptr) const;
-	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr) const;
+	std::string getText(bool *ok = nullptr, int buttonSubindex = -1) const;
+	std::vector<std::pair<std::string,std::string>> getTextMultiline(bool *ok = nullptr, int buttonSubIndex = -1) const;
 	std::vector<std::string> getOptionMultiline(bool *ok = nullptr) const;
 	Type getNextType() const;
 

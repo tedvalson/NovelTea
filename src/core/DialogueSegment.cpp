@@ -80,7 +80,7 @@ bool DialogueSegment::conditionPasses(int buttonSubindex) const
 	}
 }
 
-std::string DialogueSegment::getText(bool *ok) const
+std::string DialogueSegment::getText(bool *ok, int buttonSubIndex) const
 {
 	try {
 		if (ok)
@@ -94,7 +94,7 @@ std::string DialogueSegment::getText(bool *ok) const
 
 		if (m_scriptedText)
 		{
-			auto script = m_textRaw + "\nreturn \"\"";
+			auto script = "var buttonIndex=" + std::to_string(buttonSubIndex) + ";\n" + m_textRaw + "\nreturn \"\"";
 			return ActiveGame->getScriptManager()->runInClosure<std::string>(script);
 		} else
 			return ActiveGame->getScriptManager()->evalExpressions(m_textRaw);
@@ -132,14 +132,14 @@ std::pair<std::string,std::string> getLinePair(const std::string &line, const st
 	return result;
 }
 
-std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultiline(bool *ok) const
+std::vector<std::pair<std::string,std::string>> DialogueSegment::getTextMultiline(bool *ok, int buttonSubIndex) const
 {
 	std::vector<std::pair<std::string,std::string>> result;
 	if (isComment()) {
 		result.emplace_back("", "");
 		return result;
 	}
-	auto text = getText(ok);
+	auto text = getText(ok, buttonSubIndex);
 	auto defaultName = m_dialogue ? m_dialogue->getDefaultName() : "";
 	if (ok && !*ok) {
 		result.push_back(getLinePair(text, defaultName));
@@ -229,10 +229,7 @@ bool DialogueSegment::isEmpty() const
 
 bool DialogueSegment::isComment() const
 {
-	if (getScriptedText())
-		return false;
-	else
-		return getText().substr(0, 2) == "//";
+	return getText().substr(0, 2) == "//";
 }
 
 bool DialogueSegment::isDisabled(int buttonSubindex) const

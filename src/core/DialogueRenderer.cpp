@@ -219,8 +219,11 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 	if (startSegment->getType() == DialogueSegment::Type::Text) {
 		textSegment = startSegment;
 	} else {
-		if (!startSegment->isEmpty())
-			ActiveGame->getTextLog()->push(startSegment->getText(), TextLogType::DialogueOption);
+		if (!startSegment->isEmpty()) {
+			auto lines = startSegment->getOptionMultiline();
+			auto text = (lines.size() == 1) ? lines[0] : lines[buttonSubindex];
+			ActiveGame->getTextLog()->push(text, TextLogType::DialogueOption);
+		}
 		if (run)
 			startSegment->run(buttonSubindex);
 	}
@@ -239,8 +242,8 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 			break;
 		}
 	if (textSegment) {
-		m_textLines = textSegment->getTextMultiline();
-		textSegment->run();
+		m_textLines = textSegment->getTextMultiline(nullptr, buttonSubindex);
+		textSegment->run(buttonSubindex);
 	} else {
 		m_isComplete = true;
 		return;
