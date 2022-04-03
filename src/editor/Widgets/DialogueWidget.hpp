@@ -46,6 +46,7 @@ private slots:
 	void on_treeView_expanded(const QModelIndex &index);
 	void on_treeView_collapsed(const QModelIndex &index);
 	void on_checkBoxShowDisabled_toggled(bool checked);
+	void on_comboBoxLogMode_currentIndexChanged(int index);
 
 private:
 	void fillItemSettings();
@@ -62,6 +63,7 @@ private:
 	QModelIndex m_copyIndex;
 
 	DialogueTreeItem *m_selectedItem;
+	int m_lastLogModeIndex;
 
 	std::shared_ptr<NovelTea::Dialogue> m_dialogue;
 };

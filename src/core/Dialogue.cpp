@@ -8,6 +8,7 @@ Dialogue::Dialogue()
 : m_rootIndex(0)
 , m_enableDisabledOptions(false)
 , m_showDisabledOptions(false)
+, m_logMode(DialogueTextLogMode::Everything)
 , m_nextEntity(sj::Array(-1,""))
 {
 	auto rootSegment = std::make_shared<DialogueSegment>();
@@ -17,7 +18,7 @@ Dialogue::Dialogue()
 
 size_t Dialogue::jsonSize() const
 {
-	return 9;
+	return 10;
 }
 
 json Dialogue::toJson() const
@@ -35,6 +36,7 @@ json Dialogue::toJson() const
 		m_rootIndex,
 		m_enableDisabledOptions,
 		m_showDisabledOptions,
+		static_cast<int>(m_logMode),
 		jsegments
 	);
 	return j;
@@ -50,10 +52,11 @@ void Dialogue::loadJson(const json &j)
 	m_rootIndex = j[5].ToInt();
 	m_enableDisabledOptions = j[6].ToBool();
 	m_showDisabledOptions = j[7].ToBool();
+	m_logMode = static_cast<DialogueTextLogMode>(j[8].ToInt());
 	m_segments.clear();
 
 	int i = 0;
-	for (auto &jsegment : j[8].ArrayRange())
+	for (auto &jsegment : j[9].ArrayRange())
 	{
 		auto segment = std::make_shared<DialogueSegment>();
 		segment->fromJson(jsegment);

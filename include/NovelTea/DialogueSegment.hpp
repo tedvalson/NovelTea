@@ -60,6 +60,7 @@ public:
 	ADD_ACCESSOR(bool, ScriptEnabled, m_scriptEnabled)
 	ADD_ACCESSOR(bool, ShowOnce, m_showOnce)
 	ADD_ACCESSOR(bool, Autosave, m_autosave)
+	ADD_ACCESSOR(bool, IsLogged, m_isLogged)
 	ADD_ACCESSOR(std::string, ConditionScript, m_conditionScript)
 	ADD_ACCESSOR(std::string, Script, m_script)
 	ADD_ACCESSOR(std::string, TextRaw, m_textRaw)
@@ -74,6 +75,7 @@ private:
 	bool m_scriptEnabled;
 	bool m_showOnce;
 	bool m_autosave;
+	bool m_isLogged;
 	std::string m_conditionScript;
 	std::string m_script;
 	std::string m_textRaw;

@@ -8,6 +8,13 @@ namespace NovelTea
 
 class DialogueSegment;
 
+enum class DialogueTextLogMode {
+	Nothing = 0,
+	Everything,
+	OnlyText,
+	OnlyOptions,
+};
+
 class Dialogue : public Entity
 {
 public:
@@ -36,6 +43,7 @@ public:
 	ADD_ACCESSOR(bool, EnableDisabledOptions, m_enableDisabledOptions)
 	ADD_ACCESSOR(bool, ShowDisabledOptions, m_showDisabledOptions)
 	ADD_ACCESSOR(std::string, DefaultName, m_defaultName)
+	ADD_ACCESSOR(DialogueTextLogMode, LogMode, m_logMode)
 	ADD_ACCESSOR(json, NextEntityJson, m_nextEntity)
 
 private:
@@ -44,6 +52,7 @@ private:
 	bool m_showDisabledOptions;
 	std::vector<std::shared_ptr<DialogueSegment>> m_segments;
 	std::string m_defaultName;
+	DialogueTextLogMode m_logMode;
 	json m_nextEntity;
 };
 

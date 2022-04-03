@@ -16,6 +16,7 @@ DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	, m_treeModel(new DialogueTreeModel)
 	, m_menuTreeView(new QMenu)
 	, m_selectedItem(nullptr)
+	, m_lastLogModeIndex(0)
 {
 	m_idName = idName;
 	ui->setupUi(this);
@@ -74,6 +75,7 @@ void DialogueWidget::saveData() const
 		m_dialogue->setNextEntityJson(ui->actionSelectWidget->getValue());
 		m_dialogue->setShowDisabledOptions(ui->checkBoxShowDisabled->isChecked());
 		m_dialogue->setEnableDisabledOptions(ui->checkBoxEnableDisabled->isChecked());
+		m_dialogue->setLogMode(static_cast<NovelTea::DialogueTextLogMode>(ui->comboBoxLogMode->currentIndex()));
 		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
 	}
 }
@@ -96,6 +98,12 @@ void DialogueWidget::loadData()
 	ui->checkBoxShowDisabled->setChecked(m_dialogue->getShowDisabledOptions());
 	ui->checkBoxEnableDisabled->setChecked(m_dialogue->getEnableDisabledOptions());
 	ui->actionSelectWidget->setValue(m_dialogue->getNextEntityJson());
+
+	ui->comboBoxLogMode->blockSignals(true);
+	ui->comboBoxLogMode->setCurrentIndex(static_cast<int>(m_dialogue->getLogMode()));
+	ui->comboBoxLogMode->blockSignals(false);
+	m_lastLogModeIndex = ui->comboBoxLogMode->currentIndex();
+
 	fillItemSettings();
 
 	MODIFIER(ui->propertyEditor, &PropertyEditor::valueChanged);
@@ -175,6 +183,7 @@ void DialogueWidget::fillItemSettings()
 	ui->scriptEdit->setPlainText(QString::fromStdString(selectedSegment->getScript()));
 	ui->checkBoxShowOnce->setChecked(selectedSegment->getShowOnce());
 	ui->checkBoxAutosave->setChecked(selectedSegment->getAutosave());
+	ui->checkBoxLog->setChecked(selectedSegment->getIsLogged());
 }
 
 void DialogueWidget::checkIndexChange()
@@ -212,6 +221,7 @@ void DialogueWidget::checkIndexChange()
 		segment->setScript(ui->scriptEdit->toPlainText().toStdString());
 		segment->setShowOnce(ui->checkBoxShowOnce->isChecked());
 		segment->setAutosave(ui->checkBoxAutosave->isChecked());
+		segment->setIsLogged(ui->checkBoxLog->isChecked());
 
 		if (m_treeModel->updateSegment(index, segment)) {
 			ui->treeView->resizeColumnToContents(0);
@@ -349,4 +359,20 @@ void DialogueWidget::on_actionPlayFromHere_triggered()
 	}
 	int i = m_selectedItem->getDialogueSegment()->getId();
 	MainWindow::instance().launchPreview(NovelTea::EntityType::Dialogue, idName(), sj::Array("", i));
+}
+
+void DialogueWidget::on_comboBoxLogMode_currentIndexChanged(int index)
+{
+	auto r = QMessageBox::warning(this, "You Sure?",
+			"This will reset the log option of all existing segments in this dialogue tree to conform to this default behavior.",
+			QMessageBox::Ok | QMessageBox::Cancel);
+	if (r == QMessageBox::Cancel) {
+		ui->comboBoxLogMode->blockSignals(true);
+		ui->comboBoxLogMode->setCurrentIndex(m_lastLogModeIndex);
+		ui->comboBoxLogMode->blockSignals(false);
+		return;
+	}
+	m_lastLogModeIndex = index;
+	// TODO: Change all segments
+	setModified();
 }
