@@ -15,6 +15,7 @@ namespace NovelTea
 DialogueRenderer::DialogueRenderer()
 : m_callback(nullptr)
 , m_isShowing(false)
+, m_logCurrentIndex(false)
 , m_textLineIndex(-1)
 , m_fontSizeMultiplier(1.0)
 , m_fadeTween(nullptr)
@@ -222,7 +223,8 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 		if (!startSegment->isEmpty()) {
 			auto lines = startSegment->getOptionMultiline();
 			auto text = (lines.size() == 1) ? lines[0] : lines[buttonSubindex];
-			ActiveGame->getTextLog()->push(text, TextLogType::DialogueOption);
+			if (startSegment->getIsLogged())
+				ActiveGame->getTextLog()->push(text, TextLogType::DialogueOption);
 		}
 		if (run)
 			startSegment->run(buttonSubindex);
@@ -244,6 +246,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 	if (textSegment) {
 		m_textLines = textSegment->getTextMultiline(nullptr, buttonSubindex);
 		textSegment->run(buttonSubindex);
+		m_logCurrentIndex = textSegment->getIsLogged();
 	} else {
 		m_isComplete = true;
 		return;
@@ -301,8 +304,10 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	updateScrollbar();
 	m_scrollBar.setScroll(0.f);
 
-	ActiveGame->getTextLog()->push(line.first, TextLogType::DialogueTextName);
-	ActiveGame->getTextLog()->push(line.second, TextLogType::DialogueText);
+	if (m_logCurrentIndex) {
+		ActiveGame->getTextLog()->push(line.first, TextLogType::DialogueTextName);
+		ActiveGame->getTextLog()->push(line.second, TextLogType::DialogueText);
+	}
 
 	float duration = 0.3f;
 	m_text.setFadeAcrossPosition(0.f);

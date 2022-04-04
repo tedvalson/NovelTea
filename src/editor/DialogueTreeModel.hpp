@@ -38,6 +38,7 @@ public:
 	void saveDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue) const;
 	void loadDialogue(const std::shared_ptr<NovelTea::Dialogue> &dialogue);
 	bool changeParent(const QModelIndex &child, const QModelIndex &newParent);
+	void changeLoggingDefault(NovelTea::DialogueTextLogMode mode);
 
 	bool copy(const QModelIndex &source, const QModelIndex &destParent);
 	bool insertSegmentLink(const QModelIndex &source, const QModelIndex &destParent);

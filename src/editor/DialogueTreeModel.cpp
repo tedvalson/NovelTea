@@ -148,6 +148,42 @@ bool DialogueTreeModel::changeParent(const QModelIndex &child, const QModelIndex
 	return false;
 }
 
+void changeLogging(NovelTea::DialogueTextLogMode mode, DialogueTreeItem *node)
+{
+	auto segment = node->getDialogueSegment();
+	auto type = segment->getType();
+
+	if (type == NovelTea::DialogueSegment::Link)
+		return;
+	for (int i = 0; i < node->childCount(); ++i)
+		changeLogging(mode, node->child(i));
+
+	if (type != NovelTea::DialogueSegment::Root)
+	{
+		switch (mode) {
+		case NovelTea::DialogueTextLogMode::Everything:
+			segment->setIsLogged(true);
+			break;
+		case NovelTea::DialogueTextLogMode::Nothing:
+			segment->setIsLogged(false);
+			break;
+		case NovelTea::DialogueTextLogMode::OnlyOptions:
+			segment->setIsLogged(type == NovelTea::DialogueSegment::Option);
+			break;
+		case NovelTea::DialogueTextLogMode::OnlyText:
+			segment->setIsLogged(type == NovelTea::DialogueSegment::Text);
+			break;
+		}
+
+		node->setDialogueSegment(segment);
+	}
+}
+
+void DialogueTreeModel::changeLoggingDefault(NovelTea::DialogueTextLogMode mode)
+{
+	changeLogging(mode, m_rootItem);
+}
+
 bool DialogueTreeModel::copy(const QModelIndex &source, const QModelIndex &destParent)
 {
 	auto parentItem = getItem(destParent);

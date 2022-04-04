@@ -373,6 +373,7 @@ void DialogueWidget::on_comboBoxLogMode_currentIndexChanged(int index)
 		return;
 	}
 	m_lastLogModeIndex = index;
-	// TODO: Change all segments
+	m_treeModel->changeLoggingDefault(static_cast<NovelTea::DialogueTextLogMode>(index));
+	fillItemSettings();
 	setModified();
 }
