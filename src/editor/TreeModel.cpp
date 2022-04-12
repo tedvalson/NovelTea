@@ -123,6 +123,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	actionRoot   = new TreeItem("Actions", rootItem);
 	cutsceneRoot = new TreeItem("Cutscenes", rootItem);
 	dialogueRoot = new TreeItem("Dialogues", rootItem);
+	mapRoot      = new TreeItem("Maps", rootItem);
 	objectRoot   = new TreeItem("Objects", rootItem);
 	roomRoot     = new TreeItem("Rooms", rootItem);
 	scriptRoot   = new TreeItem("Scripts", rootItem);
@@ -131,6 +132,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	rootItem->appendChild(actionRoot);
 	rootItem->appendChild(cutsceneRoot);
 	rootItem->appendChild(dialogueRoot);
+	rootItem->appendChild(mapRoot);
 	rootItem->appendChild(objectRoot);
 	rootItem->appendChild(roomRoot);
 	rootItem->appendChild(scriptRoot);
@@ -143,6 +145,7 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 		loadEntities(jdata, actionRoot, NovelTea::EntityType::Action, NovelTea::ID::Action);
 		loadEntities(jdata, cutsceneRoot, NovelTea::EntityType::Cutscene, NovelTea::ID::Cutscene);
 		loadEntities(jdata, dialogueRoot, NovelTea::EntityType::Dialogue, NovelTea::ID::Dialogue);
+		loadEntities(jdata, mapRoot, NovelTea::EntityType::Map, NovelTea::ID::Map);
 		loadEntities(jdata, objectRoot, NovelTea::EntityType::Object, NovelTea::ID::Object);
 		loadEntities(jdata, roomRoot, NovelTea::EntityType::Room, NovelTea::ID::Room);
 		loadEntities(jdata, scriptRoot, NovelTea::EntityType::Script, NovelTea::ID::Script);
@@ -210,6 +213,7 @@ sj::JSON TreeModel::getColorJSON() const
 	saveColors(result[NovelTea::ID::Action], actionRoot);
 	saveColors(result[NovelTea::ID::Cutscene], cutsceneRoot);
 	saveColors(result[NovelTea::ID::Dialogue], dialogueRoot);
+	saveColors(result[NovelTea::ID::Map], mapRoot);
 	saveColors(result[NovelTea::ID::Object], objectRoot);
 	saveColors(result[NovelTea::ID::Room], roomRoot);
 	saveColors(result[NovelTea::ID::Script], scriptRoot);
@@ -337,14 +341,16 @@ QModelIndex TreeModel::index(EditorTabWidget::Type tabType) const
 		row = 1;
 	else if (tabType == EditorTabWidget::Dialogue)
 		row = 2;
-	else if (tabType == EditorTabWidget::Object)
+	else if (tabType == EditorTabWidget::Map)
 		row = 3;
-	else if (tabType == EditorTabWidget::Room)
+	else if (tabType == EditorTabWidget::Object)
 		row = 4;
-	else if (tabType == EditorTabWidget::Script)
+	else if (tabType == EditorTabWidget::Room)
 		row = 5;
-	else if (tabType == EditorTabWidget::Verb)
+	else if (tabType == EditorTabWidget::Script)
 		row = 6;
+	else if (tabType == EditorTabWidget::Verb)
+		row = 7;
 	else
 		return QModelIndex();
 

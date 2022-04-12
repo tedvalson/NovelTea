@@ -21,6 +21,8 @@ set(SOURCE_FILES
 	${SRCROOT}/FileUtils.cpp
 	${SRCROOT}/Game.cpp
 	${SRCROOT}/json.cpp
+	${SRCROOT}/Map.cpp
+	${SRCROOT}/MapRoom.cpp
 	${SRCROOT}/Object.cpp
 	${SRCROOT}/ObjectList.cpp
 	${SRCROOT}/Profile.cpp

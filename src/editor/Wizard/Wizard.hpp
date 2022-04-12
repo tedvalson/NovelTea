@@ -17,8 +17,9 @@ public:
 		Action,
 		Cutscene,
 		Dialogue,
-		Room,
+		Map,
 		Object,
+		Room,
 		Script,
 		Verb,
 	};

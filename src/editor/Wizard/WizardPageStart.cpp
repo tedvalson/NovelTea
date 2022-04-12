@@ -16,8 +16,9 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 	newSelectionGroup->addButton(ui->radioAction, Wizard::Page::Action);
 	newSelectionGroup->addButton(ui->radioCutscene, Wizard::Page::Cutscene);
 	newSelectionGroup->addButton(ui->radioDialogue, Wizard::Page::Dialogue);
-	newSelectionGroup->addButton(ui->radioRoom, Wizard::Page::Room);
+	newSelectionGroup->addButton(ui->radioMap, Wizard::Page::Map);
 	newSelectionGroup->addButton(ui->radioObject, Wizard::Page::Object);
+	newSelectionGroup->addButton(ui->radioRoom, Wizard::Page::Room);
 	newSelectionGroup->addButton(ui->radioScript, Wizard::Page::Script);
 	newSelectionGroup->addButton(ui->radioVerb, Wizard::Page::Verb);
 
@@ -26,8 +27,9 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 		ui->radioAction->setEnabled(false);
 		ui->radioCutscene->setEnabled(false);
 		ui->radioDialogue->setEnabled(false);
-		ui->radioRoom->setEnabled(false);
+		ui->radioMap->setEnabled(false);
 		ui->radioObject->setEnabled(false);
+		ui->radioRoom->setEnabled(false);
 		ui->radioScript->setEnabled(false);
 		ui->radioVerb->setEnabled(false);
 	}

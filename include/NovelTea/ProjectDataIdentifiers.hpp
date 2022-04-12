@@ -16,6 +16,7 @@ enum class EntityType : int {
 	Dialogue,
 	Script,
 	Verb,
+	Map,
 };
 
 namespace ID
@@ -52,6 +53,7 @@ namespace ID
 	constexpr auto Action   = "action";
 	constexpr auto Cutscene = "cutscene";
 	constexpr auto Dialogue = "dialogue";
+	constexpr auto Map      = "map";
 	constexpr auto Object   = "object";
 	constexpr auto Room     = "room";
 	constexpr auto Script   = "script";

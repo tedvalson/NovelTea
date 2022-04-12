@@ -10,6 +10,8 @@
 #include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/Map.hpp>
+#include <NovelTea/MapRoom.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
@@ -110,6 +112,10 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 			entity = std::make_shared<NovelTea::Dialogue>();
 			item->setData(0, Qt::UserRole, EditorTabWidget::Dialogue);
 		}
+		else if (entityId == NovelTea::Map::id) {
+			entity = std::make_shared<NovelTea::Map>();
+			item->setData(0, Qt::UserRole, EditorTabWidget::Map);
+		}
 		else if (entityId == NovelTea::Object::id) {
 			entity = std::make_shared<NovelTea::Object>();
 			item->setData(0, Qt::UserRole, EditorTabWidget::Object);
@@ -168,6 +174,10 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 			}
 			processString(item, dialogue->getDefaultName(), caseSensitive);
 			processEntityJson(item, dialogue->getNextEntityJson(), caseSensitive);
+		}
+		else if (entityId == NovelTea::Map::id) {
+			// TODO: implement search of map entity
+			auto map = std::static_pointer_cast<NovelTea::Map>(entity);
 		}
 		else if (entityId == NovelTea::Object::id) {
 			auto object = std::static_pointer_cast<NovelTea::Object>(entity);

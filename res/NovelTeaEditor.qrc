@@ -8,5 +8,6 @@
         <file alias="icons/4.png">icons/dialogue.png</file>
         <file alias="icons/7.png">icons/script.png</file>
         <file alias="icons/9.png">icons/verb.png</file>
+        <file alias="icons/10.png">icons/map.png</file>
     </qresource>
 </RCC>

@@ -5,6 +5,7 @@
 #include "CutsceneWidget.hpp"
 #include "DialogueWidget.hpp"
 #include "RoomWidget.hpp"
+#include "MapWidget.hpp"
 #include "ObjectWidget.hpp"
 #include "ScriptWidget.hpp"
 #include "VerbWidget.hpp"
@@ -181,10 +182,12 @@ void MainWindow::addEditorTab(EditorTabWidget::Type type, const std::string &idN
 		addEditorTab(new CutsceneWidget(idName));
 	else if (type == EditorTabWidget::Dialogue)
 		addEditorTab(new DialogueWidget(idName));
-	else if (type == EditorTabWidget::Room)
-		addEditorTab(new RoomWidget(idName));
+	else if (type == EditorTabWidget::Map)
+		addEditorTab(new MapWidget(idName));
 	else if (type == EditorTabWidget::Object)
 		addEditorTab(new ObjectWidget(idName));
+	else if (type == EditorTabWidget::Room)
+		addEditorTab(new RoomWidget(idName));
 	else if (type == EditorTabWidget::Script)
 		addEditorTab(new ScriptWidget(idName));
 	else if (type == EditorTabWidget::Verb)
@@ -256,6 +259,8 @@ std::string MainWindow::getEntityIdFromTabType(EditorTabWidget::Type type)
 		return NovelTea::Cutscene::id;
 	else if (type == EditorTabWidget::Dialogue)
 		return NovelTea::Dialogue::id;
+	else if (type == EditorTabWidget::Map)
+		return NovelTea::Map::id;
 	else if (type == EditorTabWidget::Object)
 		return NovelTea::Object::id;
 	else if (type == EditorTabWidget::Room)
@@ -706,6 +711,8 @@ void MainWindow::on_actionSelectParent_triggered()
 		page->setFilterRegExp("Cutscenes");
 	else if (selectedType == EditorTabWidget::Dialogue)
 		page->setFilterRegExp("Dialogues");
+	else if (selectedType == EditorTabWidget::Map)
+		page->setFilterRegExp("Maps");
 	else if (selectedType == EditorTabWidget::Object)
 		page->setFilterRegExp("Objects");
 	else if (selectedType == EditorTabWidget::Room)

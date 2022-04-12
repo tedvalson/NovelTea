@@ -4,8 +4,9 @@
 #include "WizardPageAction.hpp"
 #include "WizardPageCutscene.hpp"
 #include "WizardPageDialogue.hpp"
-#include "WizardPageRoom.hpp"
+#include "WizardPageMap.hpp"
 #include "WizardPageObject.hpp"
+#include "WizardPageRoom.hpp"
 #include "WizardPageScript.hpp"
 #include "WizardPageVerb.hpp"
 #include <iostream>
@@ -19,8 +20,9 @@ Wizard::Wizard(QWidget *parent) :
 	setPage(Page::Action, new WizardPageAction(this));
 	setPage(Page::Cutscene, new WizardPageCutscene(this));
 	setPage(Page::Dialogue, new WizardPageDialogue(this));
-	setPage(Page::Room, new WizardPageRoom(this));
+	setPage(Page::Map, new WizardPageMap(this));
 	setPage(Page::Object, new WizardPageObject(this));
+	setPage(Page::Room, new WizardPageRoom(this));
 	setPage(Page::Script, new WizardPageScript(this));
 	setPage(Page::Verb, new WizardPageVerb(this));
 

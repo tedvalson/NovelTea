@@ -34,6 +34,9 @@ QIcon EditorUtils::iconFromTabType(EditorTabWidget::Type type)
 	case EditorTabWidget::Dialogue:
 		color = Qt::cyan;
 		break;
+	case EditorTabWidget::Map:
+		color = Qt::gray;
+		break;
 	case EditorTabWidget::Object:
 		color = Qt::red;
 		break;

@@ -52,6 +52,7 @@ private:
 	TreeItem *actionRoot;
 	TreeItem *cutsceneRoot;
 	TreeItem *dialogueRoot;
+	TreeItem *mapRoot;
 	TreeItem *objectRoot;
 	TreeItem *roomRoot;
 	TreeItem *scriptRoot;

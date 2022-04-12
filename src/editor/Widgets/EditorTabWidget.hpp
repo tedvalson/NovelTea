@@ -22,6 +22,7 @@ public:
 		Script,
 		Settings,
 		Verb,
+		Map,
 
 		// Icon files use above numeric values
 		SpellCheck,

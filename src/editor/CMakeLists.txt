@@ -22,6 +22,7 @@ set(UIFILES
 	${UIROOT}/CutsceneWidget.ui
 	${UIROOT}/DialogueWidget.ui
 	${UIROOT}/MainWindow.ui
+	${UIROOT}/MapWidget.ui
 	${UIROOT}/ObjectWidget.ui
 	${UIROOT}/ProjectSettingsWidget.ui
 	${UIROOT}/PropertyEditor.ui
@@ -36,6 +37,7 @@ set(UIFILES
 	${UIROOT}/WizardPageActionSelect.ui
 	${UIROOT}/WizardPageCutscene.ui
 	${UIROOT}/WizardPageDialogue.ui
+	${UIROOT}/WizardPageMap.ui
 	${UIROOT}/WizardPageObject.ui
 	${UIROOT}/WizardPageProject.ui
 	${UIROOT}/WizardPageRoom.ui
@@ -63,6 +65,7 @@ set(SRC
 	${SRCROOT}/Widgets/EditorTabWidget.cpp
 	${SRCROOT}/Widgets/MainWindow.cpp
 	${SRCROOT}/Widgets/NovelTeaWidget.cpp
+	${SRCROOT}/Widgets/MapWidget.cpp
 	${SRCROOT}/Widgets/ObjectWidget.cpp
 	${SRCROOT}/Widgets/ProjectSettingsWidget.cpp
 	${SRCROOT}/Widgets/PropertyEditor.cpp
@@ -76,6 +79,7 @@ set(SRC
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/TestsWidget.cpp
 	${SRCROOT}/Widgets/VerbWidget.cpp
+	${SRCROOT}/Widgets/Map/MapView.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qteditorfactory.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertybrowser.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertybrowserutils.cpp
@@ -87,6 +91,7 @@ set(SRC
 	${SRCROOT}/Wizard/WizardPageActionSelect.cpp
 	${SRCROOT}/Wizard/WizardPageCutscene.cpp
 	${SRCROOT}/Wizard/WizardPageDialogue.cpp
+	${SRCROOT}/Wizard/WizardPageMap.cpp
 	${SRCROOT}/Wizard/WizardPageObject.cpp
 	${SRCROOT}/Wizard/WizardPageProject.cpp
 	${SRCROOT}/Wizard/WizardPageRoom.cpp

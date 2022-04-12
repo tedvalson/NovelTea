@@ -8,6 +8,8 @@
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/Map.hpp>
+#include <NovelTea/MapRoom.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
@@ -214,6 +216,10 @@ void SpellCheckWidget::checkEntities(const std::string &entityId, const QString 
 					processJavascript(item, text);
 				}
 			}
+		}
+		else if (entityId == NovelTea::Map::id) {
+			// TODO: implement spellcheck for map entities
+			auto map = std::static_pointer_cast<NovelTea::Map>(entity);
 		}
 		else if (entityId == NovelTea::Room::id) {
 			auto room = std::static_pointer_cast<NovelTea::Room>(entity);
