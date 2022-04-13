@@ -3,6 +3,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QGraphicsProxyWidget>
+#include <cmath>
 #include <iostream>
 
 MapView::MapView(QWidget *parent)
