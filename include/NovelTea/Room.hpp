@@ -33,6 +33,11 @@ public:
 	void setId(const std::string &idName) override;
 	const std::shared_ptr<ObjectList> &getObjectList() const;
 
+	int visitCount() const;
+	bool visited() const;
+	void resetVisitCount();
+	void incrementVisitCount();
+
 	std::string getDescription() const;
 	void sync();
 

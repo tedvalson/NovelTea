@@ -379,6 +379,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 				GGame->setRoom(nextRoom);
 				nextRoom->runScriptAfterEnter();
 			}
+			nextRoom->incrementVisitCount();
 		}
 		m_mode = mode;
 		showToolbar();

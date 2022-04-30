@@ -71,12 +71,13 @@ namespace ID
 
 	// For SaveData
 	const auto entityQueue        = "entityQueue";
-	const auto objectLocations    = "objectLocations";
-	const auto roomDescriptions   = "roomDescriptions";
+	const auto log                = "log";
 	const auto navigationEnabled  = "navEnabled";
+	const auto objectLocations    = "objectLocations";
 	const auto playTime           = "playTime";
 	const auto properties         = "properties";
-	const auto log                = "log";
+	const auto roomDescriptions   = "roomDescriptions";
+	const auto visitedRooms       = "visitedRooms";
 
 } // namespace ID
 

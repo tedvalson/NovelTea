@@ -113,6 +113,30 @@ const std::shared_ptr<ObjectList> &Room::getObjectList() const
 	return m_objectList;
 }
 
+int Room::visitCount() const
+{
+	if (!visited())
+		return 0;
+	return GSave->data()[ID::visitedRooms][getId()].ToInt();
+}
+
+bool Room::visited() const
+{
+	return GSave->data()[ID::visitedRooms].hasKey(getId());
+}
+
+void Room::resetVisitCount()
+{
+	if (visited())
+		GSave->data()[ID::visitedRooms].erase(getId());
+}
+
+void Room::incrementVisitCount()
+{
+	int prev = visitCount();
+	GSave->data()[ID::visitedRooms][getId()] = prev + 1;
+}
+
 std::string Room::getDescription() const
 {
 	try {
@@ -127,6 +151,7 @@ std::string Room::getDescription() const
 	}
 }
 
+// Sync to changes in SaveData
 void Room::sync()
 {
 	m_objectList->sync();
