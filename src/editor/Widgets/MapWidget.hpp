@@ -2,8 +2,10 @@
 #define MAPWIDGET_HPP
 
 #include "EditorTabWidget.hpp"
+#include "Map/FlowScene.hpp"
 #include <NovelTea/Map.hpp>
 #include <QWidget>
+#include <QMenu>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
@@ -23,15 +25,23 @@ public:
 	Type getType() const override;
 
 private slots:
-	void on_pushButton_clicked();
+	void on_actionChangeRoomName_triggered();
+	void on_actionEditScript_triggered();
+	void on_toolButton_clicked();
+
+	void nodeContextMenu(Node& n, const QPointF& pos);
 
 private:
 	void saveData() const override;
 	void loadData() override;
 
 	Ui::MapWidget *ui;
+	QMenu *m_menu;
+
+	Node *m_node;
 
 	std::shared_ptr<NovelTea::Map> m_map;
+	FlowScene m_scene;
 };
 
 #endif // MapWIDGET_HPP

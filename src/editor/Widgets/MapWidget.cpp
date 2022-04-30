@@ -1,8 +1,10 @@
 #include "MapWidget.hpp"
 #include "ui_MapWidget.h"
 #include "MainWindow.hpp"
+#include "Map/Node.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Map.hpp>
+#include <QInputDialog>
 #include <iostream>
 #include <QDebug>
 
@@ -13,10 +15,22 @@ MapWidget::MapWidget(const std::string &idName, QWidget *parent)
 	m_idName = idName;
 	ui->setupUi(this);
 	load();
+
+	ui->preview->setFPS(0);
+	ui->flowView->setScene(&m_scene);
+
+	ui->sidebar->hide();
+
+	m_menu = new QMenu;
+	m_menu->addAction(ui->actionChangeRoomName);
+	m_menu->addAction(ui->actionEditScript);
+
+	connect(ui->flowView->scene(), &FlowScene::nodeContextMenu, this, &MapWidget::nodeContextMenu);
 }
 
 MapWidget::~MapWidget()
 {
+	delete m_menu;
 	delete ui;
 }
 
@@ -50,6 +64,27 @@ void MapWidget::loadData()
 	}
 }
 
-void MapWidget::on_pushButton_clicked()
+void MapWidget::on_actionChangeRoomName_triggered()
 {
+	bool ok;
+	QString text = QInputDialog::getText(this, tr("Change Name"),
+			tr("Room Name:"), QLineEdit::Normal, m_node->name(), &ok);
+	if (ok)
+		m_node->setName(text);
+}
+
+void MapWidget::on_actionEditScript_triggered()
+{
+	ui->sidebar->show();
+}
+
+void MapWidget::on_toolButton_clicked()
+{
+	ui->sidebar->hide();
+}
+
+void MapWidget::nodeContextMenu(Node &n, const QPointF &pos)
+{
+	m_node = &n;
+	m_menu->exec(QCursor::pos());
 }

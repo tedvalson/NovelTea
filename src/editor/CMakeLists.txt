@@ -1,4 +1,4 @@
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5 5.3 COMPONENTS Core Widgets Gui)
 find_package(hunspell REQUIRED)
 
 include_directories(${HUNSPELL_INCLUDE_DIR})
@@ -79,7 +79,18 @@ set(SRC
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/TestsWidget.cpp
 	${SRCROOT}/Widgets/VerbWidget.cpp
-	${SRCROOT}/Widgets/Map/MapView.cpp
+	
+	${SRCROOT}/Widgets/Map/Connection.cpp
+	${SRCROOT}/Widgets/Map/ConnectionGraphicsObject.cpp
+	${SRCROOT}/Widgets/Map/ConnectionPainter.cpp
+	${SRCROOT}/Widgets/Map/FlowScene.cpp
+	${SRCROOT}/Widgets/Map/FlowView.cpp
+	${SRCROOT}/Widgets/Map/MapStyle.cpp
+	${SRCROOT}/Widgets/Map/Node.cpp
+	${SRCROOT}/Widgets/Map/NodeConnectionInteraction.cpp
+	${SRCROOT}/Widgets/Map/NodeGraphicsObject.cpp
+	${SRCROOT}/Widgets/Map/NodePainter.cpp
+	
 	${SRCROOT}/Widgets/QtPropertyBrowser/qteditorfactory.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertybrowser.cpp
 	${SRCROOT}/Widgets/QtPropertyBrowser/qtpropertybrowserutils.cpp
