@@ -5,6 +5,7 @@
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/CutsceneRenderer.hpp>
+#include <NovelTea/MapRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/json.hpp>
 
@@ -20,6 +21,7 @@ enum class StateEditorMode : int {
 	Cutscene = 1,
 	Room,
 	Dialogue,
+	Map,
 };
 
 class StateEditor : public State, public Scrollable
@@ -41,6 +43,7 @@ public:
 
 private:
 	CutsceneRenderer m_cutsceneRenderer;
+	MapRenderer m_mapRenderer;
 
 	ActiveText m_roomActiveText;
 	float m_scrollPos;

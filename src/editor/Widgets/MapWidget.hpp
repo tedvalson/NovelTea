@@ -28,8 +28,8 @@ private slots:
 	void on_actionChangeRoomName_triggered();
 	void on_actionEditScript_triggered();
 	void on_toolButton_clicked();
-
 	void nodeContextMenu(Node& n, const QPointF& pos);
+	void on_tabWidget_currentChanged(int index);
 
 private:
 	void saveData() const override;
@@ -40,7 +40,7 @@ private:
 
 	Node *m_node;
 
-	std::shared_ptr<NovelTea::Map> m_map;
+	mutable std::shared_ptr<NovelTea::Map> m_map;
 	FlowScene m_scene;
 };
 

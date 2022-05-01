@@ -5,8 +5,10 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Action.hpp>
+#include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Verb.hpp>
+#include <SFML/Graphics/VertexBuffer.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -27,13 +29,16 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_roomScrollbar.setColor(sf::Color(0, 0, 0, 40));
 	m_roomScrollbar.setAutoHide(false);
 	m_roomScrollbar.attachObject(this);
+
+//	m_mapRenderer.setZoomFactor(0.5f);
 }
 
 void StateEditor::render(sf::RenderTarget &target)
 {
-//	target.draw(text);
 	if (m_mode == StateEditorMode::Cutscene)
 		target.draw(m_cutsceneRenderer);
+	else if (m_mode == StateEditorMode::Map)
+		target.draw(m_mapRenderer);
 	else if (m_mode == StateEditorMode::Room)
 	{
 		target.draw(m_roomActiveText);
@@ -52,6 +57,8 @@ void StateEditor::resize(const sf::Vector2f &size)
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setFontSizeMultiplier(fontSizeMultiplier);
 	m_cutsceneRenderer.setSize(size);
+
+	m_mapRenderer.setSize(size);
 
 	m_roomScrollbar.setPosition(size.x - 4.f, 4.f);
 	m_roomScrollbar.setSize(sf::Vector2f(2, size.y - 8.f));
@@ -135,6 +142,15 @@ void *StateEditor::processData(void *data)
 			m_cutsceneRenderer.update(delta);
 		}
 	}
+	else if (m_mode == StateEditorMode::Map)
+	{
+		if (event == "map")
+		{
+			auto map = std::make_shared<Map>();
+			map->fromJson(jsonData["map"]);
+			m_mapRenderer.setMap(map);
+		}
+	}
 	else if (m_mode == StateEditorMode::Room)
 	{
 		if (event == "text")
@@ -165,13 +181,9 @@ bool StateEditor::processEvent(const sf::Event &event)
 		if (m_roomScrollbar.processEvent(event))
 			return true;
 	}
-
-	if (event.type == sf::Event::MouseButtonReleased)
+	else if (m_mode == StateEditorMode::Map)
 	{
-	}
-	if (event.type == sf::Event::MouseButtonPressed)
-	{
-
+		return m_mapRenderer.processEvent(event);
 	}
 
 	return true;
@@ -179,6 +191,8 @@ bool StateEditor::processEvent(const sf::Event &event)
 
 bool StateEditor::update(float delta)
 {
+	if (m_mode == StateEditorMode::Map)
+		m_mapRenderer.update(delta);
 	m_roomScrollbar.update(delta);
 	m_tweenManager.update(delta);
 	return true;

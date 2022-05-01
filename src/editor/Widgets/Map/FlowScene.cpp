@@ -1,5 +1,6 @@
 #include "FlowScene.hpp"
 
+#include <NovelTea/Map.hpp>
 #include <QtWidgets/QGraphicsSceneMoveEvent>
 #include <QtCore/QDebug>
 
@@ -23,6 +24,48 @@ FlowScene::FlowScene(QObject* parent)
 FlowScene::~FlowScene()
 {
 	clearScene();
+}
+
+std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity() const
+{
+	std::unordered_map<QUuid, int> n;
+	auto map = std::make_shared<NovelTea::Map>();
+	QPointF diff(10000, 10000);
+	for (auto &nodePair : _nodes)
+	{
+		Node* node = nodePair.second.get();
+		auto pos = node->nodeGraphicsObject().pos();
+		if (pos.x() < diff.x())
+			diff.setX(pos.x());
+		if (pos.y() < diff.y())
+			diff.setY(pos.y());
+	}
+	for (auto &nodePair : _nodes)
+	{
+		Node* node = nodePair.second.get();
+		auto name = node->name().toStdString();
+		auto pos = node->nodeGraphicsObject().pos() - diff;
+		pos /= Node::snapValue;
+		auto rect = sf::IntRect(pos.x(), pos.y(),
+					node->width() / Node::snapValue,
+					node->height() / Node::snapValue);
+		n[node->id()] = map->addRoom(name, rect);
+	}
+	for (auto &connPair : _connections)
+	{
+		Connection* c = connPair.second.get();
+		if (!c->complete())
+			continue;
+		int startNodeIndex = n[c->getNode(true)->id()];
+		int endNodeIndex = n[c->getNode(false)->id()];
+		QPoint pStart = c->getPortPoint(true);
+		QPoint pEnd = c->getPortPoint(false);
+		sf::Vector2i startPort(pStart.x(), pStart.y());
+		sf::Vector2i endPort(pEnd.x(), pEnd.y());
+		map->addConnection(startNodeIndex, endNodeIndex, startPort, endPort);
+	}
+	map->refresh();
+	return map;
 }
 
 //------------------------------------------------------------------------------

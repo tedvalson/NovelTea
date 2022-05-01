@@ -171,6 +171,7 @@ void NodeGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 													  _scene);
 				interaction.moveConnection(p);
 			}
+			_scene.nodeResized(_node, QSizeF(newW, newH));
 		}
 		update();
 		moveConnections();

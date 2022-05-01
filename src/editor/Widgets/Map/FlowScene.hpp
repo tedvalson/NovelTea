@@ -14,6 +14,10 @@ class NodeGraphicsObject;
 class Connection;
 class ConnectionGraphicsObject;
 
+namespace NovelTea {
+class Map;
+}
+
 /// Scene holds connections and nodes.
 class FlowScene : public QGraphicsScene
 {
@@ -24,6 +28,8 @@ public:
 	~FlowScene();
 
 public:
+	std::shared_ptr<NovelTea::Map> toMapEntity() const;
+
 	std::shared_ptr<Connection> createConnection(Node& node,
 												 QPoint portPoint);
 
@@ -75,6 +81,7 @@ Q_SIGNALS:
 	void connectionCreated(Connection const& c);
 	void connectionDeleted(Connection const& c);
 	void nodeMoved(Node& n, const QPointF& newLocation);
+	void nodeResized(Node& n, const QSizeF& newSize);
 	void nodeDoubleClicked(Node& n);
 	void connectionHovered(Connection& c, QPoint screenPos);
 	void nodeHovered(Node& n, QPoint screenPos);

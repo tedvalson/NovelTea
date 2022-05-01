@@ -22,6 +22,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Game.cpp
 	${SRCROOT}/json.cpp
 	${SRCROOT}/Map.cpp
+	${SRCROOT}/MapRenderer.cpp
 	${SRCROOT}/MapRoom.cpp
 	${SRCROOT}/Object.cpp
 	${SRCROOT}/ObjectList.cpp

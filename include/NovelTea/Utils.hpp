@@ -4,6 +4,7 @@
 #include <SFML/Graphics/Text.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <vector>
+#include <memory>
 #include <string>
 
 #define ADD_ACCESSOR(type, name, var) \
@@ -14,6 +15,11 @@
 	color = getFunc(); \
 	color.a = std::max(std::min(newValues[0] * maxValue / 255.f, 255.f), 0.f); \
 	setFunc(color);
+
+template<typename T>
+using SharedVector = std::vector<std::shared_ptr<T>>;
+template<typename T>
+using UniqueVector = std::vector<std::unique_ptr<T>>;
 
 namespace NovelTea
 {
