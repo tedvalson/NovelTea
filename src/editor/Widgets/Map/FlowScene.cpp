@@ -49,7 +49,7 @@ std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity() const
 		auto rect = sf::IntRect(pos.x(), pos.y(),
 					node->width() / Node::snapValue,
 					node->height() / Node::snapValue);
-		n[node->id()] = map->addRoom(name, rect);
+		n[node->id()] = map->addRoom(name, rect, node->getRoomIds(), node->getScript(), 0);
 	}
 	for (auto &connPair : _connections)
 	{
@@ -62,7 +62,7 @@ std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity() const
 		QPoint pEnd = c->getPortPoint(false);
 		sf::Vector2i startPort(pStart.x(), pStart.y());
 		sf::Vector2i endPort(pEnd.x(), pEnd.y());
-		map->addConnection(startNodeIndex, endNodeIndex, startPort, endPort);
+		map->addConnection(startNodeIndex, endNodeIndex, startPort, endPort, c->getScript(), 0);
 	}
 	map->refresh();
 	return map;
@@ -143,7 +143,7 @@ void FlowScene::removeNode(Node& node)
 	// call signal
 	nodeDeleted(node);
 
-	auto const& nodeEntries = node.getEntries();
+	auto const nodeEntries = node.getEntries();
 
 	for (auto& pair : nodeEntries) {
 		deleteConnection(*pair.second);

@@ -2,6 +2,7 @@
 #include "ui_MapWidget.h"
 #include "MainWindow.hpp"
 #include "Map/Node.hpp"
+#include "../Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Map.hpp>
 #include <NovelTea/States/StateEditor.hpp>
@@ -12,6 +13,8 @@
 MapWidget::MapWidget(const std::string &idName, QWidget *parent)
 : EditorTabWidget(parent)
 , ui(new Ui::MapWidget)
+, m_node(nullptr)
+, m_connection(nullptr)
 {
 	m_idName = idName;
 	ui->setupUi(this);
@@ -29,6 +32,8 @@ MapWidget::MapWidget(const std::string &idName, QWidget *parent)
 
 	FlowScene* scene = ui->flowView->scene();
 	connect(scene, &FlowScene::nodeContextMenu, this, &MapWidget::nodeContextMenu);
+	connect(scene, &FlowScene::connectionContextMenu, this, &MapWidget::connectionContextMenu);
+	connect(scene, &FlowScene::selectionChanged, this, &MapWidget::selectionChanged);
 }
 
 MapWidget::~MapWidget()
@@ -49,6 +54,7 @@ EditorTabWidget::Type MapWidget::getType() const
 
 void MapWidget::saveData() const
 {
+	updateSelectedObject();
 	auto map = ui->flowView->scene()->toMapEntity();
 	if (map)
 	{
@@ -81,6 +87,8 @@ void MapWidget::loadData()
 		auto& node = scene->createNode();
 		auto& ngo = node.nodeGraphicsObject();
 		node.setName(QString::fromStdString(room->name));
+		node.setScript(room->script);
+		node.setRoomIds(room->roomIds);
 		node.setHeight(Node::snapValue * r.height);
 		node.setWidth(Node::snapValue * r.width);
 		ngo.setPos(Node::snapValue * r.left, Node::snapValue * r.top);
@@ -92,7 +100,8 @@ void MapWidget::loadData()
 		auto& nodeEnd = *nodes[c->roomEnd];
 		QPoint portStart(c->portStart.x, c->portStart.y);
 		QPoint portEnd(c->portEnd.x, c->portEnd.y);
-		scene->createConnection(nodeStart, portStart, nodeEnd, portEnd);
+		auto connection = scene->createConnection(nodeStart, portStart, nodeEnd, portEnd);
+		connection->setScript(c->script);
 	}
 
 	MODIFIER(scene, &FlowScene::nodeCreated);
@@ -101,6 +110,33 @@ void MapWidget::loadData()
 	MODIFIER(scene, &FlowScene::nodeMoved);
 	MODIFIER(scene, &FlowScene::connectionCreated);
 	MODIFIER(scene, &FlowScene::connectionDeleted);
+	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
+}
+
+void MapWidget::nodeContextMenu(Node &n, const QPointF &pos)
+{
+	updateSelectedObject();
+	m_node = &n;
+	ui->actionChangeRoomName->setVisible(true);
+	m_menu->exec(QCursor::pos());
+}
+
+void MapWidget::connectionContextMenu(Connection &c, const QPointF &pos)
+{
+	updateSelectedObject();
+	m_connection = &c;
+	ui->actionChangeRoomName->setVisible(false);
+	m_menu->exec(QCursor::pos());
+}
+
+void MapWidget::selectionChanged()
+{
+	updateSelectedObject();
+	m_connection = nullptr;
+	m_node = nullptr;
+	ui->listRooms->hide();
+	ui->toolBar->hide();
+	ui->sidebar->hide();
 }
 
 void MapWidget::on_actionChangeRoomName_triggered()
@@ -116,7 +152,25 @@ void MapWidget::on_actionChangeRoomName_triggered()
 
 void MapWidget::on_actionEditScript_triggered()
 {
+	// TODO: check for deleted objects / invalid ptr
+	ui->scriptEdit->blockSignals(true);
+	ui->listRooms->blockSignals(true);
+
 	ui->sidebar->show();
+	if (m_node) {
+		ui->listRooms->clear();
+		for (auto& roomId : m_node->getRoomIds())
+			ui->listRooms->addItem(QString::fromStdString(roomId));
+		ui->scriptEdit->setPlainText(QString::fromStdString(m_node->getScript()));
+		ui->listRooms->show();
+		ui->toolBar->show();
+	}
+	else if (m_connection) {
+		ui->scriptEdit->setPlainText(QString::fromStdString(m_connection->getScript()));
+	}
+
+	ui->scriptEdit->blockSignals(false);
+	ui->listRooms->blockSignals(false);
 }
 
 void MapWidget::on_toolButton_clicked()
@@ -124,18 +178,66 @@ void MapWidget::on_toolButton_clicked()
 	ui->sidebar->hide();
 }
 
-void MapWidget::nodeContextMenu(Node &n, const QPointF &pos)
-{
-	m_node = &n;
-	m_menu->exec(QCursor::pos());
-}
-
 void MapWidget::on_tabWidget_currentChanged(int index)
 {
 	if (ui->tabWidget->currentWidget() == ui->tabPreview)
 	{
+		updateSelectedObject();
 		m_map = ui->flowView->scene()->toMapEntity();
 		auto jdata = json({"event","map", "map",m_map->toJson()});
 		ui->preview->processData(jdata);
+	}
+}
+
+void MapWidget::on_actionAttachRoom_triggered()
+{
+	QWizard wizard;
+	auto page = new WizardPageActionSelect;
+
+	page->setFilterRegExp("Rooms");
+	page->allowCustomScript(false);
+
+	wizard.addPage(page);
+
+	if (wizard.exec() == QDialog::Accepted)
+	{
+		auto jval = page->getValue();
+		auto idName = QString::fromStdString(jval[NovelTea::ID::selectEntityId].ToString());
+		// Check if object already exists
+		for (int i = 0; i < ui->listRooms->count(); ++i)
+		{
+			auto item = ui->listRooms->item(i);
+			if (item->text() == idName)
+				return;
+		}
+
+		auto item = new QListWidgetItem(idName);
+		ui->listRooms->addItem(item);
+		setModified();
+	}
+}
+
+void MapWidget::on_actionDetachRoom_triggered()
+{
+	delete ui->listRooms->currentItem();
+	setModified();
+}
+
+void MapWidget::on_listRooms_currentRowChanged(int currentRow)
+{
+	ui->actionDetachRoom->setEnabled(currentRow >= 0);
+}
+
+void MapWidget::updateSelectedObject() const
+{
+	if (m_node) {
+		std::vector<std::string> roomIds;
+		for (int i = 0; i < ui->listRooms->count(); ++i)
+			roomIds.push_back(ui->listRooms->item(i)->text().toStdString());
+		m_node->setScript(ui->scriptEdit->toPlainText().toStdString());
+		m_node->setRoomIds(roomIds);
+	}
+	else if (m_connection) {
+		m_connection->setScript(ui->scriptEdit->toPlainText().toStdString());
 	}
 }

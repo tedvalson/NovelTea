@@ -25,20 +25,29 @@ public:
 	Type getType() const override;
 
 private slots:
+	void nodeContextMenu(Node& n, const QPointF& pos);
+	void connectionContextMenu(Connection& c, const QPointF& pos);
+	void selectionChanged();
 	void on_actionChangeRoomName_triggered();
 	void on_actionEditScript_triggered();
 	void on_toolButton_clicked();
-	void nodeContextMenu(Node& n, const QPointF& pos);
 	void on_tabWidget_currentChanged(int index);
+	void on_actionAttachRoom_triggered();
+	void on_actionDetachRoom_triggered();
+	void on_listRooms_currentRowChanged(int currentRow);
 
 private:
+	void updateSelectedObject() const;
+
 	void saveData() const override;
 	void loadData() override;
 
+private:
 	Ui::MapWidget *ui;
 	QMenu *m_menu;
 
 	Node *m_node;
+	Connection *m_connection;
 
 	mutable std::shared_ptr<NovelTea::Map> m_map;
 	FlowScene m_scene;

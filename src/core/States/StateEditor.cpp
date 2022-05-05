@@ -30,7 +30,8 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_roomScrollbar.setAutoHide(false);
 	m_roomScrollbar.attachObject(this);
 
-//	m_mapRenderer.setZoomFactor(0.5f);
+	m_mapRenderer.setMiniMapMode(false, 0.f);
+	m_mapRenderer.setModeLocked(true);
 }
 
 void StateEditor::render(sf::RenderTarget &target)

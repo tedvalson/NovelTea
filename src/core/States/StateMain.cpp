@@ -6,6 +6,7 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
+#include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
@@ -31,7 +32,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_cutsceneSpeed(1.f)
 {
 	ScriptMan.reset();
-
 
 	auto &text = m_iconSave.getText();
 	text.setString(L"\uf0c7");
@@ -141,6 +141,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Dialogue setup
 	m_dialogueRenderer.hide(0.f);
 
+	// Map setup
+	m_mapRenderer.setMiniMapMode(true);
+
 	// TextOverlay setup
 	m_textOverlay.hide(0.f);
 	GGame->setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
@@ -176,6 +179,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		);
 		GSave->data()[ID::entrypointMetadata] = metaData;
 		GSave->data()[ID::playTime] = m_playTime;
+		GSave->data()[ID::map] = m_map ? m_map->getId() : "";
 		m_iconSave.show(0.4f, 3.f);
 	});
 
@@ -184,6 +188,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto &entryMetadata = GSave->data()[ID::entrypointMetadata];
 	if (!saveEntryPoint.IsEmpty())
 	{
+		auto mapId = GSave->data()[ID::map].ToString();
+		GGame->setMapId(mapId);
+
 		auto roomId = entryMetadata[0].ToString();
 		if (!roomId.empty())
 		{
@@ -205,7 +212,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	processTest();
 }
-
 
 void StateMain::render(sf::RenderTarget &target)
 {
@@ -246,6 +252,7 @@ void StateMain::render(sf::RenderTarget &target)
 	if (!ActiveGame->getObjectList()->items().empty())
 		target.draw(m_buttonInventory);
 	target.draw(m_inventory);
+	target.draw(m_mapRenderer);
 
 	target.draw(m_textOverlay);
 	target.draw(m_buttonSettings);
@@ -317,6 +324,15 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_dialogueRenderer.setSize(size);
 	m_dialogueRenderer.setFontSizeMultiplier(fontSizeMultiplier);
 
+	// Map
+	auto navSize = m_navigation.getSize();
+	m_mapRenderer.setMiniMapSize(navSize);
+	m_mapRenderer.setSize(size);
+	if (portrait)
+		m_mapRenderer.setMiniMapPosition(sf::Vector2f(toolbarPadding*2 + navSize.x, m_navigation.getPosition().y));
+	else
+		m_mapRenderer.setMiniMapPosition(sf::Vector2f(toolbarPadding, m_navigation.getPosition().y - navSize.y));
+
 	m_textOverlay.setSize(size);
 
 	m_verbList.setScreenSize(size);
@@ -380,6 +396,9 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 				nextRoom->runScriptAfterEnter();
 			}
 			nextRoom->incrementVisitCount();
+			if (auto map = GGame->getMap()) {
+				m_mapRenderer.setActiveRoomId(nextRoom->getId());
+			}
 		}
 		m_mode = mode;
 		showToolbar();
@@ -419,14 +438,17 @@ void StateMain::setMode(const json &jEntity)
 void StateMain::showToolbar(float duration)
 {
 	m_navigation.show(duration);
+	TweenEngine::Tween::to(m_mapRenderer, MapRenderer::ALPHA, duration)
+		.target(255.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonSettings, Button::ALPHA, duration)
-		.target(255.f)
+		.target(180.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonTextLog, Button::ALPHA, duration)
-		.target(255.f)
+		.target(180.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonInventory, Button::TEXTCOLOR_ALPHA, duration)
 		.target(255.f)
@@ -445,6 +467,9 @@ void StateMain::showToolbar(float duration)
 void StateMain::hideToolbar(float duration)
 {
 	m_navigation.hide(duration);
+	TweenEngine::Tween::to(m_mapRenderer, MapRenderer::ALPHA, duration)
+		.target(0.f)
+		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
@@ -458,10 +483,10 @@ void StateMain::hideToolbar(float duration)
 		.target(0.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonSettings, Button::TEXTCOLOR_ALPHA, duration)
-		.target(80.f)
+		.target(60.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_buttonTextLog, Button::TEXTCOLOR_ALPHA, duration)
-		.target(80.f)
+		.target(60.f)
 		.start(m_tweenManager);
 	TweenEngine::Tween::to(m_bgToolbar, TweenRectangleShape::FILL_COLOR_ALPHA, duration)
 		.target(0.f)
@@ -574,8 +599,10 @@ bool StateMain::processTestSteps()
 			}
 
 			if (waiting && waitTimeLeft > 0.f) {
-				if (GGame->getTimerManager()->update(0.01f))
+				if (GGame->getTimerManager()->update(0.01f)) {
 					updateRoomText();
+					m_mapRenderer.reset();
+				}
 				waitTimeLeft -= 0.01f;
 			}
 		}
@@ -691,7 +718,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 
 	if (success)
 	{
-		// Don't record during playback to avoid dupliating all actions
+		// Don't record during playback to avoid duplicating all actions
 		if (m_testRecordMode && !m_testPlaybackMode)
 		{
 			auto jobjects = sj::Array();
@@ -741,6 +768,7 @@ bool StateMain::gotoNextEntity()
 		setMode(Mode::Room, GGame->getRoom()->getId());
 		return true;
 	}
+
 	setMode(mode, nextEntity->getId());
 	return true;
 }
@@ -815,6 +843,7 @@ void StateMain::callOverlayFunc()
 	if (m_textOverlayFunc.type() != DukValue::UNDEFINED){
 		ScriptMan->call<void>(m_textOverlayFunc);
 		updateRoomText();
+		m_mapRenderer.reset();
 	}
 }
 
@@ -915,6 +944,10 @@ bool StateMain::processEvent(const sf::Event &event)
 	}
 	else if (m_mode == Mode::Room)
 	{
+		if (m_map) {
+			if (!m_mapRenderer.processEvent(event))
+				return false;
+		}
 		if (m_verbList.processEvent(event)) {
 			return false;
 		} else {
@@ -930,6 +963,8 @@ bool StateMain::processEvent(const sf::Event &event)
 		if (GGame->isNavigationEnabled())
 			m_navigation.processEvent(event);
 
+		if (m_buttonInventory.processEvent(event))
+			return true;
 		if (m_roomScrollbar.processEvent(event))
 		{
 			if (event.type != sf::Event::MouseButtonPressed)
@@ -982,11 +1017,18 @@ bool StateMain::update(float delta)
 	if (GGame->isQuitting())
 		quit();
 
+	auto map = GGame->getMap();
+	if (map && (!m_map || m_map->getId() != map->getId())) {
+		m_map = map;
+		m_mapRenderer.setMap(m_map);
+	}
+
 	m_playTime += delta;
 
 	m_dialogueRenderer.update(delta);
 	if (m_mode == Mode::Room)
 	{
+		m_mapRenderer.update(delta);
 		if (m_quickVerbPressed && m_clock.getElapsedTime() > sf::milliseconds(800))
 		{
 			auto callback = m_verbList.getSelectCallback();
@@ -1031,8 +1073,10 @@ bool StateMain::update(float delta)
 
 	GGame->getNotificationManager()->update(delta);
 	if (GGame->getTimerManager()->update(delta)) {
-		if (m_mode == Mode::Room)
+		if (m_mode == Mode::Room) {
 			updateRoomText();
+			m_mapRenderer.reset();
+		}
 	}
 
 	m_tweenManager.update(delta);

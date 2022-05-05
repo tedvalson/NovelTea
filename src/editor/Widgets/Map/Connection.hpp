@@ -65,6 +65,9 @@ public:
 	bool hovered() const { return _hovered; }
 	void setHovered(bool hovered) { _hovered = hovered; }
 
+	void setScript(const std::string &script) { _script = script; }
+	const std::string &getScript() const { return _script; }
+
 public:
 	void interactWithNode(Node* node);
 	void setLastHoveredNode(Node* node);
@@ -91,4 +94,7 @@ private:
 	double _lineWidth;
 	bool _hovered;
 	Node* _lastHoveredNode;
+
+	std::string _script;
+	int _type;
 };

@@ -44,6 +44,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 	void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
 private:
 	void addGraphicsEffect();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>450</width>
+    <width>563</width>
     <height>327</height>
    </rect>
   </property>
@@ -119,6 +119,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>0</height>
+           </size>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <property name="spacing">
             <number>0</number>
@@ -143,7 +149,7 @@
              <property name="topMargin">
               <number>0</number>
              </property>
-             <item>
+             <item alignment="Qt::AlignRight|Qt::AlignVCenter">
               <widget class="QToolButton" name="toolButton">
                <property name="text">
                 <string>Hide</string>
@@ -159,7 +165,26 @@
             </layout>
            </item>
            <item>
-            <widget class="QTextEdit" name="textEdit"/>
+            <widget class="ScriptEdit" name="scriptEdit"/>
+           </item>
+           <item>
+            <widget class="QListWidget" name="listRooms">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>200</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolBar" name="toolBar">
+             <property name="floatable">
+              <bool>false</bool>
+             </property>
+             <addaction name="actionAttachRoom"/>
+             <addaction name="actionDetachRoom"/>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -241,6 +266,29 @@
     <string>Edit Script</string>
    </property>
   </action>
+  <action name="actionAttachRoom">
+   <property name="icon">
+    <iconset theme="add">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Attach Room</string>
+   </property>
+  </action>
+  <action name="actionDetachRoom">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="remove">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -259,6 +307,11 @@
    <extends>QWidget</extends>
    <header>Widgets/NovelTeaWidget.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Widgets/ScriptEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

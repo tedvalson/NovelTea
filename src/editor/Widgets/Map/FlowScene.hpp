@@ -80,6 +80,7 @@ Q_SIGNALS:
 	void nodeDeleted(Node& n);
 	void connectionCreated(Connection const& c);
 	void connectionDeleted(Connection const& c);
+	void connectionContextMenu(Connection& c, const QPointF& pos);
 	void nodeMoved(Node& n, const QPointF& newLocation);
 	void nodeResized(Node& n, const QSizeF& newSize);
 	void nodeDoubleClicked(Node& n);

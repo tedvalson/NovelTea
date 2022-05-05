@@ -7,6 +7,7 @@
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/CutsceneRenderer.hpp>
 #include <NovelTea/DialogueRenderer.hpp>
+#include <NovelTea/MapRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
@@ -113,6 +114,10 @@ private:
 	// Dialogue
 	std::shared_ptr<Dialogue> m_dialogue;
 	DialogueRenderer m_dialogueRenderer;
+
+	// Map
+	std::shared_ptr<Map> m_map;
+	MapRenderer m_mapRenderer;
 
 	float m_actionBuilderShowPos;
 

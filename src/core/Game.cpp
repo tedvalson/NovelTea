@@ -1,5 +1,6 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
+#include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Timer.hpp>
@@ -15,6 +16,7 @@ namespace NovelTea
 Game::Game()
 	: m_objectList(nullptr)
 	, m_propertyList(nullptr)
+	, m_map(nullptr)
 	, m_room(nullptr)
 	, m_autosaveEnabled(true)
 	, m_quitting(false)
@@ -67,7 +69,6 @@ void Game::reset()
 
 void Game::setRoomId(const std::string &roomId)
 {
-	m_roomId = roomId;
 	m_room = m_saveData->get<Room>(roomId);
 }
 
@@ -81,6 +82,34 @@ const std::shared_ptr<Room> &Game::getRoom() const
 	if (m_room)
 		m_room->sync();
 	return m_room;
+}
+
+void Game::setMapId(const std::string &mapId)
+{
+	if (m_map && m_map->getId() == mapId)
+		return;
+
+	if (mapId.empty())
+		m_map = nullptr;
+	else
+		m_map = m_saveData->get<Map>(mapId);
+}
+
+const std::string Game::getMapId() const
+{
+	if (!m_map)
+		return "";
+	return m_map->getId();
+}
+
+void Game::setMap(const std::shared_ptr<Map> &map)
+{
+	m_map = map;
+}
+
+const std::shared_ptr<Map> &Game::getMap() const
+{
+	return m_map;
 }
 
 DukValue Game::prop(const std::string &key, const DukValue &defaultValue)

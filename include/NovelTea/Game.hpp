@@ -16,6 +16,7 @@ using MessageCallback = std::function<void(const std::vector<std::string> &messa
 using SaveCallback = std::function<void()>;
 
 class ObjectList;
+class Map;
 class Room;
 class SaveData;
 class ScriptManager;
@@ -35,6 +36,11 @@ public:
 	void setRoomId(const std::string &roomId);
 	void setRoom(const std::shared_ptr<Room> &room);
 	const std::shared_ptr<Room> &getRoom() const;
+
+	void setMapId(const std::string &mapId);
+	const std::string getMapId() const;
+	void setMap(const std::shared_ptr<Map> &map);
+	const std::shared_ptr<Map> &getMap() const;
 
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
 	void setProp(const std::string &key, const DukValue &value);
@@ -79,8 +85,8 @@ public:
 private:
 	std::shared_ptr<ObjectList> m_objectList;
 	std::shared_ptr<PropertyList> m_propertyList;
+	std::shared_ptr<Map> m_map;
 	std::shared_ptr<Room> m_room;
-	std::string m_roomId;
 	std::queue<std::shared_ptr<Entity>> m_entityQueue;
 	bool m_autosaveEnabled;
 	bool m_quitting;

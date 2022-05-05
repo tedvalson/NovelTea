@@ -30,7 +30,7 @@ ConnectionGraphicsObject::ConnectionGraphicsObject(FlowScene& scene,
 
 // addGraphicsEffect();
 
-	setZValue(2.0);
+	setZValue(-1);
 }
 
 ConnectionGraphicsObject::~ConnectionGraphicsObject()
@@ -138,6 +138,7 @@ void ConnectionGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 		}
 		_connection.setEndPoint(
 			_connection.startNodeEmpty(), pos);
+		setZValue(2.0);
 	}
 
 	update();
@@ -180,6 +181,11 @@ void ConnectionGraphicsObject::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 	update();
 	_scene.connectionHoverLeft(connection());
 	event->accept();
+}
+
+void ConnectionGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+	_scene.connectionContextMenu(connection(), mapToScene(event->pos()));
 }
 
 void ConnectionGraphicsObject::addGraphicsEffect()

@@ -69,6 +69,13 @@ public:
 
 	QRect resizeRect() const;
 
+	void setScript(const std::string &script) { _script = script; }
+	const std::string &getScript() const { return _script; }
+
+	void setRoomIds(const std::vector<std::string> &roomIds) { _roomIds = roomIds; }
+	const std::vector<std::string> &getRoomIds() const { return _roomIds; }
+
+public:
 	static unsigned int borderThickness;
 	static unsigned int snapValue;
 
@@ -109,4 +116,8 @@ private:
 	ReactToConnectionState _reaction;
 	QPoint _reactingPoint;
 	bool _resizing;
+
+	std::string _script;
+	std::vector<std::string> _roomIds;
+	int _type;
 };
