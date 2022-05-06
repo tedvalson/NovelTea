@@ -45,7 +45,7 @@ public:
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
 	void setProp(const std::string &key, const DukValue &value);
 
-	void pushNextEntity(std::shared_ptr<Entity> entity);
+	void pushNextEntity(std::shared_ptr<Entity> entity, const DukValue &value = DukValue());
 	void pushNextEntityJson(json jentity);
 	std::shared_ptr<Entity> popNextEntity();
 
@@ -57,14 +57,6 @@ public:
 
 	void quit();
 	bool isQuitting() const;
-
-	void enableNavigation();
-	void disableNavigation();
-	bool isNavigationEnabled() const;
-
-	void enableSave();
-	void disableSave();
-	bool isSaveEnabled() const;
 
 	void spawnNotification(const std::string &message, bool addToLog = true, int durationMs = 0);
 
@@ -78,6 +70,9 @@ public:
 	std::shared_ptr<TextLog> getTextLog();
 
 	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
+	ADD_ACCESSOR(bool, MinimapEnabled, m_minimapEnabled)
+	ADD_ACCESSOR(bool, NavigationEnabled, m_navigationEnabled)
+	ADD_ACCESSOR(bool, SaveEnabled, m_saveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
 	ADD_ACCESSOR(SaveCallback, SaveCallback, m_saveCallback)
@@ -87,9 +82,10 @@ private:
 	std::shared_ptr<PropertyList> m_propertyList;
 	std::shared_ptr<Map> m_map;
 	std::shared_ptr<Room> m_room;
-	std::queue<std::shared_ptr<Entity>> m_entityQueue;
+	std::queue<std::pair<std::shared_ptr<Entity>, DukValue>> m_entityQueue;
 	bool m_autosaveEnabled;
 	bool m_quitting;
+	bool m_minimapEnabled;
 	bool m_navigationEnabled;
 	bool m_saveEnabled;
 	bool m_initialized;

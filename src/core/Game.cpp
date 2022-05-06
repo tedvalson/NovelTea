@@ -20,6 +20,7 @@ Game::Game()
 	, m_room(nullptr)
 	, m_autosaveEnabled(true)
 	, m_quitting(false)
+	, m_minimapEnabled(true)
 	, m_navigationEnabled(true)
 	, m_saveEnabled(true)
 	, m_initialized(false)
@@ -122,9 +123,9 @@ void Game::setProp(const std::string &key, const DukValue &value)
 	m_propertyList->set(key, value);
 }
 
-void Game::pushNextEntity(std::shared_ptr<Entity> entity)
+void Game::pushNextEntity(std::shared_ptr<Entity> entity, const DukValue &value)
 {
-	m_entityQueue.push(entity);
+	m_entityQueue.emplace(entity, value);
 }
 
 void Game::pushNextEntityJson(json jentity)
@@ -136,17 +137,22 @@ std::shared_ptr<Entity> Game::popNextEntity()
 {
 	if (m_entityQueue.empty())
 		return nullptr;
-	auto nextEntity = m_entityQueue.front();
+	auto nextPair = m_entityQueue.front();
+	auto& nextEntity = nextPair.first;
+	auto& callback = nextPair.second;
 	m_entityQueue.pop();
+	if (callback.type() != DukValue::UNDEFINED)
+		m_scriptManager->call<void>(callback);
 	return nextEntity;
 }
 
 void Game::save(int slot)
 {
-	if (!isSaveEnabled())
+	if (!getSaveEnabled())
 		return;
 	if (m_saveCallback)
 		m_saveCallback();
+	m_saveData->data()[ID::mapEnabled] = m_minimapEnabled;
 	m_saveData->data()[ID::navigationEnabled] = m_navigationEnabled;
 	m_saveData->data()[ID::log] = m_textLog->toJson();
 	m_saveData->save(slot);
@@ -187,6 +193,7 @@ void Game::syncToSave()
 	m_objectList->attach("player", "inv");
 	m_propertyList->attach("game", "globals");
 	m_textLog->fromJson(m_saveData->data()[ID::log]);
+	m_minimapEnabled = m_saveData->data()[ID::mapEnabled].ToBool();
 	m_navigationEnabled = m_saveData->data()[ID::navigationEnabled].ToBool();
 }
 
@@ -198,36 +205,6 @@ void Game::quit()
 bool Game::isQuitting() const
 {
 	return m_quitting;
-}
-
-void Game::enableNavigation()
-{
-	m_navigationEnabled = true;
-}
-
-void Game::disableNavigation()
-{
-	m_navigationEnabled = false;
-}
-
-bool Game::isNavigationEnabled() const
-{
-	return m_navigationEnabled;
-}
-
-void Game::enableSave()
-{
-	m_saveEnabled = true;
-}
-
-void Game::disableSave()
-{
-	m_saveEnabled = false;
-}
-
-bool Game::isSaveEnabled() const
-{
-	return m_saveEnabled;
 }
 
 void Game::spawnNotification(const std::string &message, bool addToLog, int durationMs)

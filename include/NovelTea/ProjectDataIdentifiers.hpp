@@ -73,6 +73,7 @@ namespace ID
 	const auto entityQueue        = "entityQueue";
 	const auto log                = "log";
 	const auto map                = "map";
+	const auto mapEnabled         = "mapEnabled";
 	const auto navigationEnabled  = "navEnabled";
 	const auto objectLocations    = "objectLocations";
 	const auto playTime           = "playTime";

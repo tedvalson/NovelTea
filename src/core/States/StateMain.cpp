@@ -45,7 +45,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	// Navigation setup
 	// Set all Navigation transforms before getGlobalBounds is called
-	m_navigation.hide(0.f);
 	m_navigation.setCallback([this](int direction, const json &jentity){
 		if (m_testRecordMode) {
 			json jtestItem({
@@ -89,7 +88,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	});
 
 	// Inventory setup
-	m_inventory.hide(0.f);
 	m_inventory.setCallback([this](const std::string &objectId, float posX, float posY){
 		if (m_actionBuilder.isVisible()) {
 			m_actionBuilder.setObject(objectId);
@@ -177,9 +175,10 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			static_cast<int>(entityType),
 			entityId
 		);
+		auto& map = GGame->getMap();
 		GSave->data()[ID::entrypointMetadata] = metaData;
 		GSave->data()[ID::playTime] = m_playTime;
-		GSave->data()[ID::map] = m_map ? m_map->getId() : "";
+		GSave->data()[ID::map] = map ? map->getId() : "";
 		m_iconSave.show(0.4f, 3.f);
 	});
 
@@ -188,10 +187,12 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	auto &entryMetadata = GSave->data()[ID::entrypointMetadata];
 	if (!saveEntryPoint.IsEmpty())
 	{
+		auto roomId = entryMetadata[0].ToString();
 		auto mapId = GSave->data()[ID::map].ToString();
 		GGame->setMapId(mapId);
+		m_mapRenderer.setActiveRoomId(roomId);
+		m_mapRenderer.setMap(GGame->getMap());
 
-		auto roomId = entryMetadata[0].ToString();
 		if (!roomId.empty())
 		{
 			GGame->pushNextEntity(GSave->get<Room>(roomId));
@@ -209,6 +210,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		GGame->pushNextEntityJson(projEntryPoint);
 
 	m_playTime = GSave->data()[ID::playTime].ToFloat();
+
+	hideToolbar(0.f);
 
 	processTest();
 }
@@ -384,6 +387,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		auto room = GGame->getRoom();
 		if (room->getId() != idName)
 		{
+			m_mapRenderer.setActiveRoomId(nextRoom->getId());
 			if (room->getId().empty()) {
 				GGame->setRoom(nextRoom);
 			} else {
@@ -396,9 +400,6 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 				nextRoom->runScriptAfterEnter();
 			}
 			nextRoom->incrementVisitCount();
-			if (auto map = GGame->getMap()) {
-				m_mapRenderer.setActiveRoomId(nextRoom->getId());
-			}
 		}
 		m_mode = mode;
 		showToolbar();
@@ -437,10 +438,10 @@ void StateMain::setMode(const json &jEntity)
 
 void StateMain::showToolbar(float duration)
 {
-	m_navigation.show(duration);
-	TweenEngine::Tween::to(m_mapRenderer, MapRenderer::ALPHA, duration)
-		.target(255.f)
-		.start(m_tweenManager);
+	if (GGame->getNavigationEnabled())
+		m_navigation.show(duration);
+	if (GGame->getMinimapEnabled())
+		m_mapRenderer.show(duration);
 	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
@@ -467,9 +468,7 @@ void StateMain::showToolbar(float duration)
 void StateMain::hideToolbar(float duration)
 {
 	m_navigation.hide(duration);
-	TweenEngine::Tween::to(m_mapRenderer, MapRenderer::ALPHA, duration)
-		.target(0.f)
-		.start(m_tweenManager);
+	m_mapRenderer.hide(duration);
 	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
@@ -625,7 +624,7 @@ bool StateMain::processTestSteps()
 		}
 		else if (type == "move")
 		{
-			success = GGame->isNavigationEnabled();
+			success = GGame->getNavigationEnabled();
 			if (success) {
 				auto direction = jstep["direction"].ToInt();
 				auto &paths = m_navigation.getPaths();
@@ -763,9 +762,11 @@ bool StateMain::gotoNextEntity()
 	else if (nextEntity->entityId() == Dialogue::id)
 		mode = Mode::Dialogue;
 	else if (nextEntity->entityId() == Script::id) {
+		auto roomId = GGame->getRoom()->getId();
 		auto script = std::static_pointer_cast<Script>(nextEntity);
 		ScriptMan->runScript(script);
-		setMode(Mode::Room, GGame->getRoom()->getId());
+		if (!roomId.empty())
+			setMode(Mode::Room, roomId);
 		return true;
 	}
 
@@ -893,6 +894,7 @@ void StateMain::quit()
 	m_verbList.hide(duration);
 	m_actionBuilder.hide(duration);
 	m_navigation.hide(duration);
+	m_mapRenderer.hide(duration);
 
 	TweenEngine::Tween::mark()
 		.delay(duration)
@@ -944,7 +946,7 @@ bool StateMain::processEvent(const sf::Event &event)
 	}
 	else if (m_mode == Mode::Room)
 	{
-		if (m_map) {
+		if (GGame->getMinimapEnabled() && m_mapRenderer.getMap()) {
 			if (!m_mapRenderer.processEvent(event))
 				return false;
 		}
@@ -960,7 +962,7 @@ bool StateMain::processEvent(const sf::Event &event)
 
 		if (m_actionBuilder.processEvent(event))
 			return true;
-		if (GGame->isNavigationEnabled())
+		if (GGame->getNavigationEnabled())
 			m_navigation.processEvent(event);
 
 		if (m_buttonInventory.processEvent(event))
@@ -1017,18 +1019,16 @@ bool StateMain::update(float delta)
 	if (GGame->isQuitting())
 		quit();
 
-	auto map = GGame->getMap();
-	if (map && (!m_map || m_map->getId() != map->getId())) {
-		m_map = map;
-		m_mapRenderer.setMap(m_map);
-	}
+	auto& map = GGame->getMap();
+	auto& oldMap = m_mapRenderer.getMap();
+	if (map && (!oldMap || oldMap->getId() != map->getId()))
+		m_mapRenderer.setMap(map);
 
 	m_playTime += delta;
 
 	m_dialogueRenderer.update(delta);
 	if (m_mode == Mode::Room)
 	{
-		m_mapRenderer.update(delta);
 		if (m_quickVerbPressed && m_clock.getElapsedTime() > sf::milliseconds(800))
 		{
 			auto callback = m_verbList.getSelectCallback();
@@ -1036,10 +1036,15 @@ bool StateMain::update(float delta)
 			if (callback)
 				callback(ProjData[ID::quickVerb].ToString());
 		}
-		if (GGame->isNavigationEnabled() && !m_quitting)
+		if (GGame->getNavigationEnabled() && !m_quitting)
 			m_navigation.show();
 		else
 			m_navigation.hide();
+
+		if (GGame->getMinimapEnabled() && !m_quitting)
+			m_mapRenderer.show();
+		else
+			m_mapRenderer.hide();
 	}
 
 	if (m_mode == Mode::Cutscene)
@@ -1067,6 +1072,7 @@ bool StateMain::update(float delta)
 	m_verbList.update(delta);
 	m_actionBuilder.update(delta);
 	m_inventory.update(delta);
+	m_mapRenderer.update(delta);
 	m_navigation.update(delta);
 	m_textOverlay.update(delta);
 	m_iconSave.update(delta);

@@ -13,6 +13,7 @@ namespace NovelTea
 MapRenderer::MapRenderer()
 : m_needsUpdate(true)
 , m_nameAlpha(255.f)
+, m_zoomFactor(3.f)
 , m_map(nullptr)
 , m_dragging(false)
 , m_miniMapMode(true)
@@ -35,7 +36,6 @@ MapRenderer::MapRenderer()
 
 	setSize({300.f, 300.f});
 	setMiniMapSize({100.f, 100.f});
-	setZoomFactor(3.f);
 	setAlpha(255.f);
 }
 
@@ -178,6 +178,7 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 	}
 
 	m_needsUpdate = true;
+	reset(0.f);
 }
 
 const std::shared_ptr<Map> &MapRenderer::getMap() const
@@ -187,6 +188,8 @@ const std::shared_ptr<Map> &MapRenderer::getMap() const
 
 void MapRenderer::setActiveRoomId(const std::string &roomId)
 {
+	if (roomId == m_activeRoomId)
+		return;
 	m_activeRoomId = roomId;
 	reset();
 }
@@ -203,36 +206,14 @@ void MapRenderer::setMiniMapMode(bool enable, float duration)
 	m_miniMapMode = enable;
 	m_modeTransitioning = true;
 
-	if (enable) {
-		TweenEngine::Tween::to(*this, MINIMAP_RADIUS, duration)
-			.target(0.f)
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_modeTransitioning = false;
-			})
-			.start(m_tweenManager);
-		TweenEngine::Tween::to(m_buttonClose, Button::ALPHA, duration)
-			.target(0.f)
-			.start(m_tweenManager);
-		reset();
-	} else {
-		auto c = m_miniMapPosition + m_miniMapSize / 2.f + (m_mapSize - m_size) / 2.f;
-		TweenEngine::Tween::to(*this, VIEW_CENTER, duration)
-			.target(c.x, c.y)
-			.start(m_tweenManager);
-		// TODO: need reasonable zoom value for all DPIs
-		TweenEngine::Tween::to(*this, VIEW_ZOOM, duration)
-			.target(1.f)
-			.start(m_tweenManager);
-		TweenEngine::Tween::to(*this, MINIMAP_RADIUS, duration)
-			.target(std::max(m_size.x, m_size.y))
-			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
-				m_modeTransitioning = false;
-			})
-			.start(m_tweenManager);
-		TweenEngine::Tween::to(m_buttonClose, Button::ALPHA, duration)
-			.target(255.f)
-			.start(m_tweenManager);
-	}
+	TweenEngine::Tween::mark()
+		.delay(duration)
+		.setCallback(TweenEngine::TweenCallback::BEGIN, [this](TweenEngine::BaseTween*){
+			m_modeTransitioning = false;
+		})
+		.start(m_tweenManager);
+
+	reset(duration);
 }
 
 bool MapRenderer::getMiniMapMode() const
@@ -246,7 +227,7 @@ void MapRenderer::setMiniMapPosition(const sf::Vector2f &position)
 	m_needsUpdate = true;
 
 	m_bounds = {m_miniMapPosition.x, m_miniMapPosition.y, m_miniMapSize.x, m_miniMapSize.y};
-	updateRadius();
+	reset(0.f);
 }
 
 const sf::Vector2f &MapRenderer::getMiniMapPosition() const
@@ -262,8 +243,7 @@ void MapRenderer::setMiniMapSize(const sf::Vector2f &size)
 	m_miniMapSize = size;
 	m_bounds = {m_miniMapPosition.x, m_miniMapPosition.y, m_miniMapSize.x, m_miniMapSize.y};
 
-	updateRadius();
-	reset();
+	reset(0.f);
 }
 
 const sf::Vector2f &MapRenderer::getMiniMapSize() const
@@ -315,6 +295,7 @@ void MapRenderer::setSize(const sf::Vector2f &size)
 	m_buttonClose.setPosition(size.x - m_buttonClose.getSize().x * 1.3f, m_buttonClose.getSize().y * 0.3f);
 
 	m_needsUpdate = true;
+	reset(0.f);
 }
 
 const sf::Vector2f &MapRenderer::getSize() const
@@ -337,19 +318,25 @@ float MapRenderer::getAlpha() const
 }
 
 // Should be called whenever script engine is used.
-// Reevaluates all scripts.
-void MapRenderer::reset()
+// Reevaluates all scripts and resets positioning.
+void MapRenderer::reset(float duration)
 {
+	if (!m_map)
+		return;
+
 	for (auto& room : m_rooms)
 	{
 		room->shape->setFillColor(sf::Color(200, 200, 200));
 	}
 
-	sf::Vector2f center;
+	// These values are for fullscreen map mode
+	sf::Vector2f center = m_miniMapPosition + m_miniMapSize / 2.f + (m_mapSize - m_size) / 2.f;
+	float zoomFactor = 1.f; // TODO: need reasonable zoom value for all DPIs
+	float minimapRadius = std::max(m_size.x, m_size.y);
+	float buttonAlpha = 255.f;
 
 	if (!m_activeRoomId.empty())
 	{
-		float zoom = 2.f;
 		auto& indexSet = m_roomIdHashmap[m_activeRoomId];
 		for (int i : indexSet) {
 			auto& room = m_rooms[i];
@@ -357,22 +344,35 @@ void MapRenderer::reset()
 			auto& pos = shape->getPosition();
 			auto& size = shape->getSize();
 			shape->setFillColor(sf::Color::White);
-			center = sf::Vector2f(pos.x + size.x / 2.f, pos.y + size.y / 2.f);
-			zoom = std::max(size.x, size.y) / m_miniMapSize.x * 2.f;
+			if (m_miniMapMode) {
+				center = sf::Vector2f(pos.x + size.x / 2.f, pos.y + size.y / 2.f);
+				zoomFactor = std::max(size.x, size.y) / m_miniMapSize.x * 2.f;
+			}
 		}
-
-		TweenEngine::Tween::to(*this, VIEW_ZOOM, 1.f)
-			.target(zoom)
-			.start(m_tweenManager);
-	}
-	else
-	{
-		center = sf::Vector2f(m_size.x / 2.f, m_size.y / 2.f);
 	}
 
-	TweenEngine::Tween::to(*this, VIEW_CENTER, 1.f)
+	if (m_miniMapMode) {
+		minimapRadius = 0.f;
+		buttonAlpha = 0.f;
+		if (m_activeRoomId.empty()) {
+			center = sf::Vector2f(m_size.x / 2.f, m_size.y / 2.f); // TODO: Fix this?
+		}
+	}
+
+	TweenEngine::Tween::to(*this, VIEW_CENTER, duration)
 		.target(center.x, center.y)
 		.start(m_tweenManager);
+	TweenEngine::Tween::to(*this, VIEW_ZOOM, duration)
+		.target(zoomFactor)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(*this, MINIMAP_RADIUS, duration)
+		.target(minimapRadius)
+		.start(m_tweenManager);
+	TweenEngine::Tween::to(m_buttonClose, Button::ALPHA, duration)
+		.target(buttonAlpha)
+		.start(m_tweenManager);
+
+	updateRadius();
 }
 
 void MapRenderer::drawToTexture() const
@@ -402,7 +402,7 @@ void MapRenderer::drawToTexture() const
 
 void MapRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-	if (!m_map)
+	if (!m_map || getAlpha() <= 0.f)
 		return;
 	if (m_needsUpdate) {
 		m_needsUpdate = false;

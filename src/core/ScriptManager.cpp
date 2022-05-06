@@ -330,12 +330,6 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::pushNextEntity, "pushNext");
 	dukglue_register_method(m_context, &Game::execMessageCallback, "message");
 	dukglue_register_method(m_context, &Game::execMessageCallbackLog, "messageLog");
-	dukglue_register_method(m_context, &Game::enableNavigation, "enableNavigation");
-	dukglue_register_method(m_context, &Game::disableNavigation, "disableNavigation");
-	dukglue_register_method(m_context, &Game::isNavigationEnabled, "isNavigationEnabled");
-	dukglue_register_method(m_context, &Game::enableSave, "enableSave");
-	dukglue_register_method(m_context, &Game::disableSave, "disableSave");
-	dukglue_register_method(m_context, &Game::isSaveEnabled, "isSaveEnabled");
 	dukglue_register_method(m_context, &Game::spawnNotification, "spawnNotification");
 	dukglue_register_method(m_context, &Game::prop, "prop");
 	dukglue_register_method(m_context, &Game::setProp, "setProp");
@@ -345,6 +339,10 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::quit, "quit");
 	dukglue_register_property(m_context, &Game::getObjectList, nullptr, "inventory");
 	dukglue_register_property(m_context, &Game::getRoom, nullptr, "room");
+	dukglue_register_property(m_context, &Game::getMapId, &Game::setMapId, "mapId");
+	dukglue_register_property(m_context, &Game::getMinimapEnabled, &Game::setMinimapEnabled, "minimap");
+	dukglue_register_property(m_context, &Game::getNavigationEnabled, &Game::setNavigationEnabled, "navigation");
+	dukglue_register_property(m_context, &Game::getSaveEnabled, &Game::setSaveEnabled, "saveEnabled");
 
 	// Script
 	dukglue_register_global(m_context, this, "Script");

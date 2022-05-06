@@ -88,7 +88,7 @@ public:
 	void setAlpha(float alpha) override;
 	float getAlpha() const override;
 
-	void reset();
+	void reset(float duration = 1.f);
 
 protected:
 	void drawToTexture() const;

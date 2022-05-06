@@ -116,7 +116,6 @@ private:
 	DialogueRenderer m_dialogueRenderer;
 
 	// Map
-	std::shared_ptr<Map> m_map;
 	MapRenderer m_mapRenderer;
 
 	float m_actionBuilderShowPos;
