@@ -155,9 +155,10 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 		for (auto& roomId : room->roomIds)
 			m_roomIdHashmap[roomId].insert(m_rooms.size());
 
-		m_rooms.emplace_back(new Room{std::unique_ptr<TweenRectangleShape>(shape),
+		m_rooms.emplace_back(new Room{room,
+									  std::unique_ptr<TweenRectangleShape>(shape),
 									  std::unique_ptr<ActiveText>(text),
-									  room->roomIds, room->script, false, false});
+									  false, false});
 	}
 
 	for (auto& conn : map->getConnections())
@@ -178,7 +179,7 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 		buffer->create(2);
 		if (buffer->update(v))
 			m_paths.emplace_back(new Path{
-					{m_rooms[conn->roomStart], m_rooms[conn->roomEnd], "", false},
+					{conn, m_rooms[conn->roomStart], m_rooms[conn->roomEnd], false},
 					std::unique_ptr<sf::VertexBuffer>(buffer)
 			});
 	}
@@ -332,7 +333,13 @@ void MapRenderer::reset(float duration)
 
 	for (auto& room : m_rooms)
 	{
+		room->visible = m_map->evalVisibility(room->room);
 		room->shape->setFillColor(sf::Color(200, 200, 200));
+	}
+
+	for (auto& path : m_paths)
+	{
+		path->connection.visible = m_map->evalVisibility(path->connection.connection);
 	}
 
 	// These values are for fullscreen map mode
@@ -391,13 +398,16 @@ void MapRenderer::drawToTexture() const
 	auto origView = m_renderTexture.getView();
 	m_renderTexture.setView(m_view);
 	for (auto& room : m_rooms)
-		m_renderTexture.draw(*room->shape);
+		if (room->visible)
+			m_renderTexture.draw(*room->shape);
 	for (auto& path : m_paths)
-		m_renderTexture.draw(*path->buffer);
+		if (path->connection.visible)
+			m_renderTexture.draw(*path->buffer);
 	for (auto& doorway : m_doorways)
 		m_renderTexture.draw(*doorway->shape);
 	for (auto& room : m_rooms)
-		m_renderTexture.draw(*room->text);
+		if (room->visible)
+			m_renderTexture.draw(*room->text);
 
 	m_renderTexture.setView(origView);
 	if (m_miniMapMode || m_modeTransitioning)

@@ -387,7 +387,6 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		auto room = GGame->getRoom();
 		if (room->getId() != idName)
 		{
-			m_mapRenderer.setActiveRoomId(nextRoom->getId());
 			if (room->getId().empty()) {
 				GGame->setRoom(nextRoom);
 			} else {
@@ -400,6 +399,8 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 				GGame->setRoom(nextRoom);
 				nextRoom->runScriptAfterEnter();
 			}
+			// Should be set after Game room is changed, for map script eval purposes
+			m_mapRenderer.setActiveRoomId(nextRoom->getId());
 		}
 		m_mode = mode;
 		showToolbar();

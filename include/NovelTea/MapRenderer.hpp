@@ -18,6 +18,8 @@ namespace NovelTea
 
 class ActiveText;
 class Map;
+class MapRoom;
+class MapConnection;
 
 class MapRenderer : public sf::Drawable, public Hideable
 {
@@ -28,18 +30,17 @@ public:
 	static const int MINIMAP_RADIUS = 15;
 
 	struct Room {
+		std::shared_ptr<MapRoom> room;
 		std::unique_ptr<TweenRectangleShape> shape;
 		std::unique_ptr<ActiveText> text;
-		std::vector<std::string> roomIds;
-		std::string script;
 		bool visible;
 		bool active;
 	};
 
 	struct Connection {
+		std::shared_ptr<MapConnection> connection;
 		std::unique_ptr<Room>& roomStart;
 		std::unique_ptr<Room>& roomEnd;
-		std::string script;
 		bool visible;
 	};
 

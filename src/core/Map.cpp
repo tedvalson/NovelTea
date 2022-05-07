@@ -1,4 +1,6 @@
 #include <NovelTea/Map.hpp>
+#include <NovelTea/Game.hpp>
+#include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
@@ -9,7 +11,7 @@ Map::Map()
 
 size_t Map::jsonSize() const
 {
-	return 5;
+	return 7;
 }
 
 json Map::toJson() const
@@ -36,6 +38,8 @@ json Map::toJson() const
 		m_id,
 		m_parentId,
 		m_properties,
+		m_defaultRoomScript,
+		m_defaultPathScript,
 		jrooms,
 		jconnections
 	);
@@ -49,8 +53,10 @@ void Map::loadJson(const json &j)
 	m_id = j[0].ToString();
 	m_parentId = j[1].ToString();
 	m_properties = j[2];
+	m_defaultRoomScript = j[3].ToString();
+	m_defaultPathScript = j[4].ToString();
 	// Rooms
-	for (auto &jroom : j[3].ArrayRange()) {
+	for (auto &jroom : j[5].ArrayRange()) {
 		if (jroom.size() != 8)
 			continue;
 		std::vector<std::string> roomIds;
@@ -60,7 +66,7 @@ void Map::loadJson(const json &j)
 		addRoom(jroom[0].ToString(), rect, roomIds, jroom[6].ToString(), jroom[7].ToInt());
 	}
 	// Connections
-	for (auto &jconn : j[4].ArrayRange()) {
+	for (auto &jconn : j[6].ArrayRange()) {
 		if (jconn.size() != 8)
 			continue;
 		addConnection(jconn[0].ToInt(), jconn[1].ToInt(),
@@ -68,7 +74,6 @@ void Map::loadJson(const json &j)
 			{jconn[4].ToInt(), jconn[5].ToInt()},
 			jconn[6].ToString(), jconn[7].ToInt());
 	}
-	refresh();
 }
 
 EntityType Map::entityType() const
@@ -91,8 +96,42 @@ void Map::addConnection(int roomStart, int roomEnd, const sf::Vector2i &portStar
 	m_connections.emplace_back(c);
 }
 
-void Map::refresh()
+bool Map::evalVisibility(std::shared_ptr<MapRoom> &room) const
 {
+	auto result = true;
+	auto script = getDefaultRoomScript();
+	if (!room->script.empty())
+		script = room->script;
+	if (!script.empty()) {
+		script = "function _f(roomIds){\n"+script+"\nreturn true;}";
+		try {
+			result = ActiveGame->getScriptManager()->call<bool>(script, "_f", room->roomIds);
+		} catch (std::exception &e) {
+			std::cerr << "evalVisibility Room (" << room->name << ") " << e.what() << std::endl;
+			return false;
+		}
+	}
+	return result;
+}
+
+bool Map::evalVisibility(std::shared_ptr<MapConnection> &connection) const
+{
+	auto result = true;
+	auto script = getDefaultPathScript();
+	if (!connection->script.empty())
+		script = connection->script;
+	if (!script.empty()) {
+		script = "function _f(startRoomIds,endRoomIds){\n"+script+"\nreturn true;}";
+		try {
+			auto& roomStart = m_rooms[connection->roomStart];
+			auto& roomEnd = m_rooms[connection->roomEnd];
+			result = ActiveGame->getScriptManager()->call<bool>(script, "_f", roomStart->roomIds, roomEnd->roomIds);
+		} catch (std::exception &e) {
+			std::cerr << "evalVisibility Path: " << e.what() << std::endl;
+			return false;
+		}
+	}
+	return result;
 }
 
 } // namespace NovelTea

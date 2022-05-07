@@ -37,6 +37,7 @@ private slots:
 	void on_listRooms_currentRowChanged(int currentRow);
 
 private:
+	void updateMap() const;
 	void updateSelectedObject() const;
 
 	void saveData() const override;
@@ -47,7 +48,9 @@ private:
 	QMenu *m_menu;
 
 	Node *m_node;
+	Node *m_pendingNode;
 	Connection *m_connection;
+	Connection *m_pendingConnection;
 
 	mutable std::shared_ptr<NovelTea::Map> m_map;
 	FlowScene m_scene;

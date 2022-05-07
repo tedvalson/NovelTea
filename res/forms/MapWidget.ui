@@ -222,6 +222,26 @@
        <property name="bottomMargin">
         <number>4</number>
        </property>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Default Room Script</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ScriptEdit" name="scriptRoomDefault"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Default Path Script</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ScriptEdit" name="scriptPathDefault"/>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabProperties">

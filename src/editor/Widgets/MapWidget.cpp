@@ -14,7 +14,9 @@ MapWidget::MapWidget(const std::string &idName, QWidget *parent)
 : EditorTabWidget(parent)
 , ui(new Ui::MapWidget)
 , m_node(nullptr)
+, m_pendingNode(nullptr)
 , m_connection(nullptr)
+, m_pendingConnection(nullptr)
 {
 	m_idName = idName;
 	ui->setupUi(this);
@@ -55,15 +57,9 @@ EditorTabWidget::Type MapWidget::getType() const
 void MapWidget::saveData() const
 {
 	updateSelectedObject();
-	auto map = ui->flowView->scene()->toMapEntity();
-	if (map)
-	{
-		map->setId(m_map->getId());
-		map->setParentId(m_map->getParentId());
-		m_map = map;
-		m_map->setProperties(ui->propertyEditor->getValue());
-        Proj.set<NovelTea::Map>(m_map, idName());
-	}
+	updateMap();
+	if (m_map)
+		Proj.set<NovelTea::Map>(m_map, idName());
 }
 
 void MapWidget::loadData()
@@ -76,6 +72,9 @@ void MapWidget::loadData()
 		setModified();
         m_map = std::make_shared<NovelTea::Map>();
 	}
+
+	ui->scriptRoomDefault->setPlainText(QString::fromStdString(m_map->getDefaultRoomScript()));
+	ui->scriptPathDefault->setPlainText(QString::fromStdString(m_map->getDefaultPathScript()));
 
 	FlowScene* scene = ui->flowView->scene();
 	scene->clearScene();
@@ -111,29 +110,28 @@ void MapWidget::loadData()
 	MODIFIER(scene, &FlowScene::connectionCreated);
 	MODIFIER(scene, &FlowScene::connectionDeleted);
 	MODIFIER(ui->scriptEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptRoomDefault, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptPathDefault, &ScriptEdit::textChanged);
 }
 
 void MapWidget::nodeContextMenu(Node &n, const QPointF &pos)
 {
-	updateSelectedObject();
-	m_node = &n;
+	m_pendingNode = &n;
 	ui->actionChangeRoomName->setVisible(true);
 	m_menu->exec(QCursor::pos());
 }
 
 void MapWidget::connectionContextMenu(Connection &c, const QPointF &pos)
 {
-	updateSelectedObject();
-	m_connection = &c;
+	m_pendingConnection = &c;
 	ui->actionChangeRoomName->setVisible(false);
 	m_menu->exec(QCursor::pos());
 }
 
 void MapWidget::selectionChanged()
 {
-	updateSelectedObject();
-	m_connection = nullptr;
-	m_node = nullptr;
+	m_pendingConnection = nullptr;
+	m_pendingNode = nullptr;
 	ui->listRooms->hide();
 	ui->toolBar->hide();
 	ui->sidebar->hide();
@@ -145,7 +143,7 @@ void MapWidget::on_actionChangeRoomName_triggered()
 	QString text = QInputDialog::getText(this, tr("Change Name"),
 			tr("Room Name:"), QLineEdit::Normal, m_node->name(), &ok);
 	if (ok) {
-		m_node->setName(text);
+		m_pendingNode->setName(text);
 		setModified();
 	}
 }
@@ -153,8 +151,12 @@ void MapWidget::on_actionChangeRoomName_triggered()
 void MapWidget::on_actionEditScript_triggered()
 {
 	// TODO: check for deleted objects / invalid ptr
+	updateSelectedObject();
 	ui->scriptEdit->blockSignals(true);
 	ui->listRooms->blockSignals(true);
+
+	m_node = m_pendingNode;
+	m_connection = m_pendingConnection;
 
 	ui->sidebar->show();
 	if (m_node) {
@@ -183,7 +185,7 @@ void MapWidget::on_tabWidget_currentChanged(int index)
 	if (ui->tabWidget->currentWidget() == ui->tabPreview)
 	{
 		updateSelectedObject();
-		m_map = ui->flowView->scene()->toMapEntity();
+		updateMap();
 		auto jdata = json({"event","map", "map",m_map->toJson()});
 		ui->preview->processData(jdata);
 	}
@@ -226,6 +228,20 @@ void MapWidget::on_actionDetachRoom_triggered()
 void MapWidget::on_listRooms_currentRowChanged(int currentRow)
 {
 	ui->actionDetachRoom->setEnabled(currentRow >= 0);
+}
+
+void MapWidget::updateMap() const
+{
+	auto map = ui->flowView->scene()->toMapEntity();
+	if (map)
+	{
+		map->setId(m_map->getId());
+		map->setParentId(m_map->getParentId());
+		m_map = map;
+		m_map->setProperties(ui->propertyEditor->getValue());
+		m_map->setDefaultRoomScript(ui->scriptRoomDefault->toPlainText().toStdString());
+		m_map->setDefaultPathScript(ui->scriptPathDefault->toPlainText().toStdString());
+	}
 }
 
 void MapWidget::updateSelectedObject() const

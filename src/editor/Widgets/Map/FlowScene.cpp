@@ -64,7 +64,6 @@ std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity() const
 		sf::Vector2i endPort(pEnd.x(), pEnd.y());
 		map->addConnection(startNodeIndex, endNodeIndex, startPort, endPort, c->getScript(), 0);
 	}
-	map->refresh();
 	return map;
 }
 
