@@ -140,8 +140,14 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 		text->setAlpha(m_nameAlpha);
 		text->setFontSizeMultiplier(0.7f);
 		text->setText(room->name, fmt);
+		while (text->getLocalBounds().width > shape->getSize().x) {
+			fmt.size(fmt.size() - 1);
+			text->setText(room->name, fmt);
+		}
 		text->setSize(shape->getSize());
 		text->setPosition(sf::Vector2f(rect.left, rect.top) * multiplier);
+		text->move({(shape->getSize().x - text->getLocalBounds().width) / 2.f,
+				   (shape->getSize().y - text->getLocalBounds().height) / 2.f});
 
 		m_mapSize.x = std::max(m_mapSize.x, shape->getPosition().x + shape->getSize().x);
 		m_mapSize.y = std::max(m_mapSize.y, shape->getPosition().y + shape->getSize().y);
