@@ -301,10 +301,7 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &Room::setPathScript, "setPathScript");
 	dukglue_register_method(m_context, &Room::enablePath, "enablePath");
 	dukglue_register_method(m_context, &Room::disablePath, "disablePath");
-	dukglue_register_method(m_context, &Room::visited, "visited");
-	dukglue_register_method(m_context, &Room::visitCount, "visitCount");
-	dukglue_register_method(m_context, &Room::resetVisitCount, "resetVisitCount");
-	dukglue_register_method(m_context, &Room::incrementVisitCount, "incrementVisitCount");
+	dukglue_register_property(m_context, &Room::getVisitCount, &Room::setVisitCount, "visitCount");
 	dukglue_register_property(m_context, &Room::getObjectList, nullptr, "objects");
 
 	// Script

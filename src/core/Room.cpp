@@ -113,28 +113,20 @@ const std::shared_ptr<ObjectList> &Room::getObjectList() const
 	return m_objectList;
 }
 
-int Room::visitCount() const
+void Room::setVisitCount(int count)
 {
-	if (!visited())
+	auto& j = GSave->data()[ID::visitedRooms];
+	if (count <= 0)
+		j.erase(getId());
+	j[getId()] = count;
+}
+
+int Room::getVisitCount() const
+{
+	auto& j = GSave->data()[ID::visitedRooms];
+	if (!j.hasKey(getId()))
 		return 0;
-	return GSave->data()[ID::visitedRooms][getId()].ToInt();
-}
-
-bool Room::visited() const
-{
-	return GSave->data()[ID::visitedRooms].hasKey(getId());
-}
-
-void Room::resetVisitCount()
-{
-	if (visited())
-		GSave->data()[ID::visitedRooms].erase(getId());
-}
-
-void Room::incrementVisitCount()
-{
-	int prev = visitCount();
-	GSave->data()[ID::visitedRooms][getId()] = prev + 1;
+	return j[getId()].ToInt();
 }
 
 std::string Room::getDescription() const
