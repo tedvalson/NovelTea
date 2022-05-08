@@ -141,7 +141,7 @@ void MapWidget::on_actionChangeRoomName_triggered()
 {
 	bool ok;
 	QString text = QInputDialog::getText(this, tr("Change Name"),
-			tr("Room Name:"), QLineEdit::Normal, m_node->name(), &ok);
+			tr("Room Name:"), QLineEdit::Normal, m_pendingNode->name(), &ok);
 	if (ok) {
 		m_pendingNode->setName(text);
 		setModified();
