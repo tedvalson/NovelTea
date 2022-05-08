@@ -58,8 +58,7 @@ public:
 	QRectF boundingRect() const;
 
 	// TODO removed default QTransform()
-	QPointF portScenePosition(QPoint portPoint,
-							  QTransform const& t = QTransform()) const;
+	QPointF portScenePosition(QPoint portPoint) const;
 
 	bool checkHitScenePoint(QPoint& result, QPointF point,
 							QTransform const& t = QTransform()) const;

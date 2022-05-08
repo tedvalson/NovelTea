@@ -134,4 +134,35 @@ bool Map::evalVisibility(std::shared_ptr<MapConnection> &connection) const
 	return result;
 }
 
+// Code/logic duplicated in Connection::checkDoorway()
+#define BOTTOM(r) (r.top + r.height)
+#define RIGHT(r) (r.left + r.width)
+bool Map::checkForDoor(const MapConnection &c, sf::FloatRect &doorRect) const
+{
+	bool isDoor = false;
+	auto& rectStart = m_rooms[c.roomStart]->rect;
+	auto& rectEnd = m_rooms[c.roomEnd]->rect;
+	sf::Vector2i pStart(rectStart.left + c.portStart.x, rectStart.top + c.portStart.y);
+	sf::Vector2i pEnd(rectEnd.left + c.portEnd.x, rectEnd.top + c.portEnd.y);
+	doorRect = sf::FloatRect(std::min(pStart.x, pEnd.x),
+						 std::min(pStart.y, pEnd.y),
+						 std::abs(pStart.x - pEnd.x) + 1,
+						 std::abs(pStart.y - pEnd.y) + 1);
+	bool bothVertical = (c.portStart.x == 0 || c.portStart.x == rectStart.width-1) &&
+			(c.portEnd.x == 0 || c.portEnd.x == rectEnd.width-1);
+	if (bothVertical && (RIGHT(rectStart) == rectEnd.left || rectStart.left == RIGHT(rectEnd)) &&
+			(doorRect.top >= rectStart.top && doorRect.top >= rectEnd.top) &&
+			(BOTTOM(doorRect) <= BOTTOM(rectStart) && BOTTOM(doorRect) <= BOTTOM(rectEnd)))
+		isDoor = true;
+	if (!isDoor) {
+		bool bothHorizontal = (c.portStart.y == 0 || c.portStart.y == rectStart.height-1) &&
+				(c.portEnd.y == 0 || c.portEnd.y == rectEnd.height-1);
+		if (bothHorizontal && (rectStart.top == BOTTOM(rectEnd) || BOTTOM(rectStart) == rectEnd.top) &&
+				(doorRect.left >= std::max(rectStart.left, rectEnd.left)) &&
+				(RIGHT(doorRect) <= std::min(RIGHT(rectStart), RIGHT(rectEnd))))
+			isDoor = true;
+	}
+	return isDoor;
+}
+
 } // namespace NovelTea

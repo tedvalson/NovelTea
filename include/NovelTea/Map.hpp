@@ -45,6 +45,8 @@ public:
 	const SharedVector<MapRoom> &getRooms() const {return m_rooms;}
 	const SharedVector<MapConnection> &getConnections() const {return m_connections;}
 
+	bool checkForDoor(const MapConnection &connection, sf::FloatRect &doorRect) const;
+
 	ADD_ACCESSOR(std::string, DefaultRoomScript, m_defaultRoomScript)
 	ADD_ACCESSOR(std::string, DefaultPathScript, m_defaultPathScript)
 

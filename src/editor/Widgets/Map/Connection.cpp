@@ -18,6 +18,8 @@ Connection::Connection(Node& node, QPoint portPoint)
 : _uid(QUuid::createUuid())
 , _startNode(&node)
 , _startPortPoint(portPoint)
+, _connectionGraphicsObject(nullptr)
+, _doorwayGraphicsObject(nullptr)
 , _start(0, 0)
 , _end(0, 0)
 , _lineWidth(3.0)
@@ -41,6 +43,9 @@ Connection::~Connection()
 {
 	if (complete())
 		connectionMadeIncomplete(*this);
+
+	if (_doorwayGraphicsObject)
+		delete _doorwayGraphicsObject;
 
 	if (_startNode) {
 		_startNode->nodeGraphicsObject().update();
@@ -78,11 +83,9 @@ void Connection::setGraphicsObject(
 
 		auto node = getNode(true);
 
-		QTransform nodeSceneTransform =
-			node->nodeGraphicsObject().sceneTransform();
 
 		QPointF pos =
-			node->portScenePosition(attachedPoint, nodeSceneTransform);
+			node->portScenePosition(attachedPoint);
 
 		_connectionGraphicsObject->setPos(pos);
 	}
@@ -108,6 +111,8 @@ void Connection::setNodeToPort(Node& node, bool startNode, QPoint portPoint)
 		_endPortPoint = portPoint;
 
 	updated(*this);
+	checkDoorway();
+
 	if (complete() && wasIncomplete) {
 		connectionCompleted(*this);
 	}
@@ -212,6 +217,54 @@ std::pair<QPointF, QPointF> Connection::pointsC1C2() const
 	QPointF c2(_start.x() - horizontalOffset, _start.y() - verticalOffset);
 
 	return std::make_pair(c1, c2);
+}
+
+// Code/logic duplicated in Map::checkForDoor()
+void Connection::checkDoorway() const
+{
+	if (_doorwayGraphicsObject) {
+		delete _doorwayGraphicsObject;
+		_doorwayGraphicsObject = nullptr;
+	}
+	if (!complete())
+		return;
+
+	QRectF startRect = _startNode->nodeGraphicsObject().sceneBoundingRect();
+	QRectF endRect = _endNode->nodeGraphicsObject().sceneBoundingRect();
+	QPointF startPoint = _startNode->portScenePosition(_startPortPoint);
+	QPointF endPoint = _endNode->portScenePosition(_endPortPoint);
+	QRectF doorRect(std::min(startPoint.x(), endPoint.x()) - 0.5f * Node::snapValue,
+					std::min(startPoint.y(), endPoint.y()) - 0.5f * Node::snapValue,
+					std::abs(startPoint.x() - endPoint.x()) + Node::snapValue,
+					std::abs(startPoint.y() - endPoint.y()) + Node::snapValue);
+	bool door = false;
+	bool doorError = true;
+	if (_startNode->onHorizontalWall(_startPortPoint) && _endNode->onHorizontalWall(_endPortPoint))
+	{
+		if (startRect.top() == endRect.bottom() || startRect.bottom() == endRect.top())
+			door = true;
+		if ((doorRect.left() >= std::max(startRect.left(), endRect.left())) &&
+				(doorRect.right() <= std::min(startRect.right(), endRect.right())))
+			doorError = false;
+	}
+	if (!door && (_startNode->onVerticalWall(_startPortPoint) && _endNode->onVerticalWall(_endPortPoint)))
+	{
+		if (startRect.right() == endRect.left() || startRect.left() == endRect.right())
+			door = true;
+		if ((doorRect.top() >= std::max(startRect.top(), endRect.top())) &&
+				(doorRect.bottom() <= std::min(startRect.bottom(), endRect.bottom())))
+			doorError = false;
+	}
+
+	if (door)
+	{
+		if (_connectionGraphicsObject) {
+			const auto& scene = _connectionGraphicsObject->scene();
+			auto color = doorError ? QColor(255, 0, 0, 100) : QColor(0, 255, 0, 100);
+			_doorwayGraphicsObject = scene->addRect(doorRect, QPen(), QBrush(color));
+			_doorwayGraphicsObject->setZValue(5);
+		}
+	}
 }
 
 

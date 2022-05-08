@@ -3,6 +3,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QUuid>
 #include <QtCore/QVariant>
+#include <QGraphicsRectItem>
 #include <QPointF>
 #include <memory>
 
@@ -69,6 +70,8 @@ public:
 	const std::string &getScript() const { return _script; }
 
 public:
+	void checkDoorway() const;
+
 	void interactWithNode(Node* node);
 	void setLastHoveredNode(Node* node);
 	Node* lastHoveredNode() const { return _lastHoveredNode; }
@@ -87,6 +90,7 @@ private:
 	QPoint _endPortPoint;
 	QPoint _startPortPoint;
 	std::unique_ptr<ConnectionGraphicsObject> _connectionGraphicsObject;
+	mutable QGraphicsRectItem* _doorwayGraphicsObject;
 
 	// local object coordinates
 	QPointF _start;

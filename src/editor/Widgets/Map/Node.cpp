@@ -139,12 +139,12 @@ bool Node::onVerticalWall(const QPoint& p)
 
 QRectF Node::boundingRect() const { return QRectF(0.f, 0.f, _width, _height); }
 
-QPointF Node::portScenePosition(QPoint portPoint, const QTransform& t) const
+QPointF Node::portScenePosition(QPoint portPoint) const
 {
 	float length = snapValue;
 	QPointF result(length * portPoint.x() + length / 2.f,
 				   length * portPoint.y() + length / 2.f);
-	return t.map(result);
+	return nodeGraphicsObject().sceneTransform().map(result);
 }
 
 bool Node::checkHitScenePoint(QPoint& result, QPointF point,

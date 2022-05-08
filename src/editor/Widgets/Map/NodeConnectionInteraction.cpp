@@ -106,9 +106,7 @@ QPointF NodeConnectionInteraction::connectionEndScenePosition(
 
 QPointF NodeConnectionInteraction::nodePortScenePosition(QPoint portPoint) const
 {
-	QPointF p = _node->portScenePosition(portPoint);
-	NodeGraphicsObject& ngo = _node->nodeGraphicsObject();
-	return ngo.sceneTransform().map(p);
+	return _node->portScenePosition(portPoint);
 }
 
 QPoint NodeConnectionInteraction::nodePortPointUnderScenePoint(

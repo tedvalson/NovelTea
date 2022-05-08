@@ -243,14 +243,14 @@ void FlowScene::printInfo()
 
 void FlowScene::checkNodeDoorways(Node &n)
 {
-	qDebug() << "checkNodeDoorways";
-
+	auto& connections = n.getEntries();
+	for (auto& c : connections)
+		c.second->checkDoorway();
 }
 
 void FlowScene::checkConnectionDoorway(const Connection &c)
 {
-	qDebug() << "checkConnectionDoorway";
-
+	c.checkDoorway();
 }
 
 void FlowScene::setupConnectionSignals(Connection const& c)

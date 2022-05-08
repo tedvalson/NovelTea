@@ -165,23 +165,35 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 	{
 		auto& rectStart = rooms[conn->roomStart]->rect;
 		auto& rectEnd = rooms[conn->roomEnd]->rect;
-		sf::Vector2f startPos(convertVal(conn->portStart.x, rectStart.width) + rectStart.left,
-							  convertVal(conn->portStart.y, rectStart.height) + rectStart.top);
-		sf::Vector2f endPos(convertVal(conn->portEnd.x, rectEnd.width) + rectEnd.left,
-							  convertVal(conn->portEnd.y, rectEnd.height) + rectEnd.top);
+		sf::FloatRect doorRect;
 
-		auto buffer = new sf::VertexBuffer(sf::PrimitiveType::LineStrip, sf::VertexBuffer::Static);
-		sf::Vertex v[2];
-		v[0].position = startPos * multiplier;
-		v[0].color = sf::Color(100, 100, 100);
-		v[1].position = endPos * multiplier;
-		v[1].color = sf::Color(100, 100, 100);
-		buffer->create(2);
-		if (buffer->update(v))
-			m_paths.emplace_back(new Path{
+		if (map->checkForDoor(*conn, doorRect)) {
+			auto shape = new TweenRectangleShape;
+			shape->setPosition(sf::Vector2f{doorRect.left, doorRect.top} * multiplier);
+			shape->setSize(sf::Vector2f{doorRect.width, doorRect.height} * multiplier);
+			shape->setFillColor(sf::Color(200, 200, 200));
+			m_doorways.emplace_back(new Doorway{
 					{conn, m_rooms[conn->roomStart], m_rooms[conn->roomEnd], false},
-					std::unique_ptr<sf::VertexBuffer>(buffer)
+					std::unique_ptr<TweenRectangleShape>(shape)
 			});
+		} else {
+			sf::Vector2f startPos(convertVal(conn->portStart.x, rectStart.width) + rectStart.left,
+								  convertVal(conn->portStart.y, rectStart.height) + rectStart.top);
+			sf::Vector2f endPos(convertVal(conn->portEnd.x, rectEnd.width) + rectEnd.left,
+								  convertVal(conn->portEnd.y, rectEnd.height) + rectEnd.top);
+			auto buffer = new sf::VertexBuffer(sf::PrimitiveType::LineStrip, sf::VertexBuffer::Static);
+			sf::Vertex v[2];
+			v[0].position = startPos * multiplier;
+			v[0].color = sf::Color(100, 100, 100);
+			v[1].position = endPos * multiplier;
+			v[1].color = sf::Color(100, 100, 100);
+			buffer->create(2);
+			if (buffer->update(v))
+				m_paths.emplace_back(new Path{
+						{conn, m_rooms[conn->roomStart], m_rooms[conn->roomEnd], false},
+						std::unique_ptr<sf::VertexBuffer>(buffer)
+				});
+		}
 	}
 
 	m_needsUpdate = true;
@@ -404,7 +416,8 @@ void MapRenderer::drawToTexture() const
 		if (path->connection.visible)
 			m_renderTexture.draw(*path->buffer);
 	for (auto& doorway : m_doorways)
-		m_renderTexture.draw(*doorway->shape);
+		if (doorway->connection.visible)
+			m_renderTexture.draw(*doorway->shape);
 	for (auto& room : m_rooms)
 		if (room->visible)
 			m_renderTexture.draw(*room->text);

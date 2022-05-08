@@ -115,7 +115,7 @@ void NodePainter::drawFilledConnectionPoints(QPainter* painter,
 	auto& entries = node.getEntries();
 
 	for (auto& c : entries) {
-		QPointF p = node.portScenePosition(c.first);
+		QPointF p = node.portScenePosition(c.first) - node.nodeGraphicsObject().pos();
 		painter->setPen(style.ConnectionNormalColor);
 		painter->setBrush(style.ConnectionNormalColor);
 		painter->drawEllipse(p, diameter * 0.4, diameter * 0.4);
