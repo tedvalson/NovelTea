@@ -70,8 +70,8 @@ void Map::loadJson(const json &j)
 		if (jconn.size() != 8)
 			continue;
 		addConnection(jconn[0].ToInt(), jconn[1].ToInt(),
-			{jconn[2].ToInt(), jconn[3].ToInt()},
-			{jconn[4].ToInt(), jconn[5].ToInt()},
+			sf::Vector2i(jconn[2].ToInt(), jconn[3].ToInt()),
+			sf::Vector2i(jconn[4].ToInt(), jconn[5].ToInt()),
 			jconn[6].ToString(), jconn[7].ToInt());
 	}
 }
