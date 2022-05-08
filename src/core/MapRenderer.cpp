@@ -345,14 +345,18 @@ void MapRenderer::reset(float duration)
 
 	for (auto& room : m_rooms)
 	{
+		room->active = false;
 		room->visible = m_map->evalVisibility(room->room);
 		room->shape->setFillColor(sf::Color(200, 200, 200));
+		TweenEngine::Tween::to(*room->text, ActiveText::ALPHA, duration)
+			.target((room->visible && !m_miniMapMode) ? 255.f : 0.f)
+			.start(m_tweenManager);
 	}
 
 	for (auto& path : m_paths)
-	{
 		path->connection.visible = m_map->evalVisibility(path->connection.connection);
-	}
+	for (auto& door : m_doorways)
+		door->connection.visible = m_map->evalVisibility(door->connection.connection);
 
 	// These values are for fullscreen map mode
 	sf::Vector2f center = m_miniMapPosition + m_miniMapSize / 2.f + (m_mapSize - m_size) / 2.f;
@@ -368,11 +372,16 @@ void MapRenderer::reset(float duration)
 			auto& shape = room->shape;
 			auto& pos = shape->getPosition();
 			auto& size = shape->getSize();
+			room->active = true;
 			shape->setFillColor(sf::Color::White);
 			if (m_miniMapMode) {
 				center = sf::Vector2f(pos.x + size.x / 2.f, pos.y + size.y / 2.f);
 				zoomFactor = std::max(size.x, size.y) / m_miniMapSize.x * 2.f;
 			}
+			if (room->visible)
+				TweenEngine::Tween::to(*room->text, ActiveText::ALPHA, duration)
+					.target(255.f)
+					.start(m_tweenManager);
 		}
 	}
 
@@ -419,8 +428,7 @@ void MapRenderer::drawToTexture() const
 		if (doorway->connection.visible)
 			m_renderTexture.draw(*doorway->shape);
 	for (auto& room : m_rooms)
-		if (room->visible)
-			m_renderTexture.draw(*room->text);
+		m_renderTexture.draw(*room->text);
 
 	m_renderTexture.setView(origView);
 	if (m_miniMapMode || m_modeTransitioning)
