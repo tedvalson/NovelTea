@@ -22,7 +22,8 @@ json Map::toJson() const
 		for (auto &id : room->roomIds)
 			jroomIds.append(id);
 		auto& r = room->rect;
-		jrooms.append(sj::Array(room->name, r.left, r.top, r.width, r.height, jroomIds, room->script, room->type));
+		jrooms.append(sj::Array(room->name, r.left, r.top, r.width, r.height,
+								jroomIds, room->script, static_cast<int>(room->style)));
 	}
 	auto jconnections = sj::Array();
 	for (auto &c : m_connections) {
@@ -30,7 +31,7 @@ json Map::toJson() const
 			c->roomStart, c->roomEnd,
 			c->portStart.x, c->portStart.y,
 			c->portEnd.x, c->portEnd.y,
-			c->script, c->type
+			c->script, static_cast<int>(c->style)
 		));
 	}
 
@@ -63,7 +64,7 @@ void Map::loadJson(const json &j)
 		for (auto &jroomId : jroom[5].ArrayRange())
 			roomIds.push_back(jroomId.ToString());
 		sf::IntRect rect(jroom[1].ToInt(), jroom[2].ToInt(), jroom[3].ToInt(), jroom[4].ToInt());
-		addRoom(jroom[0].ToString(), rect, roomIds, jroom[6].ToString(), jroom[7].ToInt());
+		addRoom(jroom[0].ToString(), rect, roomIds, jroom[6].ToString(), static_cast<RoomStyle>(jroom[7].ToInt()));
 	}
 	// Connections
 	for (auto &jconn : j[6].ArrayRange()) {
@@ -72,7 +73,7 @@ void Map::loadJson(const json &j)
 		addConnection(jconn[0].ToInt(), jconn[1].ToInt(),
 			sf::Vector2i(jconn[2].ToInt(), jconn[3].ToInt()),
 			sf::Vector2i(jconn[4].ToInt(), jconn[5].ToInt()),
-			jconn[6].ToString(), jconn[7].ToInt());
+			jconn[6].ToString(), static_cast<ConnectionStyle>(jconn[7].ToInt()));
 	}
 }
 
@@ -81,18 +82,18 @@ EntityType Map::entityType() const
 	return EntityType::Map;
 }
 
-int Map::addRoom(const std::string &name, const sf::IntRect &rect, const std::vector<std::string> &roomIds, const std::string &script, int type)
+int Map::addRoom(const std::string &name, const sf::IntRect &rect, const std::vector<std::string> &roomIds, const std::string &script, RoomStyle style)
 {
-	auto room = new MapRoom {name, rect, roomIds, script, type};
+	auto room = new MapRoom {name, rect, roomIds, script, style};
 	m_rooms.emplace_back(room);
 	return m_rooms.size() - 1;
 }
 
-void Map::addConnection(int roomStart, int roomEnd, const sf::Vector2i &portStart, const sf::Vector2i &portEnd, const std::string &script, int type)
+void Map::addConnection(int roomStart, int roomEnd, const sf::Vector2i &portStart, const sf::Vector2i &portEnd, const std::string &script, ConnectionStyle style)
 {
 	if (roomStart >= m_rooms.size() || roomEnd >= m_rooms.size())
 		return;
-	auto c = new MapConnection {roomStart, roomEnd, portStart, portEnd, script, type};
+	auto c = new MapConnection {roomStart, roomEnd, portStart, portEnd, script, style};
 	m_connections.emplace_back(c);
 }
 

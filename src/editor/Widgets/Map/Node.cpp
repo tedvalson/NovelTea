@@ -25,6 +25,7 @@ Node::Node()
 , _draggingPos(-1000, -1000)
 , _reaction(NOT_REACTING)
 , _resizing(false)
+, _style(NovelTea::RoomStyle::SolidBorder)
 {
 	setMinHeight(0);
 	setMinWidth(0);

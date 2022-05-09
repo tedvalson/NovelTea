@@ -90,6 +90,7 @@ void MapWidget::loadData()
 		node.setRoomIds(room->roomIds);
 		node.setHeight(Node::snapValue * r.height);
 		node.setWidth(Node::snapValue * r.width);
+		node.setStyle(room->style);
 		ngo.setPos(Node::snapValue * r.left, Node::snapValue * r.top);
 		nodes.push_back(&node);
 	}
@@ -101,6 +102,7 @@ void MapWidget::loadData()
 		QPoint portEnd(c->portEnd.x, c->portEnd.y);
 		auto connection = scene->createConnection(nodeStart, portStart, nodeEnd, portEnd);
 		connection->setScript(c->script);
+		connection->setStyle(c->style);
 	}
 
 	MODIFIER(scene, &FlowScene::nodeCreated);
@@ -134,6 +136,10 @@ void MapWidget::selectionChanged()
 	m_pendingNode = nullptr;
 	ui->listRooms->hide();
 	ui->toolBar->hide();
+	ui->labelPathStyle->hide();
+	ui->labelRoomStyle->hide();
+	ui->comboPathStyle->hide();
+	ui->comboRoomStyle->hide();
 	ui->sidebar->hide();
 }
 
@@ -164,10 +170,15 @@ void MapWidget::on_actionEditScript_triggered()
 		for (auto& roomId : m_node->getRoomIds())
 			ui->listRooms->addItem(QString::fromStdString(roomId));
 		ui->scriptEdit->setPlainText(QString::fromStdString(m_node->getScript()));
+		ui->comboRoomStyle->setCurrentIndex(static_cast<int>(m_node->getStyle()));
 		ui->listRooms->show();
+		ui->labelRoomStyle->show();
+		ui->comboRoomStyle->show();
 		ui->toolBar->show();
 	}
 	else if (m_connection) {
+		ui->labelPathStyle->show();
+		ui->comboPathStyle->show();
 		ui->scriptEdit->setPlainText(QString::fromStdString(m_connection->getScript()));
 	}
 
@@ -251,6 +262,7 @@ void MapWidget::updateSelectedObject() const
 		for (int i = 0; i < ui->listRooms->count(); ++i)
 			roomIds.push_back(ui->listRooms->item(i)->text().toStdString());
 		m_node->setScript(ui->scriptEdit->toPlainText().toStdString());
+		m_node->setStyle(static_cast<NovelTea::RoomStyle>(ui->comboRoomStyle->currentIndex()));
 		m_node->setRoomIds(roomIds);
 	}
 	else if (m_connection) {

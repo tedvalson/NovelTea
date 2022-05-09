@@ -25,6 +25,7 @@ Connection::Connection(Node& node, QPoint portPoint)
 , _lineWidth(3.0)
 , _hovered(false)
 , _lastHoveredNode(nullptr)
+, _style(NovelTea::ConnectionStyle::SolidLine)
 {
 	setNodeToPort(node, true, portPoint);
 }

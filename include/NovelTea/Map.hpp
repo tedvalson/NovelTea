@@ -6,12 +6,22 @@
 namespace NovelTea
 {
 
+enum class RoomStyle : int {
+	Borderless  = 0,
+	SolidBorder = 1,
+	DashedBorder,
+};
+
+enum class ConnectionStyle : int {
+	SolidLine,
+};
+
 struct MapRoom {
 	std::string name;
 	sf::IntRect rect;
 	std::vector<std::string> roomIds;
 	std::string script;
-	int type;
+	RoomStyle style;
 };
 
 struct MapConnection {
@@ -20,7 +30,7 @@ struct MapConnection {
 	sf::Vector2i portStart;
 	sf::Vector2i portEnd;
 	std::string script;
-	int type;
+	ConnectionStyle style;
 };
 
 class Map : public Entity
@@ -35,9 +45,9 @@ public:
 	static constexpr auto id = ID::Map;
 	const std::string entityId() const override {return id;}
 
-	int addRoom(const std::string &name, const sf::IntRect &rect, const std::vector<std::string>& roomIds, const std::string &script, int type);
+	int addRoom(const std::string &name, const sf::IntRect &rect, const std::vector<std::string>& roomIds, const std::string &script, RoomStyle style);
 	void addConnection(int roomStart, int roomEnd, const sf::Vector2i &portStart,
-					   const sf::Vector2i &portEnd, const std::string &script, int type);
+					   const sf::Vector2i &portEnd, const std::string &script, ConnectionStyle style);
 
 	bool evalVisibility(std::shared_ptr<MapRoom> &room) const;
 	bool evalVisibility(std::shared_ptr<MapConnection> &connection) const;

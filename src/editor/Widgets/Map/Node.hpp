@@ -1,5 +1,6 @@
 #pragma once
 
+#include <NovelTea/Map.hpp>
 #include <QtCore/QObject>
 #include <QtCore/QUuid>
 
@@ -71,6 +72,9 @@ public:
 	void setScript(const std::string &script) { _script = script; }
 	const std::string &getScript() const { return _script; }
 
+	void setStyle(NovelTea::RoomStyle style) { _style = style; }
+	NovelTea::RoomStyle getStyle() const { return _style; }
+
 	void setRoomIds(const std::vector<std::string> &roomIds) { _roomIds = roomIds; }
 	const std::vector<std::string> &getRoomIds() const { return _roomIds; }
 
@@ -118,5 +122,5 @@ private:
 
 	std::string _script;
 	std::vector<std::string> _roomIds;
-	int _type;
+	NovelTea::RoomStyle _style;
 };

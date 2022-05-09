@@ -1,5 +1,6 @@
 #pragma once
 
+#include <NovelTea/Map.hpp>
 #include <QtCore/QObject>
 #include <QtCore/QUuid>
 #include <QtCore/QVariant>
@@ -69,6 +70,9 @@ public:
 	void setScript(const std::string &script) { _script = script; }
 	const std::string &getScript() const { return _script; }
 
+	void setStyle(NovelTea::ConnectionStyle style) { _style = style; }
+	NovelTea::ConnectionStyle getStyle() const { return _style; }
+
 public:
 	void checkDoorway() const;
 
@@ -100,5 +104,5 @@ private:
 	Node* _lastHoveredNode;
 
 	std::string _script;
-	int _type;
+	NovelTea::ConnectionStyle _style;
 };

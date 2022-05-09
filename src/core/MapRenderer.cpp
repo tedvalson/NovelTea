@@ -445,7 +445,7 @@ void MapRenderer::drawToTexture() const
 	auto origView = m_renderTexture.getView();
 	m_renderTexture.setView(m_view);
 	for (auto& room : m_rooms)
-		if (room->visible || getShowEverything())
+		if ((room->visible || getShowEverything()) && room->room->style != RoomStyle::Borderless)
 			m_renderTexture.draw(*room->borderShape);
 	for (auto& path : m_paths)
 		if (path->connection.visible || getShowEverything())
