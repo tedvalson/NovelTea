@@ -23,7 +23,6 @@ set(SOURCE_FILES
 	${SRCROOT}/json.cpp
 	${SRCROOT}/Map.cpp
 	${SRCROOT}/MapRenderer.cpp
-	${SRCROOT}/MapRoom.cpp
 	${SRCROOT}/Object.cpp
 	${SRCROOT}/ObjectList.cpp
 	${SRCROOT}/Profile.cpp

@@ -2,6 +2,7 @@
 
 #include <QtCore/QObject>
 
+#include <cmath>
 #include <utility>
 #include <iostream>
 

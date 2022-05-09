@@ -5,6 +5,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/Map.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/PropertyList.hpp>
@@ -285,6 +286,10 @@ void ScriptManager::registerClasses()
 	dukglue_register_property(m_context, &DialogueSegment::getScript, &DialogueSegment::setScript, "script");
 	dukglue_register_property(m_context, &DialogueSegment::getTextRaw, &DialogueSegment::setTextRaw, "text");
 	dukglue_register_property(m_context, &DialogueSegment::getChildrenIds, &DialogueSegment::setChildrenIds, "childIds");
+
+	// Map
+	REGISTER_CONSTRUCTOR(Map);
+	REGISTER_ENTITY(Map);
 
 	// Object
 	REGISTER_CONSTRUCTOR(Object);

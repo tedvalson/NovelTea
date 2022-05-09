@@ -11,7 +11,6 @@
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/Map.hpp>
-#include <NovelTea/MapRoom.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Script.hpp>

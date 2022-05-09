@@ -1,5 +1,4 @@
 #include <NovelTea/MapRenderer.hpp>
-#include <NovelTea/Map.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ProjectData.hpp>

@@ -3,6 +3,7 @@
 
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/GUI/Button.hpp>
+#include <NovelTea/Map.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <memory>
@@ -17,9 +18,6 @@ namespace NovelTea
 {
 
 class ActiveText;
-class Map;
-class MapRoom;
-class MapConnection;
 
 class MapRenderer : public sf::Drawable, public Hideable
 {
