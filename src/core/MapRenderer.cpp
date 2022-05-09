@@ -1,4 +1,6 @@
 #include <NovelTea/MapRenderer.hpp>
+#include <NovelTea/Game.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ProjectData.hpp>
@@ -11,6 +13,7 @@ namespace NovelTea
 
 MapRenderer::MapRenderer()
 : m_needsUpdate(true)
+, m_showEverything(false)
 , m_nameAlpha(255.f)
 , m_zoomFactor(3.f)
 , m_map(nullptr)
@@ -120,16 +123,21 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 	auto& rooms = map->getRooms();
 	auto multiplier = 15.f; // Based on editor grid width Node::snapValue
 
+	float thickness = round(0.3f * multiplier);
+	sf::Vector2f vecThickness(thickness, thickness);
+
 	for (auto& room : rooms)
 	{
-		auto shape = new TweenRectangleShape;
 		const auto &rect = room->rect;
-		float thickness = round(0.1f * multiplier);
-		sf::Vector2f vecThickness(thickness, thickness);
-		shape->setSize(sf::Vector2f(rect.width, rect.height) * multiplier - vecThickness * 2.f);
-		shape->setPosition(sf::Vector2f(rect.left, rect.top) * multiplier + vecThickness);
-		shape->setOutlineThickness(thickness);
-		shape->setOutlineColor(sf::Color::Black);
+
+		auto borderShape = new TweenRectangleShape;
+		borderShape->setPosition(sf::Vector2f(rect.left, rect.top) * multiplier - vecThickness / 2.f);
+		borderShape->setSize(sf::Vector2f(rect.width, rect.height) * multiplier + vecThickness);
+		borderShape->setFillColor(sf::Color::Black);
+
+		auto shape = new TweenRectangleShape;
+		shape->setSize(borderShape->getSize() - vecThickness * 2.f);
+		shape->setPosition(borderShape->getPosition() + vecThickness);
 		shape->setFillColor(sf::Color::White);
 
 		auto text = new ActiveText;
@@ -139,14 +147,10 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 		text->setAlpha(m_nameAlpha);
 		text->setFontSizeMultiplier(0.7f);
 		text->setText(room->name, fmt);
-		while (text->getLocalBounds().width > shape->getSize().x) {
-			fmt.size(fmt.size() - 1);
-			text->setText(room->name, fmt);
-		}
 		text->setSize(shape->getSize());
-		text->setPosition(sf::Vector2f(rect.left, rect.top) * multiplier);
-		text->move({(shape->getSize().x - text->getLocalBounds().width) / 2.f,
-				   (shape->getSize().y - text->getLocalBounds().height) / 2.f});
+		text->setOrigin({text->getLocalBounds().width / 2.f, text->getLocalBounds().height / 2.f});
+		text->setPosition(sf::Vector2f(rect.left, rect.top) * multiplier + vecThickness);
+		text->move({shape->getSize().x / 2.f, shape->getSize().y / 2.f});
 
 		m_mapSize.x = std::max(m_mapSize.x, shape->getPosition().x + shape->getSize().x);
 		m_mapSize.y = std::max(m_mapSize.y, shape->getPosition().y + shape->getSize().y);
@@ -156,6 +160,7 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 
 		m_rooms.emplace_back(new Room{room,
 									  std::unique_ptr<TweenRectangleShape>(shape),
+									  std::unique_ptr<TweenRectangleShape>(borderShape),
 									  std::unique_ptr<ActiveText>(text),
 									  false, false});
 	}
@@ -168,8 +173,8 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 
 		if (map->checkForDoor(*conn, doorRect)) {
 			auto shape = new TweenRectangleShape;
-			shape->setPosition(sf::Vector2f{doorRect.left, doorRect.top} * multiplier);
-			shape->setSize(sf::Vector2f{doorRect.width, doorRect.height} * multiplier);
+			shape->setPosition(sf::Vector2f{doorRect.left, doorRect.top} * multiplier + vecThickness / 2.f);
+			shape->setSize(sf::Vector2f{doorRect.width, doorRect.height} * multiplier - vecThickness);
 			shape->setFillColor(sf::Color(200, 200, 200));
 			m_doorways.emplace_back(new Doorway{
 					{conn, m_rooms[conn->roomStart], m_rooms[conn->roomEnd], false},
@@ -342,13 +347,23 @@ void MapRenderer::reset(float duration)
 	if (!m_map)
 		return;
 
+	// For all calls below to Map::evalVisibility
+	ActiveGame->getScriptManager()->setActiveEntity(m_map);
+
 	for (auto& room : m_rooms)
 	{
 		room->active = false;
 		room->visible = m_map->evalVisibility(room->room);
 		room->shape->setFillColor(sf::Color(200, 200, 200));
 		TweenEngine::Tween::to(*room->text, ActiveText::ALPHA, duration)
-			.target((room->visible && !m_miniMapMode) ? 255.f : 0.f)
+			.target(((room->visible || getShowEverything()) && !m_miniMapMode) ? 255.f : 0.f)
+			.start(m_tweenManager);
+		for (auto& segment : room->text->getSegments()) {
+			segment.text.setOutlineThickness(((room->visible || getShowEverything()) && !m_miniMapMode) ? 2.f : 0.f);
+			segment.text.setOutlineColor(sf::Color(200, 200, 200));
+		}
+		TweenEngine::Tween::to(*room->text, ActiveText::SCALE_XY, duration)
+			.target(1.f, 1.f)
 			.start(m_tweenManager);
 	}
 
@@ -377,10 +392,22 @@ void MapRenderer::reset(float duration)
 				center = sf::Vector2f(pos.x + size.x / 2.f, pos.y + size.y / 2.f);
 				zoomFactor = std::max(size.x, size.y) / m_miniMapSize.x * 2.f;
 			}
-			if (room->visible)
+			if (room->visible || getShowEverything()) {
+				auto scale = 1.f;
+				if (m_miniMapMode)
+					scale = m_miniMapSize.x / room->text->getLocalBounds().width * 0.9f;
+				scale = std::min(scale, 1.f) * zoomFactor;
 				TweenEngine::Tween::to(*room->text, ActiveText::ALPHA, duration)
 					.target(255.f)
 					.start(m_tweenManager);
+				TweenEngine::Tween::to(*room->text, ActiveText::SCALE_XY, duration)
+					.target(scale, scale)
+					.start(m_tweenManager);
+				for (auto& segment : room->text->getSegments()) {
+					segment.text.setOutlineThickness(2.f);
+					segment.text.setOutlineColor(sf::Color::White);
+				}
+			}
 		}
 	}
 
@@ -418,16 +445,21 @@ void MapRenderer::drawToTexture() const
 	auto origView = m_renderTexture.getView();
 	m_renderTexture.setView(m_view);
 	for (auto& room : m_rooms)
-		if (room->visible)
-			m_renderTexture.draw(*room->shape);
+		if (room->visible || getShowEverything())
+			m_renderTexture.draw(*room->borderShape);
 	for (auto& path : m_paths)
-		if (path->connection.visible)
+		if (path->connection.visible || getShowEverything())
 			m_renderTexture.draw(*path->buffer);
 	for (auto& doorway : m_doorways)
-		if (doorway->connection.visible)
+		if (doorway->connection.visible || getShowEverything())
 			m_renderTexture.draw(*doorway->shape);
-	for (auto& room : m_rooms)
+	for (auto& room : m_rooms) {
+		if (room->visible || getShowEverything())
+			m_renderTexture.draw(*room->shape);
+	}
+	for (auto& room : m_rooms) {
 		m_renderTexture.draw(*room->text);
+	}
 
 	m_renderTexture.setView(origView);
 	if (m_miniMapMode || m_modeTransitioning)

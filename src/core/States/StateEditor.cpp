@@ -30,6 +30,7 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_roomScrollbar.setAutoHide(false);
 	m_roomScrollbar.attachObject(this);
 
+	m_mapRenderer.setShowEverything(true);
 	m_mapRenderer.setMiniMapMode(false, 0.f);
 	m_mapRenderer.setModeLocked(true);
 }

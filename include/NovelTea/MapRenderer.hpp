@@ -30,6 +30,7 @@ public:
 	struct Room {
 		std::shared_ptr<MapRoom> room;
 		std::unique_ptr<TweenRectangleShape> shape;
+		std::unique_ptr<TweenRectangleShape> borderShape;
 		std::unique_ptr<ActiveText> text;
 		bool visible;
 		bool active;
@@ -68,6 +69,9 @@ public:
 	void setModeLocked(bool locked) { m_modeLocked = locked; }
 	bool getModeLocked() const { return m_modeLocked; }
 
+	void setShowEverything(bool enable) { m_showEverything = enable; }
+	bool getShowEverything() const { return m_showEverything; }
+
 	void setMiniMapPosition(const sf::Vector2f& position);
 	const sf::Vector2f& getMiniMapPosition() const;
 	void setMiniMapSize(const sf::Vector2f& size);
@@ -104,6 +108,7 @@ private:
 
 private:
 	mutable bool m_needsUpdate;
+	bool m_showEverything;
 	float m_alpha;
 	float m_nameAlpha;
 	float m_zoomFactor;
