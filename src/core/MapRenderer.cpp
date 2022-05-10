@@ -175,7 +175,6 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 			auto shape = new TweenRectangleShape;
 			shape->setPosition(sf::Vector2f{doorRect.left, doorRect.top} * multiplier + vecThickness / 2.f);
 			shape->setSize(sf::Vector2f{doorRect.width, doorRect.height} * multiplier - vecThickness);
-			shape->setFillColor(sf::Color(200, 200, 200));
 			m_doorways.emplace_back(new Doorway{
 					{conn, m_rooms[conn->roomStart], m_rooms[conn->roomEnd], false},
 					std::unique_ptr<TweenRectangleShape>(shape)
@@ -367,11 +366,6 @@ void MapRenderer::reset(float duration)
 			.start(m_tweenManager);
 	}
 
-	for (auto& path : m_paths)
-		path->connection.visible = m_map->evalVisibility(path->connection.connection);
-	for (auto& door : m_doorways)
-		door->connection.visible = m_map->evalVisibility(door->connection.connection);
-
 	// These values are for fullscreen map mode
 	sf::Vector2f center = m_miniMapPosition + m_miniMapSize / 2.f + (m_mapSize - m_size) / 2.f;
 	float zoomFactor = 1.f; // TODO: need reasonable zoom value for all DPIs
@@ -409,6 +403,17 @@ void MapRenderer::reset(float duration)
 				}
 			}
 		}
+	}
+
+	for (auto& path : m_paths)
+		path->connection.visible = m_map->evalVisibility(path->connection.connection);
+	for (auto& door : m_doorways) {
+		auto& c = door->connection;
+		c.visible = m_map->evalVisibility(c.connection);
+		if (c.roomStart->active && c.roomEnd->active)
+			door->shape->setFillColor(sf::Color::White);
+		else
+			door->shape->setFillColor(sf::Color(200, 200, 200));
 	}
 
 	if (m_miniMapMode) {
