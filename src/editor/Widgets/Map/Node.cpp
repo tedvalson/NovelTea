@@ -119,12 +119,12 @@ void Node::setWidth(unsigned int w)
 
 void Node::setMinHeight(unsigned int h)
 {
-	_minHeight = std::max(h, snapValue * 5);
+	_minHeight = std::max(h, snapValue * 3);
 }
 
 void Node::setMinWidth(unsigned int w)
 {
-	_minWidth = std::max(w, snapValue * 5);
+	_minWidth = std::max(w, snapValue * 3);
 }
 
 bool Node::onHorizontalWall(const QPoint& p)
