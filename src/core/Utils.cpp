@@ -73,6 +73,8 @@ EntityType entityIdToType(const std::string &entityId)
 		return EntityType::Cutscene;
 	if (entityId == ID::Dialogue)
 		return EntityType::Dialogue;
+	if (entityId == ID::Map)
+		return EntityType::Map;
 	if (entityId == ID::Object)
 		return EntityType::Object;
 	if (entityId == ID::Room)
@@ -93,6 +95,8 @@ std::string entityTypeToId(EntityType entityType)
 		return ID::Cutscene;
 	if (entityType == EntityType::Dialogue)
 		return ID::Dialogue;
+	if (entityType == EntityType::Map)
+		return ID::Map;
 	if (entityType == EntityType::Object)
 		return ID::Object;
 	if (entityType == EntityType::Room)

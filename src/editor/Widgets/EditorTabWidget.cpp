@@ -77,6 +77,8 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(EditorTabWidget::Type 
 			return NovelTea::EntityType::Dialogue;
 		case Type::Room:
 			return NovelTea::EntityType::Room;
+		case Type::Map:
+			return NovelTea::EntityType::Map;
 		case Type::Object:
 			return NovelTea::EntityType::Object;
 		case Type::Script:
