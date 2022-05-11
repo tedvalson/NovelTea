@@ -340,19 +340,29 @@ float MapRenderer::getAlpha() const
 }
 
 // Should be called whenever script engine is used.
-// Reevaluates all scripts and resets positioning.
+void MapRenderer::evaluateScripts()
+{
+	if (!m_map)
+		return;
+	ActiveGame->getScriptManager()->setActiveEntity(m_map);
+	for (auto& room : m_rooms)
+		room->visible = m_map->evalVisibility(room->room);
+	for (auto& path : m_paths)
+		path->connection.visible = m_map->evalVisibility(path->connection.connection);
+	for (auto& door : m_doorways)
+		door->connection.visible = m_map->evalVisibility(door->connection.connection);
+	m_needsUpdate = true;
+}
+
 void MapRenderer::reset(float duration)
 {
 	if (!m_map)
 		return;
-
-	// For all calls below to Map::evalVisibility
-	ActiveGame->getScriptManager()->setActiveEntity(m_map);
+	evaluateScripts();
 
 	for (auto& room : m_rooms)
 	{
 		room->active = false;
-		room->visible = m_map->evalVisibility(room->room);
 		room->shape->setFillColor(sf::Color(200, 200, 200));
 		TweenEngine::Tween::to(*room->text, ActiveText::ALPHA, duration)
 			.target(((room->visible || getShowEverything()) && !m_miniMapMode) ? 255.f : 0.f)
@@ -405,11 +415,8 @@ void MapRenderer::reset(float duration)
 		}
 	}
 
-	for (auto& path : m_paths)
-		path->connection.visible = m_map->evalVisibility(path->connection.connection);
 	for (auto& door : m_doorways) {
 		auto& c = door->connection;
-		c.visible = m_map->evalVisibility(c.connection);
 		if (c.roomStart->active && c.roomEnd->active)
 			door->shape->setFillColor(sf::Color::White);
 		else
@@ -424,9 +431,10 @@ void MapRenderer::reset(float duration)
 		}
 	}
 
-	TweenEngine::Tween::to(*this, VIEW_CENTER, duration)
-		.target(center.x, center.y)
-		.start(m_tweenManager);
+	if (m_miniMapMode || m_modeTransitioning)
+		TweenEngine::Tween::to(*this, VIEW_CENTER, duration)
+			.target(center.x, center.y)
+			.start(m_tweenManager);
 	TweenEngine::Tween::to(*this, VIEW_ZOOM, duration)
 		.target(zoomFactor)
 		.start(m_tweenManager);

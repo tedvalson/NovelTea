@@ -91,6 +91,7 @@ public:
 	void setAlpha(float alpha) override;
 	float getAlpha() const override;
 
+	void evaluateScripts();
 	void reset(float duration = 1.f);
 
 protected:

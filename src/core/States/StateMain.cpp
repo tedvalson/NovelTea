@@ -393,7 +393,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 					nextRoom->runScriptAfterEnter();
 			} else {
 				if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
-					updateRoomText();
+					updateUI();
 					return;
 				}
 				room->setVisitCount(room->getVisitCount() + 1);
@@ -406,7 +406,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		}
 		m_mode = mode;
 		showToolbar();
-		updateRoomText();
+		updateUI();
 		m_roomScrollbar.setScroll(0.f);
 		m_navigation.setPaths(nextRoom->getPaths());
 	}
@@ -601,10 +601,8 @@ bool StateMain::processTestSteps()
 			}
 
 			if (waiting && waitTimeLeft > 0.f) {
-				if (GGame->getTimerManager()->update(0.01f)) {
-					updateRoomText();
-					m_mapRenderer.reset();
-				}
+				if (GGame->getTimerManager()->update(0.01f))
+					updateUI();
 				waitTimeLeft -= 0.01f;
 			}
 		}
@@ -733,7 +731,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 			});
 			runCallback(&jtestItem);
 		}
-		updateRoomText();
+		updateUI();
 	}
 	return success;
 }
@@ -775,6 +773,12 @@ bool StateMain::gotoNextEntity()
 
 	setMode(mode, nextEntity->getId());
 	return true;
+}
+
+void StateMain::updateUI()
+{
+	m_mapRenderer.evaluateScripts();
+	updateRoomText();
 }
 
 void StateMain::updateRoomText(const std::string &newText, float duration)
@@ -846,8 +850,7 @@ void StateMain::callOverlayFunc()
 {
 	if (m_textOverlayFunc.type() != DukValue::UNDEFINED){
 		ScriptMan->call<void>(m_textOverlayFunc);
-		updateRoomText();
-		m_mapRenderer.reset();
+		updateUI();
 	}
 }
 
@@ -949,10 +952,6 @@ bool StateMain::processEvent(const sf::Event &event)
 	}
 	else if (m_mode == Mode::Room)
 	{
-		if (GGame->getMinimapEnabled() && m_mapRenderer.getMap()) {
-			if (!m_mapRenderer.processEvent(event))
-				return false;
-		}
 		if (m_verbList.processEvent(event)) {
 			return false;
 		} else {
@@ -961,6 +960,10 @@ bool StateMain::processEvent(const sf::Event &event)
 			// Returns true if an object is clicked on
 			if (m_inventory.processEvent(event))
 				return true;
+		}
+		if (GGame->getMinimapEnabled() && m_mapRenderer.getMap()) {
+			if (!m_mapRenderer.processEvent(event))
+				return false;
 		}
 
 		if (m_actionBuilder.processEvent(event))
@@ -1083,8 +1086,7 @@ bool StateMain::update(float delta)
 	GGame->getNotificationManager()->update(delta);
 	if (GGame->getTimerManager()->update(delta)) {
 		if (m_mode == Mode::Room) {
-			updateRoomText();
-			m_mapRenderer.reset();
+			updateUI();
 		}
 	}
 

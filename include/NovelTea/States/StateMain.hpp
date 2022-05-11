@@ -61,6 +61,7 @@ public:
 
 	bool gotoNextEntity();
 
+	void updateUI();
 	void updateRoomText(const std::string &newText = " ", float duration = 1.f);
 	void setActionBuilderShowPos(float position);
 
