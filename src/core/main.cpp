@@ -32,6 +32,7 @@ int main(int argc, char **argv)
 			auto idName = argv[4];
 			Proj.loadFromFile(argv[1]);
 			GSave->data()[NovelTea::ID::entrypointEntity] = sj::Array(typeId, idName);
+			GSave->data()[NovelTea::ID::entityPreview] = true;
 			if (argc == 6) {
 				auto segmentId = atoi(argv[5]);
 				GSave->data()[NovelTea::ID::entrypointMetadata] = sj::Array("", sj::Array(segmentId));

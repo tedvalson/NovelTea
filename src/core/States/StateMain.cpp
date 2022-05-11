@@ -389,6 +389,8 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		{
 			if (room->getId().empty()) {
 				GGame->setRoom(nextRoom);
+				if (GSave->data()[NovelTea::ID::entityPreview].ToBool())
+					nextRoom->runScriptAfterEnter();
 			} else {
 				if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
 					updateRoomText();

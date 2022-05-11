@@ -67,6 +67,7 @@ namespace ID
 	const auto openTabs           = "tabs";
 	const auto openTabIndex       = "tabIndex";
 	const auto entityColors       = "colors";
+	const auto entityPreview      = "preview";
 	const auto spellWhitelist     = "whitelist";
 
 	// For SaveData
