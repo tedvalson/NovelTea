@@ -224,8 +224,8 @@ void CutsceneWidget::fillPropertyEditor()
 
 		PROP_TIME_MS(propTextDuration, pageSegment->getTextDuration())
 		PROP_TIME_MS(propTextDelay, pageSegment->getTextDelay())
-		PROP_TIME_MS(propBreakDuration, pageSegment->getTextDuration())
-		PROP_TIME_MS(propBreakDelay, pageSegment->getTextDuration())
+		PROP_TIME_MS(propBreakDuration, pageSegment->getBreakDuration())
+		PROP_TIME_MS(propBreakDelay, pageSegment->getBreakDelay())
 
 		prop = segmentsVariantManager->addProperty(QVariant::Bool, propBeginNewLine);
 		prop->setValue(pageSegment->getBeginWithNewLine());
@@ -358,9 +358,9 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	}
 	else
 	{
-		ui->listWidget->insertItem(index, item);
+		ui->listWidget->insertItem(index + 1, item);
 		if (addToInternalObject) {
-			m_cutscene->internalSegments().insert(m_cutscene->internalSegments().begin() + index, segment);
+			m_cutscene->internalSegments().insert(m_cutscene->internalSegments().begin() + index + 1, segment);
 			m_cutscene->updateSegments();
 		}
 	}

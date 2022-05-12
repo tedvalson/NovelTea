@@ -30,8 +30,9 @@ StateProfileManager::StateProfileManager(StateStack& stack, Context& context, St
 
 	m_buttonAdd.getText().setFont(*Proj.getFont(1));
 	m_buttonAdd.setString(L"\uf234");
-	m_buttonAdd.setColor(sf::Color(0, 0 , 0));
+	m_buttonAdd.setColor(sf::Color(100, 100 , 100));
 	m_buttonAdd.setTextColor(sf::Color::White);
+	m_buttonAdd.setTextActiveColor(sf::Color::White);
 
 	m_buttonRemove = m_buttonAdd;
 	m_buttonRemove.setString(L"\uf1f8");
@@ -97,7 +98,6 @@ void StateProfileManager::resize(const sf::Vector2f &size)
 	auto bgX = (w - bgWidth) / 2;
 	auto bgY = (h - bgHeight) / 2;
 	auto margin = bgWidth * 0.05f;
-	auto buttonWidth = bgWidth - margin * 2;
 	auto buttonHeight = (portrait ? 0.09f : 0.12f) * h;
 	auto buttonFontSize = buttonHeight * 0.7f;
 
@@ -114,13 +114,13 @@ void StateProfileManager::resize(const sf::Vector2f &size)
 	m_buttonBack.setSize(buttonHeight * 0.6f, buttonHeight * 0.6f);
 	m_buttonBack.setPosition(bgX + bgWidth - m_buttonBack.getSize().x * 0.7f, bgY - m_buttonBack.getSize().y * 0.3f);
 
-	m_buttonAdd.getText().setCharacterSize(buttonHeight * 0.5f);
-	m_buttonAdd.setSize(buttonHeight * 0.8f, buttonHeight * 0.8f);
-	m_buttonAdd.setPosition(bgX, bgY);
+	m_buttonAdd.getText().setCharacterSize(buttonHeight * 0.4f);
+	m_buttonAdd.setSize(buttonHeight * 0.7f, buttonHeight * 0.7f);
+	m_buttonAdd.setPosition(bgX + buttonHeight * 0.1f, bgY + buttonHeight * 0.1f);
 
-	m_buttonRemove.getText().setCharacterSize(buttonHeight * 0.5f);
-	m_buttonRemove.setSize(buttonHeight * 0.8f, buttonHeight * 0.8f);
-	m_buttonRemove.setPosition(bgX, bgY + buttonHeight);
+	m_buttonRemove.getText().setCharacterSize(buttonHeight * 0.4f);
+	m_buttonRemove.setSize(buttonHeight * 0.7f, buttonHeight * 0.7f);
+	m_buttonRemove.setPosition(bgX + buttonHeight * 0.1f, bgY + buttonHeight * 0.9f);
 
 	sf::FloatRect viewport;
 	auto titleBounds = m_textTitle.getGlobalBounds();
@@ -195,14 +195,14 @@ void StateProfileManager::remove()
 
 void StateProfileManager::refresh()
 {
-	m_buttonHeight = m_bg.getSize().y * 0.2f;
+	m_buttonHeight = m_bg.getSize().y * 0.1f;
 	m_buttonSpacing = m_buttonHeight * 0.1f;
 	m_profileButtons.clear();
 	int i = 0;
 	for (auto &profile : GSettings.getProfiles())
 	{
 		auto button = new Button;
-		button->getText().setCharacterSize(m_buttonHeight * 0.7f);
+		button->getText().setCharacterSize(m_buttonHeight * 0.8f);
 		button->setString(profile->getName());
 		button->setSize(m_bg.getSize().x * 0.7f, m_buttonHeight);
 		button->setActiveColor(sf::Color::Blue);

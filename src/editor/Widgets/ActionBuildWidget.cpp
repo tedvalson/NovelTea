@@ -108,7 +108,7 @@ void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)
 			auto comboBox = new QComboBox;
 			comboBox->setEditable(true);
 			comboBox->setInsertPolicy(QComboBox::NoInsert);
-			comboBox->lineEdit()->setPlaceholderText(QString("[ Object %1 ]").arg(i+1));
+			comboBox->lineEdit()->setPlaceholderText(QString("[ object%1 ]").arg(i+1));
 			comboBox->addItems(m_objectStrings);
 			comboBox->setCurrentIndex(-1);
 

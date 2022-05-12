@@ -182,6 +182,10 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 		m_iconSave.show(0.4f, 3.f);
 	});
 
+	m_playTime = GSave->data()[ID::playTime].ToFloat();
+
+	hideToolbar(0.f);
+
 	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
 	auto &entryMetadata = GSave->data()[ID::entrypointMetadata];
@@ -208,10 +212,6 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	}
 	else if (!projEntryPoint.IsEmpty())
 		GGame->pushNextEntityJson(projEntryPoint);
-
-	m_playTime = GSave->data()[ID::playTime].ToFloat();
-
-	hideToolbar(0.f);
 
 	processTest();
 }
@@ -443,8 +443,8 @@ void StateMain::showToolbar(float duration)
 {
 	if (GGame->getNavigationEnabled())
 		m_navigation.show(duration);
-	if (GGame->getMinimapEnabled())
-		m_mapRenderer.show(duration);
+	if (GGame->getMinimapEnabled() && m_mapRenderer.getMap())
+		m_mapRenderer.show(duration * 4.f);
 	TweenEngine::Tween::to(m_buttonInventory, Button::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
@@ -1047,8 +1047,8 @@ bool StateMain::update(float delta)
 		else
 			m_navigation.hide();
 
-		if (GGame->getMinimapEnabled() && !m_quitting)
-			m_mapRenderer.show();
+		if (GGame->getMinimapEnabled() && m_mapRenderer.getMap() && !m_quitting)
+			m_mapRenderer.show(2.f);
 		else
 			m_mapRenderer.hide();
 	}

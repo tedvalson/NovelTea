@@ -117,8 +117,9 @@ std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vecto
 
 			for (int i = 0; i < jobjects.size(); ++i)
 			{
-				if ((positionDependent && objectIds[i] != jobjects[i].ToString()) ||
-					(!positionDependent && std::find(objectIds.begin(), objectIds.end(), jobjects[i].ToString()) == objectIds.end()))
+				auto objectId = jobjects[i].ToString();
+				if ((positionDependent && objectIds[i] != objectId) ||
+					(!positionDependent && std::find(objectIds.begin(), objectIds.end(), objectId) == objectIds.end()))
 				{
 					match = false;
 					break;

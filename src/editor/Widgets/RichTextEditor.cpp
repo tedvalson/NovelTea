@@ -40,6 +40,7 @@ void RichTextEditor::setValue(const std::shared_ptr<NovelTea::ActiveText> &text)
 {
 	auto doc = activeTextToDocument(text);
 	ui->textEdit->setDocument(doc);
+	ui->textEdit->setTabStopWidth(30);
 	m_isChanged = false;
 }
 
