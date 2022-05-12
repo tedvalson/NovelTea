@@ -117,6 +117,8 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 	m_doorways.clear();
 	m_roomIdHashmap.clear();
 	m_mapSize = {0.f, 0.f};
+	m_tweenManager.killAll();
+	m_modeTransitioning = false;
 	if (!map)
 		return;
 
@@ -426,8 +428,9 @@ void MapRenderer::reset(float duration)
 	if (m_miniMapMode) {
 		minimapRadius = 0.f;
 		buttonAlpha = 0.f;
-		if (m_activeRoomId.empty()) {
+		if (m_activeRoomId.empty() || m_roomIdHashmap[m_activeRoomId].empty()) {
 			center = sf::Vector2f(m_size.x / 2.f, m_size.y / 2.f); // TODO: Fix this?
+			zoomFactor *= 4.f;
 		}
 	}
 
