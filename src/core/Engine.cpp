@@ -32,6 +32,7 @@ EngineConfig::EngineConfig()
 
 Engine::Engine(EngineConfig config)
 	: m_config(config)
+	, m_framerateLocked(true)
 	, m_game(new Game)
 {
 	auto stateStack = new StateStack(State::Context(m_config, m_game, m_data));
@@ -118,6 +119,8 @@ void Engine::update()
 		sf::sleep(sf::seconds(m_deltaPerFrame - delta));
 		update(m_deltaPerFrame);
 	}
+	else if (getFramerateLocked())
+		update(m_deltaPerFrame);
 	else
 		update(delta);
 }
@@ -195,6 +198,16 @@ size_t Engine::getSystemTimeMs()
 std::shared_ptr<Game> Engine::getGame()
 {
 	return m_game;
+}
+
+void Engine::setFramerateLocked(bool locked)
+{
+	m_framerateLocked = locked;
+}
+
+bool Engine::getFramerateLocked() const
+{
+	return m_framerateLocked;
 }
 
 void Engine::initialize()

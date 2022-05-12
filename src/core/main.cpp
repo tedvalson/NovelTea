@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 	
 	auto engine = new NovelTea::Engine(config);
 	engine->initialize();
+	engine->setFramerateLocked(false);
 	
 	// NovelTeaLaunch project.ntp entity typeId nameId [segmentId]
 	if (argc >= 5) {

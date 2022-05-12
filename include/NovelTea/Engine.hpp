@@ -50,6 +50,9 @@ public:
 
 	std::shared_ptr<Game> getGame();
 
+	void setFramerateLocked(bool locked);
+	bool getFramerateLocked() const;
+
 //protected:
 	void initialize();
 
@@ -57,6 +60,7 @@ public:
 
 private:
 	EngineConfig m_config;
+	bool m_framerateLocked;
 	float m_deltaPerFrame;
 	std::unique_ptr<StateStack> m_stateStack;
 
