@@ -112,10 +112,12 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 					// Don't wait for click on first seg of new page
 					if (i > 0)
 						textSegment->setWaitForClick(false);
-					// Don't wait for first seg if previous seg was a page break
-					else if (m_internalSegments.size() > 1)
-						if (m_internalSegments[m_internalSegments.size()-2]->type() == CutsceneSegment::PageBreak)
+					// Don't wait for first seg if previous seg was a page break or script
+					else if (m_internalSegments.size() > 1) {
+						auto prevSegmentType = m_internalSegments[m_internalSegments.size()-2]->type();
+						if (prevSegmentType == CutsceneSegment::PageBreak || prevSegmentType == CutsceneSegment::Script)
 							textSegment->setWaitForClick(false);
+					}
 				}
 				m_segments.emplace_back(textSegment);
 			}
