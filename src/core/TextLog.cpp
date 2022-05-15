@@ -11,7 +11,7 @@ TextLog::TextLog()
 
 void TextLog::push(const std::string &text, TextLogType type)
 {
-	m_items.push_back(TextLogItem{text, type});
+		m_entries.push_back({text, type});
 }
 
 void TextLog::pushScript(const std::string &text)
@@ -19,24 +19,27 @@ void TextLog::pushScript(const std::string &text)
 	push(text, TextLogType::Script);
 }
 
-const std::vector<TextLogItem> &TextLog::items() const
+const std::vector<TextLogEntry> &TextLog::entries() const
 {
-	return m_items;
+	return m_entries;
 }
 
 json TextLog::toJson() const
 {
 	auto j = sj::Array();
-	for (auto &item : m_items)
-		j.append(sj::Array(item.text, static_cast<int>(item.type)));
+	int count = std::min(m_entries.size(), m_itemLimit);
+	for (int i = m_entries.size() - count; i < m_entries.size(); ++i) {
+		auto& entry = m_entries[i];
+		j.append(sj::Array(entry.text, static_cast<int>(entry.type)));
+	}
 	return j;
 }
 
 bool TextLog::fromJson(const json &j)
 {
-	m_items.clear();
-	for (auto &jitem : j.ArrayRange())
-		push(jitem[0].ToString(), static_cast<TextLogType>(jitem[1].ToInt()));
+	m_entries.clear();
+	for (auto &jentry : j.ArrayRange())
+		push(jentry[0].ToString(), static_cast<TextLogType>(jentry[1].ToInt()));
 	return true;
 }
 

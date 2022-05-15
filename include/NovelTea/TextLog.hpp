@@ -17,7 +17,7 @@ enum class TextLogType {
 	TextOverlay,
 };
 
-struct TextLogItem {
+struct TextLogEntry {
 	std::string text;
 	TextLogType type;
 };
@@ -29,7 +29,7 @@ public:
 
 	void push(const std::string &text, TextLogType type);
 	void pushScript(const std::string &text);
-	const std::vector<TextLogItem> &items() const;
+	const std::vector<TextLogEntry> &entries() const;
 
 	json toJson() const override;
 	bool fromJson(const json &j) override;
@@ -38,7 +38,7 @@ public:
 
 private:
 	size_t m_itemLimit;
-	std::vector<TextLogItem> m_items;
+	std::vector<TextLogEntry> m_entries;
 };
 
 } // namespace NovelTea

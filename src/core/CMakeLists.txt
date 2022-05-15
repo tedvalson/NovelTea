@@ -55,6 +55,9 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/VerbList.cpp
 	${SRCROOT}/GUI/Icon/IconContinue.cpp
 	${SRCROOT}/GUI/Icon/IconGlow.cpp
+	${SRCROOT}/GUI/TextLog/TextLogGenericItem.cpp
+	${SRCROOT}/GUI/TextLog/TextLogItem.cpp
+	${SRCROOT}/GUI/TextLog/TextLogRenderer.cpp
 	${SRCROOT}/States/State.cpp
 	${SRCROOT}/States/StateEditor.cpp
 	${SRCROOT}/States/StateIntro.cpp

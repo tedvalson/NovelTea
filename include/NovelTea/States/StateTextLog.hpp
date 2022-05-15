@@ -2,16 +2,14 @@
 #define NOVELTEA_STATETEXTLOG_HPP
 
 #include <NovelTea/States/State.hpp>
-#include <TweenEngine/TweenManager.h>
 #include <NovelTea/TweenObjects.hpp>
-#include <NovelTea/GUI/ScrollBar.hpp>
+#include <NovelTea/GUI/Button.hpp>
+#include <NovelTea/GUI/TextLog/TextLogRenderer.hpp>
 
 namespace NovelTea
 {
 
-class ActiveText;
-
-class StateTextLog : public State, public Scrollable
+class StateTextLog : public State
 {
 public:
 	StateTextLog(StateStack& stack, Context& context, StateCallback callback);
@@ -19,28 +17,13 @@ public:
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
 	void resize(const sf::Vector2f &size) override;
-
 	void setAlpha(float alpha) override;
 
-	void setScroll(float position) override;
-	float getScroll() override;
-	const sf::Vector2f &getScrollSize() override;
-	
-	void refreshItems();
-	void repositionItems();
-
 private:
-	TweenText m_text;
 	TweenRectangleShape m_bg;
-	TweenEngine::TweenManager m_tweenManager;
-	sf::View m_textView;
+	Button m_buttonClose;
 	sf::Vector2f m_screenSize;
-	
-	std::vector<std::shared_ptr<ActiveText>> m_texts;
-
-	float m_scrollPos;
-	sf::Vector2f m_scrollAreaSize;
-	ScrollBar m_scrollbar;
+	TextLogRenderer m_textLogRenderer;
 };
 
 } // namespace NovelTea
