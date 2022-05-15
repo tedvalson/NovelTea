@@ -220,14 +220,15 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 	if (startSegment->getType() == DialogueSegment::Type::Text) {
 		textSegment = startSegment;
 	} else {
+		// Run (save) before logging to avoid double-logging on load
+		if (run)
+			startSegment->run(buttonSubindex);
 		if (!startSegment->isEmpty()) {
 			auto lines = startSegment->getOptionMultiline();
 			auto text = (lines.size() == 1) ? lines[0] : lines[buttonSubindex];
-			if (startSegment->getIsLogged())
+			if (run && startSegment->getIsLogged())
 				ActiveGame->getTextLog()->push(text, TextLogType::DialogueOption);
 		}
-		if (run)
-			startSegment->run(buttonSubindex);
 	}
 
 	// Get text line
