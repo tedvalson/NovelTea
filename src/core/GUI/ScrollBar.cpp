@@ -140,7 +140,7 @@ void ScrollBar::update(float delta)
 		for (auto &obj : m_scrollObjects)
 			obj->setScroll(m_scrollPos);
 		// If scrolling, and finger stops for a certain time, stop scroll
-		if (m_clockVelocity.getElapsedTime().asSeconds() > 0.1f)
+		if (m_isTouching && m_clockVelocity.getElapsedTime().asSeconds() > 0.1f)
 			m_isScrolling = false;
 	}
 
