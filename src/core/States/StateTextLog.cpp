@@ -17,6 +17,7 @@ StateTextLog::StateTextLog(StateStack& stack, Context& context, StateCallback ca
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);
 	m_buttonClose.onClick([this](){
+		m_textLogRenderer.hide();
 		hide(1.f, ALPHA, [this](){
 			requestStackPop();
 		});
@@ -26,6 +27,18 @@ StateTextLog::StateTextLog(StateStack& stack, Context& context, StateCallback ca
 
 	hide(0.f);
 	show(1.f);
+}
+
+void StateTextLog::show(float duration, int tweenType, HideableCallback callback)
+{
+	m_textLogRenderer.show(duration);
+	State::show(duration, tweenType, callback);
+}
+
+void StateTextLog::hide(float duration, int tweenType, HideableCallback callback)
+{
+	m_textLogRenderer.hide(duration);
+	State::hide(duration, tweenType, callback);
 }
 
 void StateTextLog::render(sf::RenderTarget &target)
@@ -53,8 +66,8 @@ void StateTextLog::resize(const sf::Vector2f &size)
 	m_bg.setSize(size);
 
 	m_textLogRenderer.setFontSizeMultiplier(fontSizeMultiplier);
-	m_textLogRenderer.setPosition({20.f, 20.f});
-	m_textLogRenderer.setSize(size * 0.5f);
+	m_textLogRenderer.setPosition(size * 0.05f);
+	m_textLogRenderer.setSize(size * 0.9f);
 }
 
 void StateTextLog::setAlpha(float alpha)
@@ -62,7 +75,6 @@ void StateTextLog::setAlpha(float alpha)
 	sf::Color color;
 	float *newValues = &alpha;
 	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 245.f);
-	m_textLogRenderer.setAlpha(alpha);
 	m_buttonClose.setAlpha(alpha);
 	State::setAlpha(alpha);
 }

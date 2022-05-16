@@ -12,31 +12,14 @@ namespace NovelTea
 TextLogRenderer::TextLogRenderer()
 : m_needsUpdate(true)
 , m_mousePressed(false)
+, m_numLoaded(0)
 , m_alpha(255.f)
 {
 	m_bg.setFillColor(sf::Color(240.f, 240.f, 240.f));
 	m_scrollBar.setColor(sf::Color(0, 0, 0, 40));
+	m_scrollBar.setDeceleration(0.9f);
 	m_scrollBar.setAutoHide(false);
 	m_scrollBar.attachObject(this);
-
-	auto& entries = ActiveGame->getTextLog()->entries();
-	sf::err() << "loading text log... " << entries.size() << std::endl;
-	for (auto it = entries.begin(); it != entries.end(); ++it)
-	{
-		TextLogItem* item = nullptr;
-		auto type = it->type;
-
-		if (type == TextLogType::DialogueTextName) {
-			auto name = it->text;
-			if (++it != entries.end())
-				item = new TextLogGenericItem(name + " -- " + it->text);
-		} else {
-			item = new TextLogGenericItem(it->text);
-		}
-
-		if (item)
-			m_items.emplace_back(item);
-	}
 }
 
 // Returns true when it's time to close the overlay
@@ -54,6 +37,7 @@ bool TextLogRenderer::processEvent(const sf::Event &event)
 
 bool TextLogRenderer::update(float delta)
 {
+	loadItems(5);
 	m_scrollBar.update(delta);
 	Hideable::update(delta);
 	return true;
@@ -62,7 +46,7 @@ bool TextLogRenderer::update(float delta)
 void TextLogRenderer::setScroll(float position)
 {
 	m_scrollPos = round(position);
-	repositionText();
+	m_view.setCenter({m_size.x / 2.f, -m_scrollAreaSize.y + m_size.y / 2.f - m_scrollPos});
 }
 
 float TextLogRenderer::getScroll()
@@ -75,9 +59,54 @@ const sf::Vector2f &TextLogRenderer::getScrollSize()
 	return m_scrollAreaSize;
 }
 
-void TextLogRenderer::repositionText()
+void TextLogRenderer::repositionItems(float posY, unsigned int startIndex)
 {
-	m_view.setCenter({m_size.x / 2.f, m_size.y / 2.f - m_scrollPos});
+	auto initialPosY = posY;
+	for (int i = startIndex; i < m_items.size(); ++i)
+	{
+		auto& item = m_items[i];
+		item->setFontSizeMultiplier(m_fontSizeMultiplier);
+		item->setWidth(m_size.x);
+		posY -= item->getLocalBounds().height;
+		item->setPosition({0.f, posY});
+	}
+
+	m_scrollAreaSize.y = -posY;
+	updateScrollbar();
+	m_scrollBar.setScroll(m_scrollPos + posY - initialPosY);
+}
+
+void TextLogRenderer::loadItems(unsigned int count)
+{
+	const auto& entries = ActiveGame->getTextLog()->entries();
+	count = std::min(count, entries.size() - m_numLoaded);
+	if (count <= 0)
+		return;
+
+	int startPos = entries.size() - 1 - m_numLoaded;
+	int endPos = startPos - count;
+	int itemSize = m_items.size();
+
+	for (int i = startPos; i > endPos; --i, ++m_numLoaded)
+	{
+		TextLogItem* item = nullptr;
+		const auto& entry = entries[i];
+
+		if (entry.type == TextLogType::DialogueText) {
+			auto text = entry.text;
+			if (--i <= endPos)
+				break;
+			++m_numLoaded;
+			item = new TextLogGenericItem(entries[i].text + " -- " + text);
+		} else {
+			item = new TextLogGenericItem(entry.text);
+		}
+
+		if (item)
+			m_items.emplace_back(item);
+	}
+
+	repositionItems(-m_scrollAreaSize.y, itemSize);
 }
 
 void TextLogRenderer::setFontSizeMultiplier(float fontSizeMultiplier)
@@ -92,6 +121,7 @@ void TextLogRenderer::show(float duration, int tweenType, HideableCallback callb
 
 void TextLogRenderer::hide(float duration, int tweenType, HideableCallback callback)
 {
+	m_scrollBar.hide();
 	Hideable::hide(duration, tweenType, [this, callback](){
 		// Reset scrollbar positioning
 		m_scrollAreaSize.y = 0.f;
@@ -125,7 +155,7 @@ void TextLogRenderer::setSize(const sf::Vector2f &size)
 	m_padding = 1.f / 8.f * (portrait ? size.x : size.y);
 	m_needsUpdate = true;
 
-	m_view.reset(sf::FloatRect(0.f, 0.f, size.x, size.y));
+	m_view.reset(sf::FloatRect(0.f, -size.y, size.x, size.y));
 
 	m_bg.setSize(size);
 
@@ -135,17 +165,12 @@ void TextLogRenderer::setSize(const sf::Vector2f &size)
 
 	m_size = size;
 
-	auto posY = 0.f;
-	for (auto& item : m_items)
-	{
-		item->setFontSizeMultiplier(m_fontSizeMultiplier);
-		item->setWidth(size.x);
-		item->setPosition({0.f, posY});
-		posY += item->getLocalBounds().height;
-	}
+	if (m_numLoaded == 0)
+		loadItems(50);
+	else
+		repositionItems();
 
-	m_scrollAreaSize.y = posY;
-	m_scrollBar.setScroll(-posY);
+	m_scrollBar.setScroll(-m_scrollAreaSize.y);
 }
 
 sf::Vector2f TextLogRenderer::getSize() const
@@ -175,8 +200,19 @@ void TextLogRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) co
 	target.draw(m_bg, states);
 
 	target.setView(m_view);
+	float top = -m_scrollAreaSize.y - m_scrollPos;
+	float bottom = top + m_size.y;
+	bool drawn = false;
 	for (auto& item : m_items)
-		target.draw(*item);
+	{
+		auto y = item->getPosition().y;
+		if (y < bottom && y + item->getLocalBounds().height > top) {
+			drawn = true;
+			target.draw(*item);
+		}
+		else if (drawn)
+			break;
+	}
 	target.setView(view);
 
 	target.draw(m_scrollBar, states);

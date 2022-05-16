@@ -13,6 +13,10 @@ class StateTextLog : public State
 {
 public:
 	StateTextLog(StateStack& stack, Context& context, StateCallback callback);
+
+	void show(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
+	void hide(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
+
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;

@@ -23,7 +23,8 @@ public:
 	void setScroll(float position) override;
 	float getScroll() override;
 	const sf::Vector2f &getScrollSize() override;
-	void repositionText();
+	void repositionItems(float posY = 0.f, unsigned int startIndex = 0);
+	void loadItems(unsigned int count);
 
 	void setFontSizeMultiplier(float fontSizeMultiplier);
 
@@ -44,6 +45,7 @@ private:
 	sf::Vector2f m_size;
 	mutable bool m_needsUpdate;
 	bool m_mousePressed;
+	int m_numLoaded;
 
 	mutable sf::View m_view;
 	float m_padding;
