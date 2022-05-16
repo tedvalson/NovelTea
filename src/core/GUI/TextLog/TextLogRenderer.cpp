@@ -1,6 +1,8 @@
 #include <NovelTea/GUI/TextLog/TextLogRenderer.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/GUI/TextLog/TextLogDialogueOptionItem.hpp>
+#include <NovelTea/GUI/TextLog/TextLogDialogueTextItem.hpp>
 #include <NovelTea/GUI/TextLog/TextLogGenericItem.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
@@ -61,14 +63,16 @@ const sf::Vector2f &TextLogRenderer::getScrollSize()
 
 void TextLogRenderer::repositionItems(float posY, unsigned int startIndex)
 {
+	auto padding = 5.f;
 	auto initialPosY = posY;
+	auto w = m_size.x - padding * 2.f;
 	for (int i = startIndex; i < m_items.size(); ++i)
 	{
 		auto& item = m_items[i];
 		item->setFontSizeMultiplier(m_fontSizeMultiplier);
-		item->setWidth(m_size.x);
+		item->setWidth(w);
 		posY -= item->getLocalBounds().height;
-		item->setPosition({0.f, posY});
+		item->setPosition({padding, posY});
 	}
 
 	m_scrollAreaSize.y = -posY;
@@ -97,7 +101,9 @@ void TextLogRenderer::loadItems(unsigned int count)
 			if (--i <= endPos)
 				break;
 			++m_numLoaded;
-			item = new TextLogGenericItem(entries[i].text + " -- " + text);
+			item = new TextLogDialogueTextItem(entries[i].text, text);
+		} else if (entry.type == TextLogType::DialogueOption) {
+			item = new TextLogDialogueOptionItem(entry.text);
 		} else {
 			item = new TextLogGenericItem(entry.text);
 		}
@@ -137,9 +143,19 @@ void TextLogRenderer::setAlpha(float alpha)
 	m_alpha = alpha;
 	float *newValues = &alpha;
 	SET_ALPHA(m_bg.getFillColor, m_bg.setFillColor, 245.f);
+
+	float top = -m_scrollAreaSize.y - m_scrollPos;
+	float bottom = top + m_size.y;
+	bool done = false;
 	for (auto& item : m_items)
 	{
-		item->setAlpha(alpha);
+		auto y = item->getPosition().y;
+		if (y < bottom && y + item->getLocalBounds().height > top) {
+			done = true;
+			item->setAlpha(alpha);
+		}
+		else if (done)
+			break;
 	}
 }
 
