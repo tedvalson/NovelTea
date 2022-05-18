@@ -83,7 +83,9 @@ void TextLogRenderer::repositionItems(float posY, unsigned int startIndex)
 void TextLogRenderer::loadItems(unsigned int count)
 {
 	const auto& entries = ActiveGame->getTextLog()->entries();
-	count = std::min(count, entries.size() - m_numLoaded);
+	auto remaining = entries.size() - m_numLoaded;
+	if (count > remaining)
+		count = remaining;
 	if (count <= 0)
 		return;
 
