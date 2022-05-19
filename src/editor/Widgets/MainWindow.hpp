@@ -46,7 +46,8 @@ protected:
 	void readSettings();
 	void writeSettings();
 
-	void onProcessReadyRead();
+	void onProcessStandardError();
+	void onProcessStandardOutput();
 
 private:
 	QAction *makeColorAction(const QString &string, const QColor &color);

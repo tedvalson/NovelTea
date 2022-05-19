@@ -44,7 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	readSettings();
 
-	connect(&m_process, &QIODevice::readyRead, this, &MainWindow::onProcessReadyRead);
+	m_process.setInputChannelMode(QProcess::ForwardedInputChannel);
+	connect(&m_process, &QProcess::readyReadStandardOutput, this, &MainWindow::onProcessStandardOutput);
+	connect(&m_process, &QProcess::readyReadStandardError, this, &MainWindow::onProcessStandardError);
 }
 
 MainWindow::~MainWindow()
@@ -350,9 +352,14 @@ void MainWindow::writeSettings()
 	settings.setValue("recentProjects", m_recentProjects);
 }
 
-void MainWindow::onProcessReadyRead()
+void MainWindow::onProcessStandardError()
 {
-	std::cout << "READ: " << QString(m_process.readAll()).toStdString();
+	std::cout << "ERROR: " << QString(m_process.readAllStandardError()).toStdString();
+}
+
+void MainWindow::onProcessStandardOutput()
+{
+	std::cout << "OUT: " << QString(m_process.readAllStandardOutput()).toStdString();
 }
 
 QAction *MainWindow::makeColorAction(const QString &string, const QColor &color)
