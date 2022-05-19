@@ -38,14 +38,14 @@ void ActiveText::createRenderTexture()
 	m_sprite.setTexture(m_renderTexture->getTexture(), true);
 }
 
-void splitAndAppend(const std::string &text, const std::string &idName, std::vector<std::pair<std::string, std::string>> &pairs)
+void splitAndAppend(const sf::String &text, const sf::String &idName, std::vector<std::pair<sf::String, sf::String>> &pairs)
 {
-	std::string buffer;
+	sf::String buffer;
 	for (auto &c : text)
 	{
 		if (c == ' ')
 		{
-			if (!buffer.empty())
+			if (!buffer.isEmpty())
 				pairs.emplace_back(buffer, idName);
 			pairs.emplace_back("", "");
 			buffer.clear();
@@ -54,13 +54,13 @@ void splitAndAppend(const std::string &text, const std::string &idName, std::vec
 			buffer += c;
 	}
 
-	if (!buffer.empty())
+	if (!buffer.isEmpty())
 		pairs.emplace_back(buffer, idName);
 }
 
-std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::String &s)
+std::vector<std::pair<sf::String, sf::String>> getTextObjectPairs(const sf::String &s)
 {
-	std::vector<std::pair<std::string, std::string>> v;
+	std::vector<std::pair<sf::String, sf::String>> v;
 
 	size_t searchPos = 0,
 		   processedPos = 0,
@@ -85,7 +85,7 @@ std::vector<std::pair<std::string, std::string>> getTextObjectPairs(const sf::St
 		if (!GSave->exists<Object>(idName))
 			idName.clear();
 		if (startPos != processedPos)
-			splitAndAppend(s.substring(processedPos, startPos - processedPos).toAnsiString(), "", v);
+			splitAndAppend(s.substring(processedPos, startPos - processedPos), "", v);
 		splitAndAppend(text, idName, v);
 		processedPos = searchPos = endPos + 2;
 	}
@@ -546,14 +546,15 @@ void ActiveText::ensureUpdate() const
 			shape.setFillColor(sf::Color(0, 0, 0, 30));
 
 			std::vector<TextPart> parts;
-			parts.emplace_back(frag->getText());
+			auto str = frag->getText();
+			parts.emplace_back(sf::String::fromUtf8(str.begin(), str.end()));
 			findTextParts(parts, DIFF_OPEN_TAG, DIFF_CLOSE_TAG);
 			findTextParts(parts, "[b]", "[/b]");
 			findTextParts(parts, "[i]", "[/i]");
 
 			for (auto &part : parts)
 			{
-				auto textObjectPairs = getTextObjectPairs(part.text.toAnsiString());
+				auto textObjectPairs = getTextObjectPairs(part.text);
 
 				TweenText text;
 				auto s = style;
@@ -571,7 +572,7 @@ void ActiveText::ensureUpdate() const
 				for (auto &textObjectPair : textObjectPairs)
 				{
 					// Don't start line with a space
-					if (textObjectPair.first.empty())
+					if (textObjectPair.first.isEmpty())
 					{
 						if (m_cursorPos.x > 0)
 							m_cursorPos.x += spaceWidth;
@@ -582,7 +583,7 @@ void ActiveText::ensureUpdate() const
 					auto objectId = textObjectPair.second;
 					auto objectExists = false;
 					auto color = (part.flags[0] ? sf::Color(150, 0, 0) : format.color());
-					if (!objectId.empty()) {
+					if (!objectId.isEmpty()) {
 						objectExists = ActiveGame->getRoom()->containsId(objectId) ||
 									  ActiveGame->getObjectList()->containsId(objectId);
 					}
@@ -593,7 +594,7 @@ void ActiveText::ensureUpdate() const
 
 					// Hack to prevent these chars from wrapping by themselves.
 					const std::string specialChars = ".,!?";
-					auto isSpecialChar = (string.size() == 1 && specialChars.find(string) != specialChars.npos);
+					auto isSpecialChar = (string.getSize() == 1 && specialChars.find(string) != specialChars.npos);
 
 					auto newX = m_cursorPos.x + text.getLocalBounds().width;
 					if (newX > m_size.x && m_cursorPos.x > 0.f && !isSpecialChar)
