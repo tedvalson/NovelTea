@@ -40,6 +40,8 @@ void ProjectData::newProject()
 		ID::projectAuthor, "Author Name",
 		ID::projectWebsite, "",
 		ID::startingInventory, sj::Array(),
+		ID::scriptBeforeSave, "",
+		ID::scriptAfterLoad, "",
 		ID::scriptAfterAction, "",
 		ID::scriptBeforeAction, "return true;",
 		ID::scriptUndefinedAction, "return false;",
@@ -304,22 +306,10 @@ const std::string &ProjectData::filename() const
 
 json ProjectData::toJson() const
 {
-//	json jconfig = json::object({
-//		{"engine", m_engineVersion},
-//		{"author", "Tom2"},
-//		{"startpoint", {
-//			{"type", "cutscene"},
-//			{"id", 0}
-//		}}
-//	});
-
 	// TextFormat list
 	json jtextformats = sj::Array();
 	for (auto &format : m_textFormats)
 		jtextformats.append(format.toJson());
-
-	// Cutscene list
-//	json jcutscenes = json::array();
 
 	// Project components all together
 //	auto jproject = json::object({
@@ -330,7 +320,6 @@ json ProjectData::toJson() const
 	m_json[ID::textFormats] = jtextformats;
 
 	return m_json;
-//	return jproject;
 }
 
 bool ProjectData::fromJson(const json &j)

@@ -1,6 +1,7 @@
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Settings.hpp>
 #include <NovelTea/TextInput.hpp>
 #include <SFML/Graphics.hpp>
@@ -52,6 +53,8 @@ int main(int argc, char **argv)
 				auto segmentId = atoi(argv[5]);
 				GSave->data()[NovelTea::ID::entrypointMetadata] = sj::Array("", sj::Array(segmentId));
 			}
+			// Run the "after load" script even though no real game load happened
+			ActiveGame->getScriptManager()->runInClosure(ProjData[NovelTea::ID::scriptAfterLoad].ToString());
 		} else {
 			std::cout << "Unknown command: " << argv[2] << std::endl;
 			return 1;

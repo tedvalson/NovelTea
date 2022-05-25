@@ -32,6 +32,8 @@ namespace ID
 	const auto entrypointEntity   = "entrypoint";
 	const auto entrypointMetadata = "entrydata";
 	const auto quickVerb          = "quickVerb";
+	const auto scriptBeforeSave   = "sbs";
+	const auto scriptAfterLoad    = "sas";
 	const auto scriptAfterAction  = "saa";
 	const auto scriptBeforeAction = "sba";
 	const auto scriptUndefinedAction = "sua";

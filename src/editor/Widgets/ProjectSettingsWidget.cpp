@@ -35,6 +35,8 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
 	MODIFIER(ui->buttonSetDefaultFont, &QPushButton::clicked);
 	MODIFIER(ui->actionSelect, &ActionSelectWidget::valueChanged);
 	MODIFIER(ui->comboVerb, &QComboBox::currentTextChanged);
+	MODIFIER(ui->scriptBeforeSaveEdit, &ScriptEdit::textChanged);
+	MODIFIER(ui->scriptAfterLoadEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->scriptAfterActionEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->scriptBeforeActionEdit, &ScriptEdit::textChanged);
 	MODIFIER(ui->scriptUndefinedActionEdit, &ScriptEdit::textChanged);
@@ -107,6 +109,8 @@ void ProjectSettingsWidget::saveData() const
 	j[ID::quickVerb] = ui->comboVerb->currentText().toStdString();
 	j[ID::startingInventory] = jobjects;
 
+	j[ID::scriptBeforeSave] = ui->scriptBeforeSaveEdit->toPlainText().toStdString();
+	j[ID::scriptAfterLoad] = ui->scriptAfterLoadEdit->toPlainText().toStdString();
 	j[ID::scriptAfterAction] = ui->scriptAfterActionEdit->toPlainText().toStdString();
 	j[ID::scriptBeforeAction] = ui->scriptBeforeActionEdit->toPlainText().toStdString();
 	j[ID::scriptUndefinedAction] = ui->scriptUndefinedActionEdit->toPlainText().toStdString();
@@ -136,6 +140,8 @@ void ProjectSettingsWidget::loadData()
 	for (auto &jObjectId : jobjects.ArrayRange())
 		ui->listInventory->addItem(QString::fromStdString(jObjectId.ToString()));
 
+	ui->scriptBeforeSaveEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeSave].ToString()));
+	ui->scriptAfterLoadEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterLoad].ToString()));
 	ui->scriptAfterActionEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterAction].ToString()));
 	ui->scriptBeforeActionEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeAction].ToString()));
 	ui->scriptUndefinedActionEdit->setPlainText(QString::fromStdString(j[ID::scriptUndefinedAction].ToString()));

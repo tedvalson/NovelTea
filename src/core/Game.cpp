@@ -150,6 +150,7 @@ void Game::save(int slot)
 {
 	if (!getSaveEnabled())
 		return;
+	m_scriptManager->runInClosure(ProjData[ID::scriptBeforeSave].ToString());
 	if (m_saveCallback)
 		m_saveCallback();
 	m_saveData->data()[ID::mapEnabled] = m_minimapEnabled;
@@ -163,6 +164,7 @@ bool Game::load(int slot)
 	if (!m_saveData->load(slot))
 		return false;
 	syncToSave();
+	m_scriptManager->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
 	return true;
 }
 
