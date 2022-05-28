@@ -6,6 +6,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/Zip/Zip.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
@@ -271,24 +272,30 @@ bool ProjectData::loadFromFile(const std::string &filename)
 		s.resize(file.getSize());
 		file.read(&s[0], s.size());
 
-/*
-		std::ifstream file(filename);
-		if (!file.is_open())
-			return false;
-
-		file.seekg(0, std::ios_base::end);
-		s.resize(file.tellg());
-		file.seekg(0);
-		file.read(&s[0], s.size());
-*/
+		ZipReader zip(s.data(), s.size());
 
 //		auto j = json::from_msgpack(file);
 //		auto j = json::parse(file);
 
-		auto j = json::Load(s);
+		auto j = json::Load(zip.read("game"));
 		auto success = fromJson(j);
-		if (success)
+		if (success) {
+			for (auto& fontFileName : zip.getFileList("fonts/")) {
+				auto font = std::make_shared<sf::Font>();
+				auto fontData = zip.read(fontFileName);
+				if (font->loadFromMemory(fontData.data(), fontData.size()))
+					m_fonts.push_back(font);
+				else
+					throw std::runtime_error("Failed to load project font: " + fontFileName);
+			}
+			auto imageData = zip.read("image");
+			if (!imageData.empty()) {
+				auto texture = std::make_shared<sf::Texture>();
+				if (texture->loadFromMemory(imageData.data(), imageData.size()))
+					m_imageTexture = texture;
+			}
 			m_filename = filename;
+		}
 		return success;
 	}
 	catch (std::exception &e)
@@ -302,6 +309,11 @@ bool ProjectData::loadFromFile(const std::string &filename)
 const std::string &ProjectData::filename() const
 {
 	return m_filename;
+}
+
+const std::shared_ptr<sf::Texture> &ProjectData::imageTexture() const
+{
+	return m_imageTexture;
 }
 
 json ProjectData::toJson() const
@@ -328,6 +340,7 @@ bool ProjectData::fromJson(const json &j)
 	m_filename.clear();
 	m_textFormats.clear();
 	m_fonts.clear();
+	m_imageTexture = nullptr;
 
 	for (auto &jformat : j[ID::textFormats].ArrayRange())
 	{

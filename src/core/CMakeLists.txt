@@ -70,6 +70,8 @@ set(SOURCE_FILES
 	${SRCROOT}/States/StateTextLog.cpp
 	${SRCROOT}/States/StateTextSettings.cpp
 	${SRCROOT}/States/StateTitleScreen.cpp
+	${SRCROOT}/Zip/zip.c
+	${SRCROOT}/Zip/Zip.cpp
 	
 	${PROJECT_SOURCE_DIR}/external/duktape.c
 	${TWEEN_ENGINE_SOURCE}

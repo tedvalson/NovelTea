@@ -63,6 +63,7 @@ public:
 	void saveToFile(const std::string &filename = std::string());
 	bool loadFromFile(const std::string &filename);
 	const std::string &filename() const;
+	const std::shared_ptr<sf::Texture> &imageTexture() const;
 
 	json toJson() const override;
 	bool fromJson(const json &j) override;
@@ -77,6 +78,7 @@ private:
 
 	std::vector<TextFormat> m_textFormats;
 	std::vector<std::shared_ptr<sf::Font>> m_fonts;
+	std::shared_ptr<sf::Texture> m_imageTexture;
 };
 
 } // namespace NovelTea
