@@ -4,6 +4,7 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <vector>
 #include <memory>
+#include <string>
 
 #define ADD_ACCESSOR(type, name, var) \
 	virtual void set##name(const type & arg){var = arg;} \

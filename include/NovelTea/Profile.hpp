@@ -2,6 +2,7 @@
 #define NOVELTEA_PROFILE_HPP
 
 #include <NovelTea/Utils.hpp>
+#include <string>
 
 namespace NovelTea
 {

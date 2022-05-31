@@ -51,13 +51,11 @@ QVariant DialogueTreeItem::data(int column) const
 		else if (segment->getType() == NovelTea::DialogueSegment::Option)
 		{
 			QString str;
-			auto lines = segment->getTextMultiline();
+			auto lines = segment->getOptionMultiline();
 			for (auto &line : lines) {
 				if (!str.isEmpty())
 					str += "\n";
-				if (!line.first.empty())
-					str += QString::fromStdString("["+line.first+"] ");
-				str += QString::fromStdString(line.second).replace("\n"," ");
+				str += QString::fromStdString(line).replace("\n"," ");
 			}
 			return str.replace("\t", " ");
 		}
