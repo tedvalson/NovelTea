@@ -2,6 +2,7 @@
 #include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/CutscenePageSegment.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <iostream>
 
 namespace NovelTea

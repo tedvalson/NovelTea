@@ -6,6 +6,7 @@
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Room.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <NovelTea/Zip/Zip.hpp>
 #include <SFML/System/FileInputStream.hpp>
 #include <fstream>

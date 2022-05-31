@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_MAP_HPP
 #define NOVELTEA_MAP_HPP
 
+#include <SFML/Graphics/Rect.hpp>
 #include <NovelTea/Entity.hpp>
 
 namespace NovelTea

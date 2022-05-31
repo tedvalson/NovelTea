@@ -1,4 +1,5 @@
 #include <NovelTea/CutscenePageSegment.hpp>
+#include <NovelTea/StringUtils.hpp>
 
 namespace NovelTea
 {

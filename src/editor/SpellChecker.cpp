@@ -1,6 +1,6 @@
 #include "SpellChecker.hpp"
 #include <NovelTea/ProjectData.hpp>
-#include <NovelTea/Utils.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <QCoreApplication>
 #include <iostream>
 

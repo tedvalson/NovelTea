@@ -5,6 +5,7 @@
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <NovelTea/TextBlock.hpp>
 #include <NovelTea/TextFragment.hpp>
 

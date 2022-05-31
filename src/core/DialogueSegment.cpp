@@ -3,6 +3,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/StringUtils.hpp>
 
 namespace NovelTea
 {

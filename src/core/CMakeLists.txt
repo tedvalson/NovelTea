@@ -34,6 +34,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Script.cpp
 	${SRCROOT}/ScriptManager.cpp
 	${SRCROOT}/Settings.cpp
+	${SRCROOT}/StringUtils.cpp
 	${SRCROOT}/TextBlock.cpp
 	${SRCROOT}/TextFormat.cpp
 	${SRCROOT}/TextFragment.cpp

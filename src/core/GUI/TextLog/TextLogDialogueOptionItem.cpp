@@ -1,5 +1,6 @@
 #include <NovelTea/GUI/TextLog/TextLogDialogueOptionItem.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/Utils.hpp>
 
 namespace NovelTea
 {
@@ -15,6 +16,9 @@ TextLogDialogueOptionItem::TextLogDialogueOptionItem(const std::string &text)
 
 void TextLogDialogueOptionItem::setAlpha(float alpha)
 {
+	sf::Color color;
+	float *newValues = &alpha;
+	SET_ALPHA(m_bg.getColor, m_bg.setColor, 180.f);
 	m_text.setAlpha(alpha);
 }
 
