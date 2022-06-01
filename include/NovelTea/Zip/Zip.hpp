@@ -17,7 +17,6 @@ public:
 	virtual ~ZipReader();
 
 	std::string read(const std::string &fileName);
-	void write(const std::string &fileName, const std::string &contents);
 
 	std::vector<std::string> getFileList(const std::string &prefix = std::string());
 

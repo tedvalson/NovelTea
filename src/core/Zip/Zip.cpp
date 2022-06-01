@@ -9,13 +9,13 @@ namespace NovelTea
 ZipReader::ZipReader(const std::string &fileName)
 {
 	if (!(m_zip = zip_open(fileName.c_str(), 0, 'r')))
-		throw std::runtime_error("Nope");
+		throw std::runtime_error("Failed to open file as zip archive.");
 }
 
 ZipReader::ZipReader(const char *data, size_t size)
 {
 	if (!(m_zip = zip_stream_open(data, size, 0, 'r')))
-		throw std::runtime_error("Nope");
+		throw std::runtime_error("Data could not be read as zip archive.");
 }
 
 ZipReader::~ZipReader()
@@ -59,7 +59,7 @@ ZipWriter::ZipWriter(const std::string &fileName)
 {
 	if (!(m_zip = zip_open(fileName.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'w')))
 //	if (!(m_zip = zip_open(fileName.c_str(), 9, 'w')))
-		throw std::runtime_error("Nope");
+		throw std::runtime_error("Failed to write zip archive.");
 }
 
 ZipWriter::~ZipWriter()
@@ -75,7 +75,7 @@ void ZipWriter::write(const std::string &fileName, const std::string &contents)
 		zip_entry_close(m_zip);
 	}
 	else
-		throw std::runtime_error("Nope");
+		throw std::runtime_error("Failed to write zip archive entry: " + fileName);
 }
 
 } // namespace NovelTea
