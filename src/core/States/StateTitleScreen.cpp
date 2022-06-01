@@ -18,7 +18,6 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 	auto bgColor = context.config.backgroundColor;
 
 	// Buttons
-	m_buttonStart.getText().setFont(*Proj.getFont(0));
 	m_buttonStart.setString("Start");
 	m_buttonStart.setTextColor(sf::Color(80, 80, 80));
 	m_buttonStart.setActiveColor(sf::Color(0, 0, 0, 50));

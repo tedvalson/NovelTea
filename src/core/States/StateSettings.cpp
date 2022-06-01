@@ -10,12 +10,12 @@ namespace NovelTea
 StateSettings::StateSettings(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 {
-	auto &defaultFont = *Proj.getFont(0);
+	auto &defaultFont = *Proj.getFont();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Settings");
 	m_textTitle.setFillColor(sf::Color::Black);
 
-	m_buttonBack.getText().setFont(*Proj.getFont(1));
+	m_buttonBack.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonBack.setString(L"\uf00d");
 
 	m_buttonTextSize.setString("Text Size");

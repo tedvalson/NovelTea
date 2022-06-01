@@ -108,7 +108,7 @@ void Inventory::refreshItems()
 			item->text.setString(object->getName() + " (" + std::to_string(objectItem->count) + ")");
 		else
 			item->text.setString(object->getName());
-		item->text.setFont(*Proj.getFont(0));
+		item->text.setFont(*Proj.getFont());
 		item->text.setFillColor(sf::Color::Black);
 		item->text.setCharacterSize(m_itemHeight);
 		if (item->text.getLocalBounds().width > width)

@@ -59,7 +59,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Toolbar
 	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 
-	m_buttonInventory.getText().setFont(*Proj.getFont(1));
+	m_buttonInventory.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonInventory.setString(L"\uf0b1");
 	m_buttonInventory.setAlpha(0.f);
 	m_buttonInventory.setActiveColor(sf::Color(0, 0, 0, 50));

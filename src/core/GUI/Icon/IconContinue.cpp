@@ -8,7 +8,7 @@ namespace NovelTea
 
 IconContinue::IconContinue()
 {
-	m_text.setFont(*Proj.getFont(1));
+	m_text.setFont(*Proj.getFont("sysIcon"));
 	m_text.setString(L"\uf0da");
 	m_text.setFillColor(sf::Color(90, 90, 90));
 	m_text.setOutlineColor(sf::Color(190, 190, 190));

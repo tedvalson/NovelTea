@@ -9,7 +9,7 @@ namespace NovelTea
 IconGlow::IconGlow()
 : m_speedFactor(1.f)
 {
-	m_text.setFont(*Proj.getFont(1));
+	m_text.setFont(*Proj.getFont("sysIcon"));
 	m_text.setString(L"\uf138");
 	reset();
 }

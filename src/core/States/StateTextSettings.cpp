@@ -11,7 +11,7 @@ namespace NovelTea
 StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 {
-	auto &defaultFont = *Proj.getFont(0);
+	auto &defaultFont = *Proj.getFont();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Text Settings");
 
@@ -26,7 +26,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 	}
 	m_roomActiveText.setText(s);
 
-	m_buttonFinish.getText().setFont(*Proj.getFont(1));
+	m_buttonFinish.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonFinish.setString(L"\uf00c");
 	m_buttonCancel = m_buttonFinish;
 	m_buttonCancel.setString(L"\uf00d");

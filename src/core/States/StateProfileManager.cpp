@@ -18,17 +18,17 @@ StateProfileManager::StateProfileManager(StateStack& stack, Context& context, St
 , m_buttonSpacing(0.f)
 , m_cancelButtonPress(false)
 {
-	auto &defaultFont = *Proj.getFont(0);
+	auto &defaultFont = *Proj.getFont();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Profiles");
 	m_textTitle.setFillColor(sf::Color::Black);
 
-	m_buttonBack.getText().setFont(*Proj.getFont(1));
+	m_buttonBack.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonBack.setString(L"\uf00d");
 	m_buttonBack.setColor(sf::Color(230, 0 , 0));
 	m_buttonBack.setTextColor(sf::Color::White);
 
-	m_buttonAdd.getText().setFont(*Proj.getFont(1));
+	m_buttonAdd.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonAdd.setString(L"\uf234");
 	m_buttonAdd.setColor(sf::Color(100, 100 , 100));
 	m_buttonAdd.setTextColor(sf::Color::White);

@@ -12,7 +12,7 @@ namespace NovelTea
 StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 {
-	m_textCopyright.setFont(*Proj.getFont(0));
+	m_textCopyright.setFont(*Proj.getFont());
 	m_textCopyright.setString("NovelTea Engine");
 }
 

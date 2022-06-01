@@ -12,7 +12,7 @@ namespace NovelTea
 StateTextLog::StateTextLog(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
 {
-	m_buttonClose.getText().setFont(*Proj.getFont(1));
+	m_buttonClose.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonClose.setString(L"\uf00d");
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);

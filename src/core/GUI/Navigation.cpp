@@ -18,7 +18,7 @@ Navigation::Navigation()
 {
 	m_paths = sj::Array();
 
-	auto font = Proj.getFont(1);
+	auto font = Proj.getFont("sysIcon");
 	for (int i = 0; i < 8; ++i)
 	{
 		auto button = new Button;

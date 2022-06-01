@@ -22,6 +22,7 @@ enum class EntityType : int {
 namespace ID
 {
 	const auto engineVersion      = "engine";
+	const auto engineFonts        = "sysfonts";
 	const auto projectName        = "name";
 	const auto projectVersion     = "version";
 	const auto projectAuthor      = "author";

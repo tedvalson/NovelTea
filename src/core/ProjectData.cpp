@@ -41,6 +41,8 @@ void ProjectData::newProject()
 		ID::projectVersion, "1.0",
 		ID::projectAuthor, "Author Name",
 		ID::projectWebsite, "",
+		ID::projectFontDefault, "sys",
+		ID::projectFonts, sj::Array(),
 		ID::startingInventory, sj::Array(),
 		ID::scriptBeforeSave, "",
 		ID::scriptAfterLoad, "",
@@ -56,7 +58,10 @@ void ProjectData::newProject()
 		ID::openTabIndex, -1,
 	});
 
-	j[ID::projectFonts] = sj::Array("LiberationSans", "fontawesome");
+	j[ID::engineFonts] = json({
+	   "sys", "LiberationSans",
+	   "sysIcon", "fontawesome",
+   });
 	fromJson(j);
 }
 
@@ -242,11 +247,11 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	}
 }
 
-std::shared_ptr<sf::Font> ProjectData::getFont(size_t index) const
+std::shared_ptr<sf::Font> ProjectData::getFont(const std::string &fontName) const
 {
-	if (index >= m_fonts.size())
+	if (m_fonts.find(fontName) == m_fonts.end())
 		return nullptr;
-	return m_fonts[index];
+	return m_fonts.at(fontName);
 }
 
 void ProjectData::saveToFile(const std::string &filename)
@@ -255,10 +260,16 @@ void ProjectData::saveToFile(const std::string &filename)
 		return;
 	if (!filename.empty())
 		m_filename = filename;
-	std::ofstream file(m_filename);
+
 	auto j = toJson();
 //	json::to_msgpack(j, file);
-	file << j;
+	ZipWriter zip(m_filename);
+	zip.write("game", j.dump());
+	zip.write("image", m_imageData);
+
+	for (auto& jfont : j[ID::projectFonts].ObjectRange()) {
+		zip.write("fonts/" + jfont.second.ToString(), m_fontsData[jfont.first]);
+	}
 }
 
 bool ProjectData::loadFromFile(const std::string &filename)
@@ -281,20 +292,17 @@ bool ProjectData::loadFromFile(const std::string &filename)
 		auto j = json::Load(zip.read("game"));
 		auto success = fromJson(j);
 		if (success) {
-			for (auto& fontFileName : zip.getFileList("fonts/")) {
+			for (auto& jfont : j[ID::projectFonts].ObjectRange()) {
+				auto& alias = jfont.first;
 				auto font = std::make_shared<sf::Font>();
-				auto fontData = zip.read(fontFileName);
-				if (font->loadFromMemory(fontData.data(), fontData.size()))
-					m_fonts.push_back(font);
+				m_fontsData[alias] = zip.read("fonts/" + jfont.second.ToString());
+				auto &data = m_fontsData[alias];
+				if (font->loadFromMemory(data.data(), data.size()))
+					m_fonts[alias] = font;
 				else
-					throw std::runtime_error("Failed to load project font: " + fontFileName);
+					throw std::runtime_error("Failed to load project font: " + jfont.second.ToString());
 			}
-			auto imageData = zip.read("image");
-			if (!imageData.empty()) {
-				auto texture = std::make_shared<sf::Texture>();
-				if (texture->loadFromMemory(imageData.data(), imageData.size()))
-					m_imageTexture = texture;
-			}
+			m_imageData = zip.read("image");
 			m_filename = filename;
 		}
 		return success;
@@ -312,9 +320,9 @@ const std::string &ProjectData::filename() const
 	return m_filename;
 }
 
-const std::shared_ptr<sf::Texture> &ProjectData::imageTexture() const
+const std::string &ProjectData::imageData() const
 {
-	return m_imageTexture;
+	return m_imageData;
 }
 
 json ProjectData::toJson() const
@@ -341,7 +349,7 @@ bool ProjectData::fromJson(const json &j)
 	m_filename.clear();
 	m_textFormats.clear();
 	m_fonts.clear();
-	m_imageTexture = nullptr;
+	m_imageData.clear();
 
 	for (auto &jformat : j[ID::textFormats].ArrayRange())
 	{
@@ -350,12 +358,12 @@ bool ProjectData::fromJson(const json &j)
 		m_textFormats.push_back(format);
 	}
 
-	for (auto &jfont : j[ID::projectFonts].ArrayRange())
+	for (auto &jfont : j[ID::engineFonts].ObjectRange())
 	{
-		auto font = AssetManager<sf::Font>::get("fonts/" + jfont.ToString() + ".ttf");
-		std::cout << "Loading font: " << jfont.ToString() << std::endl;
+		auto font = AssetManager<sf::Font>::get("fonts/" + jfont.second.ToString());
+		std::cout << "Loading font: " << jfont.second.ToString() << std::endl;
 		if (font)
-			m_fonts.push_back(font);
+			m_fonts[jfont.first] = font;
 	}
 
 	GMan; // Make sure GameManager is initialized

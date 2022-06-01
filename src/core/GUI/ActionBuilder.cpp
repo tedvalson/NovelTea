@@ -20,7 +20,7 @@ ActionBuilder::ActionBuilder()
 	m_emptyRectAlpha = 40.f;
 	m_emptyRectColor = sf::Color(0.f, 0.f, 200.f, m_emptyRectAlpha);
 
-	m_buttonCancel.getText().setFont(*Proj.getFont(1));
+	m_buttonCancel.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonCancel.setString(L"\uf00d");
 	m_buttonCancel.setTextColor(sf::Color(255, 0, 0, 200));
 	m_buttonCancel.setTextActiveColor(sf::Color(255, 0, 0, 240));

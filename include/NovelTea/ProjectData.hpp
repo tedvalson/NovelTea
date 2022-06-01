@@ -36,7 +36,7 @@ public:
 
 	void renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName);
 
-	std::shared_ptr<sf::Font> getFont(size_t index) const;
+	std::shared_ptr<sf::Font> getFont(const std::string &fontName = "sys") const;
 
 	template <typename T>
 	static std::shared_ptr<T> get(const std::string &idName)
@@ -63,7 +63,7 @@ public:
 	void saveToFile(const std::string &filename = std::string());
 	bool loadFromFile(const std::string &filename);
 	const std::string &filename() const;
-	const std::shared_ptr<sf::Texture> &imageTexture() const;
+	const std::string &imageData() const;
 
 	json toJson() const override;
 	bool fromJson(const json &j) override;
@@ -77,8 +77,9 @@ private:
 	mutable json m_json;
 
 	std::vector<TextFormat> m_textFormats;
-	std::vector<std::shared_ptr<sf::Font>> m_fonts;
-	std::shared_ptr<sf::Texture> m_imageTexture;
+	std::map<std::string, std::shared_ptr<sf::Font>> m_fonts;
+	std::map<std::string, std::string> m_fontsData;
+	std::string m_imageData;
 };
 
 } // namespace NovelTea

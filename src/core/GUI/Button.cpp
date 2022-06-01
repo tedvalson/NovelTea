@@ -18,7 +18,7 @@ Button::Button()
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	setTexture(texture.get());
 
-	m_text.setFont(*Proj.getFont(0));
+	m_text.setFont(*Proj.getFont());
 }
 
 

@@ -532,7 +532,7 @@ void ActiveText::ensureUpdate() const
 
 		for (auto &frag : frags)
 		{
-			auto font = Proj.getFont(0);
+			auto font = Proj.getFont();
 			auto format = frag->getTextFormat();
 			sf::Uint32 style = sf::Text::Regular;
 
