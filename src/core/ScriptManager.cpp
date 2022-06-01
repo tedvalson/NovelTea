@@ -44,6 +44,11 @@ namespace
 	{
 		std::cout << str << std::endl;
 	}
+
+	void alert(const std::string &str)
+	{
+		sf::err() << str << std::endl;
+	}
 }
 
 namespace NovelTea
@@ -205,6 +210,7 @@ double ScriptManager::randGen()
 
 void ScriptManager::registerFunctions()
 {
+	dukglue_register_function(m_context, alert, "alert");
 	dukglue_register_function(m_context, print, "print");
 }
 
@@ -236,6 +242,8 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &ObjectList::containsId, "containsId");
 	dukglue_register_method(m_context, &ObjectList::containsCount, "containsCount");
 	dukglue_register_method(m_context, &ObjectList::containsIdCount, "containsIdCount");
+	dukglue_register_method(m_context, &ObjectList::count, "count");
+	dukglue_register_method(m_context, &ObjectList::countId, "countId");
 	dukglue_register_method(m_context, &ObjectList::sync, "sync");
 
 	// PropertyList
