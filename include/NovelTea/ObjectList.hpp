@@ -40,6 +40,8 @@ public:
 	bool containsId(const std::string &objectId) const;
 	bool containsIdCount(const std::string &objectId, int count) const;
 
+	std::vector<std::shared_ptr<Object>> getObjects() const;
+
 	int count(const std::shared_ptr<Object> &object) const;
 	int countId(const std::string &objectId) const;
 

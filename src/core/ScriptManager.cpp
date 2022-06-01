@@ -244,6 +244,7 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &ObjectList::containsIdCount, "containsIdCount");
 	dukglue_register_method(m_context, &ObjectList::count, "count");
 	dukglue_register_method(m_context, &ObjectList::countId, "countId");
+	dukglue_register_method(m_context, &ObjectList::getObjects, "getList");
 	dukglue_register_method(m_context, &ObjectList::sync, "sync");
 
 	// PropertyList

@@ -111,6 +111,14 @@ bool ObjectList::containsIdCount(const std::string &objectId, int count) const
 	return countId(objectId) >= count;
 }
 
+std::vector<std::shared_ptr<Object>> ObjectList::getObjects() const
+{
+	std::vector<std::shared_ptr<Object>> result;
+	for (auto& item : m_items)
+		result.push_back(item->object);
+	return result;
+}
+
 int ObjectList::count(const std::shared_ptr<Object> &object) const
 {
 	return countId(object->getId());
