@@ -28,7 +28,7 @@ MapRenderer::MapRenderer()
 
 	m_bgShape.setFillColor(sf::Color(210, 210, 210));
 
-	m_buttonClose.getText().setFont(*Proj.getFont(1));
+	m_buttonClose.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonClose.setString(L"\uf00d");
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);
