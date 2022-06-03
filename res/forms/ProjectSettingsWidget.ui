@@ -37,7 +37,7 @@
         <x>0</x>
         <y>-620</y>
         <width>600</width>
-        <height>1000</height>
+        <height>1100</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -152,13 +152,6 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="labelImageFileName">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="buttonSelectImage">
               <property name="text">
                <string>Choose File...</string>
@@ -244,6 +237,12 @@ Inventory</string>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Project Fonts</string>
          </property>
@@ -264,9 +263,29 @@ Inventory</string>
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="buttonFontDelete">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonFontRename">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Rename</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="buttonImportFont">
               <property name="text">
-               <string>Import Font</string>
+               <string>Import Font...</string>
               </property>
              </widget>
             </item>
@@ -274,11 +293,11 @@ Inventory</string>
           </item>
           <item>
            <widget class="QListWidget" name="listFonts">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -290,20 +309,12 @@ Inventory</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="labelFontPreview">
-            <property name="font">
-             <font>
-              <pointsize>20</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
+           <widget class="NovelTeaWidget" name="preview" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -569,6 +580,12 @@ Inventory</string>
    <class>ActionSelectWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/ActionSelectWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NovelTeaWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/NovelTeaWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

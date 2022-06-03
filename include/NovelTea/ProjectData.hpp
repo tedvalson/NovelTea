@@ -36,6 +36,8 @@ public:
 
 	void renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName);
 
+	void setFontData(const std::string &alias, const std::string &data);
+	const std::string &getFontData(const std::string &alias) const;
 	std::shared_ptr<sf::Font> getFont(const std::string &fontName = "sys") const;
 
 	template <typename T>
@@ -63,7 +65,9 @@ public:
 	void saveToFile(const std::string &filename = std::string());
 	bool loadFromFile(const std::string &filename);
 	const std::string &filename() const;
-	const std::string &imageData() const;
+
+	void setImageData(const std::string &data);
+	const std::string &getImageData() const;
 
 	json toJson() const override;
 	bool fromJson(const json &j) override;

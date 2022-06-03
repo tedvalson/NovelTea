@@ -3,6 +3,10 @@
 #include "ui_ProjectSettingsWidget.h"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QFileDialog>
+#include <QImageReader>
 #include <QStandardPaths>
 #include <QDir>
 #include <QRawFont>
@@ -10,18 +14,24 @@
 
 using namespace NovelTea;
 
-ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent) :
-	EditorTabWidget(parent),
-	ui(new Ui::ProjectSettingsWidget),
-	defaultFontIndex(-1)
+namespace {
+enum UserData {
+	FontAlias = Qt::UserRole,
+	FontFileName = Qt::UserRole + 1,
+	BuiltIn,
+};
+}
+
+ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent)
+: EditorTabWidget(parent)
+, ui(new Ui::ProjectSettingsWidget)
+, m_defaultFontAlias("sys")
 {
 	ui->setupUi(this);
 	ui->comboVerb->lineEdit()->setPlaceholderText("[ Select Verb ]");
 	load();
 
 	// Set default font preview
-	QFont font(ui->listFonts->item(0)->text(), 20);
-	ui->labelFontPreview->setFont(font);
 	ui->lineEditFontPreview->setText("Preview Text");
 
 	// Connect all modifying signals
@@ -61,34 +71,80 @@ EditorTabWidget::Type ProjectSettingsWidget::getType() const
 	return EditorTabWidget::Settings;
 }
 
-void ProjectSettingsWidget::addFont(const QString &name)
+bool ProjectSettingsWidget::addFontFromFile(bool systemFont, const QString &fileName, const QString &alias)
 {
-	auto fontItem = new QListWidgetItem(name);
-	fontItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
-	fontItem->setCheckState(Qt::Unchecked);
-	ui->listFonts->addItem(fontItem);
+	QFileInfo fileInfo(fileName);
+	auto data = getFileContents(fileName);
+	return addFontFromData(systemFont, fileInfo.fileName(), data, alias);
 }
 
-void ProjectSettingsWidget::makeFontDefault(int index)
+bool ProjectSettingsWidget::addFontFromData(bool systemFont, const QString &name, const std::string &data, const QString &alias)
 {
-	if (index >= ui->listFonts->count())
-		index = 0;
+	sf::Font testFont;
+	if (!testFont.loadFromMemory(data.data(), data.size())) {
+		QMessageBox::warning(this, "Failed to load font", QString("Failed to load font: %1 (%2)").arg(alias).arg(name));
+		return false;
+	}
+	auto fontItem = new QListWidgetItem(name);
+	auto fontAlias = alias.isEmpty() ? name : alias;
+	m_fontsData[fontAlias.toStdString()] = data;
+	fontItem->setData(UserData::FontAlias, fontAlias);
+	fontItem->setData(UserData::FontFileName, name);
+	fontItem->setData(UserData::BuiltIn, systemFont);
+	ui->listFonts->addItem(fontItem);
+	return true;
+}
 
-	// Unmark previous default, if exists
-	if (defaultFontIndex >= 0)
-	{
-		auto item = ui->listFonts->item(defaultFontIndex);
-		auto font = item->font();
-		font.setBold(false);
-		item->setFont(font);
+void ProjectSettingsWidget::refreshFontList()
+{
+	for (int i = 0; i < ui->listFonts->count(); ++i) {
+		auto item = ui->listFonts->item(i);
+		auto alias = item->data(UserData::FontAlias).toString();
+		auto fileName = item->data(UserData::FontFileName).toString();
+		QString builtIn = item->data(UserData::BuiltIn).toBool() ? "[builtin] " : "";
+		item->setText(QString("%1 %2(%3)").arg(alias).arg(builtIn).arg(fileName));
+
+		auto itemFont = item->font();
+		itemFont.setBold(alias == m_defaultFontAlias);
+		item->setFont(itemFont);
+	}
+}
+
+std::string ProjectSettingsWidget::getFileContents(const QString &fileName)
+{
+	QFile file(fileName);
+	if (!file.open(QIODevice::ReadOnly))
+		return "";
+	std::string data;
+	data.resize(file.size());
+	file.read(&data[0], data.size());
+	return data;
+}
+
+bool ProjectSettingsWidget::loadImageData(const std::string &data)
+{
+	QImage image;
+	if (!image.loadFromData(reinterpret_cast<const uchar*>(data.data()), data.size()))
+		return false;
+	auto pixmap = QPixmap::fromImage(image);
+	ui->imageLabel->setPixmap(pixmap.scaledToHeight(ui->imageLabel->height()));
+	ui->imageLabel->adjustSize();
+
+	m_imageData = data;
+	return true;
+}
+
+bool ProjectSettingsWidget::loadImageFile(const QString &fileName)
+{
+	QImage image(fileName);
+	if (image.isNull()) {
+		QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+								 tr("Cannot load %1.").arg(QDir::toNativeSeparators(fileName)));
+		return false;
 	}
 
-	// Mark new default
-	auto item = ui->listFonts->item(index);
-	auto font = item->font();
-	font.setBold(true);
-	item->setFont(font);
-	defaultFontIndex = index;
+	setModified();
+	return loadImageData(getFileContents(fileName));
 }
 
 void ProjectSettingsWidget::saveData() const
@@ -99,15 +155,30 @@ void ProjectSettingsWidget::saveData() const
 		auto item = ui->listInventory->item(i);
 		jobjects.append(item->text().toStdString());
 	}
+	j[ID::startingInventory] = jobjects;
+
+	auto jfonts = sj::Object();
+	for (int i = 0; i < ui->listFonts->count(); ++i) {
+		auto item = ui->listFonts->item(i);
+		if (!item->data(UserData::BuiltIn).toBool()) {
+			auto fileName = item->data(UserData::FontFileName).toString().toStdString();
+			auto alias = item->data(UserData::FontAlias).toString().toStdString();
+			jfonts[alias] = fileName;
+		}
+	}
+	for (auto &data : m_fontsData)
+		Proj.setFontData(data.first, data.second);
+	j[ID::projectFonts] = jfonts;
+
+	Proj.setImageData(m_imageData);
 
 	j[ID::projectName] = ui->lineEditName->text().toStdString();
 	j[ID::projectVersion] = ui->lineEditVersion->text().toStdString();
 	j[ID::projectAuthor] = ui->lineEditAuthor->text().toStdString();
 	j[ID::projectWebsite] = ui->lineEditWebsite->text().toStdString();
-	j[ID::projectFontDefault] = defaultFontIndex;
+	j[ID::projectFontDefault] = m_defaultFontAlias.toStdString();
 	j[ID::entrypointEntity] = ui->actionSelect->getValue();
 	j[ID::quickVerb] = ui->comboVerb->currentText().toStdString();
-	j[ID::startingInventory] = jobjects;
 
 	j[ID::scriptBeforeSave] = ui->scriptBeforeSaveEdit->toPlainText().toStdString();
 	j[ID::scriptAfterLoad] = ui->scriptAfterLoadEdit->toPlainText().toStdString();
@@ -140,6 +211,8 @@ void ProjectSettingsWidget::loadData()
 	for (auto &jObjectId : jobjects.ArrayRange())
 		ui->listInventory->addItem(QString::fromStdString(jObjectId.ToString()));
 
+	loadImageData(Proj.getImageData());
+
 	ui->scriptBeforeSaveEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeSave].ToString()));
 	ui->scriptAfterLoadEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterLoad].ToString()));
 	ui->scriptAfterActionEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterAction].ToString()));
@@ -151,25 +224,16 @@ void ProjectSettingsWidget::loadData()
 	ui->scriptBeforeEnterEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeEnter].ToString()));
 
 	ui->listFonts->clear();
-	ui->listFonts->addItem("DejaVu Serif");
-	ui->listFonts->addItem("DejaVu Sans");
-
-	auto fontPath = QStandardPaths::writableLocation(QStandardPaths::FontsLocation);
-	QDir dir(fontPath);
-	QStringList nameFilters;
-	nameFilters << "*.ttf" << "*.otf";
-	dir.setNameFilters(nameFilters);
-	dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-	QFileInfoList list = dir.entryInfoList();
-	for (int i = 0; i < list.size(); ++i)
-	{
-		QFileInfo fileInfo = list.at(i);
-		QRawFont font(fileInfo.absoluteFilePath(), 10);
-//		qDebug() << font.familyName();
-		addFont(font.familyName());
+	for (auto& jfont : j[ID::engineFonts].ObjectRange()) {
+		auto fileName = QString::fromStdString(jfont.second.ToString());
+		addFontFromFile(true, "/home/android/dev/NovelTea/res/assets/fonts/" + fileName, QString::fromStdString(jfont.first));
 	}
-
-	makeFontDefault(j[ID::projectFontDefault].ToInt());
+	for (auto& jfont : j[ID::projectFonts].ObjectRange()) {
+		auto &data = Proj.getFontData(jfont.first);
+		addFontFromData(false, QString::fromStdString(jfont.second.ToString()), data, QString::fromStdString(jfont.first));
+	}
+	m_defaultFontAlias = QString::fromStdString(j[ID::projectFontDefault].ToString());
+	refreshFontList();
 }
 
 void ProjectSettingsWidget::refreshVerbs()
@@ -184,24 +248,53 @@ void ProjectSettingsWidget::refreshVerbs()
 
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)
 {
-	ui->labelFontPreview->setText(arg1);
 }
 
 void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
 {
-	QFont font(ui->listFonts->currentItem()->text(), 20);
-	ui->labelFontPreview->setFont(font);
-	ui->buttonSetDefaultFont->setEnabled(currentRow != defaultFontIndex);
+	auto alias = ui->listFonts->currentItem()->data(UserData::FontAlias).toString();
+	auto builtIn = ui->listFonts->currentItem()->data(UserData::BuiltIn).toBool();
+	ui->buttonSetDefaultFont->setEnabled(alias != m_defaultFontAlias);
+	ui->buttonFontRename->setEnabled(!builtIn);
+	ui->buttonFontDelete->setEnabled(!builtIn);
 }
 
 void ProjectSettingsWidget::on_buttonImportFont_clicked()
 {
+	// TODO: Add all supported types
+	QStringList mimeTypeFilters {"application/x-font-ttf"};
+	const QStringList fontLocations = QStandardPaths::standardLocations(QStandardPaths::FontsLocation);
+	QFileDialog dialog(this, tr("Open File"),
+					   fontLocations.isEmpty() ? QDir::currentPath() : fontLocations.first());
+	dialog.setAcceptMode(QFileDialog::AcceptOpen);
+	dialog.setMimeTypeFilters(mimeTypeFilters);
 
+	if (dialog.exec() == QDialog::Accepted) {
+		for (auto& file : dialog.selectedFiles()) {
+			QFileInfo fileInfo(file);
+			QString alias;
+			bool ok;
+			while (alias.isEmpty() || m_fontsData.find(alias.toStdString()) != m_fontsData.end()) {
+				alias = QInputDialog::getText(this, tr("Make Font Alias"),
+						tr("Provide an unused alias for file: %1").arg(file), QLineEdit::Normal,
+						fileInfo.fileName(), &ok);
+				if (!ok)
+					break;
+			}
+			if (ok) {
+				addFontFromFile(false, file, alias);
+				setModified();
+			}
+		}
+
+		refreshFontList();
+	}
 }
 
 void ProjectSettingsWidget::on_buttonSetDefaultFont_clicked()
 {
-	makeFontDefault(ui->listFonts->currentRow());
+	m_defaultFontAlias = ui->listFonts->currentItem()->data(UserData::FontAlias).toString();
+	refreshFontList();
 }
 
 void ProjectSettingsWidget::on_actionAddObject_triggered()
@@ -251,4 +344,62 @@ void ProjectSettingsWidget::fillVerbs(const TreeModel *model, const QModelIndex 
 		fillVerbs(model, model->index(i, 0, index));
 	if (index.parent().isValid())
 		ui->comboVerb->addItem(index.data().toString());
+}
+
+void ProjectSettingsWidget::on_buttonSelectImage_clicked()
+{
+	QStringList mimeTypeFilters;
+	foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
+		mimeTypeFilters.append(mimeTypeName);
+	mimeTypeFilters.sort();
+	const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
+	QFileDialog dialog(this, tr("Open File"),
+					   picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
+	dialog.setAcceptMode(QFileDialog::AcceptOpen);
+	dialog.setMimeTypeFilters(mimeTypeFilters);
+	dialog.selectMimeTypeFilter("image/jpeg");
+
+	while (dialog.exec() == QDialog::Accepted && !loadImageFile(dialog.selectedFiles().first())) {}
+}
+
+void ProjectSettingsWidget::on_buttonFontRename_clicked()
+{
+	auto item = ui->listFonts->currentItem();
+	if (item->data(UserData::BuiltIn).toBool())
+		return;
+
+	bool ok;
+	auto oldAlias = item->data(UserData::FontAlias).toString();
+	QString text = QInputDialog::getText(this, tr("Rename Font Alias"),
+			tr("Please enter a new alias:"), QLineEdit::Normal,
+			oldAlias, &ok);
+	if (ok && !text.isEmpty()) {
+		if (text.startsWith("sys")) {
+			QMessageBox::warning(this, "Invalid Alias", "User-defined aliases cannot start with 'sys' because those values are reserved.");
+			return;
+		}
+		auto alias = text.toStdString();
+		if (m_fontsData.find(alias) != m_fontsData.end()) {
+			QMessageBox::warning(this, "Invalid Alias", "Alias already used.");
+			return;
+		}
+		item->setData(UserData::FontAlias, text);
+		m_fontsData[alias] = m_fontsData[oldAlias.toStdString()];
+		m_fontsData.erase(oldAlias.toStdString());
+		refreshFontList();
+		setModified();
+	}
+}
+
+void ProjectSettingsWidget::on_buttonFontDelete_clicked()
+{
+	auto item = ui->listFonts->currentItem();
+	auto alias = item->data(UserData::FontAlias).toString();
+	m_fontsData.erase(alias.toStdString());
+	delete item;
+
+	if (m_defaultFontAlias == alias)
+		m_defaultFontAlias = "sys";
+	refreshFontList();
+	setModified();
 }

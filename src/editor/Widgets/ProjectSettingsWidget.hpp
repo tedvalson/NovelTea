@@ -19,13 +19,17 @@ public:
 	QString tabText() const override;
 	Type getType() const override;
 
-	void addFontBuiltin(const QString &name);
-	void addFont(const QString &name);
-	void makeFontDefault(int index);
+	bool addFontFromFile(bool systemFont, const QString &fileName, const QString &alias);
+	bool addFontFromData(bool systemFont, const QString &name, const std::string &data, const QString &alias);
+	void refreshFontList();
+
+	static std::string getFileContents(const QString &fileName);
 
 protected:
 
 private:
+	bool loadImageData(const std::string &data);
+	bool loadImageFile(const QString &fileName);
 	void saveData() const override;
 	void loadData() override;
 
@@ -40,12 +44,17 @@ private slots:
 	void on_actionAddObject_triggered();
 	void on_actionRemoveObject_triggered();
 	void on_listInventory_currentRowChanged(int currentRow);
+	void on_buttonSelectImage_clicked();
+	void on_buttonFontRename_clicked();
+	void on_buttonFontDelete_clicked();
 
 private:
 	void fillVerbs(const TreeModel *model, const QModelIndex &index);
 
 	Ui::ProjectSettingsWidget *ui;
-	int defaultFontIndex;
+	QString m_defaultFontAlias;
+	std::map<std::string, std::string> m_fontsData;
+	std::string m_imageData;
 };
 
 #endif // PROJECTSETTINGSWIDGET_HPP

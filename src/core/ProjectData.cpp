@@ -247,6 +247,16 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	}
 }
 
+void ProjectData::setFontData(const std::string &alias, const std::string &data)
+{
+	m_fontsData[alias] = data;
+}
+
+const std::string &ProjectData::getFontData(const std::string &alias) const
+{
+	return m_fontsData.at(alias);
+}
+
 std::shared_ptr<sf::Font> ProjectData::getFont(const std::string &fontName) const
 {
 	if (m_fonts.find(fontName) == m_fonts.end())
@@ -299,8 +309,12 @@ bool ProjectData::loadFromFile(const std::string &filename)
 				auto &data = m_fontsData[alias];
 				if (font->loadFromMemory(data.data(), data.size()))
 					m_fonts[alias] = font;
-				else
-					throw std::runtime_error("Failed to load project font: " + jfont.second.ToString());
+				else {
+					std::cerr << "Failed to load project font: " << jfont.second.ToString() << std::endl;
+					auto &defaultFont = m_json[ID::projectFontDefault];
+					if (alias == defaultFont.ToString())
+						defaultFont = "sys";
+				}
 			}
 			m_imageData = zip.read("image");
 			m_filename = filename;
@@ -320,7 +334,12 @@ const std::string &ProjectData::filename() const
 	return m_filename;
 }
 
-const std::string &ProjectData::imageData() const
+void ProjectData::setImageData(const std::string &data)
+{
+	m_imageData = data;
+}
+
+const std::string &ProjectData::getImageData() const
 {
 	return m_imageData;
 }
