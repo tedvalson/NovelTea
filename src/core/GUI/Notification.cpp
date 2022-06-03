@@ -11,38 +11,7 @@ namespace
 	float spacing = 2.f;
 	int durationBaseDefault = 3000;
 	int durationPerLetter = 30;
-
-	bool wrapText(sf::Text &text, float width)
-	{
-		if (text.getLocalBounds().width <= width)
-			return false;
-
-		auto s = text.getString().toAnsiString();
-		auto words = split(s, " ");
-		auto processedWidth = 0.f;
-		int pos = 0;
-		std::string out;
-		sf::Vector2f lastWordPos;
-		for (auto &word : words)
-		{
-			auto p = text.findCharacterPos(pos + word.size());
-			if (p.x - processedWidth > width)
-			{
-				out += "\n" + word + " ";
-				pos += word.size() + 1;
-				processedWidth += lastWordPos.x - processedWidth;
-			} else {
-				out += word + " ";
-				pos += word.size() + 1;
-			}
-			lastWordPos = p;
-		}
-
-		text.setString(out);
-		return true;
-	}
 }
-
 
 Notification::Notification(const std::string &message)
 : m_string(message)
