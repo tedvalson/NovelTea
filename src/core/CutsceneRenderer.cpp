@@ -360,6 +360,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 	m_currentSegment = segment;
 	auto type = segment->type();
 
+	// Move to next segment if condition check fails
 	if (!m_skipConditionChecks && !segment->conditionPasses()) {
 		addSegmentToQueue(m_segmentIndex + 1);
 		return;
@@ -386,8 +387,8 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y = std::max(0.f, m_scrollAreaSize.y - scrollAreaMargin);
 			}
-			m_cursorPos.x += seg->getOffsetX();
-			m_cursorPos.y += seg->getOffsetY();
+			m_cursorPos.x += seg->getOffsetX() * m_fontSizeMultiplier;
+			m_cursorPos.y += seg->getOffsetY() * m_fontSizeMultiplier;
 
 			auto startPos = m_cursorPos.y;
 			activeText->setCursorStart(m_cursorPos);
