@@ -8,6 +8,7 @@
 #include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Verb.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -33,6 +34,10 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_mapRenderer.setShowEverything(true);
 	m_mapRenderer.setMiniMapMode(false, 0.f);
 	m_mapRenderer.setModeLocked(true);
+
+	m_text.setFont(m_font);
+	m_text.setFillColor(sf::Color::Black);
+//	m_text.setCharacterSize(context.config.fontSizeMultiplier * 22);
 }
 
 void StateEditor::render(sf::RenderTarget &target)
@@ -46,15 +51,21 @@ void StateEditor::render(sf::RenderTarget &target)
 		target.draw(m_roomActiveText);
 		target.draw(m_roomScrollbar);
 	}
+	else if (m_mode == StateEditorMode::Text)
+		target.draw(m_text);
 }
 
 void StateEditor::resize(const sf::Vector2f &size)
 {
+	m_size = size;
+
 	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier;
 	m_roomTextPadding = round(1.f / 16.f * std::min(size.x, size.y));
 
 	m_roomActiveText.setSize(sf::Vector2f((size.x < size.y ? 1.f : 0.6f) * size.x - m_roomTextPadding*2, 0.f));
 	m_roomActiveText.setFontSizeMultiplier(fontSizeMultiplier);
+
+	m_text.setCharacterSize(size.y / 4);
 
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setFontSizeMultiplier(fontSizeMultiplier);
@@ -168,6 +179,20 @@ void *StateEditor::processData(void *data)
 			m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
 			updateScrollbar();
 			m_roomScrollbar.setScroll(m_scrollPos);
+		}
+	}
+	else if (m_mode == StateEditorMode::Text)
+	{
+		if (event == "text")
+		{
+			m_text.setString(jsonData["text"].ToString());
+			m_text.setPosition(0.f, 0.f);
+			wrapText(m_text, m_size.x);
+		}
+		else if (event == "fontData")
+		{
+			m_fontData = jsonData["fontData"].ToString();
+			m_font.loadFromMemory(m_fontData.data(), m_fontData.size());
 		}
 	}
 

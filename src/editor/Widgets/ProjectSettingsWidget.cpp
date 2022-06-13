@@ -3,6 +3,7 @@
 #include "ui_ProjectSettingsWidget.h"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/States/StateEditor.hpp>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -32,6 +33,8 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent)
 	load();
 
 	// Set default font preview
+	ui->preview->setFPS(0);
+	ui->preview->setMode(NovelTea::StateEditorMode::Text);
 	ui->lineEditFontPreview->setText("Preview Text");
 
 	// Connect all modifying signals
@@ -248,6 +251,9 @@ void ProjectSettingsWidget::refreshVerbs()
 
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)
 {
+	auto jdata = json({"event","text", "text",arg1.toStdString()});
+	ui->preview->processData(jdata);
+	ui->preview->repaint();
 }
 
 void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
@@ -257,6 +263,10 @@ void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
 	ui->buttonSetDefaultFont->setEnabled(alias != m_defaultFontAlias);
 	ui->buttonFontRename->setEnabled(!builtIn);
 	ui->buttonFontDelete->setEnabled(!builtIn);
+
+	auto jdata = json({"event","fontData", "fontData",m_fontsData[alias.toStdString()]});
+	ui->preview->processData(jdata);
+	ui->preview->repaint();
 }
 
 void ProjectSettingsWidget::on_buttonImportFont_clicked()

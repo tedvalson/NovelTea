@@ -22,6 +22,7 @@ enum class StateEditorMode : int {
 	Room,
 	Dialogue,
 	Map,
+	Text,
 };
 
 class StateEditor : public State, public Scrollable
@@ -45,9 +46,14 @@ private:
 	CutsceneRenderer m_cutsceneRenderer;
 	MapRenderer m_mapRenderer;
 
+	std::string m_fontData;
+	sf::Font m_font;
+	sf::Text m_text;
+
 	ActiveText m_roomActiveText;
 	float m_scrollPos;
 	float m_roomTextPadding;
+	sf::Vector2f m_size;
 	sf::Vector2f m_scrollAreaSize;
 	ScrollBar m_roomScrollbar;
 
