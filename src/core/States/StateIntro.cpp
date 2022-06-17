@@ -2,6 +2,7 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/System/FileInputStream.hpp>
 #include <iostream>
@@ -51,9 +52,9 @@ void StateIntro::resize(const sf::Vector2f &size)
 	m_renderTexture.create(w, h);
 	m_sprite.setTexture(m_renderTexture.getTexture(), true);
 
-	auto format = TextFormat();
-	format.size(0.016f * wi);
-	m_textBg.setText(text, format);
+	TextProperties textProps;
+	textProps.fontSize = 0.016f * wi;
+	m_textBg.setText(text, textProps);
 	m_textBg.setSize(sf::Vector2f(0.95f * wi, h));
 	m_textBg.setPosition(round((w - wi)/2 + 0.025f * w), 0.f);
 

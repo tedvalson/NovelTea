@@ -14,8 +14,6 @@
 #include <NovelTea/Script.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/CutsceneSegment.hpp>
-#include <NovelTea/TextBlock.hpp>
-#include <NovelTea/TextFragment.hpp>
 #include <NovelTea/TextInput.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/Timer.hpp>
@@ -218,16 +216,6 @@ void ScriptManager::registerClasses()
 {
 	// ActiveText
 	REGISTER_CONSTRUCTOR(ActiveText);
-	dukglue_register_method(m_context, &ActiveText::addBlock, "addBlock");
-	dukglue_register_method(m_context, &ActiveText::refresh, "refresh");
-
-	// TextBlock
-	REGISTER_CONSTRUCTOR(TextBlock);
-	dukglue_register_method(m_context, &TextBlock::addFragment, "addFragment");
-
-	// TextFragment
-	REGISTER_CONSTRUCTOR(TextFragment);
-	dukglue_register_property(m_context, &TextFragment::getText, &TextFragment::setText, "text");
 
 	// ObjectList
 	dukglue_register_method(m_context, &ObjectList::add, "add");

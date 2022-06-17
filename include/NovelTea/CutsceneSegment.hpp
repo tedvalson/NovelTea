@@ -18,12 +18,6 @@ public:
 		Script,
 	};
 
-	enum TextEffect {
-		TextEffectNone = 0,
-		TextEffectFade = 1,
-		TextEffectFadeAcross,
-	};
-
 	enum PageEffect {
 		PageEffectNone = 0,
 		PageEffectFade = 1,
@@ -37,6 +31,9 @@ public:
 	bool conditionPasses() const;
 
 	static std::shared_ptr<CutsceneSegment> createSegment(const json &j);
+
+	virtual size_t getFullDuration() const;
+	virtual size_t getFullDelay() const;
 
 	ADD_ACCESSOR(size_t, Duration, m_duration)
 	ADD_ACCESSOR(size_t, Delay, m_delay)

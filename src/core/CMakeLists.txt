@@ -5,6 +5,8 @@ FILE(GLOB_RECURSE TWEEN_ENGINE_SOURCE ${PROJECT_SOURCE_DIR}/external/TweenEngine
 set(SOURCE_FILES
 	${SRCROOT}/Action.cpp
 	${SRCROOT}/ActiveText.cpp
+	${SRCROOT}/ActiveTextSegment.cpp
+	${SRCROOT}/BBCodeParser.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/CutscenePageBreakSegment.cpp
 	${SRCROOT}/CutscenePageSegment.cpp
@@ -35,9 +37,6 @@ set(SOURCE_FILES
 	${SRCROOT}/ScriptManager.cpp
 	${SRCROOT}/Settings.cpp
 	${SRCROOT}/StringUtils.cpp
-	${SRCROOT}/TextBlock.cpp
-	${SRCROOT}/TextFormat.cpp
-	${SRCROOT}/TextFragment.cpp
 	${SRCROOT}/TextInput.cpp
 	${SRCROOT}/TextLog.cpp
 	${SRCROOT}/Timer.cpp

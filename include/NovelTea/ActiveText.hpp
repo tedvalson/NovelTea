@@ -3,17 +3,18 @@
 
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
-#include <NovelTea/TextFormat.hpp>
+#include <NovelTea/Utils.hpp>
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderTexture.hpp>
-#include <vector>
-#include <memory>
+#include <SFML/System/Time.hpp>
 
 namespace NovelTea
 {
 
-class TextBlock;
+class ActiveTextSegment;
+class AnimationProperties;
+class TextProperties;
+
+using ActiveTextCallback = std::function<void()>;
 
 class ActiveText : public JsonSerializable, public sf::Drawable, public Hideable
 {
@@ -21,94 +22,95 @@ public:
 	static const int HIGHLIGHTS = 12;
 	static const int FADEACROSS = 13;
 
-	struct Segment {
-		bool objectExists;
-		std::string objectIdName;
-		TweenText text;
-		sf::FloatRect bounds;
-	};
-
 	ActiveText();
-	void createRenderTexture();
-
+	ActiveText(const std::string &text);
+	ActiveText(const std::string &text, const AnimationProperties &animDefault);
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
-	std::string toPlainText(const std::string &newline = "\n") const;
-	std::string objectFromPoint(const sf::Vector2f &point) const;
+	void reset(bool preservePosition = false);
 
-	void setText(const std::string &text, const TextFormat &format = TextFormat());
-	std::string getText() const;
-
-	const std::vector<std::shared_ptr<TextBlock>> &blocks() const;
-	void addBlock(std::shared_ptr<TextBlock> block, int index = -1);
+	void setText(const std::string &text);
+	void setText(const std::string &text, const AnimationProperties &animProps);
+	void setText(const std::string &text, const TextProperties &textProps);
+	void setText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
+	const std::string& getText() const;
 
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
 
-	void setHighlightId(const std::string &id);
-	void refresh();
-
-	float getTextWidth() const;
+	void setFontSizeMultiplier(float fontSizeMultiplier);
+	float getFontSizeMultiplier() const;
 
 	sf::FloatRect getLocalBounds() const;
 	sf::FloatRect getGlobalBounds() const;
 
-	void setLineSpacing(float lineSpacing);
-	float getLineSpacing() const;
-
 	void setCursorStart(const sf::Vector2f &cursorPos);
+	const sf::Vector2f &getCursorPosition() const;
 	const sf::Vector2f &getCursorEnd() const;
-
-	void setAlpha(float alpha) override;
-	float getAlpha() const override;
 
 	void setHighlightFactor(float highlightFactor);
 	float getHighlightFactor() const;
 
-	void setFontSizeMultiplier(float fontSizeMultiplier);
-	float getFontSizeMultiplier() const;
+	void setLineSpacing(float lineSpacing);
+	float getLineSpacing() const;
 
-	void setFadeAcrossPosition(float position);
-	float getFadeAcrossPosition() const;
-	float getFadeAcrossLength() const;
+	void setAlpha(float alpha) override;
+	float getAlpha() const override;
 
-	std::vector<Segment> &getSegments();
+	bool update(float delta) override;
+
+	std::string toPlainText(bool stripBBCodes = false, const std::string &newlineChar = "\n") const;
+	std::string objectFromPoint(const sf::Vector2f &point) const;
+
+	void setHighlightId(const std::string &id);
+
+	bool isComplete() const;
+	bool isWaitingForClick() const;
+	void click();
+
+	const sf::Time &getTimeToNext() const;
+	const SharedVector<ActiveTextSegment>& getSegments() const;
+
+	size_t getDurationMs() const;
+	size_t getDurationMs(size_t indexEnd) const;
+
+	size_t getDelayMs() const;
+	size_t getDelayMs(size_t indexEnd) const;
+
+	void onComplete(ActiveTextCallback callback);
+
+	ADD_ACCESSOR(bool, SkipWaitingForClick, m_skipWaitingForClick)
 
 protected:
-	virtual void setValues(int tweenType, float *newValues) override;
-	virtual int getValues(int tweenType, float *returnValues) override;
-
-	void applyAlpha() const;
-	void applyHighlightFactor() const;
-
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
-	void ensureUpdate() const;
+	void addSegmentToQueue(size_t segmentIndex);
+	void startTextEffect(const std::shared_ptr<ActiveTextSegment> &segment);
 
 private:
-	std::vector<std::shared_ptr<TextBlock>> m_textBlocks;
-	mutable std::vector<Segment> m_segments;
-	mutable std::vector<sf::Vector2f> m_linePositions;
-	mutable sf::Vector2f m_cursorPos;
-	mutable sf::FloatRect m_bounds;
-	sf::Vector2f m_cursorStart;
-	sf::Vector2f m_size;
-	std::string m_string;
-	mutable bool m_needsUpdate = true;
-	float m_lineSpacing;
 	float m_alpha;
-	float m_highlightFactor;
 	float m_fontSizeMultiplier;
+	float m_highlightFactor;
+	float m_lineSpacing;
+	int m_lineMaxCharSize;
+	int m_segmentIndex;
+	bool m_isComplete;
+	bool m_isWaitingForClick;
+	bool m_skipWaitingForClick;
+	TweenEngine::TweenManager m_tweenManager;
+	std::string m_text;
+	sf::Vector2f m_size;
+	sf::Vector2f m_cursorPos;
+	sf::Vector2f m_cursorEnd;
+	sf::Vector2f m_cursorStart;
+	SharedVector<ActiveTextSegment> m_segments;
+	SharedVector<ActiveTextSegment> m_segmentsActive;
+	std::shared_ptr<ActiveTextSegment> m_currentSegment;
 
-	float m_fadeAcrossPosition;
-	int m_fadeLineIndex;
-	mutable std::shared_ptr<sf::RenderTexture> m_renderTexture;
-	sf::Sprite m_sprite;
-	TweenRectangleShape m_shape;
-	TweenRectangleShape m_shapeFade;
+	ActiveTextCallback m_callback;
 
-	mutable sf::RectangleShape m_debugBorder;
-	mutable std::vector<sf::RectangleShape> m_debugSegmentShapes;
+	sf::Time m_timePassed;
+	sf::Time m_timeToNext;
 };
 
 } // namespace NovelTea

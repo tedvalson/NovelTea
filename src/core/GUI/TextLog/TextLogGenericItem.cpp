@@ -1,12 +1,13 @@
 #include <NovelTea/GUI/TextLog/TextLogGenericItem.hpp>
+#include <NovelTea/TextTypes.hpp>
 
 namespace NovelTea
 {
 
 TextLogGenericItem::TextLogGenericItem(const std::string &text)
 {
-	TextFormat fmt;
-	m_text.setText(text, fmt);
+	TextProperties textProps;
+	m_text.setText(text, textProps);
 }
 
 void TextLogGenericItem::setAlpha(float alpha)

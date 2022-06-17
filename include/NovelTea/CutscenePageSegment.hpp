@@ -2,6 +2,7 @@
 #define NOVELTEA_CUTSCENEPAGESEGMENT_HPP
 
 #include <NovelTea/CutsceneSegment.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/Utils.hpp>
 
 namespace NovelTea
@@ -24,7 +25,7 @@ public:
 	ADD_ACCESSOR(size_t, TextDuration, m_textDuration)
 	ADD_ACCESSOR(size_t, BreakDelay, m_breakDelay)
 	ADD_ACCESSOR(size_t, BreakDuration, m_breakDuration)
-	ADD_ACCESSOR(int, TextEffect, m_textEffect)
+	ADD_ACCESSOR(TextEffect, TextEffect, m_textEffect)
 	ADD_ACCESSOR(int, BreakEffect, m_breakEffect)
 	ADD_ACCESSOR(std::string, TextDelimiter, m_textDelimiter)
 	ADD_ACCESSOR(std::string, BreakDelimiter, m_breakDelimiter)
@@ -40,7 +41,7 @@ private:
 	size_t m_textDuration;
 	size_t m_breakDelay;
 	size_t m_breakDuration;
-	int m_textEffect;
+	TextEffect m_textEffect;
 	int m_breakEffect;
 	int m_offsetX;
 	int m_offsetY;

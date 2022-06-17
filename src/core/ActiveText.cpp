@@ -1,259 +1,146 @@
 #include <NovelTea/ActiveText.hpp>
-#include <NovelTea/AssetManager.hpp>
-#include <NovelTea/Diff.hpp>
+#include <NovelTea/ActiveTextSegment.hpp>
+#include <NovelTea/BBCodeParser.hpp>
 #include <NovelTea/Game.hpp>
-#include <NovelTea/Object.hpp>
-#include <NovelTea/Room.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/StringUtils.hpp>
-#include <NovelTea/TextBlock.hpp>
-#include <NovelTea/TextFragment.hpp>
+#include <TweenEngine/Tween.h>
 
 namespace NovelTea
 {
 
 ActiveText::ActiveText()
-	: m_size(1024.f, 1024.f)
-	, m_lineSpacing(5.f)
-	, m_alpha(255.f)
-	, m_highlightFactor(1.f)
-	, m_fontSizeMultiplier(1.f)
-	, m_fadeAcrossPosition(1.f)
-	, m_fadeLineIndex(0)
-	, m_renderTexture(nullptr)
+: m_alpha(255.f)
+, m_fontSizeMultiplier(1.f)
+, m_highlightFactor(1.f)
+, m_lineSpacing(5.f)
+, m_isComplete(true)
+, m_isWaitingForClick(false)
+, m_skipWaitingForClick(false)
+, m_currentSegment(nullptr)
+, m_callback(nullptr)
 {
-	auto texture = AssetManager<sf::Texture>::get("images/fade.png");
-	texture->setSmooth(true);
-	m_shape.setFillColor(sf::Color::Transparent);
-	m_shapeFade.setTexture(texture.get(), true);
-	m_shapeFade.setSize(sf::Vector2f(300.f, 40.f));
-	m_shapeFade.setOrigin(0.f, 40.f);
-	m_shapeFade.setRotation(90.f);
+	m_segmentIndex = -1;
+	m_timePassed = sf::Time::Zero;
+	m_timeToNext = sf::Time::Zero;
+	m_lineMaxCharSize = 0;
 }
 
-void ActiveText::createRenderTexture()
+ActiveText::ActiveText(const std::string &text)
+: ActiveText(text, AnimationProperties())
 {
-	m_shape.setSize(m_size);
-	m_renderTexture = std::make_shared<sf::RenderTexture>();
-	m_renderTexture->create(m_size.x, 512); // TODO: Avoid fixed size
-	m_sprite.setTexture(m_renderTexture->getTexture(), true);
 }
 
-void splitAndAppend(const sf::String &text, const sf::String &idName, std::vector<std::pair<sf::String, sf::String>> &pairs)
+ActiveText::ActiveText(const std::string &text, const AnimationProperties &animDefault)
+: ActiveText()
 {
-	sf::String buffer;
-	for (auto &c : text)
-	{
-		if (c == ' ')
-		{
-			if (!buffer.isEmpty())
-				pairs.emplace_back(buffer, idName);
-			pairs.emplace_back("", "");
-			buffer.clear();
-		}
-		else
-			buffer += c;
-	}
-
-	if (!buffer.isEmpty())
-		pairs.emplace_back(buffer, idName);
-}
-
-std::vector<std::pair<sf::String, sf::String>> getTextObjectPairs(const sf::String &s)
-{
-	std::vector<std::pair<sf::String, sf::String>> v;
-
-	size_t searchPos = 0,
-		   processedPos = 0,
-		   startPos;
-
-	while ((startPos = s.find("[[", searchPos)) != sf::String::InvalidPos)
-	{
-		auto endPos = s.find("]]", startPos);
-		auto midPos = s.find("|", startPos);
-		if (endPos == sf::String::InvalidPos)
-			break;
-
-		// if there is no mid char "|" in between braces, skip it
-		if (midPos == sf::String::InvalidPos || endPos < midPos)
-		{
-			searchPos = endPos + 2;
-			continue;
-		}
-
-		auto idName = s.substring(midPos + 1, endPos - midPos - 1);
-		auto text = s.substring(startPos + 2, midPos - startPos - 2);
-		if (!GSave->exists<Object>(idName))
-			idName.clear();
-		if (startPos != processedPos)
-			splitAndAppend(s.substring(processedPos, startPos - processedPos), "", v);
-		splitAndAppend(text, idName, v);
-		processedPos = searchPos = endPos + 2;
-	}
-
-	// Push remaining unprocessed string
-	if (processedPos < s.getSize())
-		splitAndAppend(s.substring(processedPos), "", v);
-
-	return v;
-}
-
-struct TextPart {
-	TextPart(const sf::String &text) : text(text){}
-	TextPart& mod(bool flag, const sf::String &s) {
-		text = s;
-		if (!flags.empty())
-			flags[flags.size()-1] = flag;
-		return *this;
-	}
-
-	sf::String text;
-	std::vector<bool> flags;
-};
-
-void findTextParts(std::vector<TextPart> &parts, const sf::String &openTag, const sf::String &closeTag)
-{
-	std::vector<TextPart> v;
-	bool isOpen = false;
-	bool processedTag = false;
-
-	for (auto &part : parts)
-	{
-		size_t searchPos = 0,
-			   processedPos = 0,
-			   startPos = 0;
-
-		TextPart p = part;
-		p.flags.push_back(false);
-		sf::String s = part.text;
-
-		while (isOpen || (startPos = s.find(openTag, searchPos)) != sf::String::InvalidPos)
-		{
-			isOpen = true;
-			auto endPos = s.find(closeTag, startPos);
-			// Process content before the start of the tag.
-			if (startPos != processedPos)
-				v.push_back(p.mod(false, s.substring(processedPos, startPos - processedPos)));
-			processedPos = startPos;
-			if (endPos == sf::String::InvalidPos)
-				break;
-			auto tagOffset = (processedTag ? 0 : openTag.getSize());
-			auto text = s.substring(startPos + tagOffset, endPos - startPos - tagOffset);
-			v.push_back(p.mod(true, text));
-			processedPos = searchPos = endPos + closeTag.getSize();
-			isOpen = false;
-		}
-
-		// Push remaining unprocessed string
-		if (processedPos < s.getSize()){
-			if (isOpen && !processedTag) {
-				processedTag = true;
-				v.push_back(p.mod(isOpen, s.substring(processedPos + openTag.getSize())));
-			} else
-				v.push_back(p.mod(isOpen, s.substring(processedPos)));
-		}
-	}
-
-	parts = v;
+	setText(text, animDefault);
 }
 
 json ActiveText::toJson() const
 {
-	json j = sj::Array();
-	for (auto &block : m_textBlocks)
-		j.append(block->toJson());
-	return j;
+	return sj::Array(
+		0,
+		m_text
+	);
 }
 
 bool ActiveText::fromJson(const json &j)
 {
-	m_textBlocks.clear();
-	m_needsUpdate = true;
-
-	for (auto &jblock : j.ArrayRange())
-	{
-		auto block = std::make_shared<TextBlock>();
-		if (block->fromJson(jblock))
-			m_textBlocks.push_back(block);
-	}
+	setText(j[1].ToString());
 	return true;
 }
 
-std::string ActiveText::toPlainText(const std::string &newline) const
+void ActiveText::reset(bool preservePosition)
 {
-	std::string result;
-	bool processedFirstBlock = false;
-	for (auto &block : blocks())
-	{
-		if (processedFirstBlock)
-			result += newline;
-		processedFirstBlock = true;
-		for (auto &frag : block->fragments())
-			result += frag->getTextRaw();
+	auto timePassed = m_timePassed;
+
+	m_currentSegment = nullptr;
+	m_isComplete = m_segments.empty();
+	m_isWaitingForClick = false;
+	m_segmentIndex = -1;
+	m_timePassed = sf::Time::Zero;
+	m_timeToNext = sf::Time::Zero;
+	m_cursorPos = sf::Vector2f();
+	m_lineMaxCharSize = 0;
+
+	m_segmentsActive.clear();
+	m_tweenManager.killAll();
+
+	// Compute cursorEnd
+	sf::Vector2f cursorPos = m_cursorStart;
+	for (auto& segment: m_segments) {
+		segment->setFontSizeMultiplier(m_fontSizeMultiplier);
+		segment->setSize(m_size);
+		segment->setCursorStart(cursorPos);
+		segment->setLastLineMaxHeight(m_lineMaxCharSize);
+		cursorPos = segment->getCursorEnd();
+		m_lineMaxCharSize = segment->getCurrentLineMaxHeight();
 	}
-	return result;
+	m_cursorEnd = cursorPos;
+
+	// Restore previous position when necessary
+	if (preservePosition) {
+		auto skipWaiting = m_skipWaitingForClick;
+		m_skipWaitingForClick = true;
+
+		addSegmentToQueue(0);
+		update(timePassed.asSeconds());
+
+		m_skipWaitingForClick = skipWaiting;
+	} else
+		addSegmentToQueue(0);
+
+	m_tweenManager.update(0.001f);
 }
 
-std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
+void ActiveText::setText(const std::string &text)
 {
-	for (auto &segment : m_segments)
-	{
-		if (!segment.objectIdName.empty())
-		{
-			auto bounds = getTransform().transformRect(segment.bounds);
-			if (bounds.contains(point))
-				return segment.objectIdName;
+	setText(text, TextProperties(), AnimationProperties());
+}
+
+void ActiveText::setText(const std::string &text, const AnimationProperties &animProps)
+{
+	setText(text, TextProperties(), animProps);
+}
+
+void ActiveText::setText(const std::string &text, const TextProperties &textProps)
+{
+	setText(text, textProps, AnimationProperties());
+}
+
+void ActiveText::setText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps)
+{
+	m_text = text;
+	m_segments.clear();
+	auto t = ActiveGame->getScriptManager()->evalExpressions(text);
+	std::cout << "setText: " << t << std::endl;
+	std::vector<std::shared_ptr<StyledSegment>> segGroup;
+	auto s = BBCodeParser::makeSegments(t, textProps, animProps);
+	for (auto &ss : s) {
+		if (ss->newGroup && !segGroup.empty()) {
+			m_segments.emplace_back(new ActiveTextSegment(segGroup));
+			segGroup.clear();
 		}
-	}
-	return std::string();
-}
-
-void ActiveText::setText(const std::string &text, const TextFormat &format)
-{
-	m_textBlocks.clear();
-
-	auto lines = split(text);
-	for (auto &line : lines)
-	{
-		auto block = std::make_shared<TextBlock>();
-		auto fragment = std::make_shared<TextFragment>();
-
-		fragment->setText(line);
-		fragment->setTextFormat(format);
-		block->addFragment(fragment);
-		addBlock(block);
+		segGroup.push_back(ss);
 	}
 
-	m_string = stripDiff(text);
-	ensureUpdate();
+	if (!segGroup.empty())
+		m_segments.emplace_back(new ActiveTextSegment(segGroup));
+
+	reset();
 }
 
-std::string ActiveText::getText() const
+const std::string &ActiveText::getText() const
 {
-	return m_string;
-}
-
-const std::vector<std::shared_ptr<TextBlock>> &ActiveText::blocks() const
-{
-	return m_textBlocks;
-}
-
-void ActiveText::addBlock(std::shared_ptr<TextBlock> block, int index)
-{
-	m_needsUpdate = true;
-	m_string.clear();
-	if (index < 0)
-		m_textBlocks.push_back(block);
-	else
-		m_textBlocks.insert(m_textBlocks.begin() + index, block);
+	return m_text;
 }
 
 void ActiveText::setSize(const sf::Vector2f &size)
 {
-	m_needsUpdate = true;
 	m_size = size;
-	if (m_renderTexture)
-		createRenderTexture();
+	reset(true);
 }
 
 sf::Vector2f ActiveText::getSize() const
@@ -261,96 +148,10 @@ sf::Vector2f ActiveText::getSize() const
 	return m_size;
 }
 
-void ActiveText::setHighlightId(const std::string &id)
-{
-	for (auto &segment : m_segments)
-	{
-		if (id.empty() || id != segment.objectIdName)
-		{
-			segment.text.setOutlineThickness(0.f);
-		}
-		else
-		{
-			segment.text.setOutlineColor(sf::Color(255, 255, 0, 140));
-			segment.text.setOutlineThickness(0.1f * segment.text.getCharacterSize());
-		}
-	}
-}
-
-void ActiveText::refresh()
-{
-	m_needsUpdate = true;
-}
-
-float ActiveText::getTextWidth() const
-{
-	auto width = 0.f;
-	for (auto &segment : m_segments)
-		width += segment.text.getLocalBounds().width;
-	return width;
-}
-
-sf::FloatRect ActiveText::getLocalBounds() const
-{
-	ensureUpdate();
-	return m_bounds;
-}
-
-sf::FloatRect ActiveText::getGlobalBounds() const
-{
-	ensureUpdate();
-	return getTransform().transformRect(m_bounds);
-}
-
-void ActiveText::setLineSpacing(float lineSpacing)
-{
-	m_needsUpdate = true;
-	m_lineSpacing = lineSpacing;
-}
-
-float ActiveText::getLineSpacing() const
-{
-	return m_lineSpacing;
-}
-
-void ActiveText::setCursorStart(const sf::Vector2f &cursorPos)
-{
-	m_needsUpdate = true;
-	m_cursorStart = cursorPos;
-}
-
-const sf::Vector2f &ActiveText::getCursorEnd() const
-{
-	ensureUpdate();
-	return m_cursorPos;
-}
-
-void ActiveText::setAlpha(float alpha)
-{
-	m_alpha = alpha;
-	applyAlpha();
-}
-
-float ActiveText::getAlpha() const
-{
-	return m_alpha;
-}
-
-void ActiveText::setHighlightFactor(float highlightFactor)
-{
-	m_highlightFactor = highlightFactor;
-	applyHighlightFactor();
-}
-
-float ActiveText::getHighlightFactor() const
-{
-	return m_highlightFactor;
-}
-
 void ActiveText::setFontSizeMultiplier(float fontSizeMultiplier)
 {
-	m_needsUpdate = true;
 	m_fontSizeMultiplier = fontSizeMultiplier;
+	reset(true);
 }
 
 float ActiveText::getFontSizeMultiplier() const
@@ -358,286 +159,263 @@ float ActiveText::getFontSizeMultiplier() const
 	return m_fontSizeMultiplier;
 }
 
-void ActiveText::setFadeAcrossPosition(float position)
+sf::FloatRect ActiveText::getLocalBounds() const
 {
-	ensureUpdate();
-	m_fadeAcrossPosition = position;
-	if (position == 1.f) {
-		if (m_renderTexture)
-			m_renderTexture = nullptr;
+	sf::FloatRect bounds;
+	if (m_currentSegment)
+		bounds = m_currentSegment->getLocalBounds();
+	return bounds;
+}
+
+sf::FloatRect ActiveText::getGlobalBounds() const
+{
+	return getTransform().transformRect(getLocalBounds());
+}
+
+void ActiveText::setCursorStart(const sf::Vector2f &cursorPos)
+{
+	m_cursorStart = cursorPos;
+	reset(true);
+}
+
+const sf::Vector2f &ActiveText::getCursorPosition() const
+{
+	return m_cursorPos;
+}
+
+const sf::Vector2f &ActiveText::getCursorEnd() const
+{
+	return m_cursorEnd;
+}
+
+void ActiveText::setHighlightFactor(float highlightFactor)
+{
+	m_highlightFactor = highlightFactor;
+	for (auto& segment : m_segments)
+		segment->setHighlightFactor(highlightFactor);
+}
+
+float ActiveText::getHighlightFactor() const
+{
+	return m_highlightFactor;
+}
+
+void ActiveText::setLineSpacing(float lineSpacing)
+{
+	m_lineSpacing = lineSpacing;
+	for (auto& segment : m_segments)
+		segment->setLineSpacing(lineSpacing);
+}
+
+float ActiveText::getLineSpacing() const
+{
+	return m_lineSpacing;
+}
+
+void ActiveText::setAlpha(float alpha)
+{
+	m_alpha = alpha;
+	for (auto &segment : m_segments)
+		segment->setAlpha(alpha);
+}
+
+float ActiveText::getAlpha() const
+{
+	return m_alpha;
+}
+
+bool ActiveText::update(float delta)
+{
+	auto timeDelta = sf::seconds(delta);
+
+	while (timeDelta >= m_timeToNext)
+	{
+		if (isComplete())
+			break;
+		if (m_isWaitingForClick && !m_skipWaitingForClick)
+			break;
+		if (m_segmentIndex < 0 || m_segmentIndex >= m_segments.size())
+			break;
+
+		timeDelta -= m_timeToNext;
+		m_timePassed += m_timeToNext;
+		m_tweenManager.update(m_timeToNext.asSeconds());
+	}
+
+	if (!m_isWaitingForClick || m_skipWaitingForClick) {
+		m_timePassed += timeDelta;
+		m_timeToNext -= timeDelta;
+	}
+	m_tweenManager.update(timeDelta.asSeconds());
+	return Hideable::update(delta);
+}
+
+std::string ActiveText::toPlainText(bool stripBBCodes, const std::string &newlineChar) const
+{
+	std::string result;
+	for (auto& segment : m_segments)
+		result += segment->toPlainText(stripBBCodes, newlineChar);
+	return result;
+}
+
+std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
+{
+	std::string result;
+	for (auto &segment : m_segments) {
+		result = segment->objectFromPoint(point);
+		if (!result.empty())
+			break;
+	}
+	return result;
+}
+
+void ActiveText::setHighlightId(const std::string &id)
+{
+	for (auto &seg : m_segments)
+		seg->setHighlightId(id);
+}
+
+bool ActiveText::isComplete() const
+{
+	return m_isComplete;
+}
+
+bool ActiveText::isWaitingForClick() const
+{
+	return m_isWaitingForClick;
+}
+
+void ActiveText::click()
+{
+	if (m_isWaitingForClick) {
+		m_isWaitingForClick = false;
+		addSegmentToQueue(m_segmentIndex + 1);
 	} else {
-		if (!m_renderTexture)
-			createRenderTexture();
-
-		auto fadeLength = getFadeAcrossLength();
-		auto pos = m_fadeAcrossPosition * fadeLength;
-		auto p = 0.f;
-
-		m_fadeLineIndex = 0;
-		for (auto &line : m_linePositions)
-		{
-			p += line.x + m_shapeFade.getSize().y;
-			if (p > pos) {
-				m_shape.setPosition(line.x - p + pos, line.y);
-				m_shapeFade.setPosition(m_shape.getPosition());
-				m_shape.move(m_shapeFade.getSize().y, 0.f);
-				break;
-			}
-			m_fadeLineIndex++;
-		}
+		if (m_currentSegment && m_currentSegment->getAnimProps().skippable)
+			update(m_timeToNext.asSeconds());
 	}
 }
 
-float ActiveText::getFadeAcrossPosition() const
+const sf::Time &ActiveText::getTimeToNext() const
 {
-	return m_fadeAcrossPosition;
+	return m_timeToNext;
 }
 
-float ActiveText::getFadeAcrossLength() const
+const SharedVector<ActiveTextSegment> &ActiveText::getSegments() const
 {
-	ensureUpdate();
-	auto len = 0.f;
-	for (auto &linePos : m_linePositions)
-		len += linePos.x + m_shapeFade.getSize().y;
-	return len;
-}
-
-std::vector<ActiveText::Segment> &ActiveText::getSegments()
-{
-	ensureUpdate();
 	return m_segments;
 }
 
-void ActiveText::setValues(int tweenType, float *newValues)
+size_t ActiveText::getDurationMs() const
 {
-	switch (tweenType) {
-		case HIGHLIGHTS:
-			setHighlightFactor(newValues[0]);
-			break;
-		case FADEACROSS:
-			setFadeAcrossPosition(newValues[0]);
-			break;
-		default:
-			Hideable::setValues(tweenType, newValues);
-	}
+	if (m_segments.empty())
+		return 0;
+	else
+		return getDurationMs(m_segments.size());
 }
 
-int ActiveText::getValues(int tweenType, float *returnValues)
+size_t ActiveText::getDurationMs(size_t indexEnd) const
 {
-	switch (tweenType) {
-	case HIGHLIGHTS:
-		returnValues[0] = getHighlightFactor();
-		return 1;
-	case FADEACROSS:
-		returnValues[0] = getFadeAcrossPosition();
-		return 1;
-	default:
-		return Hideable::getValues(tweenType, returnValues);
-	}
+	auto duration = 0u;
+	for (auto i = 0u; i < indexEnd; ++i)
+		duration += m_segments[i]->getDurationMs();
+	return duration;
 }
 
-void ActiveText::applyAlpha() const
+size_t ActiveText::getDelayMs() const
 {
-	sf::Color color;
-	const float *newValues = &m_alpha; // Hack for the macro below
-	for (auto &segment : m_segments) {
-		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
-	}
+	if (m_segments.empty())
+		return 0;
+	else
+		return getDelayMs(m_segments.size());
 }
 
-void ActiveText::applyHighlightFactor() const
+size_t ActiveText::getDelayMs(size_t indexEnd) const
 {
-	for (auto &segment : m_segments)
-	{
-		if (!segment.objectIdName.empty())
-		{
-			sf::Color color;
-			if (segment.objectExists)
-				color = sf::Color(0, 0, m_highlightFactor * 200, m_alpha);
-			else
-				color = sf::Color(m_highlightFactor * 155, 0, m_highlightFactor * 255, m_alpha);
-			segment.text.setFillColor(color);
-		}
-	}
+	auto delay = 0u;
+	for (auto i = 0u; i < indexEnd; ++i)
+		delay += m_segments[i]->getDelayMs();
+	return delay;
+}
+
+void ActiveText::onComplete(ActiveTextCallback callback)
+{
+	m_callback = callback;
 }
 
 void ActiveText::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-	ensureUpdate();
-	if (m_segments.empty())
-		return;
 	states.transform *= getTransform();
 
-	if (m_renderTexture)
-	{
-		auto posY = m_segments[0].text.getPosition().y;
-		auto lineIndex = 0;
-		m_renderTexture->clear(sf::Color::Transparent);
-		for (auto &segment : m_segments)
-		{
-			auto p = segment.text.getPosition().y;
-			if (p > posY) {
-				posY = p;
-				lineIndex++;
-			}
-			if (lineIndex == m_fadeLineIndex)
-				m_renderTexture->draw(segment.text, sf::BlendNone);
-			else if (lineIndex > m_fadeLineIndex)
-				break;
-			else
-				target.draw(segment.text, states);
-		}
-		m_renderTexture->draw(m_shape, sf::BlendMultiply);
-		m_renderTexture->draw(m_shapeFade, sf::BlendMultiply);
-		m_renderTexture->display();
-		target.draw(m_sprite, states);
-	}
-	else
-	{
-		for (auto &segment : m_segments)
-			target.draw(segment.text, states);
-
+	for (auto &segment : m_segmentsActive) {
+		target.draw(*segment, states);
 	}
 }
 
-void ActiveText::ensureUpdate() const
+void ActiveText::addSegmentToQueue(size_t segmentIndex)
 {
-	if (!m_needsUpdate)
+	m_segmentIndex = segmentIndex;
+	if (segmentIndex >= m_segments.size())
 		return;
 
-	auto padding = 6.f;
-	float lineHeight = 4.f; // TODO: Don't use fixed value
-	auto processedFirstBlock = false;
-	m_cursorPos = m_cursorStart;
-	m_segments.clear();
-	m_linePositions.clear();
-	m_debugSegmentShapes.clear();
-	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y + lineHeight);
+	auto& segment = m_segments[segmentIndex];
+	m_currentSegment = segment;
 
-	for (auto &block : blocks())
+	TweenEngine::TweenCallbackFunction endCallback = nullptr;
+	auto delayMs = segment->getDelayMs();
+	auto timeToNext = 0.001f * (delayMs > 0 ? delayMs - 1 : 0);
+
+	m_timeToNext = sf::milliseconds(segment->getDelayMs());
+	startTextEffect(segment);
+
+	endCallback = [this, segment, segmentIndex](TweenEngine::BaseTween*)
 	{
-		// Keep largest char size for current line
-		auto lineMaxCharacterSize = 0u;
-		auto &frags = block->fragments();
-
-		if (processedFirstBlock) // When '\n' is encountered
-		{
-			m_cursorPos.x = 0.f;
-			m_cursorPos.y = m_bounds.height;
-			if (!frags.empty() && frags[0]->getTextRaw().empty())
-				m_bounds.height += lineHeight + m_lineSpacing;
+		if (segmentIndex + 1 >= m_segments.size()) {
+			m_isComplete = true;
+			if (m_callback)
+				m_callback();
 		}
-		else
-			processedFirstBlock = true;
-
-		for (auto &frag : frags)
-		{
-			auto font = Proj.getFont();
-			auto format = frag->getTextFormat();
-			sf::Uint32 style = sf::Text::Regular;
-
-			if (format.bold())
-				style |= sf::Text::Bold;
-			if (format.italic())
-				style |= sf::Text::Italic;
-			if (format.underline())
-				style |= sf::Text::Underlined;
-
-			sf::RectangleShape shape;
-			shape.setFillColor(sf::Color(0, 0, 0, 30));
-
-			std::vector<TextPart> parts;
-			auto str = frag->getText();
-			parts.emplace_back(sf::String::fromUtf8(str.begin(), str.end()));
-			findTextParts(parts, DIFF_OPEN_TAG, DIFF_CLOSE_TAG);
-			findTextParts(parts, "[b]", "[/b]");
-			findTextParts(parts, "[i]", "[/i]");
-
-			for (auto &part : parts)
-			{
-				auto textObjectPairs = getTextObjectPairs(part.text);
-
-				TweenText text;
-				auto s = style;
-				text.setFont(*font);
-				text.setCharacterSize(2.f * m_fontSizeMultiplier * format.size());
-				if (part.flags[1])
-					s |= sf::Text::Bold;
-				if (part.flags[2])
-					s |= sf::Text::Italic;
-				text.setStyle(s);
-
-				text.setString(" ");
-				auto spaceWidth = text.getLocalBounds().width;
-
-				for (auto &textObjectPair : textObjectPairs)
-				{
-					// Don't start line with a space
-					if (textObjectPair.first.isEmpty())
-					{
-						if (m_cursorPos.x > 0)
-							m_cursorPos.x += spaceWidth;
-						continue;
-					}
-
-					auto string = textObjectPair.first;
-					auto objectId = textObjectPair.second;
-					auto objectExists = false;
-					auto color = (part.flags[0] ? sf::Color(150, 0, 0) : format.color());
-					if (!objectId.isEmpty()) {
-						objectExists = ActiveGame->getRoom()->containsId(objectId) ||
-									  ActiveGame->getObjectList()->containsId(objectId);
-					}
-					color.a = m_alpha;
-					text.setString(string);
-					text.setFillColor(color);
-					lineMaxCharacterSize = std::max(lineMaxCharacterSize, text.getCharacterSize());
-
-					// Hack to prevent these chars from wrapping by themselves.
-					const std::string specialChars = ".,!?";
-					auto isSpecialChar = (string.getSize() == 1 && specialChars.find(string) != specialChars.npos);
-
-					auto newX = m_cursorPos.x + text.getLocalBounds().width;
-					if (newX > m_size.x && m_cursorPos.x > 0.f && !isSpecialChar)
-					{
-						m_linePositions.push_back(m_cursorPos);
-						m_cursorPos.x = 0.f;
-						m_cursorPos.y += lineMaxCharacterSize + m_lineSpacing;
-						lineMaxCharacterSize = text.getCharacterSize();
-					}
-
-					text.setPosition(m_cursorPos);
-					m_cursorPos.x += text.getLocalBounds().width;
-
-					m_bounds.width = std::max(m_bounds.width, m_cursorPos.x);
-					m_bounds.height = std::max(m_bounds.height, m_cursorPos.y + lineMaxCharacterSize + m_lineSpacing);
-					auto bounds = sf::FloatRect(
-								text.getGlobalBounds().left - padding,
-								text.getGlobalBounds().top - padding,
-								text.getLocalBounds().width + padding * 2,
-								text.getLocalBounds().height + padding * 2);
-
-					shape.setSize(sf::Vector2f(bounds.width, bounds.height));
-					shape.setPosition(bounds.left, bounds.top);
-					m_debugSegmentShapes.push_back(shape);
-
-					m_segments.push_back({objectExists, textObjectPair.second, text, bounds});
-				}
+		else {
+			auto nextSegment = m_segments[segmentIndex+1];
+			if (m_skipWaitingForClick || !nextSegment->getAnimProps().waitForClick)
+				addSegmentToQueue(segmentIndex + 1);
+			else if (!m_skipWaitingForClick) {
+				m_isWaitingForClick = true;
 			}
 		}
-		m_linePositions.push_back(m_cursorPos);
+	};
+
+	if (endCallback)
+		TweenEngine::Tween::mark()
+			.delay(timeToNext)
+			.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
+			.start(m_tweenManager);
+}
+
+void ActiveText::startTextEffect(const std::shared_ptr<ActiveTextSegment> &segment)
+{
+	auto& anim = segment->getAnimProps();
+	auto duration = 0.001f * segment->getDurationMs();
+
+	// Push activeText in callback so it doesn't show before update()
+	TweenEngine::Tween::mark()
+		.setCallback(TweenEngine::TweenCallback::BEGIN, [this, segment](TweenEngine::BaseTween*){
+			m_segmentsActive.push_back(segment);
+		}).start(m_tweenManager);
+
+	if (anim.type == TextEffect::Fade) {
+		segment->setAlpha(0.f);
+		TweenEngine::Tween::to(*segment, ActiveTextSegment::ALPHA, duration / anim.speed)
+			.target(255.f)
+			.start(m_tweenManager);
 	}
-
-	applyAlpha();
-	applyHighlightFactor();
-
-	m_debugBorder.setFillColor(sf::Color::Transparent);
-	m_debugBorder.setOutlineColor(sf::Color::Red);
-	m_debugBorder.setOutlineThickness(2.f);
-	m_debugBorder.setSize(sf::Vector2f(m_bounds.width, m_bounds.height - m_bounds.top));
-	m_debugBorder.setPosition(m_bounds.left, m_bounds.top);
-
-	m_needsUpdate = false;
+	else if (anim.type == TextEffect::FadeAcross) {
+		segment->setFadeAcrossPosition(0.f);
+		TweenEngine::Tween::to(*segment, ActiveTextSegment::FADEACROSS, duration / anim.speed)
+			.ease(TweenEngine::TweenEquations::easeInOutLinear)
+			.target(1.f)
+			.start(m_tweenManager);
+	}
 }
 
 } // namespace NovelTea

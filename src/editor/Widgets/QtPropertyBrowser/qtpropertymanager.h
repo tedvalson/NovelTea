@@ -772,14 +772,14 @@ public:
 	QtRichTextPropertyManager(QObject *parent = 0);
 	~QtRichTextPropertyManager();
 
-	std::shared_ptr<NovelTea::ActiveText> value(const QtProperty *property) const;
+	QString value(const QtProperty *property) const;
 	RichTextEditor *editor() const;
 	void editor(RichTextEditor *obj);
 
 public Q_SLOTS:
-	void setValue(QtProperty *property, const std::shared_ptr<NovelTea::ActiveText> &val);
+	void setValue(QtProperty *property, const QString &val);
 Q_SIGNALS:
-	void valueChanged(QtProperty *property, const std::shared_ptr<NovelTea::ActiveText> &val);
+	void valueChanged(QtProperty *property, const QString &val);
 protected:
 	QString valueText(const QtProperty *property) const;
 	QIcon valueIcon(const QtProperty *property) const;

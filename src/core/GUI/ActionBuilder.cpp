@@ -1,5 +1,6 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -157,7 +158,7 @@ void ActionBuilder::setSize(const sf::Vector2f &size)
 	m_buttonCancel.setPosition(size.x - m_buttonWidth * 1.2f, 0.f);
 	m_buttonCancel.setSize(m_buttonWidth, m_buttonWidth);
 	m_buttonCancel.getText().setCharacterSize(m_buttonWidth * 0.8f);
-	m_textFormat.size(0.03f * size.x);
+	m_fontSize = 0.03f * size.x;
 	updateText();
 }
 
@@ -213,6 +214,9 @@ void ActionBuilder::updateText()
 	auto offsetX = m_buttonWidth * 0.2f;
 	auto offsetY = m_buttonWidth * 1.1f;
 
+	TextProperties textProps;
+	textProps.fontSize = m_fontSize;
+
 	m_tweenManager.killAll();
 	m_texts.clear();
 	m_emptyRects.clear();
@@ -234,10 +238,10 @@ void ActionBuilder::updateText()
 					std::transform(objectStr.begin(), objectStr.end(), objectStr.begin(), ::tolower);
 			}
 			tmpText.setSize(size);
-			tmpText.setText(objectStr, m_textFormat);
+			tmpText.setText(objectStr, textProps);
 			auto width = tmpText.getCursorEnd().x;
 			rect->setFillColor(m_emptyRectColor);
-			rect->setSize(sf::Vector2f(width, m_textFormat.size()*2));
+			rect->setSize(sf::Vector2f(width, m_fontSize*2));
 
 			tmpText.setCursorStart(lastCursorPos);
 			if (lastCursorPos.y != tmpText.getCursorEnd().y) {
@@ -259,7 +263,7 @@ void ActionBuilder::updateText()
 		text->setSize(size);
 		text->setAlpha(alpha);
 		text->setCursorStart(lastCursorPos);
-		text->setText(s, m_textFormat);
+		text->setText(s, textProps);
 		lastCursorPos = text->getCursorEnd();
 		m_texts.emplace_back(text);
 	}

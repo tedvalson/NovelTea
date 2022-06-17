@@ -1,7 +1,5 @@
 #include "EditorUtils.hpp"
 #include <NovelTea/ProjectData.hpp>
-#include <NovelTea/TextBlock.hpp>
-#include <NovelTea/TextFragment.hpp>
 #include <QTextBlock>
 #include <QPainter>
 #include <QIcon>
@@ -70,6 +68,26 @@ QIcon EditorUtils::iconFromTabType(EditorTabWidget::Type type)
 	return QIcon(pixmap);
 }
 
+QString EditorUtils::documentToBBCode(const QTextDocument *doc)
+{
+	QString result;
+	return result;
+}
+
+QTextDocument *EditorUtils::documentFromBBCode(const QString &bbstring)
+{
+	auto doc = new QTextDocument;
+	auto cursor = QTextCursor{doc};
+	auto firstBlock = true;
+	QFont defaultFont("DejaVu Sans", 12);
+	QTextBlockFormat blockFormat;
+
+	doc->setDefaultFont(defaultFont);
+
+	return doc;
+}
+
+/*
 json EditorUtils::documentToJson(const QTextDocument *doc)
 {
 	json j = sj::Array();
@@ -90,19 +108,6 @@ json EditorUtils::documentToJson(const QTextDocument *doc)
 				if (fragment.isValid())
 				{
 					auto format = toTextFormat(fragment.charFormat());
-					auto fmtIndex = NovelTea::ProjectData::instance().addTextFormat(format);
-
-					if (fmtIndex != fmtIndexLast)
-					{
-						if (fmtIndexLast >= 0)
-						{
-							jfrag[1] = sfrag;
-							jblock[1].append(jfrag);
-						}
-						fmtIndexLast = fmtIndex;
-						jfrag[0] = fmtIndex;
-						sfrag.clear();
-					}
 
 					sfrag += fragment.text().toStdString();
 				}
@@ -142,8 +147,6 @@ QTextDocument *EditorUtils::jsonToDocument(const json &j)
 
 		for (auto &jfrag : jblock[1].ArrayRange())
 		{
-			auto textformat = toQTextCharFormat(Proj.textFormat(jfrag[0].ToInt()));
-			cursor.insertText(QString::fromStdString(jfrag[1].ToString()), textformat);
 		}
 	}
 	return doc;
@@ -191,3 +194,4 @@ QTextCharFormat EditorUtils::toQTextCharFormat(const NovelTea::TextFormat &forma
 
 	return fmt;
 }
+*/

@@ -12,7 +12,7 @@
 #include <QToolButton>
 #include <QDebug>
 
-Q_DECLARE_METATYPE(std::shared_ptr<NovelTea::ActiveText>)
+Q_DECLARE_METATYPE(NovelTea::TextEffect)
 
 namespace
 {
@@ -176,10 +176,10 @@ void CutsceneWidget::fillPropertyEditor()
 		ui->richTextEditor->setFormattingEnabled(true);
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), propText);
 		prop->setAttribute("richTextEditor", QVariant::fromValue(ui->richTextEditor));
-		prop->setValue(QVariant::fromValue(textSegment->getActiveText()));
+		prop->setValue(QString::fromStdString(textSegment->getText()));
 		ui->propertyBrowser->addProperty(prop);
 
-		PROP_TEXT_EFFECT(textSegment->getTransition())
+		PROP_TEXT_EFFECT(QVariant::fromValue(textSegment->getTransition()))
 
 		prop = segmentsVariantManager->addProperty(QVariant::Bool, propBeginNewLine);
 		prop->setValue(textSegment->getBeginWithNewLine());
@@ -203,15 +203,13 @@ void CutsceneWidget::fillPropertyEditor()
 	{
 		auto pageSegment = static_cast<NovelTea::CutscenePageSegment*>(segment.get());
 
-		auto t = std::make_shared<NovelTea::ActiveText>();
-		t->setText(pageSegment->getText());
 		ui->richTextEditor->setFormattingEnabled(false);
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), propText);
 		prop->setAttribute("richTextEditor", QVariant::fromValue(ui->richTextEditor));
-		prop->setValue(QVariant::fromValue(t));
+		prop->setValue(QString::fromStdString(pageSegment->getText()));
 		ui->propertyBrowser->addProperty(prop);
 
-		PROP_TEXT_EFFECT(pageSegment->getTextEffect())
+		PROP_TEXT_EFFECT(QVariant::fromValue(pageSegment->getTextEffect()))
 		PROP_BREAK_EFFECT(pageSegment->getBreakEffect())
 
 		prop = segmentsVariantManager->addProperty(QVariant::String, propTextDelimiter);
@@ -429,14 +427,14 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 
 		if (propertyName == propText)
 		{
-			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
-			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText(" | ")).replace("\t"," "));
-			textSegment->setActiveText(activeText);
+			auto val = value.toString();
+			ui->listWidget->currentItem()->setText(val);
+			textSegment->setText(val.toStdString());
 		}
 		else if (propertyName == propBeginNewLine)
 			textSegment->setBeginWithNewLine(value.toBool());
 		else if (propertyName == propTextEffect)
-			textSegment->setTransition(value.toInt());
+			textSegment->setTransition(value.value<NovelTea::TextEffect>());
 		else if (propertyName == propOffset) {
 			auto point = value.toPoint();
 			textSegment->setOffsetX(point.x());
@@ -455,14 +453,14 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		auto pageSegment = static_cast<NovelTea::CutscenePageSegment*>(segment.get());
 
 		if (propertyName == propText){
-			auto activeText = value.value<std::shared_ptr<NovelTea::ActiveText>>();
-			ui->listWidget->currentItem()->setText(QString::fromStdString(activeText->toPlainText(" | ")).replace("\t"," "));
-			pageSegment->setText(activeText->toPlainText());
+			auto val = value.toString();
+			ui->listWidget->currentItem()->setText(val);
+			pageSegment->setText(val.toStdString());
 		}
 		else if (propertyName == propTextDelimiter)
 			pageSegment->setTextDelimiter(EditorUtils::unescape(value.toString()).toStdString());
 		else if (propertyName == propTextEffect)
-			pageSegment->setTextEffect(value.toInt());
+			pageSegment->setTextEffect(value.value<NovelTea::TextEffect>());
 		else if (propertyName == propTextDuration)
 			pageSegment->setTextDuration(value.toInt());
 		else if (propertyName == propTextDelay)
@@ -645,7 +643,7 @@ void CutsceneWidget::updateLoopValues()
 	auto segment = m_cutscene->internalSegments()[selectedIndex];
 	auto max = ui->horizontalSlider->maximum();
 
-	auto endMs = std::min(segment->getDuration(), segment->getDelay());
+	auto endMs = std::min(segment->getFullDuration(), segment->getFullDelay());
 	m_loopStartMs = m_cutscene->getDelayMs(selectedIndex) / m_cutscene->getSpeedFactor();
 	m_loopEndMs = m_loopStartMs + endMs / m_cutscene->getSpeedFactor();
 	if (m_loopEndMs > m_loopStartMs)
@@ -677,7 +675,7 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 		for (size_t i = 0; i < m_cutscene->internalSegments().size(); ++i)
 		{
 			auto segment = m_cutscene->internalSegments()[i];
-			duration += segment->getDelay();
+			duration += segment->getFullDelay();
 			if (duration / m_cutscene->getSpeedFactor() > value)
 			{
 				if (selectedIndex != i)

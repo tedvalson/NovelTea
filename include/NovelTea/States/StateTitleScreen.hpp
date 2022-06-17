@@ -32,7 +32,7 @@ private:
 	ActiveText m_textTitle;
 	ActiveText m_textAuthor;
 	ActiveText m_textProfile;
-	TextFormat m_formatProfile;
+	unsigned int m_buttonFontSize;
 	TweenEngine::TweenManager m_tweenManager;
 	bool m_startPressed;
 };

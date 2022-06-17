@@ -1,5 +1,6 @@
 #include <NovelTea/GUI/TextLog/TextLogDialogueTextItem.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/Utils.hpp>
 
 namespace NovelTea
@@ -8,8 +9,8 @@ namespace NovelTea
 TextLogDialogueTextItem::TextLogDialogueTextItem(const std::string &name, const std::string &text)
 {
 	m_hasName = !name.empty();
-	TextFormat fmt;
-	m_text.setText(text, fmt);
+	TextProperties textProps;
+	m_text.setText(text, textProps);
 
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png").get();
 	m_bg.setTexture(texture);
@@ -18,7 +19,7 @@ TextLogDialogueTextItem::TextLogDialogueTextItem(const std::string &name, const 
 	if (m_hasName) {
 		m_bgName.setTexture(texture);
 		m_bgName.setColor(sf::Color::White);
-		m_textName.setText(name, fmt);
+		m_textName.setText(name, textProps);
 	}
 }
 
@@ -62,7 +63,6 @@ void TextLogDialogueTextItem::setWidth(float width)
 void TextLogDialogueTextItem::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	states.transform *= getTransform();
-	target.draw(m_bg, states);
 	if (m_hasName) {
 		target.draw(m_bgName, states);
 		target.draw(m_textName, states);

@@ -57,7 +57,7 @@ private:
 	sf::Vector2f m_size;
 	std::vector<std::unique_ptr<ActiveText>> m_texts;
 	std::vector<std::unique_ptr<TweenRectangleShape>> m_emptyRects;
-	TextFormat m_textFormat;
+	unsigned int m_fontSize;
 
 	sf::Color m_emptyRectColor;
 	float m_emptyRectAlpha;

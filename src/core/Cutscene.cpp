@@ -95,12 +95,9 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 			auto texts = split(textPages[i], pageSegment->getTextDelimiter());
 			for (int j = 0; j < texts.size(); ++j)
 			{
-				TextFormat format;
-				auto activeText = std::make_shared<ActiveText>();
-				activeText->setText(texts[j], format);
 
 				auto textSegment = new CutsceneTextSegment;
-				textSegment->setActiveText(activeText);
+				textSegment->setText(texts[j]);
 				textSegment->setBeginWithNewLine(pageSegment->getBeginWithNewLine());
 				textSegment->setTransition(pageSegment->getTextEffect());
 				textSegment->setDuration(pageSegment->getTextDuration());
@@ -160,7 +157,7 @@ size_t Cutscene::getDurationMs(size_t indexEnd) const
 	auto duration = 0u;
 	for (auto i = 0u; i < indexEnd; ++i)
 		if (m_skipConditionChecks || m_internalSegments[i]->conditionPasses())
-			duration += m_internalSegments[i]->getDuration();
+			duration += m_internalSegments[i]->getFullDuration();
 	return duration;
 }
 
@@ -177,7 +174,7 @@ size_t Cutscene::getDelayMs(size_t indexEnd) const
 	auto delay = 0u;
 	for (auto i = 0u; i < indexEnd; ++i)
 		if (m_skipConditionChecks || m_internalSegments[i]->conditionPasses())
-			delay += m_internalSegments[i]->getDelay();
+			delay += m_internalSegments[i]->getFullDelay();
 	return delay;
 }
 

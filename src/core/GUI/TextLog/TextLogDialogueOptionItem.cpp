@@ -1,5 +1,6 @@
 #include <NovelTea/GUI/TextLog/TextLogDialogueOptionItem.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/Utils.hpp>
 
 namespace NovelTea
@@ -7,8 +8,8 @@ namespace NovelTea
 
 TextLogDialogueOptionItem::TextLogDialogueOptionItem(const std::string &text)
 {
-	TextFormat fmt;
-	m_text.setText(text, fmt);
+	TextProperties textProps;
+	m_text.setText(text, textProps);
 
 	m_bg.setTexture(AssetManager<sf::Texture>::get("images/button-radius.9.png").get());
 	m_bg.setColor(sf::Color(180, 180, 180, 180));

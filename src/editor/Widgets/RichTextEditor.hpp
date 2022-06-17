@@ -20,14 +20,12 @@ public:
 	void mergeFormat(const QTextCharFormat &format);
 	void invoke();
 
-	void setValue(const std::shared_ptr<NovelTea::ActiveText> &text);
-	std::shared_ptr<NovelTea::ActiveText> getValue() const;
+	void setValue(const QString &bbstring);
+	QString getValue() const;
 
 	void setFormattingEnabled(bool value);
 	bool getFormattingEnabled() const;
 
-	static QTextDocument *activeTextToDocument(const std::shared_ptr<NovelTea::ActiveText> &activeText);
-	static std::shared_ptr<NovelTea::ActiveText> documentToActiveText(const QTextDocument *doc);
 
 protected:
 	void fontChanged(const QFont &font);
@@ -45,13 +43,12 @@ private slots:
 
 signals:
 	void invoked();
-	void saved(const std::shared_ptr<NovelTea::ActiveText> &data);
-	void changed(const std::shared_ptr<NovelTea::ActiveText> &data);
+	void saved(const QString &bbstring);
+	void changed(const QString &bbstring);
 	void canceled();
 	
 private:
 	Ui::RichTextEditor *ui;
-	std::shared_ptr<NovelTea::ActiveText> m_activeText;
 	bool m_isChanged;
 	bool m_formattingEnabled;
 };

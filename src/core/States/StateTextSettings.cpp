@@ -24,7 +24,6 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 			s += "This is some sample text. Please use the arrows below to adjust the font size. ";
 		s += "\n";
 	}
-	m_roomActiveText.setText(s);
 
 	m_buttonFinish.getText().setFont(*Proj.getFont("sysIcon"));
 	m_buttonFinish.setString(L"\uf00c");
@@ -89,10 +88,6 @@ void StateTextSettings::resize(const sf::Vector2f &size)
 
 	// Copy same sizing rules as StateMain::resize() for room text
 	float roomTextPadding = round(1.f / 16.f * std::min(w, h));
-	m_roomActiveText.setFontSizeMultiplier(m_multiplier);
-	m_roomActiveText.setLineSpacing(m_multiplier * 5.f);
-	m_roomActiveText.setSize(sf::Vector2f((portrait ? 1.f : 0.6f) * w - roomTextPadding*2, 0.f));
-	m_roomActiveText.setPosition((w - m_roomActiveText.getSize().x)/2, roomTextPadding);
 
 	m_buttonCancel.getText().setCharacterSize(buttonTextSize);
 	m_buttonCancel.setSize(buttonSize);
@@ -129,7 +124,6 @@ void StateTextSettings::setAlpha(float alpha)
 	m_buttonFinish.setAlpha(alpha);
 	m_buttonSizeDec.setAlpha(alpha);
 	m_buttonSizeInc.setAlpha(alpha);
-	m_roomActiveText.setAlpha(alpha);
 	State::setAlpha(alpha);
 }
 

@@ -1,8 +1,6 @@
 #include "RichTextEditor.hpp"
 #include "ui_RichTextEditor.h"
 #include "EditorUtils.hpp"
-#include <NovelTea/TextBlock.hpp>
-#include <NovelTea/TextFragment.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <QTextBlock>
 #include <iostream>
@@ -36,17 +34,17 @@ void RichTextEditor::invoke()
 	emit invoked();
 }
 
-void RichTextEditor::setValue(const std::shared_ptr<NovelTea::ActiveText> &text)
+void RichTextEditor::setValue(const QString &bbstring)
 {
-	auto doc = activeTextToDocument(text);
+	auto doc = EditorUtils::documentFromBBCode(bbstring);
 	ui->textEdit->setDocument(doc);
 	ui->textEdit->setTabStopWidth(30);
 	m_isChanged = false;
 }
 
-std::shared_ptr<NovelTea::ActiveText> RichTextEditor::getValue() const
+QString RichTextEditor::getValue() const
 {
-	return documentToActiveText(ui->textEdit->document());
+	return EditorUtils::documentToBBCode(ui->textEdit->document());
 }
 
 void RichTextEditor::setFormattingEnabled(bool value)
@@ -61,7 +59,7 @@ bool RichTextEditor::getFormattingEnabled() const
 {
 	return m_formattingEnabled;
 }
-
+/*
 QTextDocument *RichTextEditor::activeTextToDocument(const std::shared_ptr<NovelTea::ActiveText> &activeText)
 {
 	auto doc = new QTextDocument;
@@ -114,7 +112,7 @@ std::shared_ptr<NovelTea::ActiveText> RichTextEditor::documentToActiveText(const
 				if (qfragment.isValid())
 				{
 					auto format = EditorUtils::toTextFormat(qfragment.charFormat());
-					auto fmtIndex = NovelTea::ProjectData::instance().addTextFormat(format);
+					auto fmtIndex = 0;
 
 					if (fmtIndex != fmtIndexLast)
 					{
@@ -153,7 +151,7 @@ std::shared_ptr<NovelTea::ActiveText> RichTextEditor::documentToActiveText(const
 
 	return activeText;
 }
-
+*/
 //void RichTextEditor::setValue(const json &j)
 //{
 //	auto doc = Utils::jsonToDocument(j);
@@ -181,7 +179,7 @@ void RichTextEditor::timerEvent(QTimerEvent *event)
 {
 	if (m_isChanged) {
 		m_isChanged = false;
-		emit changed(documentToActiveText(ui->textEdit->document()));
+		emit changed(EditorUtils::documentToBBCode(ui->textEdit->document()));
 	}
 }
 
@@ -194,7 +192,7 @@ void RichTextEditor::on_actionFinish_triggered()
 //	json j = f;
 //	std::cout << j.dump() << std::endl;
 
-	emit saved(documentToActiveText(ui->textEdit->document()));
+	emit saved(EditorUtils::documentToBBCode(ui->textEdit->document()));
 
 //	NovelTea::ProjectData::instance().saveToFile("/home/android/test.ntp");
 //	NovelTea::ProjectData::instance().loadFromFile("/home/android/test.ntp");

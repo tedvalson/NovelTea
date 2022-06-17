@@ -2,7 +2,6 @@
 #define NOVELTEA_PROJECTDATA_HPP
 
 #include <NovelTea/JsonSerializable.hpp>
-#include <NovelTea/TextFormat.hpp>
 #include <NovelTea/Utils.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/System/String.hpp>
@@ -29,10 +28,6 @@ public:
 
 	bool isLoaded() const;
 	bool isValid(std::string &errorMessage) const;
-
-	TextFormat textFormat(size_t index) const;
-	size_t addTextFormat(const TextFormat &textFormat);
-	bool removeTextFormat(size_t index);
 
 	void renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName);
 
@@ -80,7 +75,6 @@ private:
 	std::string m_filename;
 	mutable json m_json;
 
-	std::vector<TextFormat> m_textFormats;
 	std::map<std::string, std::shared_ptr<sf::Font>> m_fonts;
 	std::map<std::string, std::string> m_fontsData;
 	std::string m_imageData;

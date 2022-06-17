@@ -48,8 +48,6 @@ namespace ID
 	const auto entityParentId     = 1;
 	const auto entityProperties   = 2;
 	const auto cutsceneSegType    = 0;
-	const auto textFormats        = "textformats";
-	const auto titleImageFile     = "titleImage";
 	const auto player             = "player";
 
 	// Entity IDs

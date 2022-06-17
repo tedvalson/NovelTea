@@ -3,6 +3,7 @@
 #include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <TweenEngine/Tween.h>
@@ -59,6 +60,9 @@ void DialogueRenderer::reset()
 
 void DialogueRenderer::update(float delta)
 {
+	m_text.update(delta);
+	m_textOld.update(delta);
+
 	m_scrollBar.update(delta);
 	m_iconContinue.update(delta);
 	m_tweenManager.update(delta);
@@ -73,9 +77,8 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 
 	if (event.type == sf::Event::MouseButtonReleased)
 	{
-		if (m_text.getFadeAcrossPosition() < 1.f) {
-			if (m_fadeTween)
-				m_fadeTween->update(9999.f);
+		if (!m_text.isComplete()) {
+			m_text.update(9999.f);
 			return true;
 		}
 
@@ -137,12 +140,12 @@ void DialogueRenderer::repositionButtons(float fontSize)
 		auto &button = m_buttons[i];
 		auto &text = m_buttonTexts[i];
 		auto &padding = button->getPadding();
-		TextFormat format;
-		text->setLineSpacing(0.1f * fontSize);
-		format.size(0.5f * fontSize);
-		format.color(button->getTextColor());
+		TextProperties textProps;
+		textProps.fontSize = 0.5f * fontSize;
+		textProps.color = button->getTextColor();
 		text->setSize(sf::Vector2f(width - padding.left * 2, 0.f));
-		text->setText(text->getText(), format);
+		text->setLineSpacing(0.1f * fontSize);
+		text->setText(text->getText(), textProps);
 		button->setSize(width, text->getLocalBounds().height + (padding.top + padding.height) * fontSize * 0.08f);
 
 		button->setPosition(m_bg.getPosition().x, round(posY));
@@ -162,10 +165,10 @@ void DialogueRenderer::applyChanges()
 	m_fontSize = m_fontSizeMultiplier * 22;
 	m_text.setSize(sf::Vector2f((portrait ? 0.95f : 0.58f) * m_size.x, m_size.y));
 
-	TextFormat format;
-	format.size(m_fontSize/2);
-	m_textName.setText(m_textName.getText(), format);
-	m_text.setText(m_text.getText(), format);
+	TextProperties textProps;
+	textProps.fontSize = m_fontSize / 2;
+	m_textName.setText(m_textName.getText(), textProps);
+	m_text.setText(m_text.getText(), textProps);
 
 	m_textName.setPosition(round(posX + m_padding), round(2.f * m_size.y / m_fontSize));
 	m_bg.setPosition(round(posX), m_textName.getPosition().y + 1.2f * m_fontSize);
@@ -278,7 +281,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 	for (auto &text : m_buttonTexts)
 		text->setAlpha(0.f);
 	for (auto &text : m_buttonTextsOld)
-		TweenEngine::Tween::to(*text, ActiveText::ALPHA, 0.4f)
+		TweenEngine::Tween::to(*text, ActiveTextSegment::ALPHA, 0.4f)
 			.target(0.f)
 			.start(m_tweenManager);
 	m_tweenManager.update(0.0001f);
@@ -290,16 +293,19 @@ void DialogueRenderer::changeLine(int newLineIndex)
 {
 	if (newLineIndex + 1 > m_textLines.size())
 		return;
-	auto fadeAcrossSpeed = 1.2f;
 	auto &line = m_textLines[newLineIndex];
-	TextFormat format;
-	format.size(m_fontSize/2);
+	AnimationProperties animProps;
+	animProps.type = TextEffect::FadeAcross;
+	animProps.speed = 1.2f;
+	animProps.duration = -1;
+	animProps.delay = -1;
+	TextProperties textProps;
+	textProps.fontSize = m_fontSize / 2;
 	m_textLineIndex = newLineIndex;
-	m_text.setFadeAcrossPosition(1.f);
 	m_textOld = m_text;
 	m_textNameOld = m_textName;
-	m_textName.setText(line.first, format);
-	m_text.setText(line.second, format);
+	m_textName.setText(line.first, textProps);
+	m_text.setText(line.second, textProps, animProps);
 
 	m_scrollAreaSize.y = m_text.getCursorEnd().y + m_fontSize * 2;
 	updateScrollbar();
@@ -311,12 +317,11 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	}
 
 	float duration = 0.3f;
-	m_text.setFadeAcrossPosition(0.f);
-	m_text.setAlpha(255.f);
 	m_textOld.setAlpha(255.f);
 	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
+	/*
 	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f / fadeAcrossSpeed)
 		.ease(TweenEngine::TweenEquations::easeInOutLinear)
 		.target(1.f);
@@ -340,15 +345,35 @@ void DialogueRenderer::changeLine(int newLineIndex)
 			m_iconContinue.show();
 		}
 	}).start(m_tweenManager);
+*/
+	m_text.onComplete([this](){
+		if (m_textLineIndex + 1 == m_textLines.size()) {
+			repositionButtons(m_fontSize);
+			if (m_buttons.empty())
+				m_iconContinue.show();
+			for (auto &button : m_buttons) {
+				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
+					.target(255.f)
+					.start(m_tweenManager);
+			}
+			for (auto &text : m_buttonTexts) {
+				TweenEngine::Tween::to(*text, ActiveTextSegment::ALPHA, 1.f)
+					.target(255.f)
+					.start(m_tweenManager);
+			}
+		} else {
+			m_iconContinue.show();
+		}
+	});
 
 	m_iconContinue.hide(0.4f);
 
 	m_textName.setAlpha(0.f);
 	m_textNameOld.setAlpha(255.f);
-	TweenEngine::Tween::to(m_textNameOld, ActiveText::ALPHA, duration)
+	TweenEngine::Tween::to(m_textNameOld, ActiveTextSegment::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_textName, ActiveText::ALPHA, duration)
+	TweenEngine::Tween::to(m_textName, ActiveTextSegment::ALPHA, duration)
 		.target(255.f)
 		.start(m_tweenManager);
 }
@@ -403,18 +428,14 @@ void DialogueRenderer::hide(float duration)
 	TweenEngine::Tween::to(m_bg, TweenNinePatch::COLOR_ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_textName, ActiveText::ALPHA, duration)
+	TweenEngine::Tween::to(m_textName, ActiveTextSegment::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_textNameOld, ActiveText::ALPHA, duration)
+	TweenEngine::Tween::to(m_textNameOld, ActiveTextSegment::ALPHA, duration)
 		.target(0.f)
 		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_text, ActiveText::ALPHA, duration)
-		.target(0.f)
-		.start(m_tweenManager);
-	TweenEngine::Tween::to(m_textOld, ActiveText::ALPHA, duration)
-		.target(0.f)
-		.start(m_tweenManager);
+	m_text.hide(duration);
+	m_textOld.hide(duration);
 	for (auto &button : m_buttons) {
 		TweenEngine::Tween::to(*button, Button::ALPHA, duration)
 			.target(0.f)
@@ -426,11 +447,11 @@ void DialogueRenderer::hide(float duration)
 			.start(m_tweenManager);
 	}
 	for (auto &text : m_buttonTexts)
-		TweenEngine::Tween::to(*text, ActiveText::ALPHA, duration)
+		TweenEngine::Tween::to(*text, ActiveTextSegment::ALPHA, duration)
 			.target(0.f)
 			.start(m_tweenManager);
 	for (auto &text : m_buttonTextsOld)
-		TweenEngine::Tween::to(*text, ActiveText::ALPHA, duration)
+		TweenEngine::Tween::to(*text, ActiveTextSegment::ALPHA, duration)
 			.target(0.f)
 			.start(m_tweenManager);
 }
@@ -589,8 +610,11 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 			++i;
 			m_buttons.emplace_back(btn);
 
-			auto text = new ActiveText();
-			text->setText(buttonText);
+			TextProperties buttonTextProps;
+			buttonTextProps.fontSize = m_fontSize / 2;
+
+			auto text = new ActiveTextSegment();
+			text->setText(buttonText, buttonTextProps);
 			m_buttonTexts.emplace_back(text);
 		}
 	}

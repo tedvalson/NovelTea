@@ -48,4 +48,14 @@ std::shared_ptr<CutsceneSegment> CutsceneSegment::createSegment(const json &j)
 	return segment;
 }
 
+size_t CutsceneSegment::getFullDuration() const
+{
+	return m_duration;
+}
+
+size_t CutsceneSegment::getFullDelay() const
+{
+	return m_delay;
+}
+
 } // namespace NovelTea

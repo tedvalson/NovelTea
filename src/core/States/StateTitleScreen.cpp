@@ -1,5 +1,7 @@
 #include <NovelTea/States/StateTitleScreen.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/ActiveTextSegment.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
@@ -20,8 +22,8 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 	// Buttons
 	m_buttonStart.setString("Start");
 	m_buttonStart.setTextColor(sf::Color(80, 80, 80));
-	m_buttonStart.setActiveColor(sf::Color(0, 0, 0, 50));
-	m_buttonStart.setColor(sf::Color(0, 0, 0, 30));
+	m_buttonStart.setActiveColor(sf::Color(200, 200, 200, 240));
+	m_buttonStart.setColor(sf::Color(220, 220, 220, 240));
 	m_buttonStart.onClick([this, bgColor](){
 		if (m_startPressed)
 			return;
@@ -86,42 +88,52 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	m_size = size;
 
 	// Title
-	TextFormat format;
-	format.size(0.1f * h);
-	format.bold(true);
+	TextProperties textProps;
+	textProps.fontStyle |= sf::Text::Bold;
+	textProps.fontSize = 0.1f * h;
 	m_textTitle.setSize(sf::Vector2f((portrait ? 0.95f : 0.8f) * w, h));
 	m_textTitle.setFontSizeMultiplier(portrait ? 0.4f : 0.7f);
-	m_textTitle.setText(ProjData[ID::projectName].ToString(), format);
+	m_textTitle.setText(ProjData[ID::projectName].ToString(), textProps);
 	m_textTitle.setOrigin(m_textTitle.getLocalBounds().width / 2, 0.f);
 	m_textTitle.setPosition(round(0.5f * w), round(0.05f * h));
+	for (auto& seg : m_textTitle.getSegments()) {
+		for (auto& segment : seg->getSegments()) {
+			segment.text.setOutlineColor(m_bg.getFillColor());
+			segment.text.setOutlineThickness(2.f);
+		}
+	}
 
 	// Author
-	format.color(sf::Color(120, 120, 120));
-	format.size(0.03f * h);
-	format.bold(false);
+	textProps.fontStyle ^= sf::Text::Bold;
+	textProps.fontSize = 0.03f * h;
+	textProps.color = sf::Color(120, 120, 120);
 	m_textAuthor.setSize(sf::Vector2f(0.9f * w, h));
 	m_textAuthor.setFontSizeMultiplier(portrait ? 0.35f : 0.6f);
 	m_textAuthor.setPosition(round(0.5f * w - m_textTitle.getLocalBounds().width / 2),
 							 round((0.07f * h) + m_textTitle.getLocalBounds().height));
-	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), format);
+	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), textProps);
+	for (auto& seg : m_textAuthor.getSegments()) {
+		for (auto& segment : seg->getSegments()) {
+			segment.text.setOutlineColor(m_bg.getFillColor());
+			segment.text.setOutlineThickness(1.f);
+		}
+	}
 
 	auto buttonWidth = (portrait ? 0.85f : 0.4f) * w;
 	auto buttonHeight = (portrait ? 0.09f : 0.12f) * h * 0.8f;
-	auto buttonFontSize = buttonHeight * 0.7f;
-	m_buttonStart.getText().setCharacterSize(buttonFontSize);
+	m_buttonFontSize = buttonHeight * 0.7f;
+	m_buttonStart.getText().setCharacterSize(m_buttonFontSize);
 	m_buttonStart.setSize(buttonWidth, buttonHeight);
 	m_buttonStart.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 4.2f));
 
-	m_buttonSettings.getText().setCharacterSize(buttonFontSize);
+	m_buttonSettings.getText().setCharacterSize(m_buttonFontSize);
 	m_buttonSettings.setSize(buttonWidth, buttonHeight);
 	m_buttonSettings.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 3.f));
 
-	m_buttonProfile.getText().setCharacterSize(buttonFontSize);
+	m_buttonProfile.getText().setCharacterSize(m_buttonFontSize);
 	m_buttonProfile.setSize(buttonWidth, buttonHeight);
 	m_buttonProfile.setPosition(round(0.5f * (w - buttonWidth)), round(h - buttonHeight * 1.8f));
 
-	m_formatProfile.color(sf::Color(120, 120, 120));
-	m_formatProfile.size(0.3f * buttonFontSize);
 	updateProfileText();
 }
 
@@ -138,6 +150,9 @@ void StateTitleScreen::setAlpha(float alpha)
 
 void StateTitleScreen::updateProfileText()
 {
+	TextProperties textProps;
+	textProps.color = sf::Color(120, 120, 120);
+	textProps.fontSize = 0.3f * m_buttonFontSize;
 	if (GSettings.getProfiles().empty())
 	{
 		if (GTextInput.finished())
@@ -147,7 +162,7 @@ void StateTitleScreen::updateProfileText()
 			});
 		return;
 	}
-	m_textProfile.setText(GSettings.getActiveProfile()->getName(), m_formatProfile);
+	m_textProfile.setText(GSettings.getActiveProfile()->getName(), textProps);
 	auto b = m_textProfile.getGlobalBounds();
 	m_textProfile.setPosition((m_size.x - b.width) / 2, m_size.y - b.height * 1.1f);
 }

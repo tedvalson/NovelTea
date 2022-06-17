@@ -1,7 +1,9 @@
 #include <NovelTea/MapRenderer.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <TweenEngine/Tween.h>
@@ -143,12 +145,15 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 		shape->setFillColor(sf::Color::White);
 
 		auto text = new ActiveText;
-		TextFormat fmt;
-		fmt.size(multiplier);
-		fmt.color(sf::Color::Black);
+		TextProperties style;
+		style.fontSize = multiplier;
 		text->setAlpha(m_nameAlpha);
 		text->setFontSizeMultiplier(0.7f);
-		text->setText(room->name, fmt);
+		text->setText(room->name, style);
+		while (text->getLocalBounds().width > shape->getSize().x) {
+			style.fontSize -= 1;
+			text->setText(room->name, style);
+		}
 		text->setSize(shape->getSize());
 		text->setOrigin({text->getLocalBounds().width / 2.f, text->getLocalBounds().height / 2.f});
 		text->setPosition(sf::Vector2f(rect.left, rect.top) * multiplier + vecThickness);
@@ -369,9 +374,11 @@ void MapRenderer::reset(float duration)
 		TweenEngine::Tween::to(*room->text, ActiveText::ALPHA, duration)
 			.target(((room->visible || getShowEverything()) && !m_miniMapMode) ? 255.f : 0.f)
 			.start(m_tweenManager);
-		for (auto& segment : room->text->getSegments()) {
-			segment.text.setOutlineThickness(((room->visible || getShowEverything()) && !m_miniMapMode) ? 2.f : 0.f);
-			segment.text.setOutlineColor(sf::Color(200, 200, 200));
+		for (auto& seg : room->text->getSegments()) {
+			for (auto& segment : seg->getSegments()) {
+				segment.text.setOutlineThickness(((room->visible || getShowEverything()) && !m_miniMapMode) ? 2.f : 0.f);
+				segment.text.setOutlineColor(sf::Color(200, 200, 200));
+			}
 		}
 		TweenEngine::Tween::to(*room->text, ActiveText::SCALE_XY, duration)
 			.target(1.f, 1.f)
@@ -409,9 +416,11 @@ void MapRenderer::reset(float duration)
 				TweenEngine::Tween::to(*room->text, ActiveText::SCALE_XY, duration)
 					.target(scale, scale)
 					.start(m_tweenManager);
-				for (auto& segment : room->text->getSegments()) {
-					segment.text.setOutlineThickness(2.f);
-					segment.text.setOutlineColor(sf::Color::White);
+				for (auto& seg : room->text->getSegments()) {
+					for (auto& segment : seg->getSegments()) {
+						segment.text.setOutlineThickness(2.f);
+						segment.text.setOutlineColor(sf::Color::White);
+					}
 				}
 			}
 		}

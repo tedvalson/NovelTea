@@ -9,7 +9,7 @@ CutscenePageSegment::CutscenePageSegment()
 , m_textDuration(1000)
 , m_breakDelay(3000)
 , m_breakDuration(2000)
-, m_textEffect(TextEffectFade)
+, m_textEffect(TextEffect::Fade)
 , m_breakEffect(PageEffectFade)
 , m_offsetX(0)
 , m_offsetY(0)
@@ -29,7 +29,7 @@ json CutscenePageSegment::toJson() const
 		getText(),
 		getTextDelimiter(),
 		getBreakDelimiter(),
-		getTextEffect(),
+		static_cast<int>(getTextEffect()),
 		getBreakEffect(),
 		getTextDuration(),
 		getTextDelay(),
@@ -50,7 +50,7 @@ bool CutscenePageSegment::fromJson(const json &j)
 	setText(j[2].ToString());
 	setTextDelimiter(j[3].ToString());
 	setBreakDelimiter(j[4].ToString());
-	setTextEffect(j[5].ToInt());
+	setTextEffect(static_cast<TextEffect>(j[5].ToInt()));
 	setBreakEffect(j[6].ToInt());
 	setTextDuration(j[7].ToInt());
 	setTextDelay(j[8].ToInt());

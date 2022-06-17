@@ -122,6 +122,8 @@ void CutsceneRenderer::update(float delta)
 		m_timeToNext -= timeDelta;
 	}
 	m_tweenManager.update(timeDelta.asSeconds());
+	for (auto& text : m_texts)
+		text->update(delta);
 }
 
 bool CutsceneRenderer::isComplete() const
@@ -291,9 +293,10 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 
 void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 {
+	auto text = segment->getText();
 	auto activeText = segment->getActiveText();
 	auto effect = segment->getTransition();
-	auto duration = 0.001f * segment->getDuration();
+	auto duration = 0.001f * segment->getFullDuration();
 
 	// Push activeText in callback so it doesn't show before update()
 	TweenEngine::Tween::mark()
@@ -302,7 +305,7 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 		}).start(m_tweenManager);
 
 	activeText->setPosition((m_size.x < m_size.y ? 0.f : 0.2f * m_size.x), 0.f);
-
+/*
 	if (effect == CutsceneSegment::TextEffectFade) {
 		activeText->setAlpha(0.f);
 		TweenEngine::Tween::to(*activeText, ActiveText::ALPHA, duration)
@@ -316,12 +319,13 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 			.target(1.f)
 			.start(m_tweenManager);
 	}
+*/
 }
 
 void CutsceneRenderer::startTransitionEffect(const CutscenePageBreakSegment *segment)
 {
 	auto effect = segment->getTransition();
-	auto duration = 0.001f * segment->getDuration();
+	auto duration = 0.001f * segment->getFullDuration();
 
 	for (auto &text : m_textsOld)
 	{
@@ -368,7 +372,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 
 	TweenEngine::TweenCallbackFunction beginCallback = nullptr;
 	TweenEngine::TweenCallbackFunction endCallback = nullptr;
-	auto delayMs = segment->getDelay();
+	auto delayMs = segment->getFullDelay();
 	auto timeToNext = 0.001f * (delayMs > 0 ? delayMs - 1 : 0);
 
 	if (type == CutsceneSegment::Text)
@@ -383,6 +387,8 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			auto activeText = seg->getActiveText();
 			activeText->setSize(sf::Vector2f((m_size.x < m_size.y ? 1.f : 0.6f) * m_size.x - m_margin*2, m_size.y));
 			activeText->setFontSizeMultiplier(m_fontSizeMultiplier);
+			activeText->setSkipWaitingForClick(m_skipWaitingForClick);
+			activeText->setSkipWaitingForClick(true);
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y = std::max(0.f, m_scrollAreaSize.y - scrollAreaMargin);
@@ -393,7 +399,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			auto startPos = m_cursorPos.y;
 			activeText->setCursorStart(m_cursorPos);
 			m_cursorPos = activeText->getCursorEnd();
-			m_timeToNext = sf::milliseconds(seg->getDelay());
+			m_timeToNext = sf::milliseconds(seg->getFullDelay());
 			startTransitionEffect(seg);
 
 			m_scrollAreaSize.y = activeText->getLocalBounds().height + scrollAreaMargin;

@@ -33,8 +33,6 @@ ProjectData &ProjectData::instance()
 
 void ProjectData::newProject()
 {
-	TextFormat textFormat;
-
 	auto j = json({
 		ID::engineVersion, NOVELTEA_VERSION,
 		ID::projectName, "Project Name",
@@ -53,7 +51,6 @@ void ProjectData::newProject()
 		ID::scriptBeforeLeave, "return true;",
 		ID::scriptAfterEnter, "",
 		ID::scriptBeforeEnter, "return true;",
-		ID::textFormats, sj::Array(textFormat.toJson()),
 		ID::openTabs, sj::Array(),
 		ID::openTabIndex, -1,
 	});
@@ -94,31 +91,6 @@ bool ProjectData::isValid(std::string &errorMessage) const
 		return false;
 	}
 
-	return true;
-}
-
-TextFormat ProjectData::textFormat(size_t index) const
-{
-	if (index >= m_textFormats.size())
-	{
-		// TODO: throw error? Return const ref?
-		return TextFormat();
-	}
-
-	return m_textFormats[index];
-}
-
-size_t ProjectData::addTextFormat(const TextFormat &textFormat)
-{
-	for (size_t i = 0; i < m_textFormats.size(); ++i)
-		if (textFormat == m_textFormats[i])
-			return i;
-	m_textFormats.push_back(textFormat);
-	return m_textFormats.size() - 1;
-}
-
-bool ProjectData::removeTextFormat(size_t index)
-{
 	return true;
 }
 
@@ -260,7 +232,7 @@ const std::string &ProjectData::getFontData(const std::string &alias) const
 std::shared_ptr<sf::Font> ProjectData::getFont(const std::string &fontName) const
 {
 	if (m_fonts.find(fontName) == m_fonts.end())
-		return nullptr;
+		return m_fonts.at("sys");
 	return m_fonts.at(fontName);
 }
 
@@ -347,17 +319,12 @@ const std::string &ProjectData::getImageData() const
 json ProjectData::toJson() const
 {
 	// TextFormat list
-	json jtextformats = sj::Array();
-	for (auto &format : m_textFormats)
-		jtextformats.append(format.toJson());
 
 	// Project components all together
 //	auto jproject = json::object({
 //		{"config", jconfig},
 //		{"textformats", jtextformats}
 //	});
-
-	m_json[ID::textFormats] = jtextformats;
 
 	return m_json;
 }
@@ -366,16 +333,8 @@ bool ProjectData::fromJson(const json &j)
 {
 	m_loaded = false;
 	m_filename.clear();
-	m_textFormats.clear();
 	m_fonts.clear();
 	m_imageData.clear();
-
-	for (auto &jformat : j[ID::textFormats].ArrayRange())
-	{
-		TextFormat format;
-		format.fromJson(jformat);
-		m_textFormats.push_back(format);
-	}
 
 	for (auto &jfont : j[ID::engineFonts].ObjectRange())
 	{

@@ -24,7 +24,6 @@ public:
 
 private:
 	float m_multiplier;
-	ActiveText m_roomActiveText;
 
 	TweenText m_textTitle;
 	TweenText m_textValue;
