@@ -54,6 +54,7 @@ private:
 	bool m_mousePressed;
 
 	float m_alpha;
+	TweenEngine::TweenManager m_tweenManager;
 
 	TweenRectangleShape m_bg;
 	ActiveText m_text;

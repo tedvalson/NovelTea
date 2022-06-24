@@ -19,7 +19,7 @@ bool Hideable::update(float delta)
 
 void Hideable::show(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isShowing && (!m_visible || m_isHiding))
+	if ((!m_isShowing && (!m_visible || m_isHiding)) || duration == 0.f)
 	{
 		m_isShowing = true;
 		m_isHiding = false;
@@ -38,7 +38,7 @@ void Hideable::show(float duration, int tweenType, HideableCallback callback)
 
 void Hideable::hide(float duration, int tweenType, HideableCallback callback)
 {
-	if (!m_isHiding && m_visible)
+	if ((!m_isHiding && m_visible) || duration == 0.f)
 	{
 		m_isHiding = true;
 		m_isShowing = false;

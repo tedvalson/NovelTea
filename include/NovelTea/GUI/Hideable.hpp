@@ -2,7 +2,6 @@
 #define NOVELTEA_HIDEABLE_HPP
 
 #include <NovelTea/TweenObjects.hpp>
-#include <NovelTea/Utils.hpp>
 #include <TweenEngine/TweenManager.h>
 
 namespace NovelTea
@@ -34,10 +33,10 @@ protected:
 
 	bool m_isHiding;
 	bool m_isShowing;
-	TweenEngine::TweenManager m_tweenManager;
 
 private:
 	bool m_visible;
+	TweenEngine::TweenManager m_tweenManager;
 };
 
 } // namespace NovelTea

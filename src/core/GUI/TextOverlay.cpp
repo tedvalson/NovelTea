@@ -52,6 +52,7 @@ bool TextOverlay::processEvent(const sf::Event &event)
 bool TextOverlay::update(float delta)
 {
 	m_scrollBar.update(delta);
+	m_tweenManager.update(delta);
 	Hideable::update(delta);
 	return true;
 }
