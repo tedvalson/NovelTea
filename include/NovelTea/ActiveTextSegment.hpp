@@ -22,6 +22,7 @@ class ActiveTextSegment : public JsonSerializable, public sf::Drawable, public H
 public:
 	static const int HIGHLIGHTS = 12;
 	static const int FADEACROSS = 13;
+	static const int ANIMALPHA = 14;
 
 	struct Segment {
 		bool objectExists;
@@ -46,6 +47,8 @@ public:
 	void setText(const std::string &text, const TextProperties &textProps);
 	void setText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
 	std::string getText() const;
+
+	void startAnim();
 
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
@@ -87,10 +90,13 @@ public:
 
 	AnimationProperties &getAnimProps() const;
 
+	bool update(float delta) override;
+
 protected:
 	virtual void setValues(int tweenType, float *newValues) override;
 	virtual int getValues(int tweenType, float *returnValues) override;
 
+	void setAnimAlpha(float alpha);
 	void applyAlpha() const;
 	void applyHighlightFactor() const;
 
@@ -110,6 +116,7 @@ private:
 	mutable bool m_needsUpdate;
 	float m_lineSpacing;
 	float m_alpha;
+	float m_animAlpha;
 	float m_highlightFactor;
 	float m_fontSizeMultiplier;
 
@@ -122,6 +129,8 @@ private:
 
 	mutable sf::RectangleShape m_debugBorder;
 	mutable std::vector<sf::RectangleShape> m_debugSegmentShapes;
+
+	TweenEngine::TweenManager m_tweenManager;
 };
 
 } // namespace NovelTea

@@ -20,21 +20,28 @@ class ActiveText : public JsonSerializable, public sf::Drawable, public Hideable
 {
 public:
 	static const int HIGHLIGHTS = 12;
-	static const int FADEACROSS = 13;
 
 	ActiveText();
 	ActiveText(const std::string &text);
 	ActiveText(const std::string &text, const AnimationProperties &animDefault);
+	ActiveText(const std::string &text, const TextProperties &textProps);
+	ActiveText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 
 	void reset(bool preservePosition = false);
+	void skipToNext(bool skipWaitForClick = false);
 
 	void setText(const std::string &text);
 	void setText(const std::string &text, const AnimationProperties &animProps);
 	void setText(const std::string &text, const TextProperties &textProps);
 	void setText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
 	const std::string& getText() const;
+
+	void updateProps(const TextProperties &textProps, const AnimationProperties &animProps);
+
+	void show(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
+	void hide(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
 
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;
@@ -84,15 +91,18 @@ public:
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+	virtual void setValues(int tweenType, float *newValues) override;
+	virtual int getValues(int tweenType, float *returnValues) override;
+
 	void addSegmentToQueue(size_t segmentIndex);
-	void startTextEffect(const std::shared_ptr<ActiveTextSegment> &segment);
+	void buildSegments(const TextProperties &textProps, const AnimationProperties &animProps);
+	void updateSegments(float delta);
 
 private:
 	float m_alpha;
 	float m_fontSizeMultiplier;
 	float m_highlightFactor;
 	float m_lineSpacing;
-	int m_lineMaxCharSize;
 	int m_segmentIndex;
 	bool m_isComplete;
 	bool m_isWaitingForClick;

@@ -1,12 +1,12 @@
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/BBCodeParser.hpp>
-#include <NovelTea/Diff.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/StringUtils.hpp>
+#include <TweenEngine/Tween.h>
 
 namespace NovelTea
 {
@@ -17,6 +17,7 @@ ActiveTextSegment::ActiveTextSegment()
 	, m_needsUpdate(true)
 	, m_lineSpacing(5.f)
 	, m_alpha(255.f)
+	, m_animAlpha(255.f)
 	, m_highlightFactor(1.f)
 	, m_fontSizeMultiplier(1.f)
 	, m_fadeAcrossPosition(1.f)
@@ -81,13 +82,6 @@ std::string ActiveTextSegment::objectFromPoint(const sf::Vector2f &point) const
 
 void ActiveTextSegment::setStyledSegments(const std::vector<std::shared_ptr<StyledSegment>> &segments)
 {
-	for (auto &s : segments) {
-		std::cout << "[";
-		for (auto &style : s->styles)
-			std::cout << "+";
-		std::cout << "] " << (s->newGroup ? "new" : "old") << (s->startOnNewLine ? " \\n" : "") << " \"" << s->text << "\"" << std::endl;
-	}
-	std::cout << std::endl;
 
 	m_styledSegments = segments;
 	m_string = "styledSegments";
@@ -113,12 +107,38 @@ void ActiveTextSegment::setText(const std::string &text, const TextProperties &t
 {
 	auto styledSegments = BBCodeParser::makeSegments(text, textProps, animProps);
 	setStyledSegments(styledSegments);
-	m_string = stripDiff(text);
+	m_string = text;
 }
 
 std::string ActiveTextSegment::getText() const
 {
 	return m_string;
+}
+
+void ActiveTextSegment::startAnim()
+{
+	auto& anim = getAnimProps();
+	auto delay = 0.001f * getDelayMs();
+	auto duration = 0.001f * getDurationMs();
+	m_tweenManager.killAll();
+
+	setFadeAcrossPosition(1.f);
+	setAnimAlpha(255.f);
+
+	if (anim.type == TextEffect::Fade) {
+		setAnimAlpha(0.f);
+		TweenEngine::Tween::to(*this, ANIMALPHA, duration)
+			.target(255.f)
+			.start(m_tweenManager);
+	}
+	else if (anim.type == TextEffect::FadeAcross) {
+		setFadeAcrossPosition(0.f);
+		TweenEngine::Tween::to(*this, FADEACROSS, duration)
+			.ease(TweenEngine::TweenEquations::easeInOutLinear)
+			.target(1.f)
+			.start(m_tweenManager);
+	}
+	m_tweenManager.update(0.f); // TODO: why is this needed?????
 }
 
 void ActiveTextSegment::setSize(const sf::Vector2f &size)
@@ -267,9 +287,8 @@ void ActiveTextSegment::setFadeAcrossPosition(float position)
 	m_fadeAcrossPosition = position;
 	if (m_segments.empty())
 		return;
-	if (position == 1.f) {
-		if (m_renderTexture)
-			m_renderTexture = nullptr;
+	if (position > 0.9999f) {
+		m_renderTexture = nullptr;
 	} else {
 		if (!m_renderTexture)
 			createRenderTexture();
@@ -327,6 +346,12 @@ AnimationProperties &ActiveTextSegment::getAnimProps() const
 	return m_styledSegments[0]->anim;
 }
 
+bool ActiveTextSegment::update(float delta)
+{
+	m_tweenManager.update(delta);
+	return Hideable::update(delta);
+}
+
 void ActiveTextSegment::setValues(int tweenType, float *newValues)
 {
 	switch (tweenType) {
@@ -335,6 +360,9 @@ void ActiveTextSegment::setValues(int tweenType, float *newValues)
 			break;
 		case FADEACROSS:
 			setFadeAcrossPosition(newValues[0]);
+			break;
+		case ANIMALPHA:
+			setAnimAlpha(newValues[0]);
 			break;
 		default:
 			Hideable::setValues(tweenType, newValues);
@@ -350,9 +378,18 @@ int ActiveTextSegment::getValues(int tweenType, float *returnValues)
 	case FADEACROSS:
 		returnValues[0] = getFadeAcrossPosition();
 		return 1;
+	case ANIMALPHA:
+		returnValues[0] = m_animAlpha;
+		return 1;
 	default:
 		return Hideable::getValues(tweenType, returnValues);
 	}
+}
+
+void ActiveTextSegment::setAnimAlpha(float alpha)
+{
+	m_animAlpha = alpha;
+	applyAlpha();
 }
 
 void ActiveTextSegment::applyAlpha() const
@@ -360,21 +397,22 @@ void ActiveTextSegment::applyAlpha() const
 	sf::Color color;
 	const float *newValues = &m_alpha; // Hack for the macro below
 	for (auto &segment : m_segments) {
-		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, 255.f);
+		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, m_animAlpha);
 	}
 }
 
 void ActiveTextSegment::applyHighlightFactor() const
 {
+	auto alpha = m_alpha * m_animAlpha / 255.f;
 	for (auto &segment : m_segments)
 	{
 		if (!segment.objectIdName.empty())
 		{
 			sf::Color color;
 			if (segment.objectExists)
-				color = sf::Color(0, 0, m_highlightFactor * 200, m_alpha);
+				color = sf::Color(0, 0, m_highlightFactor * 200, alpha);
 			else
-				color = sf::Color(m_highlightFactor * 155, 0, m_highlightFactor * 255, m_alpha);
+				color = sf::Color(m_highlightFactor * 155, 0, m_highlightFactor * 255, alpha);
 			segment.text.setFillColor(color);
 		}
 	}
@@ -383,7 +421,7 @@ void ActiveTextSegment::applyHighlightFactor() const
 void ActiveTextSegment::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	ensureUpdate();
-	if (m_segments.empty())
+	if (m_segments.empty() || m_alpha == 0.f || m_animAlpha == 0.f)
 		return;
 	states.transform *= getTransform();
 
@@ -472,6 +510,8 @@ void ActiveTextSegment::ensureUpdate() const
 			text.setFont(*font);
 			text.setCharacterSize(2.f * m_fontSizeMultiplier * style.fontSize);
 			text.setStyle(style.fontStyle);
+			text.setOutlineColor(style.outlineColor);
+			text.setOutlineThickness(style.outlineThickness);
 
 			text.setString(" ");
 			auto spaceWidth = text.getLocalBounds().width;

@@ -1,4 +1,6 @@
 #include <NovelTea/CutscenePageSegment.hpp>
+#include <NovelTea/CutsceneTextSegment.hpp>
+#include <NovelTea/CutscenePageBreakSegment.hpp>
 #include <NovelTea/StringUtils.hpp>
 
 namespace NovelTea
@@ -61,6 +63,7 @@ bool CutscenePageSegment::fromJson(const json &j)
 	setOffsetX(j[13].ToInt());
 	setOffsetY(j[14].ToInt());
 	setConditionScript(j[15].ToString());
+	buildSegments();
 	return true;
 }
 
@@ -69,27 +72,13 @@ CutsceneSegment::Type CutscenePageSegment::type() const
 	return CutsceneSegment::Page;
 }
 
-const size_t &CutscenePageSegment::getDuration() const
+size_t CutscenePageSegment::getFullDuration() const
 {
-	auto textCount = 0;
-	auto pages = split(getText(), getBreakDelimiter());
-	for (auto &page : pages)
-		textCount += split(page, getTextDelimiter()).size();
-	m_duration = m_textDuration * textCount;
-	if (textCount > 0 && m_textDelay > m_textDuration)
-		m_duration += (m_textDelay - m_textDuration) * (textCount - 1);
-	if (!pages.empty())
-		m_duration += m_breakDelay * (pages.size() - 1);
 	return m_duration;
 }
 
-const size_t &CutscenePageSegment::getDelay() const
+size_t CutscenePageSegment::getFullDelay() const
 {
-	auto textCount = 0;
-	auto pages = split(getText(), getBreakDelimiter());
-	for (auto &page : pages)
-		textCount += split(page, getTextDelimiter()).size();
-	m_delay = m_textDelay * textCount + m_breakDelay * (pages.size() - 1);
 	return m_delay;
 }
 
@@ -100,6 +89,59 @@ int CutscenePageSegment::getSegmentCount() const
 	for (auto &page : pages)
 		result += split(page, getTextDelimiter()).size();
 	return result;
+}
+
+const std::vector<std::shared_ptr<CutsceneSegment> > &CutscenePageSegment::getSegments() const
+{
+	return m_segments;
+}
+
+void CutscenePageSegment::buildSegments()
+{
+	m_segments.clear();
+	m_duration = 0;
+	m_delay = 0;
+
+	auto textPages = split(getText(), getBreakDelimiter());
+	for (int i = 0; i < textPages.size(); ++i)
+	{
+		// Process first text segment without page break.
+		if (i > 0)
+		{
+			auto pageBreakSegment = new CutscenePageBreakSegment;
+			pageBreakSegment->setTransition(getBreakEffect());
+			pageBreakSegment->setDuration(getBreakDuration());
+			pageBreakSegment->setDelay(getBreakDelay());
+			pageBreakSegment->setWaitForClick(getWaitForClick());
+			pageBreakSegment->setCanSkip(getCanSkip());
+			m_duration += getBreakDuration();
+			m_delay += getBreakDelay();
+			m_segments.emplace_back(pageBreakSegment);
+		}
+
+		auto texts = split(textPages[i], getTextDelimiter());
+		for (int j = 0; j < texts.size(); ++j)
+		{
+			auto textSegment = new CutsceneTextSegment;
+			textSegment->setBeginWithNewLine(getBeginWithNewLine());
+			textSegment->setTransition(getTextEffect());
+			textSegment->setDuration(getTextDuration());
+			textSegment->setDelay(getTextDelay());
+			textSegment->setWaitForClick(getWaitForClick());
+			textSegment->setCanSkip(getCanSkip());
+			textSegment->setOffsetX(getOffsetX());
+			textSegment->setOffsetY(getOffsetY());
+			if (j == 0) {
+				// Don't wait for click on first seg of new page
+				if (i > 0)
+					textSegment->setWaitForClick(false);
+			}
+			textSegment->setText(texts[j]); // TODO: Make it so this doesn't NEED to be set last
+			m_duration += textSegment->getFullDuration();
+			m_delay += textSegment->getFullDelay();
+			m_segments.emplace_back(textSegment);
+		}
+	}
 }
 
 } // namespace NovelTea

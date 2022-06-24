@@ -16,10 +16,11 @@ public:
 	bool fromJson(const json &j) override;
 	Type type() const override;
 
-	const size_t &getDuration() const override;
-	const size_t &getDelay() const override;
+	size_t getFullDuration() const override;
+	size_t getFullDelay() const override;
 
 	int getSegmentCount() const;
+	const std::vector<std::shared_ptr<CutsceneSegment>> &getSegments() const;
 
 	ADD_ACCESSOR(size_t, TextDelay, m_textDelay)
 	ADD_ACCESSOR(size_t, TextDuration, m_textDuration)
@@ -33,6 +34,9 @@ public:
 	ADD_ACCESSOR(int, OffsetX, m_offsetX)
 	ADD_ACCESSOR(int, OffsetY, m_offsetY)
 	ADD_ACCESSOR(bool, BeginWithNewLine, m_beginWithNewline)
+
+private:
+	void buildSegments();
 
 private:
 	mutable size_t m_delay;
@@ -49,6 +53,7 @@ private:
 	std::string m_textDelimiter;
 	std::string m_breakDelimiter;
 	std::string m_text;
+	std::vector<std::shared_ptr<CutsceneSegment>> m_segments;
 };
 
 } // namespace NovelTea

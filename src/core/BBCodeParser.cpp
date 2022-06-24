@@ -148,6 +148,8 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 			style.fontStyle |= sf::Text::Bold;
 		else if (s.type == TextStyleType::Italic)
 			style.fontStyle |= sf::Text::Italic;
+		else if (s.type == TextStyleType::Diff)
+			style.color = sf::Color(150, 0, 0);
 		else if (s.type == TextStyleType::Object)
 			style.objectId = s.params["id"];
 		else if (s.type == TextStyleType::Font)
@@ -167,7 +169,9 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 					anim.delay = std::atol(val.c_str());
 				else if (key == TextAnimation::Time)
 					anim.duration = std::atol(val.c_str());
-				else if (key == TextAnimation::Skippable)
+				else if (key == TextAnimation::Speed)
+					anim.speed = std::max(std::atof(val.c_str()), 0.01);
+				else if (key == TextAnimation::CanSkip)
 					anim.skippable = (val == "1");
 				else if (key == TextAnimation::Wait)
 					anim.waitForClick = (val == "1");

@@ -8,11 +8,12 @@ namespace NovelTea
 
 enum class TextStyleType : int {
 	None = 0,
-	Bold = 1,
-	Italic,
+	Animation = 1,
+	Bold,
 	Color,
+	Diff,
 	Font,
-	Animation,
+	Italic,
 	Object,
 	Size,
 };
@@ -25,8 +26,8 @@ enum class TextEffect : int {
 
 struct AnimationProperties {
 	TextEffect type = TextEffect::None;
-	int duration = 1000;
-	int delay    = 1000;
+	int duration = 0;
+	int delay    = 0;
 	float speed  = 1.f;
 	bool skippable = true;
 	bool waitForClick = false;
@@ -38,6 +39,8 @@ struct TextProperties {
 	sf::Uint32 fontSize = 12;
 	sf::Uint32 fontStyle = sf::Text::Regular;
 	sf::Color color = sf::Color::Black;
+	sf::Color outlineColor = sf::Color::Black;
+	float outlineThickness = 0.f;
 };
 
 } // namespace NovelTea

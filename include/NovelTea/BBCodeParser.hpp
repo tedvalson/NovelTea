@@ -14,7 +14,8 @@ namespace TextAnimation {
 	const std::string Effect    = "effect";
 	const std::string Time      = "time";
 	const std::string Delay     = "delay";
-	const std::string Skippable = "skippable";
+	const std::string Speed     = "speed";
+	const std::string CanSkip   = "cs";
 	const std::string Wait      = "wait";
 }
 
@@ -44,14 +45,19 @@ struct TextStyle {
 							params[TextAnimation::Time] = param.second;
 						else if (c == TextAnimation::Delay[0])
 							params[TextAnimation::Delay] = param.second;
-						else if (c == TextAnimation::Skippable[0])
-							params[TextAnimation::Skippable] = param.second;
+						else if (c == TextAnimation::Speed[0])
+							params[TextAnimation::Speed] = param.second;
+						else if (c == TextAnimation::CanSkip[0])
+							params[TextAnimation::CanSkip] = param.second;
 						else if (c == TextAnimation::Wait[0])
 							params[TextAnimation::Wait] = param.second;
 					}
 				}
 				else if (c == 'b' || c == 'B') {
 					type = TextStyleType::Bold;
+				}
+				else if (c == 'd' || c == 'D') {
+					type = TextStyleType::Diff;
 				}
 				else if (c == 'i' || c == 'I') {
 					type = TextStyleType::Italic;

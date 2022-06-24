@@ -3,8 +3,10 @@
 
 #include <string>
 
-#define DIFF_OPEN_TAG "^<"
-#define DIFF_CLOSE_TAG ">^"
+#define DIFF_OPEN_TAG "[d]"
+#define DIFF_CLOSE_TAG "[/d]"
+#define DIFF_OPEN_TAG_LEN 3
+#define DIFF_CLOSE_TAG_LEN 4
 
 namespace NovelTea
 {

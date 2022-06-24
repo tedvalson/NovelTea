@@ -76,49 +76,21 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 	m_internalSegments.push_back(segment);
 	if (segment->type() == CutsceneSegment::Page)
 	{
+		auto firstProcessed = false;
 		auto pageSegment = static_cast<CutscenePageSegment*>(segment.get());
-		auto textPages = split(pageSegment->getText(), pageSegment->getBreakDelimiter());
-		for (int i = 0; i < textPages.size(); ++i)
+		for (auto &seg : pageSegment->getSegments())
 		{
-			// Process first text segment without page break.
-			if (i > 0)
-			{
-				auto pageBreakSegment = new CutscenePageBreakSegment;
-				pageBreakSegment->setTransition(pageSegment->getBreakEffect());
-				pageBreakSegment->setDuration(pageSegment->getBreakDuration());
-				pageBreakSegment->setDelay(pageSegment->getBreakDelay());
-				pageBreakSegment->setWaitForClick(pageSegment->getWaitForClick());
-				pageBreakSegment->setCanSkip(pageSegment->getCanSkip());
-				m_segments.emplace_back(pageBreakSegment);
-			}
+			if (!firstProcessed && seg->type() == CutsceneSegment::Text) {
+				firstProcessed = true;
 
-			auto texts = split(textPages[i], pageSegment->getTextDelimiter());
-			for (int j = 0; j < texts.size(); ++j)
-			{
-
-				auto textSegment = new CutsceneTextSegment;
-				textSegment->setText(texts[j]);
-				textSegment->setBeginWithNewLine(pageSegment->getBeginWithNewLine());
-				textSegment->setTransition(pageSegment->getTextEffect());
-				textSegment->setDuration(pageSegment->getTextDuration());
-				textSegment->setDelay(pageSegment->getTextDelay());
-				textSegment->setWaitForClick(pageSegment->getWaitForClick());
-				textSegment->setCanSkip(pageSegment->getCanSkip());
-				textSegment->setOffsetX(pageSegment->getOffsetX());
-				textSegment->setOffsetY(pageSegment->getOffsetY());
-				if (j == 0) {
-					// Don't wait for click on first seg of new page
-					if (i > 0)
-						textSegment->setWaitForClick(false);
-					// Don't wait for first seg if previous seg was a page break or script
-					else if (m_internalSegments.size() > 1) {
-						auto prevSegmentType = m_internalSegments[m_internalSegments.size()-2]->type();
-						if (prevSegmentType == CutsceneSegment::PageBreak || prevSegmentType == CutsceneSegment::Script)
-							textSegment->setWaitForClick(false);
-					}
+				// Don't wait for first seg if previous seg was a page break or script
+				if (m_internalSegments.size() > 1) {
+					auto prevSegmentType = m_internalSegments[m_internalSegments.size()-2]->type();
+					if (prevSegmentType == CutsceneSegment::PageBreak || prevSegmentType == CutsceneSegment::Script)
+						seg->setWaitForClick(false);
 				}
-				m_segments.emplace_back(textSegment);
 			}
+			m_segments.push_back(seg);
 		}
 	}
 	else

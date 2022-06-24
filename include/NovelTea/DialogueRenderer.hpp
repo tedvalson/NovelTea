@@ -6,7 +6,7 @@
 #include <NovelTea/GUI/Icon/IconContinue.hpp>
 #include <TweenEngine/Tween.h>
 #include <NovelTea/ActiveText.hpp>
-#include <NovelTea/ActiveTextSegment.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Time.hpp>
@@ -77,12 +77,12 @@ private:
 	int m_textLineIndex;
 	std::vector<std::pair<std::string,std::string>> m_textLines;
 
-	std::vector<std::shared_ptr<ActiveTextSegment>> m_buttonTexts;
-	std::vector<std::shared_ptr<ActiveTextSegment>> m_buttonTextsOld;
+	std::vector<std::shared_ptr<ActiveText>> m_buttonTexts;
+	std::vector<std::shared_ptr<ActiveText>> m_buttonTextsOld;
 	std::vector<std::shared_ptr<Button>> m_buttons;
 	std::vector<std::shared_ptr<Button>> m_buttonsOld;
-	ActiveTextSegment m_textName;
-	ActiveTextSegment m_textNameOld;
+	ActiveText m_textName;
+	ActiveText m_textNameOld;
 	ActiveText m_text;
 	ActiveText m_textOld;
 	sf::Vector2f m_size;
@@ -91,6 +91,9 @@ private:
 	TweenNinePatch m_bg;
 	float m_fontSize;
 	float m_fontSizeMultiplier;
+
+	AnimationProperties m_animProps;
+	AnimationProperties m_animNameProps;
 
 	float m_padding;
 	float m_scrollPos;
