@@ -74,8 +74,16 @@ namespace TweenEngine
 
     TweenManager::TweenManager() : objects()
     {
-        objects.reserve(20);
-    }
+		objects.reserve(20);
+	}
+
+	TweenManager &TweenManager::operator=(TweenManager &manager)
+	{
+		isPaused = manager.isPaused;
+		objects = manager.objects;
+		manager.objects.clear();
+		return *this;
+	}
 
     /**
 	 * Adds a tween or timeline to the manager and starts or restarts it.
@@ -132,9 +140,9 @@ namespace TweenEngine
    
 	void TweenManager::update(float delta)
     {
-        // Remove tweens that are finished
+		// Remove tweens that are finished
         objects.erase(std::remove_if(objects.begin(),objects.end(),isTweenFinished), objects.end());
-        
+
 		if (!isPaused)
         {
 			if (delta >= 0)

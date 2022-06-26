@@ -38,6 +38,8 @@ namespace TweenEngine
 
     public:
         TweenManager();
+
+		TweenManager& operator=(TweenManager& manager);
         
         static void setAutoRemove(BaseTween &object, bool value);
         static void setAutoStart(BaseTween &object, bool value);
