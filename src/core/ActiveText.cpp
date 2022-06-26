@@ -102,8 +102,9 @@ void ActiveText::reset(bool preservePosition)
 
 void ActiveText::skipToNext(bool skipWaitForClick)
 {
-	if (m_currentSegment && m_currentSegment->getAnimProps().skippable)
-		update(m_timeToNext.asSeconds());
+	if (m_currentSegment && !m_currentSegment->getAnimProps().skippable)
+		return;
+	update(m_timeToNext.asSeconds());
 }
 
 void ActiveText::setText(const std::string &text)
@@ -141,7 +142,6 @@ void ActiveText::updateProps(const TextProperties &textProps, const AnimationPro
 
 void ActiveText::show(float duration, int tweenType, HideableCallback callback)
 {
-
 	Hideable::show(duration, tweenType, callback);
 }
 
@@ -418,12 +418,9 @@ void ActiveText::addSegmentToQueue(size_t segmentIndex)
 			m_isComplete = true;
 			if (m_callback)
 				m_callback();
-			m_callback = nullptr;
-			m_timeToNext = sf::Time::Zero;
 		}
 		else {
-			auto& nextSegment = m_segments[nextIndex];
-			if (m_skipWaitingForClick || !nextSegment->getAnimProps().waitForClick)
+			if (m_skipWaitingForClick || !segment->getAnimProps().waitForClick)
 				addSegmentToQueue(nextIndex);
 			else if (!m_skipWaitingForClick) {
 				m_isWaitingForClick = true;

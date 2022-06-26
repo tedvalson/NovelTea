@@ -39,6 +39,7 @@ public:
 
 	void changeSegment(int newSegmentIndex, bool run = true, int buttonSubindex = -1);
 	void changeLine(int newLineIndex);
+	bool continueToNext();
 
 	sj::JSON saveState() const;
 	void restoreState(const sj::JSON &jstate);

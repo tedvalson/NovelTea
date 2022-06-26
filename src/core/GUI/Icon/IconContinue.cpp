@@ -7,6 +7,7 @@ namespace NovelTea
 {
 
 IconContinue::IconContinue()
+: m_isShowing(false)
 {
 	m_text.setFont(*Proj.getFont("sysIcon"));
 	m_text.setString(L"\uf0da");
@@ -27,6 +28,7 @@ void IconContinue::reset()
 	m_text.setOutlineColor(color);
 
 	m_text.setPosition(0.f, 0.f);
+
 }
 
 TweenText &IconContinue::getText()
@@ -36,6 +38,7 @@ TweenText &IconContinue::getText()
 
 void IconContinue::show(float duration)
 {
+	m_isShowing = true;
 	m_tweenManager.killAll();
 	reset();
 
@@ -57,6 +60,7 @@ void IconContinue::show(float duration)
 
 void IconContinue::hide(float duration)
 {
+	m_isShowing = false;
 	m_tweenManager.killAll();
 	TweenEngine::Tween::to(m_text, TweenText::FILL_COLOR_ALPHA, duration)
 		.target(0.f)
@@ -64,6 +68,11 @@ void IconContinue::hide(float duration)
 	TweenEngine::Tween::to(m_text, TweenText::OUTLINE_COLOR_ALPHA, duration)
 		.target(0.f)
 			.start(m_tweenManager);
+}
+
+bool IconContinue::isShowing() const
+{
+	return m_isShowing;
 }
 
 void IconContinue::draw(sf::RenderTarget &target, sf::RenderStates states) const

@@ -111,25 +111,25 @@ std::string DialogueSegment::getText(bool *ok, int buttonSubIndex) const
 std::pair<std::string,std::string> getLinePair(const std::string &line, const std::string &defaultName)
 {
 	auto result = std::make_pair(defaultName, line);
-	if (line[0] != '[')
-		return result;
+	if (line[0] == '[')
+	{
+		int bracketCount = 0;
+		int endPos = 0;
+		for (auto &c : line) {
+			if (c == '[')
+				++bracketCount;
+			else if (c == ']')
+				--bracketCount;
+			if (bracketCount == 0)
+				break;
+			++endPos;
+		}
+		if (bracketCount != 0)
+			return result;
 
-	int bracketCount = 0;
-	int endPos = 0;
-	for (auto &c : line) {
-		if (c == '[')
-			++bracketCount;
-		else if (c == ']')
-			--bracketCount;
-		if (bracketCount == 0)
-			break;
-		++endPos;
+		result.first = line.substr(1, endPos - 1);
+		result.second = line.substr(endPos + 1);
 	}
-	if (bracketCount != 0)
-		return result;
-
-	result.first = line.substr(1, endPos - 1);
-	result.second = line.substr(endPos + 1);
 	if (!result.second.empty() && result.second[0] == ' ')
 		result.second = result.second.substr(1);
 	return result;

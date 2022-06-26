@@ -19,6 +19,7 @@ public:
 
 	void show(float duration = 1.f);
 	void hide(float duration = 1.f);
+	bool isShowing() const;
 
 	void update(float delta);
 
@@ -28,6 +29,7 @@ protected:
 private:
 	TweenEngine::TweenManager m_tweenManager;
 	TweenText m_text;
+	bool m_isShowing;
 };
 
 } // namespace NovelTea

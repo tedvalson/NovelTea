@@ -1,6 +1,7 @@
 #include <NovelTea/DialogueRenderer.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/AssetManager.hpp>
@@ -33,9 +34,9 @@ DialogueRenderer::DialogueRenderer()
 	m_iconContinue.hide(0.f);
 
 	m_animProps.type = TextEffect::FadeAcross;
-	m_animProps.speed = 1.2f;
 	m_animProps.duration = -1;
 	m_animProps.delay = -1;
+	m_animProps.waitForClick = true;
 
 	m_animNameProps.type = TextEffect::None;
 	m_animNameProps.duration = 0;
@@ -64,6 +65,7 @@ void DialogueRenderer::reset()
 	m_isComplete = false;
 	m_text.setText("");
 	m_text.show(0.f);
+	m_text.onComplete(nullptr);
 	m_textName.setText("");
 	m_textName.show(0.f);
 	m_nextForcedSegmentIndex = m_dialogue->getRootIndex();
@@ -72,6 +74,9 @@ void DialogueRenderer::reset()
 
 void DialogueRenderer::update(float delta)
 {
+	if (m_text.isWaitingForClick() && !m_iconContinue.isShowing())
+		m_iconContinue.show();
+
 	m_text.update(delta);
 	m_textOld.update(delta);
 	m_textName.update(delta);
@@ -96,7 +101,8 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 	if (event.type == sf::Event::MouseButtonReleased)
 	{
 		if (!m_text.isComplete()) {
-			m_text.skipToNext();
+			m_iconContinue.hide(0.4f);
+			m_text.click();
 			return true;
 		}
 
@@ -106,15 +112,9 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 				.targetRelative(-0.75f * sizeY)
 				.start(m_tweenManager);
 			return true;
-		} else if (m_textLineIndex < m_textLines.size() - 1) {
-			changeLine(m_textLineIndex + 1);
-			return true;
 		}
-
-		if (m_buttons.empty()) {
-			changeSegment(m_nextForcedSegmentIndex);
+		if (continueToNext())
 			return true;
-		}
 	}
 	// Need to break loop since button click could change m_buttons
 	for (auto &button : m_buttons)
@@ -331,35 +331,14 @@ void DialogueRenderer::changeLine(int newLineIndex)
 		ActiveGame->getTextLog()->push(line.second, TextLogType::DialogueText);
 	}
 
-	float duration = 0.3f;
-	m_text.hide(0.f);
-	m_textOld.hide(duration);
-	/*
-	m_fadeTween = &TweenEngine::Tween::to(m_text, ActiveText::FADEACROSS, m_text.getFadeAcrossLength() / 220.f / fadeAcrossSpeed)
-		.ease(TweenEngine::TweenEquations::easeInOutLinear)
-		.target(1.f);
-	m_fadeTween->setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*)
-	{
-		if (m_textLineIndex + 1 == m_textLines.size()) {
-			repositionButtons(m_fontSize);
-			if (m_buttons.empty())
-				m_iconContinue.show();
-			for (auto &button : m_buttons) {
-				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
-					.target(255.f)
-					.start(m_tweenManager);
-			}
-			for (auto &text : m_buttonTexts) {
-				TweenEngine::Tween::to(*text, ActiveText::ALPHA, 1.f)
-					.target(255.f)
-					.start(m_tweenManager);
-			}
-		} else {
-			m_iconContinue.show();
-		}
-	}).start(m_tweenManager);
-*/
-	m_text.onComplete([this, newLineIndex](){
+	// Check last segment to see if it expects to wait for click
+	const auto& segs = m_text.getSegments();
+	auto noWait = !segs.empty() && !segs[segs.size()-1]->getAnimProps().waitForClick;
+
+	m_text.onComplete([this, newLineIndex, noWait](){
+		if (noWait && continueToNext())
+			return;
+
 		if (m_textLineIndex + 1 == m_textLines.size()) {
 			repositionButtons(m_fontSize);
 			if (m_buttons.empty())
@@ -380,14 +359,30 @@ void DialogueRenderer::changeLine(int newLineIndex)
 
 	m_iconContinue.hide(0.4f);
 
-	m_text.show(0.f, ActiveText::ALPHA, [this, newLineIndex](){
-	});
-
+	float duration = 0.3f;
+	m_textOld.hide(duration);
+	m_text.show(0.f);
 	m_textName.show(0.f);
 	m_textNameOld = m_textName;
 	m_textName.setText(line.first, textProps, m_animNameProps);
+	m_textName.hide(0.f);
 	m_textName.show(duration);
 	m_textNameOld.hide(duration);
+}
+
+bool DialogueRenderer::continueToNext()
+{
+	if (m_textLineIndex + 1 == m_textLines.size()) {
+		// Cannot continue if waiting for option to be selected
+		if (m_buttons.empty()) {
+			changeSegment(m_nextForcedSegmentIndex);
+			return true;
+		}
+	} else {
+		changeLine(m_textLineIndex + 1);
+		return true;
+	}
+	return false;
 }
 
 sj::JSON DialogueRenderer::saveState() const
