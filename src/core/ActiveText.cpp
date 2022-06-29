@@ -43,19 +43,6 @@ ActiveText::ActiveText(const std::string &text, const TextProperties &textProps,
 	setText(text, textProps, animProps);
 }
 
-json ActiveText::toJson() const
-{
-	return sj::Array(
-		0,
-		m_text
-	);
-}
-
-bool ActiveText::fromJson(const json &j)
-{
-	setText(j[1].ToString());
-	return true;
-}
 
 void ActiveText::reset(bool preservePosition)
 {

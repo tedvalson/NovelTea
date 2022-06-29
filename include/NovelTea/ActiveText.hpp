@@ -16,7 +16,7 @@ class TextProperties;
 
 using ActiveTextCallback = std::function<void()>;
 
-class ActiveText : public JsonSerializable, public sf::Drawable, public Hideable
+class ActiveText : public sf::Drawable, public Hideable
 {
 public:
 	static const int HIGHLIGHTS = 12;
@@ -26,8 +26,6 @@ public:
 	ActiveText(const std::string &text, const AnimationProperties &animDefault);
 	ActiveText(const std::string &text, const TextProperties &textProps);
 	ActiveText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
-	json toJson() const override;
-	bool fromJson(const json &j) override;
 
 	void reset(bool preservePosition = false);
 	void skipToNext(bool skipWaitForClick = false);
