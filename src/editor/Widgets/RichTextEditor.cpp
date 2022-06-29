@@ -34,17 +34,16 @@ void RichTextEditor::invoke()
 	emit invoked();
 }
 
-void RichTextEditor::setValue(const QString &bbstring)
+void RichTextEditor::setValue(const std::string &bbstring)
 {
-	auto doc = EditorUtils::documentFromBBCode(bbstring);
-	ui->textEdit->setDocument(doc);
+	ui->textEdit->setText(QString::fromStdString(bbstring));
 	ui->textEdit->setTabStopWidth(30);
 	m_isChanged = false;
 }
 
-QString RichTextEditor::getValue() const
+std::string RichTextEditor::getValue() const
 {
-	return EditorUtils::documentToBBCode(ui->textEdit->document());
+	return ui->textEdit->toPlainText().toStdString();
 }
 
 void RichTextEditor::setFormattingEnabled(bool value)
@@ -179,7 +178,7 @@ void RichTextEditor::timerEvent(QTimerEvent *event)
 {
 	if (m_isChanged) {
 		m_isChanged = false;
-		emit changed(EditorUtils::documentToBBCode(ui->textEdit->document()));
+		emit changed(ui->textEdit->toPlainText().toStdString());
 	}
 }
 
@@ -192,7 +191,7 @@ void RichTextEditor::on_actionFinish_triggered()
 //	json j = f;
 //	std::cout << j.dump() << std::endl;
 
-	emit saved(EditorUtils::documentToBBCode(ui->textEdit->document()));
+	emit saved(ui->textEdit->toPlainText().toStdString());
 
 //	NovelTea::ProjectData::instance().saveToFile("/home/android/test.ntp");
 //	NovelTea::ProjectData::instance().loadFromFile("/home/android/test.ntp");

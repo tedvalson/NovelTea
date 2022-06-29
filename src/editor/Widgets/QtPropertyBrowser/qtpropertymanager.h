@@ -772,14 +772,14 @@ public:
 	QtRichTextPropertyManager(QObject *parent = 0);
 	~QtRichTextPropertyManager();
 
-	QString value(const QtProperty *property) const;
+	std::string value(const QtProperty *property) const;
 	RichTextEditor *editor() const;
 	void editor(RichTextEditor *obj);
 
 public Q_SLOTS:
-	void setValue(QtProperty *property, const QString &val);
+	void setValue(QtProperty *property, const std::string &val);
 Q_SIGNALS:
-	void valueChanged(QtProperty *property, const QString &val);
+	void valueChanged(QtProperty *property, const std::string &val);
 protected:
 	QString valueText(const QtProperty *property) const;
 	QIcon valueIcon(const QtProperty *property) const;

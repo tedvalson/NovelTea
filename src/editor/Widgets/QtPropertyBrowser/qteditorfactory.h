@@ -417,9 +417,9 @@ private:
 	QtRichTextEditorFactoryPrivate *d_ptr;
 	Q_DECLARE_PRIVATE(QtRichTextEditorFactory)
 	Q_DISABLE_COPY(QtRichTextEditorFactory)
-	Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
+	Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const std::string &))
 	Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
-	Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
+	Q_PRIVATE_SLOT(d_func(), void slotSetValue(const std::string &))
 };
 
 class QtFontEditorFactoryPrivate;

@@ -176,7 +176,7 @@ void CutsceneWidget::fillPropertyEditor()
 		ui->richTextEditor->setFormattingEnabled(true);
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), propText);
 		prop->setAttribute("richTextEditor", QVariant::fromValue(ui->richTextEditor));
-		prop->setValue(QString::fromStdString(textSegment->getText()));
+		prop->setValue(QVariant::fromValue(textSegment->getText()));
 		ui->propertyBrowser->addProperty(prop);
 
 		PROP_TEXT_EFFECT(QVariant::fromValue(textSegment->getTransition()))
@@ -323,7 +323,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	if (type == NovelTea::CutsceneSegment::Text)
 	{
 		auto seg = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
-		auto text = QString::fromStdString(seg->getActiveText()->toPlainText(" | "));
+		auto text = QString::fromStdString(seg->getActiveText()->toPlainText(false, " | "));
 		text.replace("\t", " ");
 		item = new QListWidgetItem(QIcon::fromTheme("format"), text);
 	}
@@ -427,9 +427,9 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 
 		if (propertyName == propText)
 		{
-			auto val = value.toString();
-			ui->listWidget->currentItem()->setText(val);
-			textSegment->setText(val.toStdString());
+			auto val = value.value<std::string>();
+			ui->listWidget->currentItem()->setText(QString::fromStdString(val));
+			textSegment->setText(val);
 		}
 		else if (propertyName == propBeginNewLine)
 			textSegment->setBeginWithNewLine(value.toBool());

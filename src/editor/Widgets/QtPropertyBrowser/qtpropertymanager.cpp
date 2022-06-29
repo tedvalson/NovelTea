@@ -6647,7 +6647,7 @@ public:
 
 	void slotPropertyDestroyed(QtProperty *property);
 
-	typedef QMap<const QtProperty *, QString> PropertyValueMap;
+	typedef QMap<const QtProperty *, std::string> PropertyValueMap;
 	PropertyValueMap m_values;
 };
 
@@ -6716,9 +6716,9 @@ QtRichTextPropertyManager::~QtRichTextPropertyManager()
 
 	\sa setValue()
 */
-QString QtRichTextPropertyManager::value(const QtProperty *property) const
+std::string QtRichTextPropertyManager::value(const QtProperty *property) const
 {
-	return d_ptr->m_values.value(property, nullptr);
+	return d_ptr->m_values.value(property, "");
 }
 
 RichTextEditor *QtRichTextPropertyManager::editor() const
@@ -6740,9 +6740,7 @@ QString QtRichTextPropertyManager::valueText(const QtProperty *property) const
 	const QtRichTextPropertyManagerPrivate::PropertyValueMap::const_iterator it = d_ptr->m_values.constFind(property);
 	if (it == d_ptr->m_values.constEnd())
 		return QString();
-
-
-	return it.value();
+	return QString::fromStdString(it.value()).replace("\n", " | ").replace("\t", " ");
 }
 
 /*!
@@ -6766,17 +6764,14 @@ QIcon QtRichTextPropertyManager::valueIcon(const QtProperty *property) const
 
 	\sa value(), valueChanged()
 */
-void QtRichTextPropertyManager::setValue(QtProperty *property, const QString &val)
+void QtRichTextPropertyManager::setValue(QtProperty *property, const std::string &val)
 {
 	const QtRichTextPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
 	if (it == d_ptr->m_values.end())
 		return;
-
-//	if (it.value() == val)
-//		return;
-
+	if (it.value() == val)
+		return;
 	it.value() = val;
-
 	emit propertyChanged(property);
 	emit valueChanged(property, val);
 }

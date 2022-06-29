@@ -20,8 +20,8 @@ public:
 	void mergeFormat(const QTextCharFormat &format);
 	void invoke();
 
-	void setValue(const QString &bbstring);
-	QString getValue() const;
+	void setValue(const std::string &bbstring);
+	std::string getValue() const;
 
 	void setFormattingEnabled(bool value);
 	bool getFormattingEnabled() const;
@@ -43,8 +43,8 @@ private slots:
 
 signals:
 	void invoked();
-	void saved(const QString &bbstring);
-	void changed(const QString &bbstring);
+	void saved(const std::string &bbstring);
+	void changed(const std::string &bbstring);
 	void canceled();
 	
 private:

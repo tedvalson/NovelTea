@@ -2620,10 +2620,10 @@ public:
 	void setRichTextEditor(RichTextEditor *widget);
 
 public Q_SLOTS:
-	void setValue(const QString &value);
+	void setValue(const std::string &value);
 
 Q_SIGNALS:
-	void valueChanged(const QString &value);
+	void valueChanged(const std::string &value);
 
 protected:
 	void paintEvent(QPaintEvent *);
@@ -2632,7 +2632,7 @@ private Q_SLOTS:
 	void buttonClicked();
 
 private:
-	QString m_bbString;
+	std::string m_bbString;
 	QLabel *m_label;
 	QToolButton *m_button;
 	RichTextEditor *m_widget;
@@ -2661,10 +2661,10 @@ QtRichTextEditWidget::QtRichTextEditWidget(QWidget *parent) :
 	m_label->setText("initial text");
 }
 
-void QtRichTextEditWidget::setValue(const QString &bbString)
+void QtRichTextEditWidget::setValue(const std::string &bbString)
 {
 	m_bbString = bbString;
-	m_label->setText(bbString);
+	m_label->setText(QString::fromStdString(bbString).replace("\n", " | ").replace("\t", " "));
 }
 
 void QtRichTextEditWidget::buttonClicked()
@@ -2724,12 +2724,12 @@ class QtRichTextEditorFactoryPrivate : public EditorFactoryPrivate<QtRichTextEdi
 	Q_DECLARE_PUBLIC(QtRichTextEditorFactory)
 public:
 
-	void slotPropertyChanged(QtProperty *property, const QString &value);
-	void slotSetValue(const QString &value);
+	void slotPropertyChanged(QtProperty *property, const std::string &value);
+	void slotSetValue(const std::string &value);
 };
 
 void QtRichTextEditorFactoryPrivate::slotPropertyChanged(QtProperty *property,
-				const QString &value)
+				const std::string &value)
 {
 	const PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
 	if (it == m_createdEditors.end())
@@ -2740,7 +2740,7 @@ void QtRichTextEditorFactoryPrivate::slotPropertyChanged(QtProperty *property,
 		itEditor.next()->setValue(value);
 }
 
-void QtRichTextEditorFactoryPrivate::slotSetValue(const QString &value)
+void QtRichTextEditorFactoryPrivate::slotSetValue(const std::string &value)
 {
 	QObject *object = q_ptr->sender();
 	const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
@@ -2790,8 +2790,8 @@ QtRichTextEditorFactory::~QtRichTextEditorFactory()
 */
 void QtRichTextEditorFactory::connectPropertyManager(QtRichTextPropertyManager *manager)
 {
-	connect(manager, SIGNAL(valueChanged(QtProperty*,QString)),
-			this, SLOT(slotPropertyChanged(QtProperty*,QString)));
+	connect(manager, SIGNAL(valueChanged(QtProperty*,std::string)),
+			this, SLOT(slotPropertyChanged(QtProperty*,std::string)));
 }
 
 /*!
@@ -2805,7 +2805,7 @@ QWidget *QtRichTextEditorFactory::createEditor(QtRichTextPropertyManager *manage
 	QtRichTextEditWidget *editor = d_ptr->createEditor(property, parent);
 	editor->setRichTextEditor(manager->editor());
 	editor->setValue(manager->value(property));
-	connect(editor, SIGNAL(valueChanged(QString)), this, SLOT(slotSetValue(QString)));
+	connect(editor, SIGNAL(valueChanged(std::string)), this, SLOT(slotSetValue(std::string)));
 	connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotEditorDestroyed(QObject *)));
 	return editor;
 }
@@ -2817,7 +2817,7 @@ QWidget *QtRichTextEditorFactory::createEditor(QtRichTextPropertyManager *manage
 */
 void QtRichTextEditorFactory::disconnectPropertyManager(QtRichTextPropertyManager *manager)
 {
-	disconnect(manager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(slotPropertyChanged(QtProperty*,QString)));
+	disconnect(manager, SIGNAL(valueChanged(QtProperty*,std::string)), this, SLOT(slotPropertyChanged(QtProperty*,std::string)));
 }
 
 // QtFontEditWidget
