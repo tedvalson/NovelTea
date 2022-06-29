@@ -156,7 +156,7 @@ private:
 				tag = str.str();
 				return it;
 			}
-			else if (IsAlNum(c) || c == '=' || IsSpace(c))
+			else if (IsAlNum(c) || IsSpace(c) || c == '=' || c == '.')
 				str << c;
 			else
 				return start;
