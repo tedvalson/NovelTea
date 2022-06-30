@@ -68,6 +68,7 @@ protected:
 	void startTransitionEffect(const CutsceneTextSegment *segment);
 	void startTransitionEffect(const CutscenePageBreakSegment *segment);
 	void addSegmentToQueue(size_t segmentIndex);
+	void waitForClick();
 
 private:
 	std::shared_ptr<Cutscene> m_cutscene;

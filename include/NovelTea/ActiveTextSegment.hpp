@@ -49,6 +49,7 @@ public:
 	std::string getText() const;
 
 	void startAnim();
+	void reset();
 
 	void setSize(const sf::Vector2f &size);
 	sf::Vector2f getSize() const;

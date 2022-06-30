@@ -63,6 +63,7 @@ void ActiveText::reset(bool preservePosition)
 	// Compute cursorEnd
 	sf::Vector2f cursorPos = m_cursorStart;
 	for (auto& segment: m_segments) {
+		segment->reset();
 		segment->setFontSizeMultiplier(m_fontSizeMultiplier);
 		segment->setSize(m_size);
 		segment->setCursorStart(cursorPos);
@@ -226,8 +227,6 @@ float ActiveText::getAlpha() const
 
 bool ActiveText::update(float delta)
 {
-	if (isComplete())
-		return Hideable::update(delta);
 
 	auto timeDelta = sf::seconds(delta);
 	while (timeDelta >= m_timeToNext && m_timeToNext > sf::Time::Zero)
@@ -256,9 +255,7 @@ bool ActiveText::update(float delta)
 
 std::string ActiveText::toPlainText(bool stripBBCodes, const std::string &newlineChar) const
 {
-	std::string result;
-	for (auto& segment : m_segments)
-		result += segment->toPlainText(stripBBCodes, newlineChar);
+	std::string result = replace(m_text, "\n", newlineChar);
 	return result;
 }
 

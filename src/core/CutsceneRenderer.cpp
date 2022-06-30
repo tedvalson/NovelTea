@@ -115,6 +115,8 @@ void CutsceneRenderer::update(float delta)
 		timeDelta -= m_timeToNext;
 		m_timePassed += m_timeToNext;
 		m_tweenManager.update(m_timeToNext.asSeconds());
+		for (auto& text : m_texts)
+			text->update(m_timeToNext.asSeconds());
 	}
 
 	if (!m_isWaitingForClick || m_skipWaitingForClick) {
@@ -123,7 +125,7 @@ void CutsceneRenderer::update(float delta)
 	}
 	m_tweenManager.update(timeDelta.asSeconds());
 	for (auto& text : m_texts)
-		text->update(delta);
+		text->update(timeDelta.asSeconds());
 }
 
 bool CutsceneRenderer::isComplete() const
@@ -385,6 +387,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			auto scrollAreaMargin = m_margin * 2;
 
 			auto activeText = seg->getActiveText();
+			activeText->reset();
 			activeText->setSize(sf::Vector2f((m_size.x < m_size.y ? 1.f : 0.6f) * m_size.x - m_margin*2, m_size.y));
 			activeText->setFontSizeMultiplier(m_fontSizeMultiplier);
 			activeText->setSkipWaitingForClick(m_skipWaitingForClick);
@@ -393,8 +396,6 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y = std::max(0.f, m_scrollAreaSize.y - scrollAreaMargin);
 			}
-			m_cursorPos.x += seg->getOffsetX() * m_fontSizeMultiplier;
-			m_cursorPos.y += seg->getOffsetY() * m_fontSizeMultiplier;
 
 			auto startPos = m_cursorPos.y;
 			activeText->setCursorStart(m_cursorPos);
@@ -459,14 +460,10 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 		if (segmentIndex + 1 >= m_cutscene->segments().size())
 			m_isComplete = true;
 		else {
-			auto nextSegment = m_cutscene->segments()[segmentIndex+1];
-			if (m_skipWaitingForClick || !nextSegment->getWaitForClick())
+			if (m_skipWaitingForClick || !segment->getWaitForClick())
 				addSegmentToQueue(segmentIndex + 1);
 			else if (!m_skipWaitingForClick) {
-				m_isWaitingForClick = true;
-				auto posY = std::min(m_scrollAreaSize.y, m_size.y - m_margin * 2);
-				m_icon.setPosition(m_size.x / 2, posY);
-				m_icon.show(2.f);
+				waitForClick();
 			}
 		}
 	};
@@ -479,6 +476,14 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
 			.start(m_tweenManager);
 	repositionItems();
+}
+
+void CutsceneRenderer::waitForClick()
+{
+	m_isWaitingForClick = true;
+	auto posY = std::min(m_scrollAreaSize.y, m_size.y - m_margin * 2);
+	m_icon.setPosition(m_size.x / 2, posY);
+	m_icon.show(2.f);
 }
 
 } // namespace NovelTea

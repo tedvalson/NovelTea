@@ -31,6 +31,7 @@ ActiveTextSegment::ActiveTextSegment()
 	m_shapeFade.setSize(sf::Vector2f(300.f, 40.f));
 	m_shapeFade.setOrigin(0.f, 40.f);
 	m_shapeFade.setRotation(90.f);
+	reset();
 }
 
 ActiveTextSegment::ActiveTextSegment(const std::vector<std::shared_ptr<StyledSegment>> &segments)
@@ -84,7 +85,7 @@ void ActiveTextSegment::setStyledSegments(const std::vector<std::shared_ptr<Styl
 {
 
 	m_styledSegments = segments;
-	m_string = "styledSegments";
+	m_string = BBCodeParser::makeString(segments);
 	m_needsUpdate = true;
 }
 
@@ -139,6 +140,17 @@ void ActiveTextSegment::startAnim()
 			.start(m_tweenManager);
 	}
 	m_tweenManager.update(0.f); // TODO: why is this needed?????
+}
+
+void ActiveTextSegment::reset()
+{
+	m_needsUpdate = true;
+	m_tweenManager.killAll();
+	m_alpha = 255.f;
+	m_animAlpha = 255.f;
+	m_highlightFactor = 1.f;
+	m_fadeAcrossPosition = 1.f;
+	m_fadeLineIndex = 0;
 }
 
 void ActiveTextSegment::setSize(const sf::Vector2f &size)
@@ -200,8 +212,8 @@ size_t ActiveTextSegment::getDelayMs() const
 	auto& anim = getAnimProps();
 	auto delay = anim.delay;
 	if (anim.type == TextEffect::FadeAcross && delay < 0)
-		delay = 1000.f * getFadeAcrossLength() / 220.f * 2;
-	return delay;
+		delay = 1000.f * getFadeAcrossLength() / 180.f;
+	return delay / anim.speed;
 }
 
 size_t ActiveTextSegment::getDurationMs() const
@@ -209,8 +221,8 @@ size_t ActiveTextSegment::getDurationMs() const
 	auto& anim = getAnimProps();
 	auto duration = anim.duration;
 	if (anim.type == TextEffect::FadeAcross && duration < 0)
-		duration = 1000.f * getFadeAcrossLength() / 220.f * 2;
-	return duration;
+		duration = 1000.f * getFadeAcrossLength() / 180.f;
+	return duration / anim.speed;
 }
 
 sf::FloatRect ActiveTextSegment::getLocalBounds() const
@@ -528,7 +540,7 @@ void ActiveTextSegment::ensureUpdate() const
 			else
 				m_cursorPos.x += spaceWidth;
 
-			sf::String string = word;
+			auto string = sf::String::fromUtf8(word.begin(), word.end());
 			text.setString(string);
 			text.setFillColor(color);
 			m_lineMaxCharSize = std::max(m_lineMaxCharSize, text.getCharacterSize());
