@@ -514,6 +514,9 @@ void ActiveTextSegment::ensureUpdate() const
 		}
 		color.a = m_alpha;
 
+		m_cursorPos.x += style.xOffset;
+		m_cursorPos.y += style.yOffset;
+
 		auto words = split(styledSegment->text, " ");
 		auto firstWord = true;
 		for (auto &word : words)

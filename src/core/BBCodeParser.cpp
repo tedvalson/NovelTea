@@ -49,14 +49,19 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 	bool newGroup = true;
 	bool newLine = false;
 
-	const auto pushSeg = [&]() {
+	const auto pushSeg = [&](bool forcePush = false) {
 		auto text = str.str();
-		if (text.empty())
+		if (text.empty() && !forcePush)
 			return;
 		result.emplace_back(new StyledSegment(text, styleStack, textDefault, animDefault, newGroup, newLine));
 		newGroup = false;
 		newLine = false;
 		str.str("");
+
+		// Remove styles that should only persist for one grouping
+		styleStack.erase(std::remove_if(styleStack.begin(), styleStack.end(), [](const TextStyle& style){
+			return style.type == TextStyleType::XOffset || style.type == TextStyleType::YOffset;
+		}), styleStack.end());
 	};
 
 	for (auto it = text.cbegin(); it != text.cend(); ++it) {
@@ -66,7 +71,7 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 			auto d = it;
 			if (*++d == 'p' && *++d == ']') {
 				it = d;
-				pushSeg();
+				pushSeg(true);
 				newGroup = true;
 				continue;
 			}
@@ -94,6 +99,8 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 					// All animation tags create new groups
 					if (style.type == TextStyleType::Animation)
 						newGroup = true;
+					if (style.type == TextStyleType::XOffset || style.type == TextStyleType::YOffset)
+						newGroup = true;
 
 					if (closing)
 						styleStack.erase(std::next(itStyle).base());
@@ -113,7 +120,14 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 			str << c;
 	}
 
-	// Push remaining content
+	// Force it to push if the previous segment does not wait for click.
+	// In the case that "waitForClick" changed, this will ensure it.
+	if (str.str().empty() && !result.empty()) {
+		auto& lastSegment = *result.rbegin();
+		if (newGroup && !lastSegment->anim.waitForClick)
+			pushSeg(true);
+	}
+	// Push remaining content.
 	pushSeg();
 
 	return result;
@@ -156,6 +170,10 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 			style.fontAlias = s.params["id"];
 		else if (s.type == TextStyleType::Size)
 			style.fontSize = std::atol(s.params["size"].c_str());
+		else if (s.type == TextStyleType::XOffset)
+			style.xOffset = std::atol(s.params["x"].c_str());
+		else if (s.type == TextStyleType::YOffset)
+			style.yOffset = std::atol(s.params["y"].c_str());
 		else if (s.type == TextStyleType::Animation) {
 			for (auto &param : s.params) {
 				auto& key = param.first;

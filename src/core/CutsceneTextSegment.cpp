@@ -55,13 +55,17 @@ void CutsceneTextSegment::setText(const std::string &text)
 {
 	m_text = text;
 
+	TextProperties textProps;
+	textProps.xOffset = getOffsetX();
+	textProps.yOffset = getOffsetY();
+
 	AnimationProperties anim;
 	anim.type      = TextEffect::Fade;
 	anim.duration  = getDuration();
 	anim.delay     = getDelay();
 	anim.skippable = getCanSkip();
 	anim.waitForClick = getWaitForClick();
-	m_activeText = std::make_shared<ActiveText>(m_text, anim);
+	m_activeText = std::make_shared<ActiveText>(m_text, textProps, anim);
 }
 
 const std::string &CutsceneTextSegment::getText() const

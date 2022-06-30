@@ -16,6 +16,8 @@ enum class TextStyleType : int {
 	Italic,
 	Object,
 	Size,
+	XOffset,
+	YOffset,
 };
 
 enum class TextEffect : int {
@@ -36,6 +38,8 @@ struct AnimationProperties {
 struct TextProperties {
 	std::string fontAlias;
 	std::string objectId;
+	int xOffset = 0;
+	int yOffset = 0;
 	sf::Uint32 fontSize = 12;
 	sf::Uint32 fontStyle = sf::Text::Regular;
 	sf::Color color = sf::Color::Black;

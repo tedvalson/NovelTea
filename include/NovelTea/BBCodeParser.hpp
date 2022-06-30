@@ -74,6 +74,14 @@ struct TextStyle {
 					type = TextStyleType::Size;
 					parseSingleArg(tag, "size");
 				}
+				else if (c == 'x' || c == 'X') {
+					type = TextStyleType::XOffset;
+					parseSingleArg(tag, "x");
+				}
+				else if (c == 'y' || c == 'Y') {
+					type = TextStyleType::YOffset;
+					parseSingleArg(tag, "y");
+				}
 				else
 					throw std::exception();
 				return;
