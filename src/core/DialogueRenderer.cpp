@@ -182,6 +182,7 @@ void DialogueRenderer::applyChanges()
 	m_padding = (portrait ? 0.01f : 0.004f) * m_size.x;
 	m_fontSize = m_fontSizeMultiplier * 22;
 	m_text.setSize(sf::Vector2f((portrait ? 0.95f : 0.58f) * m_size.x, m_size.y));
+	m_textName.setSize(m_text.getSize());
 
 	TextProperties textProps;
 	textProps.fontSize = m_fontSize / 2;
