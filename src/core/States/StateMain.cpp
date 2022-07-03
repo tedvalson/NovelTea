@@ -202,12 +202,16 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			GGame->pushNextEntity(GSave->get<Room>(roomId));
 			gotoNextEntity();
 		}
-		GGame->pushNextEntityJson(saveEntryPoint);
-		if (entryMetadata.size() > 1 && gotoNextEntity()) {
-			if (m_mode == Mode::Cutscene)
-				m_cutsceneRenderer.restoreState(entryMetadata[1]);
-			else if (m_mode == Mode::Dialogue)
-				m_dialogueRenderer.restoreState(entryMetadata[1]);
+		// Don't double-push room mode
+		if (m_mode != Mode::Room)
+		{
+			GGame->pushNextEntityJson(saveEntryPoint);
+			if (entryMetadata.size() > 1 && gotoNextEntity()) {
+				if (m_mode == Mode::Cutscene)
+					m_cutsceneRenderer.restoreState(entryMetadata[1]);
+				else if (m_mode == Mode::Dialogue)
+					m_dialogueRenderer.restoreState(entryMetadata[1]);
+			}
 		}
 	}
 	else if (!projEntryPoint.IsEmpty())
