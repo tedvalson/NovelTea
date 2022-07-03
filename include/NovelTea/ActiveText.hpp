@@ -107,6 +107,7 @@ private:
 	bool m_skipWaitingForClick;
 	TweenEngine::TweenManager m_tweenManager;
 	std::string m_text;
+	std::string m_highlightId;
 	sf::Vector2f m_size;
 	sf::Vector2f m_cursorPos;
 	sf::Vector2f m_cursorEnd;

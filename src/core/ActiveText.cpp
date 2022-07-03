@@ -43,7 +43,6 @@ ActiveText::ActiveText(const std::string &text, const TextProperties &textProps,
 	setText(text, textProps, animProps);
 }
 
-
 void ActiveText::reset(bool preservePosition)
 {
 	auto timePassed = m_timePassed;
@@ -273,6 +272,7 @@ std::string ActiveText::objectFromPoint(const sf::Vector2f &point) const
 
 void ActiveText::setHighlightId(const std::string &id)
 {
+	m_highlightId = id;
 	for (auto &seg : m_segments)
 		seg->setHighlightId(id);
 }
@@ -392,7 +392,7 @@ void ActiveText::addSegmentToQueue(size_t segmentIndex)
 	auto timeToNext = 0.001f * (delayMs > 1 ? delayMs : 1);
 
 	m_timeToNext = sf::seconds(timeToNext);
-			m_segmentsActive.push_back(segment);
+	m_segmentsActive.push_back(segment);
 	segment->startAnim();
 
 	endCallback = [this, segment, segmentIndex](TweenEngine::BaseTween*)
@@ -433,6 +433,11 @@ void ActiveText::buildSegments(const TextProperties &textProps, const AnimationP
 
 	if (!segGroup.empty())
 		m_segments.emplace_back(new ActiveTextSegment(segGroup));
+
+	setHighlightFactor(m_highlightFactor);
+	setHighlightId(m_highlightId);
+	setLineSpacing(m_lineSpacing);
+	setAlpha(m_alpha);
 }
 
 void ActiveText::updateSegments(float delta)
