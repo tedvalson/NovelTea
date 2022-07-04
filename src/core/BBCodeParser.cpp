@@ -3,13 +3,61 @@
 namespace NovelTea
 {
 
+// First letters need to be unique, for now
+namespace TextAnimation {
+	const std::string Effect    = "effect";
+	const std::string Function  = "func";
+	const std::string Time      = "time";
+	const std::string Delay     = "delay";
+	const std::string Speed     = "speed";
+	const std::string CanSkip   = "cs";
+	const std::string Value     = "value";
+	const std::string Wait      = "wait";
+}
+
+// Lowercase mapping of text effects (e.g. [anim e=FADE] will match "fade")
 std::map<std::string, TextEffect> textEffectMap = {
 	{"0",          TextEffect::None},
+	{"n",          TextEffect::None},
 	{"none",       TextEffect::None},
 	{"f",          TextEffect::Fade},
 	{"fade",       TextEffect::Fade},
 	{"fa",         TextEffect::FadeAcross},
 	{"fadeacross", TextEffect::FadeAcross},
+};
+
+std::map<std::string, TweenEngine::TweenEquation&> textEquationMap = {
+	{"quad-in",      TweenEngine::TweenEquations::easeInQuad},
+	{"quad-out",     TweenEngine::TweenEquations::easeOutQuad},
+	{"quad",         TweenEngine::TweenEquations::easeInOutQuad},
+	{"linear",       TweenEngine::TweenEquations::easeInOutLinear},
+	{"back-in",      TweenEngine::TweenEquations::easeInBack},
+	{"back-out",     TweenEngine::TweenEquations::easeOutBack},
+	{"back",         TweenEngine::TweenEquations::easeInOutBack},
+	{"bounce-in",    TweenEngine::TweenEquations::easeInBounce},
+	{"bounce-out",   TweenEngine::TweenEquations::easeOutBounce},
+	{"bounce",       TweenEngine::TweenEquations::easeInOutBounce},
+	{"circ-in",      TweenEngine::TweenEquations::easeInCirc},
+	{"circ-out",     TweenEngine::TweenEquations::easeOutCirc},
+	{"circ",         TweenEngine::TweenEquations::easeInOutCirc},
+	{"cubic-in",     TweenEngine::TweenEquations::easeInCubic},
+	{"cubic-out",    TweenEngine::TweenEquations::easeOutCubic},
+	{"cubic",        TweenEngine::TweenEquations::easeInOutCubic},
+	{"elastic-in",   TweenEngine::TweenEquations::easeInElastic},
+	{"elastic-out",  TweenEngine::TweenEquations::easeOutElastic},
+	{"elastic",      TweenEngine::TweenEquations::easeInOutElastic},
+	{"expo.in",      TweenEngine::TweenEquations::easeInExpo},
+	{"expo.out",     TweenEngine::TweenEquations::easeOutExpo},
+	{"expo",         TweenEngine::TweenEquations::easeInOutExpo},
+	{"quart.in",     TweenEngine::TweenEquations::easeInQuart},
+	{"quart.out",    TweenEngine::TweenEquations::easeOutQuart},
+	{"quart",        TweenEngine::TweenEquations::easeInOutQuart},
+	{"quint.in",     TweenEngine::TweenEquations::easeInQuint},
+	{"quint.out",    TweenEngine::TweenEquations::easeOutQuint},
+	{"quint",        TweenEngine::TweenEquations::easeInOutQuint},
+	{"sine.in",      TweenEngine::TweenEquations::easeInSine},
+	{"sine.out",     TweenEngine::TweenEquations::easeOutSine},
+	{"sine",         TweenEngine::TweenEquations::easeInOutSine},
 };
 
 std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags)
@@ -41,13 +89,51 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 	return result;
 }
 
-std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std::string &text, const TextProperties &textDefault, const AnimationProperties &animDefault)
+std::string replaceObjectShorthand(const std::string &text)
+{
+	std::string result;
+	size_t searchPos = 0,
+		   processedPos = 0,
+		   startPos;
+
+	while ((startPos = text.find("[[", searchPos)) != text.npos)
+	{
+		auto endPos = text.find("]]", startPos);
+		auto midPos = text.find("|", startPos);
+		if (endPos == text.npos)
+			break;
+
+		// if there is no mid char "|" in between braces, skip it
+		if (midPos == text.npos || endPos < midPos)
+		{
+			searchPos = endPos + 2;
+			continue;
+		}
+
+		auto idName = text.substr(midPos + 1, endPos - midPos - 1);
+		auto str = text.substr(startPos + 2, midPos - startPos - 2);
+		if (startPos != processedPos)
+			result += text.substr(processedPos, startPos - processedPos);
+		result += "[o=" + idName + "]" + str + "[/o]";
+		processedPos = searchPos = endPos + 2;
+		std::cout << "object:" << idName << " str:" << str << std::endl;
+	}
+
+	if (processedPos < text.size())
+		result += text.substr(processedPos);
+
+	return result;
+}
+
+std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std::string &bbstring, const TextProperties &textDefault, const AnimationProperties &animDefault)
 {
 	std::vector<std::shared_ptr<StyledSegment>> result;
 	std::vector<TextStyle> styleStack;
 	std::stringstream str;
 	bool newGroup = true;
 	bool newLine = false;
+
+	auto text = replaceObjectShorthand(bbstring);
 
 	const auto pushSeg = [&](bool forcePush = false) {
 		auto text = str.str();
@@ -183,19 +269,131 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 					if (it != textEffectMap.end())
 						anim.type = it->second;
 				}
+				else if (key == TextAnimation::Function) {
+					auto it = textEquationMap.find(val);
+					if (it != textEquationMap.end())
+						anim.equation = &it->second;
+				}
 				else if (key == TextAnimation::Delay)
-					anim.delay = std::atol(val.c_str());
+					anim.delay = std::max(std::atof(val.c_str()), 0.0) * 1000;
 				else if (key == TextAnimation::Time)
-					anim.duration = std::atol(val.c_str());
+					anim.duration = std::max(std::atof(val.c_str()), 0.0) * 1000;
 				else if (key == TextAnimation::Speed)
 					anim.speed = std::max(std::atof(val.c_str()), 0.01);
 				else if (key == TextAnimation::CanSkip)
 					anim.skippable = (val == "1");
+				else if (key == TextAnimation::Value)
+					anim.value = val;
 				else if (key == TextAnimation::Wait)
 					anim.waitForClick = (val == "1");
 			}
 		}
 	}
+}
+
+TextStyle::TextStyle()
+: type(TextStyleType::None)
+{
+}
+
+TextStyle::TextStyle(const std::string &tag)
+{
+	if (!tag.empty()) {
+		auto s = split(tag, " ");
+		tagName = s[0];
+		if (!tagName.empty()) {
+			auto c = tagName[0];
+			if (c == 'a' || c == 'A') {
+				type = TextStyleType::Animation;
+				parseKeyValPairs(tag);
+				// Recreate param map, normalizing the values
+				auto paramsCopy = params;
+				params.clear();
+				for (auto &param : paramsCopy) {
+					auto c = param.first[0];
+					if (c == TextAnimation::Effect[0])
+						params[TextAnimation::Effect] = param.second;
+					else if (c == TextAnimation::Function[0])
+						params[TextAnimation::Function] = param.second;
+					else if (c == TextAnimation::Time[0])
+						params[TextAnimation::Time] = param.second;
+					else if (c == TextAnimation::Delay[0])
+						params[TextAnimation::Delay] = param.second;
+					else if (c == TextAnimation::Speed[0])
+						params[TextAnimation::Speed] = param.second;
+					else if (c == TextAnimation::CanSkip[0])
+						params[TextAnimation::CanSkip] = param.second;
+					else if (c == TextAnimation::Value[0])
+						params[TextAnimation::Value] = param.second;
+					else if (c == TextAnimation::Wait[0])
+						params[TextAnimation::Wait] = param.second;
+				}
+			}
+			else if (c == 'b' || c == 'B') {
+				type = TextStyleType::Bold;
+			}
+			else if (c == 'd' || c == 'D') {
+				type = TextStyleType::Diff;
+			}
+			else if (c == 'i' || c == 'I') {
+				type = TextStyleType::Italic;
+			}
+			else if (c == 'f' || c == 'F') {
+				type = TextStyleType::Font;
+				parseSingleArg(tag, "id");
+			}
+			else if (c == 'o' || c == 'O') {
+				type = TextStyleType::Object;
+				parseSingleArg(tag, "id");
+			}
+			else if (c == 's' || c == 'S') {
+				type = TextStyleType::Size;
+				parseSingleArg(tag, "size");
+			}
+			else if (c == 'x' || c == 'X') {
+				type = TextStyleType::XOffset;
+				parseSingleArg(tag, "x");
+			}
+			else if (c == 'y' || c == 'Y') {
+				type = TextStyleType::YOffset;
+				parseSingleArg(tag, "y");
+			}
+			else
+				throw std::exception();
+			return;
+		}
+	}
+	throw std::exception();
+}
+
+void TextStyle::parseSingleArg(const std::string &tag, const std::string &paramKey)
+{
+	auto s = split(tag, "=");
+	tagName = s[0];
+	if (s.size() > 1)
+		params[paramKey] = s[1];
+}
+
+void TextStyle::parseKeyValPairs(const std::string &tag)
+{
+	auto s = split(tag, " ");
+	for (int i = 1; i < s.size(); ++i) {
+		auto kv = split(s[i], "=");
+		if (kv.size() != 2)
+			throw std::exception();
+		auto key = kv[0];
+		auto val = kv[1];
+		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+		std::transform(val.begin(), val.end(), val.begin(), ::tolower);
+		params[key] = val;
+	}
+}
+
+bool TextStyle::operator==(const TextStyle &style) const
+{
+	return ((type == style.type) &&
+		(tagName == style.tagName) &&
+		(params == style.params));
 }
 
 } // namespace NovelTea

@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TEXTTYPES_HPP
 #define NOVELTEA_TEXTTYPES_HPP
 
+#include <TweenEngine/TweenEquations.h>
 #include <SFML/Graphics/Text.hpp>
 
 namespace NovelTea
@@ -28,6 +29,8 @@ enum class TextEffect : int {
 
 struct AnimationProperties {
 	TextEffect type = TextEffect::None;
+	TweenEngine::TweenEquation* equation = &TweenEngine::TweenEquations::easeInOutQuad;
+	std::string value;
 	int duration = 0;
 	int delay    = 0;
 	float speed  = 1.f;
