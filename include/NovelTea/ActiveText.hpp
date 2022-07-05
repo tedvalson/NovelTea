@@ -11,8 +11,8 @@ namespace NovelTea
 {
 
 class ActiveTextSegment;
-class AnimationProperties;
-class TextProperties;
+struct AnimationProperties;
+struct TextProperties;
 
 using ActiveTextCallback = std::function<void()>;
 

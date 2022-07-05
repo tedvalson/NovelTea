@@ -12,10 +12,9 @@
 namespace NovelTea
 {
 
-class AnimationProperties;
-class TextProperties;
-class StyledSegment;
-class TextBlock;
+struct AnimationProperties;
+struct TextProperties;
+struct StyledSegment;
 
 class ActiveTextSegment : public JsonSerializable, public sf::Drawable, public Hideable
 {
