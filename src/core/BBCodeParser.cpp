@@ -219,6 +219,15 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 	return result;
 }
 
+std::string BBCodeParser::stripTags(const std::string &bbstring)
+{
+	std::string result;
+	auto segments = makeSegments(bbstring);
+	for (auto& segment : segments)
+		result += segment->text;
+	return result;
+}
+
 std::vector<std::pair<TextStyle, bool> > BBCodeParser::getStylesDiff(const std::vector<TextStyle> &prevStyles, const std::vector<TextStyle> &currStyles)
 {
 	std::vector<std::pair<TextStyle,bool>> result;

@@ -1,4 +1,5 @@
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/BBCodeParser.hpp>
 #include <SFML/System/Err.hpp>
 
 namespace NovelTea
@@ -11,7 +12,7 @@ TextLog::TextLog()
 
 void TextLog::push(const std::string &text, TextLogType type)
 {
-		m_entries.push_back({text, type});
+		m_entries.push_back({BBCodeParser::stripTags(text), type});
 }
 
 void TextLog::pushScript(const std::string &text)
