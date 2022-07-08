@@ -33,7 +33,7 @@ ProjectSettingsWidget::ProjectSettingsWidget(QWidget *parent)
 	load();
 
 	// Set default font preview
-	ui->preview->setFPS(0);
+	ui->preview->setFPS(20);
 	ui->preview->setMode(NovelTea::StateEditorMode::Text);
 	ui->lineEditFontPreview->setText("Preview Text");
 
@@ -253,7 +253,6 @@ void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &ar
 {
 	auto jdata = json({"event","text", "text",arg1.toStdString()});
 	ui->preview->processData(jdata);
-	ui->preview->repaint();
 }
 
 void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
@@ -264,9 +263,8 @@ void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
 	ui->buttonFontRename->setEnabled(!builtIn);
 	ui->buttonFontDelete->setEnabled(!builtIn);
 
-	auto jdata = json({"event","fontData", "fontData",m_fontsData[alias.toStdString()]});
+	auto jdata = json({"event","fontAlias", "fontAlias",alias.toStdString()});
 	ui->preview->processData(jdata);
-	ui->preview->repaint();
 }
 
 void ProjectSettingsWidget::on_buttonImportFont_clicked()

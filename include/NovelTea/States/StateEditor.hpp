@@ -7,6 +7,7 @@
 #include <NovelTea/CutsceneRenderer.hpp>
 #include <NovelTea/MapRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <NovelTea/json.hpp>
 
 using json = sj::JSON;
@@ -46,9 +47,8 @@ private:
 	CutsceneRenderer m_cutsceneRenderer;
 	MapRenderer m_mapRenderer;
 
-	std::string m_fontData;
-	sf::Font m_font;
-	sf::Text m_text;
+	ActiveText m_previewText;
+	TextProperties m_textProps;
 
 	ActiveText m_roomActiveText;
 	float m_scrollPos;

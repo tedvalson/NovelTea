@@ -361,7 +361,8 @@ AnimationProperties &ActiveTextSegment::getAnimProps() const
 bool ActiveTextSegment::update(float delta)
 {
 	m_tweenManager.update(delta);
-	return Hideable::update(delta);
+	Hideable::update(delta);
+	return m_tweenManager.getRunningTweensCount() > 0;
 }
 
 void ActiveTextSegment::setValues(int tweenType, float *newValues)

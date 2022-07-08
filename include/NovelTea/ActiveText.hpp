@@ -37,6 +37,7 @@ public:
 	const std::string& getText() const;
 
 	void updateProps(const TextProperties &textProps, const AnimationProperties &animProps);
+	void updateProps(const TextProperties &textProps);
 
 	void show(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
 	void hide(float duration = 0.5f, int tweenType = ALPHA, HideableCallback callback = nullptr) override;
@@ -70,6 +71,7 @@ public:
 
 	void setHighlightId(const std::string &id);
 
+	bool isAnimating() const;
 	bool isComplete() const;
 	bool isWaitingForClick() const;
 	void click();
@@ -102,6 +104,7 @@ private:
 	float m_highlightFactor;
 	float m_lineSpacing;
 	int m_segmentIndex;
+	bool m_isAnimating;
 	bool m_isComplete;
 	bool m_isWaitingForClick;
 	bool m_skipWaitingForClick;

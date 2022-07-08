@@ -35,9 +35,8 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_mapRenderer.setMiniMapMode(false, 0.f);
 	m_mapRenderer.setModeLocked(true);
 
-	m_text.setFont(m_font);
-	m_text.setFillColor(sf::Color::Black);
-//	m_text.setCharacterSize(context.config.fontSizeMultiplier * 22);
+	m_textProps.color = sf::Color::Black;
+	m_previewText.setSkipWaitingForClick(true);
 }
 
 void StateEditor::render(sf::RenderTarget &target)
@@ -52,7 +51,7 @@ void StateEditor::render(sf::RenderTarget &target)
 		target.draw(m_roomScrollbar);
 	}
 	else if (m_mode == StateEditorMode::Text)
-		target.draw(m_text);
+		target.draw(m_previewText);
 }
 
 void StateEditor::resize(const sf::Vector2f &size)
@@ -65,7 +64,10 @@ void StateEditor::resize(const sf::Vector2f &size)
 	m_roomActiveText.setSize(sf::Vector2f((size.x < size.y ? 1.f : 0.6f) * size.x - m_roomTextPadding*2, 0.f));
 	m_roomActiveText.setFontSizeMultiplier(fontSizeMultiplier);
 
-	m_text.setCharacterSize(size.y / 4);
+	m_textProps.fontSize = size.y / 4;
+	m_previewText.setSize(size);
+	m_previewText.setFontSizeMultiplier(fontSizeMultiplier);
+	m_previewText.updateProps(m_textProps);
 
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setFontSizeMultiplier(fontSizeMultiplier);
@@ -185,14 +187,13 @@ void *StateEditor::processData(void *data)
 	{
 		if (event == "text")
 		{
-			m_text.setString(jsonData["text"].ToString());
-			m_text.setPosition(0.f, 0.f);
-			wrapText(m_text, m_size.x);
+			m_previewText.setText(jsonData["text"].ToString(), m_textProps);
 		}
-		else if (event == "fontData")
+		else if (event == "fontAlias")
 		{
-			m_fontData = jsonData["fontData"].ToString();
-			m_font.loadFromMemory(m_fontData.data(), m_fontData.size());
+			m_textProps.fontAlias = jsonData["fontAlias"].ToString();
+			m_previewText.updateProps(m_textProps);
+			m_previewText.reset();
 		}
 	}
 
@@ -220,6 +221,9 @@ bool StateEditor::update(float delta)
 {
 	if (m_mode == StateEditorMode::Map)
 		m_mapRenderer.update(delta);
+	if (!m_previewText.isAnimating())
+		m_previewText.reset();
+	m_previewText.update(delta);
 	m_roomScrollbar.update(delta);
 	m_tweenManager.update(delta);
 	return true;

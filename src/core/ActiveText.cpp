@@ -14,6 +14,7 @@ ActiveText::ActiveText()
 , m_fontSizeMultiplier(1.f)
 , m_highlightFactor(1.f)
 , m_lineSpacing(5.f)
+, m_isAnimating(true)
 , m_isComplete(true)
 , m_isWaitingForClick(false)
 , m_skipWaitingForClick(false)
@@ -49,6 +50,7 @@ void ActiveText::reset(bool preservePosition)
 
 	m_currentSegment = nullptr;
 	m_isComplete = m_segments.empty();
+	m_isAnimating = !m_isComplete;
 	m_isWaitingForClick = false;
 	m_segmentIndex = -1;
 	m_timePassed = sf::Time::Zero;
@@ -125,6 +127,11 @@ void ActiveText::updateProps(const TextProperties &textProps, const AnimationPro
 {
 	buildSegments(textProps, animProps);
 	reset(true);
+}
+
+void ActiveText::updateProps(const TextProperties &textProps)
+{
+	updateProps(textProps, AnimationProperties());
 }
 
 void ActiveText::show(float duration, int tweenType, HideableCallback callback)
@@ -275,6 +282,11 @@ void ActiveText::setHighlightId(const std::string &id)
 	m_highlightId = id;
 	for (auto &seg : m_segments)
 		seg->setHighlightId(id);
+}
+
+bool ActiveText::isAnimating() const
+{
+	return m_isAnimating;
 }
 
 bool ActiveText::isComplete() const
@@ -442,8 +454,10 @@ void ActiveText::buildSegments(const TextProperties &textProps, const AnimationP
 
 void ActiveText::updateSegments(float delta)
 {
+	m_isAnimating = m_tweenManager.getRunningTweensCount() > 0;
 	for (auto& segment : m_segmentsActive)
-		segment->update(delta);
+		if (segment->update(delta))
+			m_isAnimating = true;
 }
 
 } // namespace NovelTea
