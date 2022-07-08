@@ -26,39 +26,47 @@ std::map<std::string, TextEffect> textEffectMap = {
 	{"fadeacross", TextEffect::FadeAcross},
 };
 
-std::map<std::string, TweenEngine::TweenEquation&> textEquationMap = {
-	{"quad-in",      TweenEngine::TweenEquations::easeInQuad},
-	{"quad-out",     TweenEngine::TweenEquations::easeOutQuad},
-	{"quad",         TweenEngine::TweenEquations::easeInOutQuad},
-	{"linear",       TweenEngine::TweenEquations::easeInOutLinear},
-	{"back-in",      TweenEngine::TweenEquations::easeInBack},
-	{"back-out",     TweenEngine::TweenEquations::easeOutBack},
-	{"back",         TweenEngine::TweenEquations::easeInOutBack},
-	{"bounce-in",    TweenEngine::TweenEquations::easeInBounce},
-	{"bounce-out",   TweenEngine::TweenEquations::easeOutBounce},
-	{"bounce",       TweenEngine::TweenEquations::easeInOutBounce},
-	{"circ-in",      TweenEngine::TweenEquations::easeInCirc},
-	{"circ-out",     TweenEngine::TweenEquations::easeOutCirc},
-	{"circ",         TweenEngine::TweenEquations::easeInOutCirc},
-	{"cubic-in",     TweenEngine::TweenEquations::easeInCubic},
-	{"cubic-out",    TweenEngine::TweenEquations::easeOutCubic},
-	{"cubic",        TweenEngine::TweenEquations::easeInOutCubic},
-	{"elastic-in",   TweenEngine::TweenEquations::easeInElastic},
-	{"elastic-out",  TweenEngine::TweenEquations::easeOutElastic},
-	{"elastic",      TweenEngine::TweenEquations::easeInOutElastic},
-	{"expo.in",      TweenEngine::TweenEquations::easeInExpo},
-	{"expo.out",     TweenEngine::TweenEquations::easeOutExpo},
-	{"expo",         TweenEngine::TweenEquations::easeInOutExpo},
-	{"quart.in",     TweenEngine::TweenEquations::easeInQuart},
-	{"quart.out",    TweenEngine::TweenEquations::easeOutQuart},
-	{"quart",        TweenEngine::TweenEquations::easeInOutQuart},
-	{"quint.in",     TweenEngine::TweenEquations::easeInQuint},
-	{"quint.out",    TweenEngine::TweenEquations::easeOutQuint},
-	{"quint",        TweenEngine::TweenEquations::easeInOutQuint},
-	{"sine.in",      TweenEngine::TweenEquations::easeInSine},
-	{"sine.out",     TweenEngine::TweenEquations::easeOutSine},
-	{"sine",         TweenEngine::TweenEquations::easeInOutSine},
-};
+TweenEngine::TweenEquation* getTweenEquation(const std::string &funcName)
+{
+	static std::map<std::string, TweenEngine::TweenEquation&> equationMap = {
+		{"quad-in",      TweenEngine::TweenEquations::easeInQuad},
+		{"quad-out",     TweenEngine::TweenEquations::easeOutQuad},
+		{"quad",         TweenEngine::TweenEquations::easeInOutQuad},
+		{"linear",       TweenEngine::TweenEquations::easeInOutLinear},
+		{"back-in",      TweenEngine::TweenEquations::easeInBack},
+		{"back-out",     TweenEngine::TweenEquations::easeOutBack},
+		{"back",         TweenEngine::TweenEquations::easeInOutBack},
+		{"bounce-in",    TweenEngine::TweenEquations::easeInBounce},
+		{"bounce-out",   TweenEngine::TweenEquations::easeOutBounce},
+		{"bounce",       TweenEngine::TweenEquations::easeInOutBounce},
+		{"circ-in",      TweenEngine::TweenEquations::easeInCirc},
+		{"circ-out",     TweenEngine::TweenEquations::easeOutCirc},
+		{"circ",         TweenEngine::TweenEquations::easeInOutCirc},
+		{"cubic-in",     TweenEngine::TweenEquations::easeInCubic},
+		{"cubic-out",    TweenEngine::TweenEquations::easeOutCubic},
+		{"cubic",        TweenEngine::TweenEquations::easeInOutCubic},
+		{"elastic-in",   TweenEngine::TweenEquations::easeInElastic},
+		{"elastic-out",  TweenEngine::TweenEquations::easeOutElastic},
+		{"elastic",      TweenEngine::TweenEquations::easeInOutElastic},
+		{"expo.in",      TweenEngine::TweenEquations::easeInExpo},
+		{"expo.out",     TweenEngine::TweenEquations::easeOutExpo},
+		{"expo",         TweenEngine::TweenEquations::easeInOutExpo},
+		{"quart.in",     TweenEngine::TweenEquations::easeInQuart},
+		{"quart.out",    TweenEngine::TweenEquations::easeOutQuart},
+		{"quart",        TweenEngine::TweenEquations::easeInOutQuart},
+		{"quint.in",     TweenEngine::TweenEquations::easeInQuint},
+		{"quint.out",    TweenEngine::TweenEquations::easeOutQuint},
+		{"quint",        TweenEngine::TweenEquations::easeInOutQuint},
+		{"sine.in",      TweenEngine::TweenEquations::easeInSine},
+		{"sine.out",     TweenEngine::TweenEquations::easeOutSine},
+		{"sine",         TweenEngine::TweenEquations::easeInOutSine},
+	};
+
+	auto it = equationMap.find(funcName);
+	if (it != equationMap.end())
+		return &it->second;
+	return nullptr;
+}
 
 std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags)
 {
@@ -66,6 +74,10 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 	std::vector<TextStyle> prevStyles;
 	for (auto &s : segments) {
 		auto diff = getStylesDiff(prevStyles, s->styles);
+		if (s->startOnNewLine)
+			result += "\n";
+		if (diff.empty())
+			result += "[p]";
 		for (auto &p : diff) {
 			auto &style = p.first;
 			if (p.second) {
@@ -116,7 +128,6 @@ std::string replaceObjectShorthand(const std::string &text)
 			result += text.substr(processedPos, startPos - processedPos);
 		result += "[o=" + idName + "]" + str + "[/o]";
 		processedPos = searchPos = endPos + 2;
-		std::cout << "object:" << idName << " str:" << str << std::endl;
 	}
 
 	if (processedPos < text.size())
@@ -241,7 +252,41 @@ std::vector<std::pair<TextStyle, bool> > BBCodeParser::getStylesDiff(const std::
 		if (p == prevStyles.end())
 			result.emplace_back(currStyle, true);
 	}
+	// Remove duplicates
+	for (auto it = result.begin(); it != result.end(); ++it)
+		for (auto it2 = it + 1; it2 != result.end(); ++it2)
+			if (*it == *it2) {
+				result.erase(it2);
+				break;
+			}
 	return result;
+}
+
+cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, bool &closing)
+{
+	if (start == end)
+		return start;
+
+	closing = false;
+	auto it = start;
+	if (*++it == '/') {
+		closing = true;
+		++it;
+	}
+
+	std::stringstream str;
+	for (; it != end; ++it) {
+		auto c = *it;
+		if (c == ']') {
+			tag = str.str();
+			return it;
+		}
+		else if (IsAlNum(c) || IsSpace(c) || c == '=' || c == '-' || c == '.')
+			str << c;
+		else
+			return start;
+	}
+	return start;
 }
 
 StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, const TextProperties &textDefault, const AnimationProperties &animDefault, bool newGroup, bool startOnNewLine)
@@ -279,9 +324,9 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 						anim.type = it->second;
 				}
 				else if (key == TextAnimation::Function) {
-					auto it = textEquationMap.find(val);
-					if (it != textEquationMap.end())
-						anim.equation = &it->second;
+					auto equation = getTweenEquation(val);
+					if (equation)
+						anim.equation = equation;
 				}
 				else if (key == TextAnimation::Delay)
 					anim.delay = std::max(std::atof(val.c_str()), 0.0) * 1000;

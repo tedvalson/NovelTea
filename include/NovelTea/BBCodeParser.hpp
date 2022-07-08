@@ -2,13 +2,14 @@
 #define NOVELTEA_BBCODEPARSER_HPP
 
 #include <NovelTea/StringUtils.hpp>
-#include <NovelTea/json.hpp>
 #include <NovelTea/TextTypes.hpp>
 #include <memory>
 #include <sstream>
 
 namespace NovelTea
 {
+
+using cStrIter = std::string::const_iterator;
 
 struct TextStyle {
 	TextStyle();
@@ -47,33 +48,7 @@ public:
 
 private:
 	static std::vector<std::pair<TextStyle,bool>> getStylesDiff(const std::vector<TextStyle> &prevStyles, const std::vector<TextStyle> &currStyles);
-
-	template <typename citerator>
-	static citerator parseTag(citerator start, citerator end, std::string &tag, bool &closing) {
-		if (start == end)
-			return start;
-
-		closing = false;
-		auto it = start;
-		if (*++it == '/') {
-			closing = true;
-			++it;
-		}
-
-		std::stringstream str;
-		for (; it != end; ++it) {
-			auto c = *it;
-			if (c == ']') {
-				tag = str.str();
-				return it;
-			}
-			else if (IsAlNum(c) || IsSpace(c) || c == '=' || c == '-' || c == '.')
-				str << c;
-			else
-				return start;
-		}
-		return start;
-	}
+	static cStrIter parseTag(cStrIter start, cStrIter end, std::string &tag, bool &closing);
 };
 
 } // namespace NovelTea
