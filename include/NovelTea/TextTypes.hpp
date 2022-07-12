@@ -11,6 +11,8 @@ enum class TextStyleType : int {
 	None = 0,
 	Animation = 1,
 	Bold,
+	BorderColor,
+	BorderSize,
 	Color,
 	Diff,
 	Font,

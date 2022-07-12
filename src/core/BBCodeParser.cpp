@@ -48,17 +48,17 @@ TweenEngine::TweenEquation* getTweenEquation(const std::string &funcName)
 		{"elastic-in",   TweenEngine::TweenEquations::easeInElastic},
 		{"elastic-out",  TweenEngine::TweenEquations::easeOutElastic},
 		{"elastic",      TweenEngine::TweenEquations::easeInOutElastic},
-		{"expo.in",      TweenEngine::TweenEquations::easeInExpo},
-		{"expo.out",     TweenEngine::TweenEquations::easeOutExpo},
+		{"expo-in",      TweenEngine::TweenEquations::easeInExpo},
+		{"expo-out",     TweenEngine::TweenEquations::easeOutExpo},
 		{"expo",         TweenEngine::TweenEquations::easeInOutExpo},
-		{"quart.in",     TweenEngine::TweenEquations::easeInQuart},
-		{"quart.out",    TweenEngine::TweenEquations::easeOutQuart},
+		{"quart-in",     TweenEngine::TweenEquations::easeInQuart},
+		{"quart-out",    TweenEngine::TweenEquations::easeOutQuart},
 		{"quart",        TweenEngine::TweenEquations::easeInOutQuart},
-		{"quint.in",     TweenEngine::TweenEquations::easeInQuint},
-		{"quint.out",    TweenEngine::TweenEquations::easeOutQuint},
+		{"quint-in",     TweenEngine::TweenEquations::easeInQuint},
+		{"quint-out",    TweenEngine::TweenEquations::easeOutQuint},
 		{"quint",        TweenEngine::TweenEquations::easeInOutQuint},
-		{"sine.in",      TweenEngine::TweenEquations::easeInSine},
-		{"sine.out",     TweenEngine::TweenEquations::easeOutSine},
+		{"sine-in",      TweenEngine::TweenEquations::easeInSine},
+		{"sine-out",     TweenEngine::TweenEquations::easeOutSine},
 		{"sine",         TweenEngine::TweenEquations::easeInOutSine},
 	};
 
@@ -289,6 +289,11 @@ cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, 
 	return start;
 }
 
+sf::Color parseColor(const std::string &colorStr)
+{
+	return sf::Color::Black;
+}
+
 StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, const TextProperties &textDefault, const AnimationProperties &animDefault, bool newGroup, bool startOnNewLine)
 	: text(text)
 	, styles(styles)
@@ -298,23 +303,44 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 	, startOnNewLine(startOnNewLine)
 {
 	for (auto &s : styles) {
-		if (s.type == TextStyleType::Bold)
+		switch (s.type)
+		{
+		case TextStyleType::None:
+			break;
+		case TextStyleType::Bold:
 			style.fontStyle |= sf::Text::Bold;
-		else if (s.type == TextStyleType::Italic)
-			style.fontStyle |= sf::Text::Italic;
-		else if (s.type == TextStyleType::Diff)
+			break;
+		case TextStyleType::BorderColor:
+			style.outlineColor = parseColor(s.params["color"]);
+			break;
+		case TextStyleType::BorderSize:
+			style.outlineThickness = std::max(std::atof(s.params["size"].c_str()), 0.0);
+			break;
+		case TextStyleType::Color:
+			style.color = parseColor(s.params["color"]);
+			break;
+		case TextStyleType::Diff:
 			style.color = sf::Color(150, 0, 0);
-		else if (s.type == TextStyleType::Object)
-			style.objectId = s.params["id"];
-		else if (s.type == TextStyleType::Font)
+			break;
+		case TextStyleType::Font:
 			style.fontAlias = s.params["id"];
-		else if (s.type == TextStyleType::Size)
+			break;
+		case TextStyleType::Italic:
+			style.fontStyle |= sf::Text::Italic;
+			break;
+		case TextStyleType::Object:
+			style.objectId = s.params["id"];
+			break;
+		case TextStyleType::Size:
 			style.fontSize = std::atol(s.params["size"].c_str());
-		else if (s.type == TextStyleType::XOffset)
+			break;
+		case TextStyleType::XOffset:
 			style.xOffset = std::atol(s.params["x"].c_str());
-		else if (s.type == TextStyleType::YOffset)
+			break;
+		case TextStyleType::YOffset:
 			style.yOffset = std::atol(s.params["y"].c_str());
-		else if (s.type == TextStyleType::Animation) {
+			break;
+		case TextStyleType::Animation:
 			for (auto &param : s.params) {
 				auto& key = param.first;
 				auto  val = param.second;
@@ -341,6 +367,7 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 				else if (key == TextAnimation::Wait)
 					anim.waitForClick = (val == "1");
 			}
+			break;
 		}
 	}
 }
@@ -356,8 +383,10 @@ TextStyle::TextStyle(const std::string &tag)
 		auto s = split(tag, " ");
 		tagName = s[0];
 		if (!tagName.empty()) {
-			auto c = tagName[0];
-			if (c == 'a' || c == 'A') {
+			auto tagLower = tagName;
+			std::transform(tagLower.begin(), tagLower.end(), tagLower.begin(), ::tolower);
+			auto c = tagLower[0];
+			if (c == 'a') {
 				type = TextStyleType::Animation;
 				parseKeyValPairs(tag);
 				// Recreate param map, normalizing the values
@@ -383,32 +412,47 @@ TextStyle::TextStyle(const std::string &tag)
 						params[TextAnimation::Wait] = param.second;
 				}
 			}
-			else if (c == 'b' || c == 'B') {
+			else if (c == 'b') {
 				type = TextStyleType::Bold;
+				if (tagLower.size() > 1) {
+					auto c2 = tagLower[1];
+					if (c2 == 'c' || tagLower == "border-color") {
+						type = TextStyleType::BorderColor;
+						parseSingleArg(tag, "color");
+					} else if (c2 == 's' || tagLower == "border-size") {
+						type = TextStyleType::BorderSize;
+						parseSingleArg(tag, "size");
+					} else
+						throw std::exception();
+				}
 			}
-			else if (c == 'd' || c == 'D') {
+			else if (c == 'c') {
+				type = TextStyleType::Color;
+				parseSingleArg(tag, "color");
+			}
+			else if (c == 'd') {
 				type = TextStyleType::Diff;
 			}
-			else if (c == 'i' || c == 'I') {
+			else if (c == 'i') {
 				type = TextStyleType::Italic;
 			}
-			else if (c == 'f' || c == 'F') {
+			else if (c == 'f') {
 				type = TextStyleType::Font;
 				parseSingleArg(tag, "id");
 			}
-			else if (c == 'o' || c == 'O') {
+			else if (c == 'o') {
 				type = TextStyleType::Object;
 				parseSingleArg(tag, "id");
 			}
-			else if (c == 's' || c == 'S') {
+			else if (c == 's') {
 				type = TextStyleType::Size;
 				parseSingleArg(tag, "size");
 			}
-			else if (c == 'x' || c == 'X') {
+			else if (c == 'x') {
 				type = TextStyleType::XOffset;
 				parseSingleArg(tag, "x");
 			}
-			else if (c == 'y' || c == 'Y') {
+			else if (c == 'y') {
 				type = TextStyleType::YOffset;
 				parseSingleArg(tag, "y");
 			}
