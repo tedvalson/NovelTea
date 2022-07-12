@@ -26,6 +26,17 @@ std::map<std::string, TextEffect> textEffectMap = {
 	{"fadeacross", TextEffect::FadeAcross},
 };
 
+std::map<std::string, sf::Color> colorMap = {
+	{"black",    sf::Color::Black},
+	{"white",    sf::Color::White},
+	{"red",      sf::Color::Red},
+	{"green",    sf::Color::Green},
+	{"blue",     sf::Color::Blue},
+	{"yellow",   sf::Color::Yellow},
+	{"magenta",  sf::Color::Magenta},
+	{"cyan",     sf::Color::Cyan},
+};
+
 TweenEngine::TweenEquation* getTweenEquation(const std::string &funcName)
 {
 	static std::map<std::string, TweenEngine::TweenEquation&> equationMap = {
@@ -274,6 +285,8 @@ cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, 
 		++it;
 	}
 
+	static const char allowedChars[] = " =.-#";
+
 	std::stringstream str;
 	for (; it != end; ++it) {
 		auto c = *it;
@@ -281,7 +294,7 @@ cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, 
 			tag = str.str();
 			return it;
 		}
-		else if (IsAlNum(c) || IsSpace(c) || c == '=' || c == '-' || c == '.')
+		else if (IsAlNum(c) || std::strchr(allowedChars, c) != nullptr)
 			str << c;
 		else
 			return start;
@@ -289,9 +302,44 @@ cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, 
 	return start;
 }
 
-sf::Color parseColor(const std::string &colorStr)
+sf::Color parseColor(std::string colorStr)
 {
-	return sf::Color::Black;
+	auto result = sf::Color::Black;
+	std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
+
+	// Check for predefined color matches if no "#" prefix
+	if (colorStr[0] != '#') {
+		auto it = colorMap.find(colorStr);
+		if (it != colorMap.end())
+			return it->second;
+		return result;
+	}
+
+	// Erase "#"
+	colorStr.erase(0, 1);
+
+	while (colorStr.size() < 3)
+		colorStr.insert(0, 1, '0');
+
+	// Convert short format to long (eg. BED -> BBEEDD)
+	if (colorStr.size() == 3) {
+		colorStr += colorStr[2];
+		colorStr.insert(1, 1, colorStr[1]);
+		colorStr.insert(0, 1, colorStr[0]);
+	}
+
+	while (colorStr.size() < 6)
+		colorStr += '0';
+
+	if (colorStr.size() != 6)
+		return result;
+
+	int v = std::stoi(colorStr, 0, 16);
+	result.r = (v >> 16) & 0xFF;
+	result.g = (v >> 8) & 0xFF;
+	result.b = v & 0xFF;
+
+	return result;
 }
 
 StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, const TextProperties &textDefault, const AnimationProperties &animDefault, bool newGroup, bool startOnNewLine)
@@ -415,13 +463,16 @@ TextStyle::TextStyle(const std::string &tag)
 			else if (c == 'b') {
 				type = TextStyleType::Bold;
 				if (tagLower.size() > 1) {
-					auto c2 = tagLower[1];
-					if (c2 == 'c' || tagLower == "border-color") {
-						type = TextStyleType::BorderColor;
-						parseSingleArg(tag, "color");
-					} else if (c2 == 's' || tagLower == "border-size") {
-						type = TextStyleType::BorderSize;
-						parseSingleArg(tag, "size");
+					auto s = split(tagLower, "=");
+					if (s.size() == 2) {
+						auto c2 = tagLower[1];
+						if (c2 == 'c' || s[0] == "border-color") {
+							type = TextStyleType::BorderColor;
+							params["color"] = s[1];
+						} else if (c2 == 's' || s[0] == "border-size") {
+							type = TextStyleType::BorderSize;
+							params["size"] = s[1];
+						}
 					} else
 						throw std::exception();
 				}

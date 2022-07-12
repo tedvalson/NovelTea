@@ -3,6 +3,7 @@
 
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
+#include <NovelTea/TextTypes.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
@@ -12,8 +13,6 @@
 namespace NovelTea
 {
 
-struct AnimationProperties;
-struct TextProperties;
 struct StyledSegment;
 
 class ActiveTextSegment : public JsonSerializable, public sf::Drawable, public Hideable
@@ -27,6 +26,7 @@ public:
 		bool objectExists;
 		std::string objectIdName;
 		TweenText text;
+		TextProperties style;
 		sf::FloatRect bounds;
 	};
 

@@ -184,7 +184,8 @@ void ActiveTextSegment::setHighlightId(const std::string &id)
 	{
 		if (id.empty() || id != segment.objectIdName)
 		{
-			segment.text.setOutlineThickness(0.f);
+			segment.text.setOutlineColor(segment.style.outlineColor);
+			segment.text.setOutlineThickness(segment.style.outlineThickness);
 		}
 		else
 		{
@@ -411,6 +412,7 @@ void ActiveTextSegment::applyAlpha() const
 	const float *newValues = &m_alpha; // Hack for the macro below
 	for (auto &segment : m_segments) {
 		SET_ALPHA(segment.text.getFillColor, segment.text.setFillColor, m_animAlpha);
+		SET_ALPHA(segment.text.getOutlineColor, segment.text.setOutlineColor, m_animAlpha);
 	}
 }
 
@@ -580,7 +582,7 @@ void ActiveTextSegment::ensureUpdate() const
 			debugShape.setPosition(bounds.left, bounds.top);
 			m_debugSegmentShapes.push_back(debugShape);
 
-			m_segments.push_back({objectExists, objectId, text, bounds});
+			m_segments.push_back({objectExists, objectId, text, style, bounds});
 		}
 	}
 	m_linePositions.push_back(m_cursorPos);
