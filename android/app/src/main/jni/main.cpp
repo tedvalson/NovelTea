@@ -6,6 +6,10 @@
 #include <SFML/System/Sleep.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <android/native_activity.h>
+#include <android/log.h>
+
+#define LOGV(...) { __android_log_print(ANDROID_LOG_INFO, "noveltea", __VA_ARGS__); printf(__VA_ARGS__); printf("\n"); fflush(stdout); }
+#define LOG(s) { LOGV("%s", s) }
 
 namespace {
 	bool gettingInput = false;
@@ -90,10 +94,12 @@ int main(int argc, char *argv[])
 	std::string projectFileName;
 	methodID = attachedEnv->GetStaticMethodID(helperClass, "getProjectFileName", "(Landroid/app/NativeActivity;)Ljava/lang/String;");
 	jstring jstr = static_cast<jstring>(attachedEnv->CallStaticObjectMethod(helperClass, methodID, na));
-	auto cs = attachedEnv->GetStringUTFChars(jstr, 0);
-	if (cs)
-		projectFileName = cs;
-	attachedEnv->ReleaseStringUTFChars(jstr, cs);
+	if (jstr) {
+		auto cs = attachedEnv->GetStringUTFChars(jstr, 0);
+		if (cs)
+			projectFileName = cs;
+		attachedEnv->ReleaseStringUTFChars(jstr, cs);
+	}
 	
 	GTextInput.textInputTrigger = triggerTextInput;
 	GSettings.setDirectory(nativeActivity->internalDataPath);

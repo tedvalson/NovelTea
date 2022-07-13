@@ -140,7 +140,7 @@ jobs:
         api-level: 16
         script: |
           cd android && ./gradlew installDebug
-          adb shell am start -n com.noveltea.launcher/android.app.NativeActivity
+          adb shell am start -W -n com.noveltea.launcher/android.app.NativeActivity
           sleep 5
           adb shell logcat -d
 
