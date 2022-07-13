@@ -142,6 +142,7 @@ jobs:
           cd android && ./gradlew installDebug
           adb shell am start -n com.noveltea.launcher/android.app.NativeActivity
           sleep 5
+          adb shell logcat -d
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
