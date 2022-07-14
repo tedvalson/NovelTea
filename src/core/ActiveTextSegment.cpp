@@ -213,7 +213,7 @@ size_t ActiveTextSegment::getDelayMs() const
 	auto& anim = getAnimProps();
 	auto delay = anim.delay;
 	if (anim.type == TextEffect::FadeAcross && delay < 0)
-		delay = 1000.f * getFadeAcrossLength() / 180.f;
+		return getDurationMs() - delay;
 	return delay / anim.speed;
 }
 
@@ -221,7 +221,7 @@ size_t ActiveTextSegment::getDurationMs() const
 {
 	auto& anim = getAnimProps();
 	auto duration = anim.duration;
-	if (anim.type == TextEffect::FadeAcross && duration < 0)
+	if (anim.type == TextEffect::FadeAcross && duration <= 0)
 		duration = 1000.f * getFadeAcrossLength() / 180.f;
 	return duration / anim.speed;
 }

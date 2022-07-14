@@ -18,6 +18,7 @@ enum class TextStyleType : int {
 	Font,
 	Italic,
 	Object,
+	PBreak,
 	Size,
 	XOffset,
 	YOffset,
@@ -33,8 +34,8 @@ struct AnimationProperties {
 	TextEffect type = TextEffect::None;
 	TweenEngine::TweenEquation* equation = &TweenEngine::TweenEquations::easeInOutQuad;
 	std::string value;
-	int duration = 0;
-	int delay    = 0;
+	int duration = -1;
+	int delay    = -1;
 	float speed  = 1.f;
 	bool skippable = true;
 	bool waitForClick = false;

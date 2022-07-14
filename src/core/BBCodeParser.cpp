@@ -175,15 +175,6 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 	for (auto it = text.cbegin(); it != text.cend(); ++it) {
 		auto c = *it;
 		if (c == '[') {
-			// First check for breaker tag [p]
-			auto d = it;
-			if (*++d == 'p' && *++d == ']') {
-				it = d;
-				pushSeg(true);
-				newGroup = true;
-				continue;
-			}
-
 			std::string tag;
 			bool closing;
 			auto r = parseTag(it, text.cend(), tag, closing);
@@ -193,6 +184,20 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 			else
 				try {
 					TextStyle style(tag);
+
+					// First check for breaker tag [p]
+					if (style.type == TextStyleType::PBreak) {
+						if (closing)
+							throw std::exception();
+						// [p] is self-closing tag, so push then pop
+						styleStack.push_back(style);
+						pushSeg(true);
+						styleStack.pop_back();
+						newGroup = true;
+						it = r;
+						continue;
+					}
+
 					auto itStyle = styleStack.rbegin();
 					if (closing) {
 						itStyle = std::find_if(itStyle, styleStack.rend(), [style](TextStyle &s){
@@ -334,7 +339,7 @@ sf::Color parseColor(std::string colorStr)
 	if (colorStr.size() != 6)
 		return result;
 
-	int v = std::stoi(colorStr, 0, 16);
+	int v = std::strtol(colorStr.c_str(), 0, 16);
 	result.r = (v >> 16) & 0xFF;
 	result.g = (v >> 8) & 0xFF;
 	result.b = v & 0xFF;
@@ -379,6 +384,13 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 		case TextStyleType::Object:
 			style.objectId = s.params["id"];
 			break;
+		case TextStyleType::PBreak:
+			if (!s.params.empty()) {
+				auto delay = std::max(std::atof(s.params["delay"].c_str()), 0.0) * 1000;
+				anim.delay += (anim.delay > 0) ? delay : -delay;
+				anim.waitForClick = false;
+			}
+			break;
 		case TextStyleType::Size:
 			style.fontSize = std::atol(s.params["size"].c_str());
 			break;
@@ -403,9 +415,9 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 						anim.equation = equation;
 				}
 				else if (key == TextAnimation::Delay)
-					anim.delay = std::max(std::atof(val.c_str()), 0.0) * 1000;
+					anim.delay = std::atof(val.c_str()) * 1000;
 				else if (key == TextAnimation::Time)
-					anim.duration = std::max(std::atof(val.c_str()), 0.0) * 1000;
+					anim.duration = std::atof(val.c_str()) * 1000;
 				else if (key == TextAnimation::Speed)
 					anim.speed = std::max(std::atof(val.c_str()), 0.01);
 				else if (key == TextAnimation::CanSkip)
@@ -494,6 +506,10 @@ TextStyle::TextStyle(const std::string &tag)
 			else if (c == 'o') {
 				type = TextStyleType::Object;
 				parseSingleArg(tag, "id");
+			}
+			else if (c == 'p') {
+				type = TextStyleType::PBreak;
+				parseSingleArg(tag, "delay");
 			}
 			else if (c == 's') {
 				type = TextStyleType::Size;
