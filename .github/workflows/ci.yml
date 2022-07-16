@@ -79,9 +79,30 @@ jobs:
         export CMAKE_INCLUDE_PATH=${{ steps.setup.outputs.library }}
         mkdir -p install/NovelTea
         mkdir -p doc/github.io/docs
-        cmake -DBUILD_DOCS=ON -DBUILD_TEST=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML .
-        cmake --build . --config Release --target install
-        cmake --build . --config Release --target doc
+        cmake -S . -B build -DBUILD_DOCS=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML
+        cmake --build build --config Release --target install
+        cmake --build build --config Release --target doc
+        cmake --build build --config Debug --target tests
+
+    - name: Run Tests
+      run: |
+        ctest -C Debug --output-on-failure --verbose
+
+    - name: Setup python
+      uses: actions/setup-python@v2
+      if: ${{ runner.os == 'Linux' }}
+      with:
+        python-version: 3.8
+
+    - name: Upload code coverage to coveralls
+      if: ${{ runner.os == 'Linux' }}
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip setuptools cpp-coveralls
+        coveralls -E ".*CMakeFiles.*" -E ".*test/.*.cpp.*" --exclude "venv" --exclude "build/_deps"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
