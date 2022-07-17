@@ -23,12 +23,11 @@ int WizardPageScript::nextId() const
 
 bool WizardPageScript::validatePage()
 {
-	// TODO: check for name collision
+	auto name = field("scriptName").toString();
 	auto mainWindow = qobject_cast<MainWindow*>(wizard()->parent());
-	if (mainWindow)
+	if (mainWindow && mainWindow->validateEntityName(name, EditorTabWidget::Script))
 	{
-		auto name = field("scriptName").toString().toStdString();
-		auto w = new ScriptWidget(name);
+		auto w = new ScriptWidget(name.toStdString());
 		mainWindow->addEditorTab(w);
 	}
 	return true;

@@ -23,12 +23,11 @@ int WizardPageMap::nextId() const
 
 bool WizardPageMap::validatePage()
 {
-	// TODO: check for name collision
+	auto name = field("mapName").toString();
 	auto mainWindow = qobject_cast<MainWindow*>(wizard()->parent());
-	if (mainWindow)
+	if (mainWindow && mainWindow->validateEntityName(name, EditorTabWidget::Map))
 	{
-		auto name = field("mapName").toString().toStdString();
-		auto w = new MapWidget(name);
+		auto w = new MapWidget(name.toStdString());
 		mainWindow->addEditorTab(w);
 	}
 	return true;

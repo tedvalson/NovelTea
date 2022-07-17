@@ -30,6 +30,8 @@ public:
 	int getEditorTabIndex(EditorTabWidget::Type type, const std::string &idName) const;
 	void warnIfInvalid() const;
 
+	bool validateEntityName(const QString &entityIdName, EditorTabWidget::Type type, bool checkForCollision = true);
+
 	void launchPreview(NovelTea::EntityType entityType, const std::string &entityId, json jMetaData);
 	void launchPreview();
 

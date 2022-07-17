@@ -16,6 +16,7 @@
 #include "NovelTeaWidget.hpp"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QDebug>
@@ -214,6 +215,31 @@ void MainWindow::warnIfInvalid() const
 	std::string error;
 	if (!Proj.isValid(error))
 		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
+}
+
+bool MainWindow::validateEntityName(const QString &entityIdName, EditorTabWidget::Type type, bool checkForCollision)
+{
+	auto name = entityIdName.toStdString();
+
+	// See BBCodeParser::parseTag
+	// Include all permitted chars except '='
+	static const char allowedChars[] = " .-#";
+	for (auto& c : name)
+		if (!NovelTea::IsAlNum(c) && std::strchr(allowedChars, c) == nullptr) {
+			QMessageBox::critical(this, "Failed to rename",
+				QString::fromStdString("Invalid entity name. Only the following special characters are permitted: [.-#]"));
+			return false;
+		}
+
+	auto existingNewIndex = getEditorTabIndex(type, name);
+	auto entityId = getEntityIdFromTabType(type);
+	if (checkForCollision && (existingNewIndex >= 0 || ProjData[entityId].hasKey(name))) {
+		QMessageBox::critical(this, "Failed to rename",
+			QString::fromStdString("\"" + name + "\" already exists."));
+		return false;
+	}
+
+	return true;
 }
 
 void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::string &entityId, json jMetaData)
@@ -635,16 +661,10 @@ void MainWindow::on_actionRename_triggered()
 	{
 		auto newName = text.toStdString();
 		auto existingOldIndex = getEditorTabIndex(selectedType, selectedIdName);
-		auto existingNewIndex = getEditorTabIndex(selectedType, newName);
-		auto entityId = getEntityIdFromTabType(selectedType);
 		auto entityType = EditorTabWidget::tabTypeToEntityType(selectedType);
 
-		if (existingNewIndex >= 0 || ProjData[entityId].hasKey(newName))
-		{
-			QMessageBox::critical(this, "Failed to rename",
-				QString::fromStdString("\"" + newName + "\" already exists."));
+		if (!validateEntityName(text, selectedType))
 			return;
-		}
 
 		// Rename the tab, if open
 		if (existingOldIndex >= 0)

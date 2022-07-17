@@ -23,12 +23,11 @@ int WizardPageDialogue::nextId() const
 
 bool WizardPageDialogue::validatePage()
 {
-	// TODO: check for cutscene name collision
+	auto name = field("dialogueName").toString();
 	auto mainWindow = qobject_cast<MainWindow*>(wizard()->parent());
-	if (mainWindow)
+	if (mainWindow && mainWindow->validateEntityName(name, EditorTabWidget::Dialogue))
 	{
-		auto name = field("dialogueName").toString().toStdString();
-		auto w = new DialogueWidget(name);
+		auto w = new DialogueWidget(name.toStdString());
 		mainWindow->addEditorTab(w);
 	}
 	return true;

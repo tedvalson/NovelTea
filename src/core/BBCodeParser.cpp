@@ -290,6 +290,8 @@ cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, 
 		++it;
 	}
 
+	// See MainWindow::validateEntityName
+	// Entity naming needs to be restricted to these chars.
 	static const char allowedChars[] = " =.-#";
 
 	std::stringstream str;

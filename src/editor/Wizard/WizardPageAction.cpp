@@ -23,12 +23,13 @@ int WizardPageAction::nextId() const
 
 bool WizardPageAction::validatePage()
 {
+	auto name = field("actionName").toString();
 	auto mainWindow = qobject_cast<MainWindow*>(wizard()->parent());
-	if (mainWindow)
+	if (mainWindow && mainWindow->validateEntityName(name, EditorTabWidget::Action))
 	{
-		auto name = field("actionName").toString().toStdString();
-		auto w = new ActionWidget(name);
+		auto w = new ActionWidget(name.toStdString());
 		mainWindow->addEditorTab(w);
+		return true;
 	}
-	return true;
+	return false;
 }
