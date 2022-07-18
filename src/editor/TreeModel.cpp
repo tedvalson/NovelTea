@@ -50,6 +50,18 @@ bool TreeModel::removeRows(int position, int rows, const QModelIndex &parent)
 	return success;
 }
 
+bool TreeModel::insertEntity(const std::string &idName, EditorTabWidget::Type type, const QModelIndex &parent)
+{
+	auto p = parent;
+	if (!p.isValid())
+		p = index(type);
+	if (!insertRow(0, p))
+		return false;
+	setData(index(0, 0, p), QString::fromStdString(idName));
+	setData(index(0, 1, p), static_cast<int>(EditorTabWidget::tabTypeToEntityType(type)));
+	return true;
+}
+
 void addToJson(json *jout, const json &jitem, const json& jdata, std::vector<std::string> keys)
 {
 	auto id = jitem[0].ToString();
@@ -75,7 +87,7 @@ void addToTree(const json &data, TreeItem *parent, NovelTea::EntityType type)
 		QList<QVariant> columnData;
 		columnData << QString::fromStdString(item.first);
 		columnData << static_cast<int>(type);
-		columnData << QVariant();
+		columnData << QVariant(); // Color (QBrush)
 
 		auto child = new TreeItem(columnData, parent);
 		parent->appendChild(child);
@@ -223,6 +235,7 @@ sj::JSON TreeModel::getColorJSON() const
 
 bool TreeModel::changeParent(const QModelIndex &child, const QModelIndex &newParent)
 {
+	// TODO: Change parent of tab entity, otherwise saving it later will undo this change
 	auto childItem = getItem(child);
 	auto parentItem = getItem(newParent);
 	if (beginMoveRows(child.parent(), child.row(), child.row(), newParent, parentItem->childCount()))

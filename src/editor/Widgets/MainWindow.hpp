@@ -92,6 +92,7 @@ private slots:
 	void on_actionCustomColor_triggered();
 	void on_actionClearColor_triggered();
 	void on_actionSpellCheck_triggered();
+	void on_actionCopyAs_triggered();
 
 private:
 	static MainWindow *_instance;

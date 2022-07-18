@@ -157,13 +157,7 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 	// If added widget is modified when added, then it's new
 	if (widget->isModified())
 	{
-		auto type = widget->getType();
-		auto parent = treeModel->index(type);
-		if (treeModel->insertRow(0, parent))
-		{
-			treeModel->setData(treeModel->index(0, 0, parent), QString::fromStdString(widget->idName()));
-			treeModel->setData(treeModel->index(0, 1, parent), static_cast<int>(EditorTabWidget::tabTypeToEntityType(type)));
-		}
+		treeModel->insertEntity(widget->idName(), widget->getType());
 		widget->save();
 		Proj.saveToFile();
 	}
@@ -425,6 +419,7 @@ void MainWindow::createMenus()
 
 	menuTreeView->addAction(ui->actionOpen);
 	menuTreeView->addAction(ui->actionRename);
+	menuTreeView->addAction(ui->actionCopyAs);
 	menuTreeView->addMenu(menuSetColor);
 	menuTreeView->addAction(ui->actionSelectParent);
 	menuTreeView->addAction(ui->actionClearParentSelection);
@@ -815,4 +810,27 @@ void MainWindow::on_actionClearColor_triggered()
 void MainWindow::on_actionSpellCheck_triggered()
 {
 	addEditorTab(new SpellCheckWidget);
+}
+
+void MainWindow::on_actionCopyAs_triggered()
+{
+	bool ok;
+	QString text;
+	do {
+		text = QInputDialog::getText(this, tr("Copy As..."),
+			tr("Enter the name for the new copy:"), QLineEdit::Normal,
+			QString::fromStdString(selectedIdName) + " Copy", &ok);
+		if (!ok || text.isEmpty())
+			return;
+	}
+	while (!validateEntityName(text, selectedType));
+
+	auto name = text.toStdString();
+	auto entityId = getEntityIdFromTabType(selectedType);
+	ProjData[entityId][name] = ProjData[entityId][selectedIdName];
+	ProjData[entityId][name][0] = name;
+	Proj.saveToFile();
+
+	auto parent = ui->treeView->mapToSource(ui->treeView->currentIndex().parent());
+	treeModel->insertEntity(name, selectedType, parent);
 }
