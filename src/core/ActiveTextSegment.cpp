@@ -178,6 +178,23 @@ unsigned int ActiveTextSegment::getCurrentLineMaxHeight() const
 	return m_lineMaxCharSize;
 }
 
+void ActiveTextSegment::setLastCodePoint(sf::Uint32 codePoint)
+{
+	m_lastCodePoint = codePoint;
+	m_needsUpdate = true;
+}
+
+sf::Uint32 ActiveTextSegment::getCurrentCodePoint() const
+{
+	ensureUpdate();
+	if (m_segments.empty())
+		return 0;
+	auto& s = m_segments.back().text.getString();
+	if (s.isEmpty())
+		return 0;
+	return s.toUtf32().back();
+}
+
 void ActiveTextSegment::setHighlightId(const std::string &id)
 {
 	for (auto &segment : m_segments)
@@ -482,25 +499,33 @@ void ActiveTextSegment::ensureUpdate() const
 		return;
 
 	auto padding = 6.f;
-	float lineHeight = 4.f; // TODO: Don't use fixed value
 	m_cursorPos = m_cursorStart;
 	m_segments.clear();
 	m_linePositions.clear();
 	m_debugSegmentShapes.clear();
-	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y + lineHeight);
+	m_bounds = sf::FloatRect(0.f, m_cursorStart.y, m_cursorStart.x, m_cursorStart.y);
+
+	sf::Uint32 lastCodePoint = m_lastCodePoint;
 
 	sf::RectangleShape debugShape;
 	debugShape.setFillColor(sf::Color(0, 0, 0, 30));
 
+	auto firstSeg = true;
 	for (auto &styledSegment : m_styledSegments)
 	{
 		if (styledSegment->startOnNewLine && m_cursorPos.x > 0)
 		{
-			m_linePositions.push_back(m_cursorPos);
+			if (firstSeg)
+				m_bounds.width = 0;
+			else
+				m_linePositions.push_back(m_cursorPos);
+			if (m_bounds.height == m_cursorPos.y)
+				m_bounds.height += m_lineMaxCharSize + m_lineSpacing;
 			m_cursorPos.y = m_bounds.height;
 			m_bounds.height += m_lineMaxCharSize + m_lineSpacing;
 			m_lineMaxCharSize = 0;
 			m_cursorPos.x = 0.f;
+			lastCodePoint = 0;
 		}
 
 		auto& style = styledSegment->style;
@@ -520,7 +545,22 @@ void ActiveTextSegment::ensureUpdate() const
 		m_cursorPos.x += style.xOffset;
 		m_cursorPos.y += style.yOffset;
 
+		if (styledSegment->text.empty())
+			continue;
+		firstSeg = false;
+
+		auto spaceWidth = font->getGlyph(L' ', 2.f * m_fontSizeMultiplier * style.fontSize, false).advance;
+		bool bold = style.fontStyle & sf::Text::Bold;
+
 		auto words = split(styledSegment->text, " ");
+		if (words.size() > 1) {
+			auto it = std::find_if(words.begin(), words.end(), [](const std::string &s){
+				return !s.empty();
+			});
+			if (it == words.end())
+				words.pop_back();
+		}
+
 		auto firstWord = true;
 		for (auto &word : words)
 		{
@@ -531,14 +571,12 @@ void ActiveTextSegment::ensureUpdate() const
 			text.setOutlineColor(style.outlineColor);
 			text.setOutlineThickness(style.outlineThickness);
 
-			text.setString(" ");
-			auto spaceWidth = text.getLocalBounds().width;
-
 			if (word.empty())
 			{
 				// Don't start line with a space
 				if (m_cursorPos.x > 0)
 					m_cursorPos.x += spaceWidth;
+				lastCodePoint = L' ';
 				continue;
 			}
 			if (firstWord)
@@ -565,10 +603,27 @@ void ActiveTextSegment::ensureUpdate() const
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y += m_lineMaxCharSize + m_lineSpacing;
 				m_lineMaxCharSize = text.getCharacterSize();
+				lastCodePoint = 0;
 			}
 
-			text.setPosition(m_cursorPos);
-			m_cursorPos.x += text.getLocalBounds().width;
+			bool appliedFirstKerning = false;
+			for (auto c : string.toUtf32())
+			{
+				auto kerning = font->getKerning(lastCodePoint, c, text.getCharacterSize());
+				m_cursorPos.x += kerning;
+				if (!appliedFirstKerning) {
+					appliedFirstKerning = true;
+					text.setPosition(m_cursorPos);
+				}
+				lastCodePoint = c;
+				if (c == L'\t') {
+					m_cursorPos.x += spaceWidth * 4;
+					continue;
+				}
+				auto& glyph = font->getGlyph(c, text.getCharacterSize(), bold, style.outlineThickness);
+				m_cursorPos.x += glyph.advance;
+			}
+			lastCodePoint = L' ';
 
 			m_bounds.width = std::max(m_bounds.width, m_cursorPos.x);
 			m_bounds.height = std::max(m_bounds.height, m_cursorPos.y + m_lineMaxCharSize + m_lineSpacing);

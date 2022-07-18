@@ -57,6 +57,7 @@ void ActiveText::reset(bool preservePosition)
 	m_timeToNext = sf::Time::Zero;
 	m_cursorPos = sf::Vector2f();
 	int lineMaxCharSize = 0;
+	sf::Uint32 lastCodePoint = 0;
 
 	m_segmentsActive.clear();
 	m_tweenManager.killAll();
@@ -69,8 +70,10 @@ void ActiveText::reset(bool preservePosition)
 		segment->setSize(m_size);
 		segment->setCursorStart(cursorPos);
 		segment->setLastLineMaxHeight(lineMaxCharSize);
+		segment->setLastCodePoint(lastCodePoint);
 		cursorPos = segment->getCursorEnd();
 		lineMaxCharSize = segment->getCurrentLineMaxHeight();
+		lastCodePoint = segment->getCurrentCodePoint();
 	}
 	m_cursorEnd = cursorPos;
 

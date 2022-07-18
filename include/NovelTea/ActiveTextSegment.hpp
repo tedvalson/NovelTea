@@ -56,6 +56,9 @@ public:
 	void setLastLineMaxHeight(unsigned int height);
 	unsigned int getCurrentLineMaxHeight() const;
 
+	void setLastCodePoint(sf::Uint32 codePoint);
+	sf::Uint32 getCurrentCodePoint() const;
+
 	void setHighlightId(const std::string &id);
 	void refresh();
 
@@ -110,6 +113,7 @@ private:
 	mutable sf::Vector2f m_cursorPos;
 	mutable sf::FloatRect m_bounds;
 	mutable unsigned int m_lineMaxCharSize;
+	sf::Uint32 m_lastCodePoint;
 	sf::Vector2f m_cursorStart;
 	sf::Vector2f m_size;
 	std::string m_string;
