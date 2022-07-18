@@ -34,6 +34,7 @@ public:
 	ADD_ACCESSOR(int, OffsetX, m_offsetX)
 	ADD_ACCESSOR(int, OffsetY, m_offsetY)
 	ADD_ACCESSOR(bool, BeginWithNewLine, m_beginWithNewline)
+	ADD_ACCESSOR(bool, EndWithPageBreak, m_endWithPageBreak)
 
 private:
 	void buildSegments();
@@ -50,6 +51,7 @@ private:
 	int m_offsetX;
 	int m_offsetY;
 	bool m_beginWithNewline;
+	bool m_endWithPageBreak;
 	std::string m_textDelimiter;
 	std::string m_breakDelimiter;
 	std::string m_text;

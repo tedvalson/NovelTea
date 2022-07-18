@@ -18,6 +18,7 @@ namespace
 {
 	const auto propText           = "Text";
 	const auto propBeginNewLine   = "Begin New Line";
+	const auto propEndPageBreak   = "End With Page Break";
 	const auto propTextEffect     = "Text Effect";
 	const auto propBreakEffect    = "Break Effect";
 	const auto propDuration       = "Effect Duration";
@@ -206,7 +207,7 @@ void CutsceneWidget::fillPropertyEditor()
 		ui->richTextEditor->setFormattingEnabled(false);
 		prop = segmentsVariantManager->addProperty(QtVariantPropertyManager::richTextTypeId(), propText);
 		prop->setAttribute("richTextEditor", QVariant::fromValue(ui->richTextEditor));
-		prop->setValue(QString::fromStdString(pageSegment->getText()));
+		prop->setValue(QVariant::fromValue(pageSegment->getText()));
 		ui->propertyBrowser->addProperty(prop);
 
 		PROP_TEXT_EFFECT(QVariant::fromValue(pageSegment->getTextEffect()))
@@ -227,6 +228,10 @@ void CutsceneWidget::fillPropertyEditor()
 
 		prop = segmentsVariantManager->addProperty(QVariant::Bool, propBeginNewLine);
 		prop->setValue(pageSegment->getBeginWithNewLine());
+		ui->propertyBrowser->addProperty(prop);
+
+		prop = segmentsVariantManager->addProperty(QVariant::Bool, propEndPageBreak);
+		prop->setValue(pageSegment->getEndWithPageBreak());
 		ui->propertyBrowser->addProperty(prop);
 
 		prop = segmentsVariantManager->addProperty(QVariant::Point, propOffset);
@@ -332,6 +337,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 		auto seg = static_cast<NovelTea::CutscenePageSegment*>(segment.get());
 		auto text = QString::fromStdString(seg->getText());
 		text.replace("\n", " | ").replace("\t", " ");
+		text.truncate(100);
 		item = new QListWidgetItem(QIcon::fromTheme("document-new"), text);
 	}
 	else if (type == NovelTea::CutsceneSegment::PageBreak)
@@ -453,9 +459,11 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		auto pageSegment = static_cast<NovelTea::CutscenePageSegment*>(segment.get());
 
 		if (propertyName == propText){
-			auto val = value.toString();
-			ui->listWidget->currentItem()->setText(val);
-			pageSegment->setText(val.toStdString());
+			auto val = value.value<std::string>();
+			auto text = QString::fromStdString(val).replace("\n", " | ").replace("\t", " ");
+			text.truncate(100);
+			ui->listWidget->currentItem()->setText(text);
+			pageSegment->setText(val);
 		}
 		else if (propertyName == propTextDelimiter)
 			pageSegment->setTextDelimiter(EditorUtils::unescape(value.toString()).toStdString());
@@ -475,6 +483,8 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 			pageSegment->setBreakDelay(value.toInt());
 		else if (propertyName == propBeginNewLine)
 			pageSegment->setBeginWithNewLine(value.toBool());
+		else if (propertyName == propEndPageBreak)
+			pageSegment->setEndWithPageBreak(value.toBool());
 		else if (propertyName == propOffset) {
 			auto point = value.toPoint();
 			pageSegment->setOffsetX(point.x());

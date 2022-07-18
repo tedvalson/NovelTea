@@ -16,6 +16,7 @@ CutscenePageSegment::CutscenePageSegment()
 , m_offsetX(0)
 , m_offsetY(0)
 , m_beginWithNewline(true)
+, m_endWithPageBreak(true)
 , m_textDelimiter("\n")
 , m_breakDelimiter("\n\n")
 {
@@ -41,7 +42,8 @@ json CutscenePageSegment::toJson() const
 		getBeginWithNewLine(),
 		getOffsetX(),
 		getOffsetY(),
-		getConditionScript()
+		getConditionScript(),
+		getEndWithPageBreak()
 	);
 	return j;
 }
@@ -63,6 +65,7 @@ bool CutscenePageSegment::fromJson(const json &j)
 	setOffsetX(j[13].ToInt());
 	setOffsetY(j[14].ToInt());
 	setConditionScript(j[15].ToString());
+	setEndWithPageBreak(j[16].ToBool());
 	buildSegments();
 	return true;
 }
@@ -102,25 +105,27 @@ void CutscenePageSegment::buildSegments()
 	m_duration = 0;
 	m_delay = 0;
 
+	auto pushPageBreak = [this](){
+		auto pageBreakSegment = new CutscenePageBreakSegment;
+		pageBreakSegment->setTransition(getBreakEffect());
+		pageBreakSegment->setDuration(getBreakDuration());
+		pageBreakSegment->setDelay(getBreakDelay());
+		pageBreakSegment->setWaitForClick(false);
+		pageBreakSegment->setCanSkip(getCanSkip());
+		m_duration += getBreakDuration();
+		m_delay += getBreakDelay();
+		m_segments.emplace_back(pageBreakSegment);
+	};
+
 	auto textPages = split(getText(), getBreakDelimiter());
 	for (int i = 0; i < textPages.size(); ++i)
 	{
 		// Process first text segment without page break.
 		if (i > 0)
-		{
-			auto pageBreakSegment = new CutscenePageBreakSegment;
-			pageBreakSegment->setTransition(getBreakEffect());
-			pageBreakSegment->setDuration(getBreakDuration());
-			pageBreakSegment->setDelay(getBreakDelay());
-			pageBreakSegment->setWaitForClick(getWaitForClick());
-			pageBreakSegment->setCanSkip(getCanSkip());
-			m_duration += getBreakDuration();
-			m_delay += getBreakDelay();
-			m_segments.emplace_back(pageBreakSegment);
-		}
+			pushPageBreak();
 
 		auto texts = split(textPages[i], getTextDelimiter());
-		for (int j = 0; j < texts.size(); ++j)
+		for (auto& text : texts)
 		{
 			auto textSegment = new CutsceneTextSegment;
 			textSegment->setBeginWithNewLine(getBeginWithNewLine());
@@ -131,17 +136,15 @@ void CutscenePageSegment::buildSegments()
 			textSegment->setCanSkip(getCanSkip());
 			textSegment->setOffsetX(getOffsetX());
 			textSegment->setOffsetY(getOffsetY());
-			if (j == 0) {
-				// Don't wait for click on first seg of new page
-				if (i > 0)
-					textSegment->setWaitForClick(false);
-			}
-			textSegment->setText(texts[j]); // TODO: Make it so this doesn't NEED to be set last
+			textSegment->setText(text); // TODO: Make it so this doesn't NEED to be set last
 			m_duration += textSegment->getFullDuration();
 			m_delay += textSegment->getFullDelay();
 			m_segments.emplace_back(textSegment);
 		}
 	}
+
+	if (getEndWithPageBreak())
+		pushPageBreak();
 }
 
 } // namespace NovelTea
