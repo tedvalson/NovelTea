@@ -159,7 +159,7 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 
 	const auto pushSeg = [&](bool forcePush = false) {
 		auto text = str.str();
-		if (text.empty() && !forcePush)
+		if (text.empty() && !newLine && !forcePush)
 			return;
 		result.emplace_back(new StyledSegment(text, styleStack, textDefault, animDefault, newGroup, newLine));
 		newGroup = false;

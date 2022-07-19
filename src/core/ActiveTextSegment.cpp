@@ -239,7 +239,7 @@ size_t ActiveTextSegment::getDurationMs() const
 	auto& anim = getAnimProps();
 	auto duration = anim.duration;
 	if (anim.type == TextEffect::FadeAcross && duration <= 0)
-		duration = 1000.f * getFadeAcrossLength() / 180.f;
+		duration = 1000.f * getFadeAcrossLength() / 280.f;
 	return duration / anim.speed;
 }
 
@@ -513,7 +513,25 @@ void ActiveTextSegment::ensureUpdate() const
 	auto firstSeg = true;
 	for (auto &styledSegment : m_styledSegments)
 	{
-		if (styledSegment->startOnNewLine && m_cursorPos.x > 0)
+		auto& style = styledSegment->style;
+		auto& objectId = style.objectId;
+		auto fontAlias = style.fontAlias;
+		if (fontAlias.empty())
+			fontAlias = ProjData[ID::projectFontDefault].ToString();
+		auto font = Proj.getFont(fontAlias);
+		auto objectExists = false;
+		auto fontSize = 2.f * m_fontSizeMultiplier * style.fontSize;
+		auto color = style.color;
+		if (!objectId.empty()) {
+			objectExists = ActiveGame->getRoom()->containsId(objectId) ||
+						  ActiveGame->getObjectList()->containsId(objectId);
+		}
+		color.a = m_alpha;
+
+		if (m_lineMaxCharSize == 0)
+			m_lineMaxCharSize = fontSize;
+
+		if (styledSegment->startOnNewLine)
 		{
 			if (firstSeg)
 				m_bounds.width = 0;
@@ -523,24 +541,10 @@ void ActiveTextSegment::ensureUpdate() const
 				m_bounds.height += m_lineMaxCharSize + m_lineSpacing;
 			m_cursorPos.y = m_bounds.height;
 			m_bounds.height += m_lineMaxCharSize + m_lineSpacing;
-			m_lineMaxCharSize = 0;
+			m_lineMaxCharSize = fontSize;
 			m_cursorPos.x = 0.f;
 			lastCodePoint = 0;
 		}
-
-		auto& style = styledSegment->style;
-		auto& objectId = style.objectId;
-		auto fontAlias = style.fontAlias;
-		if (fontAlias.empty())
-			fontAlias = ProjData[ID::projectFontDefault].ToString();
-		auto font = Proj.getFont(fontAlias);
-		auto objectExists = false;
-		auto color = style.color;
-		if (!objectId.empty()) {
-			objectExists = ActiveGame->getRoom()->containsId(objectId) ||
-						  ActiveGame->getObjectList()->containsId(objectId);
-		}
-		color.a = m_alpha;
 
 		m_cursorPos.x += style.xOffset;
 		m_cursorPos.y += style.yOffset;
@@ -549,7 +553,7 @@ void ActiveTextSegment::ensureUpdate() const
 			continue;
 		firstSeg = false;
 
-		auto spaceWidth = font->getGlyph(L' ', 2.f * m_fontSizeMultiplier * style.fontSize, false).advance;
+		auto spaceWidth = font->getGlyph(L' ', fontSize, false).advance;
 		bool bold = style.fontStyle & sf::Text::Bold;
 
 		auto words = split(styledSegment->text, " ");
@@ -566,7 +570,7 @@ void ActiveTextSegment::ensureUpdate() const
 		{
 			TweenText text;
 			text.setFont(*font);
-			text.setCharacterSize(2.f * m_fontSizeMultiplier * style.fontSize);
+			text.setCharacterSize(fontSize);
 			text.setStyle(style.fontStyle);
 			text.setOutlineColor(style.outlineColor);
 			text.setOutlineThickness(style.outlineThickness);
@@ -609,7 +613,7 @@ void ActiveTextSegment::ensureUpdate() const
 			bool appliedFirstKerning = false;
 			for (auto c : string.toUtf32())
 			{
-				auto kerning = font->getKerning(lastCodePoint, c, text.getCharacterSize());
+				auto kerning = font->getKerning(lastCodePoint, c, fontSize);
 				m_cursorPos.x += kerning;
 				if (!appliedFirstKerning) {
 					appliedFirstKerning = true;
@@ -620,7 +624,7 @@ void ActiveTextSegment::ensureUpdate() const
 					m_cursorPos.x += spaceWidth * 4;
 					continue;
 				}
-				auto& glyph = font->getGlyph(c, text.getCharacterSize(), bold, style.outlineThickness);
+				auto& glyph = font->getGlyph(c, fontSize, bold, style.outlineThickness);
 				m_cursorPos.x += glyph.advance;
 			}
 			lastCodePoint = L' ';
