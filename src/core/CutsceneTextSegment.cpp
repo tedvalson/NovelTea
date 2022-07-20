@@ -5,7 +5,11 @@ namespace NovelTea
 {
 
 CutsceneTextSegment::CutsceneTextSegment()
+: m_offsetX(0)
+, m_offsetY(0)
+, m_transition(TextEffect::Fade)
 {
+	setText("");
 }
 
 json CutsceneTextSegment::toJson() const
@@ -60,11 +64,13 @@ void CutsceneTextSegment::setText(const std::string &text)
 	textProps.yOffset = getOffsetY();
 
 	AnimationProperties anim;
-	anim.type      = TextEffect::Fade;
+	anim.type      = getTransition();
 	anim.duration  = getDuration();
 	anim.delay     = getDelay();
 	anim.skippable = getCanSkip();
-	anim.waitForClick = getWaitForClick();
+	anim.waitForClick = false;
+	if (anim.type == TextEffect::FadeAcross)
+		anim.equation = &TweenEngine::TweenEquations::easeInOutLinear;
 	m_activeText = std::make_shared<ActiveText>(m_text, textProps, anim);
 }
 

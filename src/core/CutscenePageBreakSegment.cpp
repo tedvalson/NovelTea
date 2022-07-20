@@ -5,7 +5,7 @@ namespace NovelTea
 
 CutscenePageBreakSegment::CutscenePageBreakSegment()
 {
-	setWaitForClick(true);
+	setWaitForClick(false);
 	setCanSkip(false);
 }
 

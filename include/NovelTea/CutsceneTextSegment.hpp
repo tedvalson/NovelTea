@@ -29,10 +29,10 @@ public:
 	ADD_ACCESSOR(bool, BeginWithNewLine, m_beginWithNewline)
 
 private:
-	bool m_beginWithNewline = false;
-	int m_offsetX = 0;
-	int m_offsetY = 0;
-	TextEffect m_transition = TextEffect::Fade;
+	bool m_beginWithNewline;
+	int m_offsetX;
+	int m_offsetY;
+	TextEffect m_transition;
 	std::shared_ptr<ActiveText> m_activeText;
 	std::string m_text;
 };
