@@ -239,7 +239,7 @@ size_t ActiveTextSegment::getDurationMs() const
 	auto& anim = getAnimProps();
 	auto duration = anim.duration;
 	if (anim.type == TextEffect::FadeAcross && duration <= 0)
-		duration = 1000.f * getFadeAcrossLength() / 280.f;
+		duration = 1000.f * getFadeAcrossLength() / 280.f; // TODO: Change based on font multiplier
 	return duration / anim.speed;
 }
 
@@ -336,7 +336,8 @@ void ActiveTextSegment::setFadeAcrossPosition(float position)
 				w -= startX;
 			p += w + m_shapeFade.getSize().y;
 			if (p > pos) {
-				m_shape.setPosition(w - p + pos, line.y);
+				m_sprite.setPosition({0.f, line.y});
+				m_shape.setPosition(w - p + pos, 0);
 				if (m_fadeLineIndex == 0)
 					m_shape.move(startX, 0.f);
 				m_shapeFade.setPosition(m_shape.getPosition());
@@ -472,7 +473,13 @@ void ActiveTextSegment::draw(sf::RenderTarget &target, sf::RenderStates states) 
 				lineIndex++;
 			}
 			if (lineIndex == m_fadeLineIndex)
-				m_renderTexture->draw(segment.text, sf::BlendNone);
+			{
+				auto s = states;
+				s.transform = sf::Transform();
+				s.transform.translate({0.f, -segment.text.getPosition().y});
+				s.blendMode = sf::BlendNone;
+				m_renderTexture->draw(segment.text, s);
+			}
 			else if (lineIndex > m_fadeLineIndex)
 				break;
 			else

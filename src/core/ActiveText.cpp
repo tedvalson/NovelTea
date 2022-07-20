@@ -18,6 +18,7 @@ ActiveText::ActiveText()
 , m_isComplete(true)
 , m_isWaitingForClick(false)
 , m_skipWaitingForClick(false)
+, m_size(256.f, 256.f)
 , m_currentSegment(nullptr)
 , m_callback(nullptr)
 {
