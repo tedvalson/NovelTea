@@ -1,4 +1,5 @@
 #include <NovelTea/TextInput.hpp>
+#include <NovelTea/BBCodeParser.hpp>
 #include <SFML/System/Err.hpp>
 
 namespace NovelTea
@@ -57,7 +58,7 @@ TextInputInstance::TextInputInstance(GetTextInputCallback callback)
 void TextInputInstance::callback(const std::string &result)
 {
 	if (m_callback)
-		m_callback(result);
+		m_callback(BBCodeParser::stripTags(result));
 }
 
 } // namespace NovelTea
