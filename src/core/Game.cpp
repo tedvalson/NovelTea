@@ -170,10 +170,11 @@ bool Game::load(int slot)
 
 bool Game::loadLast()
 {
-	auto success = m_saveData->loadLast();
-	if (success)
-		syncToSave();
-	return success;
+	if (!m_saveData->loadLast())
+		return false;
+	syncToSave();
+	m_scriptManager->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
+	return true;
 }
 
 void Game::autosave()
