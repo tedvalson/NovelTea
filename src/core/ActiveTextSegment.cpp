@@ -372,8 +372,10 @@ std::vector<ActiveTextSegment::Segment> &ActiveTextSegment::getSegments()
 
 AnimationProperties &ActiveTextSegment::getAnimProps() const
 {
+	// Return last segment's anim props.
+	// PBreak tag sometimes changes waitForClick flag only in last segment.
 	assert(!m_styledSegments.empty());
-	return m_styledSegments[0]->anim;
+	return m_styledSegments.back()->anim;
 }
 
 bool ActiveTextSegment::update(float delta)

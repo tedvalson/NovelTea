@@ -333,7 +333,7 @@ void DialogueRenderer::changeLine(int newLineIndex)
 
 	// Check last segment to see if it expects to wait for click
 	const auto& segs = m_text.getSegments();
-	auto noWait = !segs.empty() && !segs[segs.size()-1]->getAnimProps().waitForClick;
+	auto noWait = !segs.empty() && !segs.back()->getAnimProps().waitForClick;
 
 	m_text.onComplete([this, newLineIndex, noWait](){
 		if (noWait && continueToNext())
