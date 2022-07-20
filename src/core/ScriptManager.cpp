@@ -20,6 +20,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <SFML/System/FileInputStream.hpp>
+#include <SFML/System/Sleep.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -193,6 +194,9 @@ void ScriptManager::getTextInput(const std::string &message, const DukValue &fun
 			sf::err() << "Error Script::getTextInput: " << e.what() << std::endl;
 		}
 	});
+	// Block execution for platforms (eg. Android) that have non-blocking input methods
+	while (!GTextInput.finished())
+		sf::sleep(sf::milliseconds(10));
 }
 
 void ScriptManager::randSeed(int seed)
