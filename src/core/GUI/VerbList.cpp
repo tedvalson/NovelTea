@@ -310,7 +310,7 @@ void VerbList::addVerbOption(const std::string &verbId)
 	VerbOption option;
 	option.verbId = verbId;
 	option.text.setFillColor(sf::Color::Black);
-	option.text.setFont(*Proj.getFont(0));
+	option.text.setFont(*Proj.getFont());
 
 	auto verb = GSave->get<Verb>(verbId);
 	option.text.setString(verb->getName());

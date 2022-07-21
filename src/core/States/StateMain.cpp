@@ -193,6 +193,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	{
 		auto roomId = entryMetadata[0].ToString();
 		auto mapId = GSave->data()[ID::map].ToString();
+		auto entryPointType = static_cast<EntityType>(saveEntryPoint[0].ToInt());
 		GGame->setMapId(mapId);
 		m_mapRenderer.setActiveRoomId(roomId);
 		m_mapRenderer.setMap(GGame->getMap());
@@ -203,13 +204,13 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			gotoNextEntity();
 		}
 		// Don't double-push room mode
-		if (m_mode != Mode::Room)
+		if (entryPointType != EntityType::Room)
 		{
 			GGame->pushNextEntityJson(saveEntryPoint);
 			if (entryMetadata.size() > 1 && gotoNextEntity()) {
-				if (m_mode == Mode::Cutscene)
+				if (entryPointType == EntityType::Cutscene)
 					m_cutsceneRenderer.restoreState(entryMetadata[1]);
-				else if (m_mode == Mode::Dialogue)
+				else if (entryPointType == EntityType::Dialogue)
 					m_dialogueRenderer.restoreState(entryMetadata[1]);
 			}
 		}
