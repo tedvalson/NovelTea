@@ -440,7 +440,7 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		else if (propertyName == propBeginNewLine)
 			textSegment->setBeginWithNewLine(value.toBool());
 		else if (propertyName == propTextEffect)
-			textSegment->setTransition(value.value<NovelTea::TextEffect>());
+			textSegment->setTransition(static_cast<NovelTea::TextEffect>(value.toInt()));
 		else if (propertyName == propOffset) {
 			auto point = value.toPoint();
 			textSegment->setOffsetX(point.x());
@@ -468,7 +468,7 @@ void CutsceneWidget::segmentPropertyChanged(QtProperty *property, const QVariant
 		else if (propertyName == propTextDelimiter)
 			pageSegment->setTextDelimiter(EditorUtils::unescape(value.toString()).toStdString());
 		else if (propertyName == propTextEffect)
-			pageSegment->setTextEffect(value.value<NovelTea::TextEffect>());
+			pageSegment->setTextEffect(static_cast<NovelTea::TextEffect>(value.toInt()));
 		else if (propertyName == propTextDuration)
 			pageSegment->setTextDuration(value.toInt());
 		else if (propertyName == propTextDelay)
