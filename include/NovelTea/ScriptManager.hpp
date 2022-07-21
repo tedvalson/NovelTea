@@ -22,8 +22,8 @@ public:
 	~ScriptManager();
 	void reset();
 
-	void runScript(std::shared_ptr<Script> script);
-	void runScriptId(const std::string &scriptId);
+	DukValue runScript(std::shared_ptr<Script> script);
+	DukValue runScriptId(const std::string &scriptId);
 
 	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script);
 	bool runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds);
@@ -52,7 +52,7 @@ public:
 		}
 		catch (std::exception &e)
 		{
-			sf::err() << e.what() << std::endl;
+			sf::err() << "ScriptManager::run() " << e.what() << std::endl;
 			throw e;
 		}
 	}

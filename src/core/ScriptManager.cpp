@@ -94,15 +94,20 @@ void ScriptManager::reset()
 	runAutorunScripts();
 }
 
-void ScriptManager::runScript(std::shared_ptr<Script> script)
+DukValue ScriptManager::runScript(std::shared_ptr<Script> script)
 {
-	setActiveEntity(script);
-	runInClosure(script->getContent());
+	try {
+		setActiveEntity(script);
+		return runInClosure<DukValue>(script->getContent());
+	} catch (std::exception &e) {
+		sf::err() << "ScriptManager::runScript " << e.what() << std::endl;
+		return dukglue_peval<DukValue>(m_context, "\"#Error# runScript\"");
+	}
 }
 
-void ScriptManager::runScriptId(const std::string &scriptId)
+DukValue ScriptManager::runScriptId(const std::string &scriptId)
 {
-	runScript(m_game->getSaveData()->get<Script>(scriptId));
+	return runScript(m_game->getSaveData()->get<Script>(scriptId));
 }
 
 bool ScriptManager::runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script)
@@ -378,7 +383,8 @@ void ScriptManager::runAutorunScripts()
 
 void ScriptManager::checkAutorun(const sj::JSON &j)
 {
-	auto script = m_game->getSaveData()->get<Script>(j[ID::entityId].ToString());
+	auto entityId = j[ID::entityId].ToString();
+	auto script = m_game->getSaveData()->get<Script>(entityId);
 	if (script->getAutorun())
 		runScript(script);
 }
