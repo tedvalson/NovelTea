@@ -15,6 +15,7 @@ jobs:
     steps:
     
     - name: Checkout
+        ls -l ${{ steps.setup-ndk.outputs.ndk-path }}
       uses: actions/checkout@v2
       
     - name: Cache Qt and SFML
@@ -79,13 +80,16 @@ jobs:
         export CMAKE_INCLUDE_PATH=${{ steps.setup.outputs.library }}
         mkdir -p install/NovelTea
         mkdir -p doc/github.io/docs
-        cmake -S . -B build -DBUILD_DOCS=ON -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML
+        cmake -S . -B build -DBUILD_DOCS=ON -DBUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML
+        cmake -S . -B build-test -DBUILD_TESTS=ON -DENABLE_COVERAGE=On -DSFML_DIR=./SFML/install/lib/cmake/SFML
         cmake --build build --config Release --target install
         cmake --build build --config Release --target doc
-        cmake --build build --config Debug --target tests
 
-    - name: Run Tests
+    - name: Compile/Run Tests
       run: |
+        ls -l SFML/install/lib/
+        cp SFML/install/lib/libsfml-* bin/
+        VERBOSE=1 cmake --build build-test --config Release --target tests
         bin/tests
 
     - name: Codecov
@@ -152,7 +156,7 @@ jobs:
         api-level: 16
         script: |
           cd android && ./gradlew installDebug
-          adb shell am start -W -n com.noveltea.launcher/android.app.NativeActivity
+          adb shell am start -n com.noveltea.launcher/android.app.NativeActivity
           sleep 5
           adb shell logcat -d
 

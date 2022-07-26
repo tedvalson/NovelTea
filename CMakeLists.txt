@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.21)
 
 project("NovelTea")
 
@@ -8,6 +8,7 @@ option(BUILD_DOCS "Build doxygen documentation" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EDITOR "Build NovelTea Qt5 editor" ON)
 option(BUILD_ANDROID "Build Android app" OFF)
+option(ENABLE_COVERAGE "Enabled Coverage Flags" OFF)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -59,9 +60,10 @@ set(CMAKE_SKIP_BUILD_RPATH TRUE)
 # set the output directory for libraries and binaries
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # compile flags
-set(NT_TEST_FLAGS "-g -O3 -coverage")
+set(NT_COVERAGE_FLAGS "--coverage")
 set(NT_EDITOR_FLAGS "-g -O3")
 
 add_subdirectory(src)

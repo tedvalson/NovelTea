@@ -87,8 +87,6 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 		auto diff = getStylesDiff(prevStyles, s->styles);
 		if (s->startOnNewLine)
 			result += "\n";
-		if (diff.empty())
-			result += "[p]";
 		for (auto &p : diff) {
 			auto &style = p.first;
 			if (p.second) {
