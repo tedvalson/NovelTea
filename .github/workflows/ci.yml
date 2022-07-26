@@ -87,10 +87,9 @@ jobs:
 
     - name: Compile/Run Tests
       run: |
-        ls -l SFML/install/lib/
-        cp SFML/install/lib/libsfml-* bin/
+        cp SFML/install/lib/libsfml-* bin/test/
         VERBOSE=1 cmake --build build-test --config Release --target tests
-        bin/tests
+        bin/test/tests
 
     - name: Codecov
       if: ${{ runner.os == 'Linux' }}
