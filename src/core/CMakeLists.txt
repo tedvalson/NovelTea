@@ -6,6 +6,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Action.cpp
 	${SRCROOT}/ActiveText.cpp
 	${SRCROOT}/ActiveTextSegment.cpp
+	${SRCROOT}/AssetManager.cpp
 	${SRCROOT}/BBCodeParser.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/CutscenePageBreakSegment.cpp

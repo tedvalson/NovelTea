@@ -1,4 +1,5 @@
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
@@ -21,6 +22,8 @@ void triggerTextInput(const std::string &message, int ref)
 
 int main(int argc, char **argv)
 {
+	NovelTea::AssetPath::set("/home/android/dev/NovelTea/res/assets/");
+	
 	auto dir = "/home/android/dev/NovelTea/bin";
 	GSettings.setDirectory(dir);
 	GSettings.load();

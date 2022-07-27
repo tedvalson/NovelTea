@@ -1,8 +1,6 @@
 #ifndef NOVELTEA_ASSETMANAGER_HPP
 #define NOVELTEA_ASSETMANAGER_HPP
 
-#include <SFML/Audio/Sound.hpp>
-#include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/System/Err.hpp>
 #include <memory>
 #include <map>
@@ -10,6 +8,14 @@
 
 namespace NovelTea
 {
+
+struct AssetPath
+{
+	static void set(const std::string &dirName);
+	static const std::string &get();
+private:
+	static std::string path;
+};
 
 template <class T>
 class AssetManager
@@ -24,12 +30,13 @@ public:
 		{
 			std::shared_ptr<T> asset(new T);
 #ifdef ANDROID
-			if (!asset->loadFromFile(filename))
+			auto fullPath = filename;
 #else
-			if (!asset->loadFromFile("/home/android/dev/NovelTea/res/assets/" + filename))
+			auto fullPath = AssetPath::get() + filename;
 #endif
+			if (!asset->loadFromFile(fullPath))
 			{
-				sf::err() << "Failed to load asset: " << filename << std::endl;
+				sf::err() << "Failed to load asset: " << fullPath << std::endl;
 				return nullptr;
 			}
 			manager.m_assets.insert(std::make_pair(filename, asset));
