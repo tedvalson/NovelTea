@@ -52,10 +52,10 @@ include_directories(
 )
 
 # C++11 support
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
-# disable the rpath stuff
-set(CMAKE_SKIP_BUILD_RPATH TRUE)
+# rpath stuff
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
 # set the output directory for libraries and binaries
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
@@ -72,5 +72,6 @@ if(BUILD_DOCS)
 	add_subdirectory(doc)
 endif()
 if(BUILD_TESTS)
+	enable_testing()
 	add_subdirectory(test)
 endif()
