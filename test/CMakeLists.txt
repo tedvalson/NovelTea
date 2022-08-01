@@ -20,6 +20,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${DESTROOT})
 set(SRCTESTS
 	${SRCROOT}/main.cpp
 	${SRCROOT}/BBCodeParser.cpp
+	${SRCROOT}/Dialogue.cpp
+	${SRCROOT}/Engine.cpp
 )
 
 set(NTP_FILES

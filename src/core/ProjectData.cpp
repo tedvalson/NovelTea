@@ -18,6 +18,7 @@ namespace NovelTea
 ProjectData::ProjectData()
 : m_loaded(false)
 {
+	newProject();
 }
 
 ProjectData::~ProjectData()
@@ -56,8 +57,8 @@ void ProjectData::newProject()
 	});
 
 	j[ID::engineFonts] = json({
-	   "sys", "LiberationSans",
-	   "sysIcon", "fontawesome",
+	   "sys", "LiberationSans.ttf",
+	   "sysIcon", "fontawesome.ttf",
    });
 	fromJson(j);
 }
@@ -344,13 +345,8 @@ bool ProjectData::fromJson(const json &j)
 			m_fonts[jfont.first] = font;
 	}
 
-	GMan; // Make sure GameManager is initialized
 	m_json = j;
 	m_loaded = true;
-	if (ActiveGame == GMan.getDefault())
-		ActiveGame->initialize();
-	else
-		ActiveGame->reset();
 
 	return true;
 }
