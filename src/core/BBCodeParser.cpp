@@ -79,7 +79,7 @@ TweenEngine::TweenEquation* getTweenEquation(const std::string &funcName)
 	return nullptr;
 }
 
-std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags)
+std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags, bool closeTags)
 {
 	std::string result;
 	std::vector<TextStyle> prevStyles;
@@ -89,6 +89,17 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 			result += "\n";
 		for (auto &p : diff) {
 			auto &style = p.first;
+			// Handle PBreak specially, ignoring "opening" tag
+			if (style.tagName == "p") {
+				if (!p.second) {
+					result += "[p";
+					if (!style.params.empty())
+						result += "=" + style.params["delay"];
+					result += "]";
+				}
+				continue;
+			}
+			// If style is new (ie. opening tag)
 			if (p.second) {
 				result += "["+style.tagName;
 				if (!style.params.empty()) {
@@ -96,8 +107,15 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 						result += "=" + style.params["id"];
 					}
 					else
-						for (auto &param : style.params)
-							result += " " + param.first + "=" + param.second;
+						for (auto &param : style.params) {
+							if (shortTags) {
+								auto name = param.first;
+								if (name != TextAnimation::CanSkip)
+									name = name.substr(0,1);
+								result += " " + name + "=" + param.second;
+							} else
+								result += " " + param.first + "=" + param.second;
+						}
 				}
 				result += "]";
 			} else {
@@ -106,6 +124,16 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 		}
 		result += s->text;
 		prevStyles = s->styles;
+	}
+	if (closeTags) {
+		std::vector<std::string> closedTags;
+		for (auto& style : prevStyles) {
+			auto& tag = style.tagName;
+			if (std::find(closedTags.begin(), closedTags.end(), tag) == closedTags.end()) {
+				closedTags.push_back(tag);
+				result += "[/"+tag+"]";
+			}
+		}
 	}
 	return result;
 }
@@ -201,8 +229,11 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 						itStyle = std::find_if(itStyle, styleStack.rend(), [style](TextStyle &s){
 							return s.tagName == style.tagName;
 						});
-						if (itStyle == styleStack.rend())
-							throw std::exception();
+						// Ignore (and remove) closing tags that were never opened
+						if (itStyle == styleStack.rend()) {
+							it = r;
+							continue;
+						}
 					}
 
 					pushSeg();

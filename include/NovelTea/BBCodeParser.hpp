@@ -42,7 +42,7 @@ struct StyledSegment {
 class BBCodeParser
 {
 public:
-	static std::string makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags = true);
+	static std::string makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags = true, bool closeTags = false);
 	static std::vector<std::shared_ptr<StyledSegment>> makeSegments(const std::string &text, const TextProperties &textDefault = TextProperties(), const AnimationProperties &animDefault = AnimationProperties());
 	static std::string stripTags(const std::string &bbstring);
 
