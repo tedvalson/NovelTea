@@ -25,7 +25,7 @@ jobs:
         path: |
           ${{ github.workspace }}/Qt
           SFML/install
-        key: ${{ runner.os }}-NovelTea7
+        key: ${{ runner.os }}-NovelTea9
         
     - name: Setup MacOS Environment
       if: ${{ runner.os == 'macOS' }}
@@ -61,7 +61,7 @@ jobs:
       with:
         repository: tedvalson/SFML
         path: SFML
-        ref: 'noveltea'
+        ref: '2.6.x'
 
     - name: Compile SFML
       if: ${{ !steps.cache.outputs.cache-hit }}
@@ -80,15 +80,16 @@ jobs:
         mkdir -p install/NovelTea
         mkdir -p doc/github.io/docs
         cmake -S . -B build -DBUILD_DOCS=ON -DBUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=./install/NovelTea -DSFML_DIR=./SFML/install/lib/cmake/SFML
-        cmake -S . -B build-test -DBUILD_TESTS=ON -DENABLE_COVERAGE=On -DSFML_DIR=./SFML/install/lib/cmake/SFML
+        cmake -S . -B build-test -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON -DSFML_DIR=./SFML/install/lib/cmake/SFML
         cmake --build build --config Release --target install
         cmake --build build --config Release --target doc
 
     - name: Compile/Run Tests
-      run: |
-        cp -r SFML/install/lib/* bin/test/ || true
-        cmake --build build-test --config Release --target tests
-        ctest -C Release --output-on-failure --test-dir build-test
+      uses: GabrielBB/xvfb-action@v1.6
+      with:
+        run: |
+          cmake --build build-test --config Release --target tests
+          ctest -C Release --output-on-failure --test-dir build-test
 
     - name: Codecov
       if: ${{ runner.os == 'Linux' }}
@@ -137,7 +138,7 @@ jobs:
       with:
         repository: tedvalson/SFML
         path: SFML
-        ref: 'noveltea'
+        ref: '2.6.x'
 
     - name: Compile SFML and NovelTea
       run: sh .github/build_android.sh ${{ steps.setup-ndk.outputs.ndk-path }}
