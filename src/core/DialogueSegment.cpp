@@ -1,6 +1,7 @@
 #include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/StringUtils.hpp>
@@ -8,8 +9,9 @@
 namespace NovelTea
 {
 
-DialogueSegment::DialogueSegment()
-: m_id(-1)
+DialogueSegment::DialogueSegment(Context *context)
+: ContextObject(context)
+, m_id(-1)
 , m_linkId(-1)
 , m_type(Type::Invalid)
 , m_conditionalEnabled(false)
@@ -52,14 +54,14 @@ void DialogueSegment::clearChildren()
 void DialogueSegment::run(int buttonSubindex)
 {
 	if (m_autosave)
-		ActiveGame->autosave();
+		GGame->autosave();
 	if (!m_scriptEnabled)
 		return;
 	try {
-		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
+		auto dialogue = GGame->get<Dialogue>(m_dialogue->getId());
 		auto script = "var buttonIndex=" + std::to_string(buttonSubindex) + ";\n" + m_script;
-		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
-		ActiveGame->getScriptManager()->runInClosure(script);
+		ScriptMan->setActiveEntity(dialogue);
+		ScriptMan->runInClosure(script);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::run() " << e.what() << std::endl;
 	}
@@ -73,10 +75,10 @@ bool DialogueSegment::conditionPasses(int buttonSubindex) const
 		return false;
 
 	try {
-		auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
+		auto dialogue = GGame->get<Dialogue>(m_dialogue->getId());
 		auto script = "var buttonIndex=" + std::to_string(buttonSubindex) + ";\n" + m_conditionScript + "\nreturn false;";
-		ActiveGame->getScriptManager()->setActiveEntity(dialogue);
-		return ActiveGame->getScriptManager()->runInClosure<bool>(script);
+		ScriptMan->setActiveEntity(dialogue);
+		return ScriptMan->runInClosure<bool>(script);
 	} catch (std::exception &e) {
 		std::cerr << "DialogueSegment::conditionPasses() " << e.what() << std::endl;
 		return false;
@@ -91,16 +93,16 @@ std::string DialogueSegment::getText(bool *ok, int buttonSubIndex) const
 
 		if (m_dialogue)
 		{
-			auto dialogue = GSave->get<Dialogue>(m_dialogue->getId());
-			ActiveGame->getScriptManager()->setActiveEntity(dialogue);
+			auto dialogue = GGame->get<Dialogue>(m_dialogue->getId());
+			ScriptMan->setActiveEntity(dialogue);
 		}
 
 		if (m_scriptedText)
 		{
 			auto script = "var buttonIndex=" + std::to_string(buttonSubIndex) + ";\n" + m_textRaw + "\nreturn \"\"";
-			return ActiveGame->getScriptManager()->runInClosure<std::string>(script);
+			return ScriptMan->runInClosure<std::string>(script);
 		} else
-			return ActiveGame->getScriptManager()->evalExpressions(m_textRaw);
+			return ScriptMan->evalExpressions(m_textRaw);
 	} catch (std::exception &e) {
 		if (ok)
 			*ok = false;

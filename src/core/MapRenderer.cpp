@@ -1,5 +1,6 @@
 #include <NovelTea/MapRenderer.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/TextTypes.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/ActiveText.hpp>
@@ -13,8 +14,9 @@
 namespace NovelTea
 {
 
-MapRenderer::MapRenderer()
-: m_needsUpdate(true)
+MapRenderer::MapRenderer(Context *context)
+: ContextObject(context)
+, m_needsUpdate(true)
 , m_showEverything(false)
 , m_nameAlpha(255.f)
 , m_zoomFactor(3.f)
@@ -24,13 +26,14 @@ MapRenderer::MapRenderer()
 , m_modeTransitioning(false)
 , m_modeLocked(false)
 , m_miniMapRadius(0.f)
+, m_buttonClose(context)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/minimap.png");
 	m_spriteCircle.setTexture(*texture, true);
 
 	m_bgShape.setFillColor(sf::Color(210, 210, 210));
 
-	m_buttonClose.getText().setFont(*Proj.getFont("sysIcon"));
+	m_buttonClose.getText().setFont(*Proj->getFont("sysIcon"));
 	m_buttonClose.setString(L"\uf00d");
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);
@@ -144,7 +147,7 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 		shape->setPosition(borderShape->getPosition() + vecThickness);
 		shape->setFillColor(sf::Color::White);
 
-		auto text = new ActiveText;
+		auto text = new ActiveText(getContext());
 		TextProperties style;
 		style.fontSize = multiplier;
 		text->setAlpha(m_nameAlpha);
@@ -351,7 +354,7 @@ void MapRenderer::evaluateScripts()
 {
 	if (!m_map)
 		return;
-	ActiveGame->getScriptManager()->setActiveEntity(m_map);
+	ScriptMan->setActiveEntity(m_map);
 	for (auto& room : m_rooms)
 		room->visible = m_map->evalVisibility(room->room);
 	for (auto& path : m_paths)

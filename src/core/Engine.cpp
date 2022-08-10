@@ -1,5 +1,8 @@
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/TextInput.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/States/StateIntro.hpp>
@@ -17,27 +20,11 @@ using namespace std::chrono;
 namespace NovelTea
 {
 
-EngineConfig::EngineConfig()
-	: width(1024)
-	, height(720)
-	, fps(30)
-	, fontSizeMultiplier(1.f)
-	, dpiMultiplier(1.f)
-	, backgroundColor(sf::Color(200, 200, 200))
-	, initialState(StateID::Intro)
-	, orientation(EngineOrientation::Auto)
+Engine::Engine(Context* context)
+	: ContextObject(context)
+	, m_framerateLocked(false)
+	, m_stateStack(new StateStack(context))
 {
-
-}
-
-Engine::Engine(EngineConfig config)
-	: m_config(config)
-	, m_framerateLocked(true)
-	, m_game(new Game)
-{
-	auto stateStack = new StateStack(State::Context(m_config, m_game, m_data));
-	m_stateStack = std::unique_ptr<StateStack>(stateStack);
-
 	m_stateStack->registerState<StateEditor>(StateID::Editor);
 	m_stateStack->registerState<StateIntro>(StateID::Intro);
 	m_stateStack->registerState<StateMain>(StateID::Main);
@@ -48,9 +35,62 @@ Engine::Engine(EngineConfig config)
 	m_stateStack->registerState<StateTitleScreen>(StateID::TitleScreen);
 }
 
-void Engine::run()
+int Engine::run()
 {
+	initialize();
 
+	sf::RenderWindow window(sf::VideoMode(GConfig.width, GConfig.height, 16), "NovelTea Launcher");
+
+	GTextInput.textInputTrigger = [&window](const std::string &message, int ref) {
+		std::string input;
+		std::cout << message << std::endl;
+		std::cout << "Waiting for input..." << std::endl;
+		std::cin >> input;
+		std::cout << "Input: \"" << input << "\"" << std::endl;
+		GTextInput.callback(input, ref);
+		// Purge events received while waiting for standard input
+		sf::Event event;
+		while (window.pollEvent(event)) {}
+	};
+
+	auto active = true;
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (active ? window.pollEvent(event) : window.waitEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			else if (event.type == sf::Event::Resized)
+				resize(event.size.width, event.size.height);
+			else if (event.type == sf::Event::LostFocus)
+				active = false;
+			else if (event.type == sf::Event::GainedFocus) {
+				update(0.f);
+				active = true;
+			}
+
+			processEvent(event);
+		}
+
+		update();
+		render(window);
+		window.display();
+	}
+	return 0;
+}
+
+void Engine::initialize()
+{
+	if (!getContext()->initialize())
+		return;
+
+	m_lastTime = getSystemTimeMs();
+	m_deltaPerFrame = 1.f / GConfig.maxFps;
+
+	resize(GConfig.width, GConfig.height);
+
+	m_stateStack->pushState(GConfig.initialState);
 }
 
 bool Engine::isRunning() const
@@ -67,7 +107,7 @@ void Engine::resize(size_t width, size_t height)
 	m_renderTexture.setSmooth(true);
 	m_sprite.setTexture(m_renderTexture.getTexture(), true);
 
-	m_game->getNotificationManager()->setScreenSize(sf::Vector2f(width, height));
+	NotificationMan->setScreenSize(sf::Vector2f(width, height));
 
 	sf::FloatRect viewport;
 	sf::Vector2f widgetSize(width, height);
@@ -91,17 +131,15 @@ void Engine::resize(size_t width, size_t height)
 	m_view.setViewport(viewport);
 	m_width = width;
 	m_height = height;
-	m_config.width = width;
-	m_config.height = height;
+//	m_config.width = width;
+//	m_config.height = height;
 
 	m_stateStack->resize(sf::Vector2f(width, height));
 }
 
 void Engine::render(sf::RenderTarget &target)
 {
-	GMan.setActive(m_game);
-
-	m_renderTexture.clear(m_config.backgroundColor);
+	m_renderTexture.clear(GConfig.backgroundColor);
 	m_stateStack->render(m_renderTexture);
 	m_renderTexture.display();
 
@@ -127,7 +165,6 @@ void Engine::update()
 
 void Engine::update(float deltaSeconds)
 {
-	GMan.setActive(m_game);
 	m_lastTime = getSystemTimeMs();
 	if (deltaSeconds > 0.f)
 		m_stateStack->update(deltaSeconds);
@@ -135,7 +172,6 @@ void Engine::update(float deltaSeconds)
 
 void Engine::processEvent(const sf::Event &event)
 {
-	GMan.setActive(m_game);
 	auto e = event;
 	sf::Vector2i pos;
 
@@ -184,7 +220,6 @@ void Engine::processEvent(const sf::Event &event)
 
 void *Engine::processData(void *data)
 {
-	GMan.setActive(m_game);
 	return m_stateStack->processData(data);
 }
 
@@ -195,11 +230,6 @@ size_t Engine::getSystemTimeMs()
 	return ts.count();
 }
 
-std::shared_ptr<Game> Engine::getGame()
-{
-	return m_game;
-}
-
 void Engine::setFramerateLocked(bool locked)
 {
 	m_framerateLocked = locked;
@@ -208,19 +238,6 @@ void Engine::setFramerateLocked(bool locked)
 bool Engine::getFramerateLocked() const
 {
 	return m_framerateLocked;
-}
-
-void Engine::initialize()
-{
-	GMan.setActive(m_game);
-	m_game->initialize();
-	m_game->getSaveData()->setDirectory(m_config.saveDir);
-	m_lastTime = getSystemTimeMs();
-	m_deltaPerFrame = 1.f / m_config.fps;
-
-	resize(m_config.width, m_config.height);
-
-	m_stateStack->pushState(m_config.initialState);
 }
 
 sf::Vector2f Engine::mapPixelToCoords(const sf::Vector2i &point) const

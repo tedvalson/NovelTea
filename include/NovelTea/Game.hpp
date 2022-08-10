@@ -1,13 +1,12 @@
 #ifndef NOVELTEA_GAME_HPP
 #define NOVELTEA_GAME_HPP
 
+#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SaveData.hpp>
 #include <NovelTea/Entity.hpp>
 #include <NovelTea/Utils.hpp>
 #include <queue>
-
-#define GMan NovelTea::GameManager::instance()
-#define ActiveGame GMan.getActive()
-#define GSave ActiveGame->getSaveData()
 
 namespace NovelTea
 {
@@ -19,18 +18,15 @@ class ObjectList;
 class Map;
 class Room;
 class SaveData;
-class ScriptManager;
-class NotificationManager;
-class TextLog;
-class TimerManager;
+class Settings;
 
-class Game
+class Game : public ContextObject
 {
 public:
-	Game();
+	Game(Context* context);
 	~Game();
 
-	void initialize();
+	bool initialize();
 	void reset();
 
 	void setRoomId(const std::string &roomId);
@@ -63,11 +59,12 @@ public:
 	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
 	void execMessageCallbackLog(const std::vector<std::string> &messageArray, const DukValue &callback);
 
-	std::shared_ptr<ScriptManager> getScriptManager();
-	std::shared_ptr<SaveData> getSaveData();
-	std::shared_ptr<TimerManager> getTimerManager();
-	std::shared_ptr<NotificationManager> getNotificationManager();
-	std::shared_ptr<TextLog> getTextLog();
+	std::shared_ptr<Settings> getSettings() const { return m_settings; }
+	std::shared_ptr<SaveData> getSaveData() const { return m_saveData; }
+	std::shared_ptr<ProjectData> getProjectData() const { return m_projectData; }
+
+	std::string getParentId(const std::string &entityType, const std::string &entityId);
+	void set(std::shared_ptr<Entity> obj, const std::string &idName = std::string());
 
 	ADD_ACCESSOR(bool, AutosaveEnabled, m_autosaveEnabled)
 	ADD_ACCESSOR(bool, MinimapEnabled, m_minimapEnabled)
@@ -76,6 +73,37 @@ public:
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
 	ADD_ACCESSOR(SaveCallback, SaveCallback, m_saveCallback)
+
+	template <typename T>
+	std::shared_ptr<T> makeContextObject()
+	{
+		return std::make_shared<T>(getContext());
+	}
+
+	template <typename T>
+	bool exists(const std::string &idName)
+	{
+		if (idName.empty())
+			return false;
+		return (m_projectData->data()[T::id].hasKey(idName) || m_saveData->data()[T::id].hasKey(idName));
+	}
+
+	template <typename T>
+	std::shared_ptr<T> get(const std::string &idName)
+	{
+		auto result = std::make_shared<T>(getContext());
+		if (exists<T>(idName))
+		{
+			if (m_saveData->data()[T::id].hasKey(idName))
+				result->fromJson(m_saveData->data()[T::id][idName]);
+			else
+				result->fromJson(m_projectData->data()[T::id][idName]);
+		} else {
+			if (!idName.empty())
+				std::cerr << "Warning: Entity doesn't exist - " << T::id << " '" << idName << "'" << std::endl;
+		}
+		return result;
+	}
 
 private:
 	std::shared_ptr<ObjectList> m_objectList;
@@ -93,29 +121,9 @@ private:
 	MessageCallback m_messageCallback;
 	SaveCallback m_saveCallback;
 
+	std::shared_ptr<Settings> m_settings;
+	std::shared_ptr<ProjectData> m_projectData;
 	std::shared_ptr<SaveData> m_saveData;
-	std::shared_ptr<TimerManager> m_timerManager;
-	std::shared_ptr<NotificationManager> m_notificationManager;
-	std::shared_ptr<TextLog> m_textLog;
-	std::shared_ptr<ScriptManager> m_scriptManager; // Initialize last
-};
-
-
-class GameManager
-{
-public:
-	static GameManager &instance();
-
-	std::shared_ptr<Game> getActive() const;
-	std::shared_ptr<Game> getDefault() const;
-	void setActive(std::shared_ptr<Game> game);
-	void setDefault();
-
-protected:
-	GameManager();
-private:
-	std::shared_ptr<Game> m_activeGame;
-	std::shared_ptr<Game> m_defaultGame;
 };
 
 } // namespace NovelTea

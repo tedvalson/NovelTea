@@ -6,7 +6,10 @@
 namespace NovelTea
 {
 
-TextLogDialogueTextItem::TextLogDialogueTextItem(const std::string &name, const std::string &text)
+TextLogDialogueTextItem::TextLogDialogueTextItem(Context *context, const std::string &name, const std::string &text)
+	: TextLogItem(context)
+	, m_text(context)
+	, m_textName(context)
 {
 	m_hasName = !name.empty();
 	TextProperties textProps;

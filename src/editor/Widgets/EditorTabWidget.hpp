@@ -2,6 +2,7 @@
 #define EDITORTABWIDGET_HPP
 
 #include <QWidget>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 
 #define MODIFIER(sender, signal) connect(sender, signal, this, &EditorTabWidget::setModified)
@@ -37,6 +38,8 @@ public:
 	const std::string &idName() const;
 	void rename(const std::string &newIdName);
 
+	NovelTea::Context *getContext() const { return m_context; }
+
 	static Type entityTypeToTabType(NovelTea::EntityType entityType);
 	static Type entityTypeToTabType(int entityType);
 	static NovelTea::EntityType tabTypeToEntityType(Type tabType);
@@ -46,6 +49,7 @@ private:
 	virtual void saveData() const = 0;
 	virtual void loadData() = 0;
 public slots:
+	void autosave();
 	void save();
 	void load();
 	void setModified();
@@ -58,7 +62,9 @@ protected:
 	void hideEvent(QHideEvent*) override;
 	std::string m_idName;
 private:
-	bool m_modified = false;
+	bool m_modified;
+	bool m_modifiedBackup;
+	NovelTea::Context *m_context;
 };
 
 #endif // EDITORTABWIDGET_HPP

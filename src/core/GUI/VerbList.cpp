@@ -1,4 +1,5 @@
 #include <NovelTea/GUI/VerbList.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
@@ -11,8 +12,9 @@
 namespace NovelTea
 {
 
-VerbList::VerbList()
-: m_scrollPos(0.f)
+VerbList::VerbList(Context *context)
+: ContextObject(context)
+, m_scrollPos(0.f)
 , m_margin(0.f)
 , m_itemHeight(38.f)
 , m_screenSize(320.f, 400.f)
@@ -190,7 +192,7 @@ void VerbList::setVerbs(const std::string &objectId)
 
 	for (auto it = verbIds.begin(); it != verbIds.end();)
 	{
-		auto verb = GSave->get<Verb>(*it);
+		auto verb = GGame->get<Verb>(*it);
 		if (!verb->checkConditionScript(*it, objectId))
 			verbIds.erase(it);
 		else
@@ -310,9 +312,9 @@ void VerbList::addVerbOption(const std::string &verbId)
 	VerbOption option;
 	option.verbId = verbId;
 	option.text.setFillColor(sf::Color::Black);
-	option.text.setFont(*Proj.getFont());
+	option.text.setFont(*Proj->getFont());
 
-	auto verb = GSave->get<Verb>(verbId);
+	auto verb = GGame->get<Verb>(verbId);
 	option.text.setString(verb->getName());
 	m_verbs.push_back(option);
 }

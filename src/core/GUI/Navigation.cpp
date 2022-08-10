@@ -1,4 +1,5 @@
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <NovelTea/ProjectData.hpp>
@@ -10,18 +11,19 @@
 namespace NovelTea
 {
 
-Navigation::Navigation()
-: m_needsUpdate(true)
+Navigation::Navigation(Context *context)
+	: ContextObject(context)
+, m_needsUpdate(true)
 , m_highlightFactor(1.f)
 , m_alpha(255.f)
 , m_callback(nullptr)
 {
 	m_paths = sj::Array();
 
-	auto font = Proj.getFont("sysIcon");
+	auto font = Proj->getFont("sysIcon");
 	for (int i = 0; i < 8; ++i)
 	{
-		auto button = new Button;
+		auto button = new Button(getContext());
 		button->getText().setFont(*font);
 		button->setString(L"\uf062");
 		button->setColor(sf::Color::Transparent);

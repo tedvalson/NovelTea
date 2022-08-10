@@ -12,6 +12,7 @@ using json = sj::JSON;
 namespace Ui {
 class ActionWidget;
 }
+class ActionBuildWidget;
 
 class ActionWidget : public EditorTabWidget
 {
@@ -31,6 +32,7 @@ private:
 	void loadData() override;
 
 	Ui::ActionWidget *ui;
+	ActionBuildWidget *m_actionBuilder;
 
 	std::vector<QComboBox*> m_comboBoxes;
 	QStringList m_objectStrings;

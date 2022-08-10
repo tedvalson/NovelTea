@@ -7,6 +7,7 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -14,10 +15,12 @@
 namespace NovelTea
 {
 
-CutsceneRenderer::CutsceneRenderer()
-: m_skipWaitingForClick(false)
+CutsceneRenderer::CutsceneRenderer(Context *context)
+: ContextObject(context)
+, m_skipWaitingForClick(false)
 , m_skipScriptSegments(false)
 , m_skipConditionChecks(false)
+, m_icon(context)
 , m_size(400.f, 400.f)
 , m_margin(10.f)
 , m_fontSizeMultiplier(1.f)
@@ -36,7 +39,7 @@ CutsceneRenderer::CutsceneRenderer()
 	text.setString(L"\uf138");
 	text.setFillColor(sf::Color(120, 120, 120, 0));
 
-	setCutscene(std::make_shared<Cutscene>());
+	setCutscene(std::make_shared<Cutscene>(getContext()));
 }
 
 void CutsceneRenderer::setCutscene(const std::shared_ptr<Cutscene> &cutscene)
@@ -72,14 +75,13 @@ void CutsceneRenderer::reset(bool preservePosition)
 
 	m_cutscene->setSkipConditionChecks(m_skipConditionChecks);
 
-	ActiveGame->getScriptManager()->setActiveEntity(m_cutscene);
+	ScriptMan->setActiveEntity(m_cutscene);
 
 	if (preservePosition) {
 		auto skipScripts = m_skipScriptSegments;
 		auto skipWaiting = m_skipWaitingForClick;
 		m_skipScriptSegments = true;
 		m_skipWaitingForClick = true;
-
 
 		addSegmentToQueue(0);
 		update(timePassed.asSeconds());
@@ -439,14 +441,14 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 
 			if (seg->getAutosaveBefore()) {
 				m_segmentSaveIndex = m_segmentIndex;
-				ActiveGame->autosave();
+				GGame->autosave();
 			}
 
 			seg->runScript(m_cutscene);
 
 			if (seg->getAutosaveAfter()) {
 				m_segmentSaveIndex = m_segmentIndex + 1;
-				ActiveGame->autosave();
+				GGame->autosave();
 			}
 		};
 	}

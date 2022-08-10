@@ -1,4 +1,5 @@
 #include <NovelTea/Action.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
@@ -7,10 +8,10 @@
 namespace NovelTea
 {
 
-Action::Action()
-: m_positionDependent(false)
+Action::Action(Context *context)
+	: Entity(context)
+	, m_positionDependent(false)
 {
-	
 }
 
 size_t Action::jsonSize() const
@@ -23,15 +24,8 @@ json Action::toJson() const
 	auto jobjects = sj::Array();
 	for (auto &objectId : m_objectIds)
 		jobjects.append(objectId);
-	auto j = sj::Array(
-		m_id,
-		m_parentId,
-		m_properties,
-		m_verbId,
-		m_script,
-		jobjects,
-		m_positionDependent
-	);
+	auto j = sj::Array(m_id, m_parentId, m_properties, m_verbId, m_script,
+					   jobjects, m_positionDependent);
 	return j;
 }
 
@@ -56,11 +50,10 @@ EntityType Action::entityType() const
 
 void Action::setVerbObjectCombo(const json &j)
 {
-	if (!j.IsArray() || j.size() != 2 ||
-			!j[1].IsArray() || j[1].IsEmpty())
+	if (!j.IsArray() || j.size() != 2 || !j[1].IsArray() || j[1].IsEmpty())
 		return;
 
-	auto verb = GSave->get<Verb>(j[0].ToString());
+	auto verb = GGame->get<Verb>(j[0].ToString());
 	if (!verb)
 		return;
 
@@ -82,17 +75,19 @@ json Action::getVerbObjectCombo() const
 	return j;
 }
 
-bool Action::runScript(const std::string &verbId, const std::vector<std::string> &objectIds)
+bool Action::runScript(const std::string &verbId,
+					   const std::vector<std::string> &objectIds)
 {
 	if (m_script.empty())
 		return true;
 	if (!m_parentId.empty()) {
-		auto parentAction = GSave->get<Action>(m_parentId);
+		auto parentAction = GGame->get<Action>(m_parentId);
 		if (parentAction && !parentAction->runScript(verbId, objectIds))
 			return false;
 	}
-	ActiveGame->getScriptManager()->setActiveEntity(GSave->get<Action>(m_id));
-	return ActiveGame->getScriptManager()->runActionScript(verbId, objectIds, m_script + "\nreturn true;");
+	ScriptMan->setActiveEntity(GGame->get<Action>(m_id));
+	return ScriptMan->runActionScript(verbId, objectIds,
+									  m_script + "\nreturn true;");
 }
 
 bool Action::runScript()
@@ -100,14 +95,15 @@ bool Action::runScript()
 	return runScript(m_verbId, m_objectIds);
 }
 
-std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vector<std::string> &objectIds)
+std::shared_ptr<Action> Action::find(Context *context,
+									 const std::string &verbId,
+									 const std::vector<std::string> &objectIds)
 {
 	// TODO: check SaveData
-	for (auto &item : ProjData[Action::id].ObjectRange())
-	{
+	auto &projData = context->getGame()->getProjectData()->data();
+	for (auto &item : projData[Action::id].ObjectRange()) {
 		auto j = item.second;
-		if (j[3].ToString() == verbId)
-		{
+		if (j[3].ToString() == verbId) {
 			auto match = true;
 			auto &jobjects = j[5];
 			bool positionDependent = j[6].ToBool();
@@ -115,19 +111,19 @@ std::shared_ptr<Action> Action::find(const std::string &verbId, const std::vecto
 			if (objectIds.size() != jobjects.size())
 				continue;
 
-			for (int i = 0; i < jobjects.size(); ++i)
-			{
+			for (int i = 0; i < jobjects.size(); ++i) {
 				auto objectId = jobjects[i].ToString();
-				if ((positionDependent && objectIds[i] != objectId) ||
-					(!positionDependent && std::find(objectIds.begin(), objectIds.end(), objectId) == objectIds.end()))
-				{
+				if ((positionDependent && objectIds[i] != objectId)
+					|| (!positionDependent
+						&& std::find(objectIds.begin(), objectIds.end(),
+									 objectId) == objectIds.end())) {
 					match = false;
 					break;
 				}
 			}
 
 			if (match)
-				return GSave->get<Action>(item.first);
+				return context->getGame()->get<Action>(item.first);
 		}
 	}
 

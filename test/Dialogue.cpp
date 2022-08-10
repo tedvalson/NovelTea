@@ -8,12 +8,17 @@
 using namespace NovelTea;
 
 class DialogueTest : public EngineTest {
+public:
+	DialogueTest()
+	: dr(getContext())
+	{
+		
+	}
 protected:
 	void loadDialogue(const std::string &idName) {
-		auto dialogue = GSave->get<Dialogue>(idName);
+		auto dialogue = Proj->get<Dialogue>(idName, getContext());
 		dr.setDialogue(dialogue);
 	}
-
 	DialogueRenderer dr;
 };
 

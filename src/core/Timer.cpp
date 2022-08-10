@@ -1,12 +1,14 @@
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
 
-Timer::Timer(const DukValue &func)
-	: m_func(func)
+Timer::Timer(Context *context, const DukValue &func)
+	: ContextObject(context)
+	, m_func(func)
 	, m_secondsPassed(0.f)
 	, m_repeat(false)
 	, m_completed(false)
@@ -58,10 +60,11 @@ void Timer::setTimePassed(int timeMs)
 
 void Timer::exec()
 {
-	ActiveGame->getScriptManager()->call<void>(m_func);
+	ScriptMan->call<void>(m_func);
 }
 
-TimerManager::TimerManager()
+TimerManager::TimerManager(Context *context)
+	: ContextObject(context)
 {
 
 }
@@ -92,7 +95,7 @@ bool TimerManager::update(float delta)
 
 std::shared_ptr<Timer> TimerManager::start(int duration, const DukValue &func)
 {
-	auto timer = std::make_shared<Timer>(func);
+	auto timer = std::make_shared<Timer>(getContext(), func);
 	timer->setDuration(duration);
 	m_timers.push_back(timer);
 	return timer;
@@ -100,7 +103,7 @@ std::shared_ptr<Timer> TimerManager::start(int duration, const DukValue &func)
 
 std::shared_ptr<Timer> TimerManager::startRepeat(int duration, const DukValue &func)
 {
-	auto timer = std::make_shared<Timer>(func);
+	auto timer = std::make_shared<Timer>(getContext(), func);
 	if (duration > 0)
 		timer->setDuration(duration);
 	timer->setRepeat(true);

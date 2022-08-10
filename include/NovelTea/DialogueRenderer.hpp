@@ -22,10 +22,10 @@ class DialogueSegment;
 
 using DialogueCallback = std::function<void(int)>;
 
-class DialogueRenderer : public sf::Drawable, public Scrollable
+class DialogueRenderer : public ContextObject, public sf::Drawable, public Scrollable
 {
 public:
-	DialogueRenderer();
+	DialogueRenderer(Context *context);
 
 	void setDialogue(const std::shared_ptr<Dialogue> &dialogue);
 	const std::shared_ptr<Dialogue> &getDialogue() const;

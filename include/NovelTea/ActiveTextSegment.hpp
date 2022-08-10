@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_ACTIVETEXTSEGMENT_HPP
 #define NOVELTEA_ACTIVETEXTSEGMENT_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/TextTypes.hpp>
@@ -15,7 +16,7 @@ namespace NovelTea
 
 struct StyledSegment;
 
-class ActiveTextSegment : public JsonSerializable, public sf::Drawable, public Hideable
+class ActiveTextSegment : public ContextObject, public JsonSerializable, public sf::Drawable, public Hideable
 {
 public:
 	static const int HIGHLIGHTS = 12;
@@ -30,8 +31,8 @@ public:
 		sf::FloatRect bounds;
 	};
 
-	ActiveTextSegment();
-	ActiveTextSegment(const std::vector<std::shared_ptr<StyledSegment>> &segments);
+	ActiveTextSegment(Context *context);
+	ActiveTextSegment(Context *context, const std::vector<std::shared_ptr<StyledSegment>> &segments);
 	void createRenderTexture();
 
 	json toJson() const override;

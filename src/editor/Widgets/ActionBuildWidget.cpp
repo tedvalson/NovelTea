@@ -1,13 +1,15 @@
 #include "ActionBuildWidget.hpp"
 #include "MainWindow.hpp"
 #include "ui_ActionBuildWidget.h"
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Object.hpp>
 #include <QLineEdit>
 #include <iostream>
 
-ActionBuildWidget::ActionBuildWidget(QWidget *parent)
+ActionBuildWidget::ActionBuildWidget(NovelTea::Context *context, QWidget *parent)
 : QWidget(parent)
+, NovelTea::ContextObject(context)
 , ui(new Ui::ActionBuildWidget)
 , m_value(sj::Array("", sj::Array()))
 {
@@ -98,7 +100,7 @@ void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)
 	}
 
 	auto verbId = value.toStdString();
-	auto verb = Proj.get<NovelTea::Verb>(verbId);
+	auto verb = Proj->get<NovelTea::Verb>(verbId, getContext());
 	if (verb)
 	{
 		auto objectCount = verb->getObjectCount();
@@ -124,11 +126,11 @@ void ActionBuildWidget::on_comboVerb_currentIndexChanged(const QString &value)
 bool ActionBuildWidget::isValid() const
 {
 	auto verbId = ui->comboVerb->currentText().toStdString();
-	auto verb = Proj.get<NovelTea::Verb>(verbId);
+	auto verb = Proj->get<NovelTea::Verb>(verbId, getContext());
 	if (!verb || verb->getObjectCount() != m_comboBoxes.size())
 		return false;
 	for (auto &comboBox : m_comboBoxes)
-		if (!Proj.get<NovelTea::Object>(comboBox->currentText().toStdString()))
+		if (!Proj->get<NovelTea::Object>(comboBox->currentText().toStdString(), getContext()))
 			return false;
 	return true;
 }
@@ -166,7 +168,7 @@ void ActionBuildWidget::comboBox_currentIndexChanged(const QString &value)
 	}
 
 	QString actionSentence;
-	auto verb = Proj.get<NovelTea::Verb>(ui->comboVerb->currentText().toStdString());
+	auto verb = Proj->get<NovelTea::Verb>(ui->comboVerb->currentText().toStdString(), getContext());
 	if (verb)
 	{
 		std::vector<std::string> objectIds;

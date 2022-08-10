@@ -26,10 +26,10 @@ FlowScene::~FlowScene()
 	clearScene();
 }
 
-std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity() const
+std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity(NovelTea::Context *context) const
 {
 	std::unordered_map<QUuid, int> n;
-	auto map = std::make_shared<NovelTea::Map>();
+	auto map = std::make_shared<NovelTea::Map>(context);
 	QPointF diff(10000, 10000);
 	for (auto &nodePair : _nodes)
 	{

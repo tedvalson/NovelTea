@@ -1,14 +1,17 @@
 #include <NovelTea/Room.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
+#include <NovelTea/PropertyList.hpp>
 #include <iostream>
 
 namespace NovelTea
 {
 
-Room::Room()
-: m_objectList(std::make_shared<ObjectList>())
+Room::Room(Context *context)
+	: Entity(context)
+	, m_objectList(std::make_shared<ObjectList>(context))
 {
 	m_paths = sj::Array();
 	for (int i = 0; i < 8; ++i)
@@ -81,12 +84,13 @@ bool Room::containsId(const std::string &objectId)
 	return m_objectList->containsId(objectId);
 }
 
-json Room::getProjectRoomObjects()
+json Room::getProjectRoomObjects(Context *context)
 {
 	auto j = sj::Object();
-	if (Proj.isLoaded())
+	auto proj = context->getGame()->getProjectData();
+	if (proj->isLoaded())
 	{
-		for (auto &item : ProjData[id].ObjectRange())
+		for (auto &item : proj->data()[id].ObjectRange())
 		{
 			auto jroom = item.second;
 			auto jobjects = sj::Array();
@@ -132,10 +136,10 @@ int Room::getVisitCount() const
 std::string Room::getDescription() const
 {
 	try {
-		auto room = GSave->get<Room>(m_id);
-		ActiveGame->getScriptManager()->setActiveEntity(room);
+		auto room = GGame->get<Room>(m_id);
+		ScriptMan->setActiveEntity(room);
 		auto script = "var text='';\n" + m_descriptionRaw + "\nreturn text;";
-		auto newDescription = ActiveGame->getScriptManager()->runInClosure<std::string>(script);
+		auto newDescription = ScriptMan->runInClosure<std::string>(script);
 		return GSave->roomDescription(m_id, newDescription);
 	} catch (std::exception &e) {
 		std::cerr << "Room::getDescription " << e.what() << std::endl;
@@ -152,11 +156,11 @@ void Room::sync()
 
 bool Room::runScript(const std::string &script) const
 {
-	auto room = GSave->get<Room>(m_id);
+	auto room = GGame->get<Room>(m_id);
 	auto s = "function _f(room){\n"+script+"\nreturn true;}";
-	ActiveGame->getScriptManager()->setActiveEntity(room);
+	ScriptMan->setActiveEntity(room);
 	try {
-		return ActiveGame->getScriptManager()->call<bool>(s, "_f", room);
+		return ScriptMan->call<bool>(s, "_f", room);
 	} catch (std::exception &e) {
 		std::cerr << "runRoomScript (" << m_id << ") " << e.what() << std::endl;
 		return false;

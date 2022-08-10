@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_ACTIVETEXT_HPP
 #define NOVELTEA_ACTIVETEXT_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/Utils.hpp>
@@ -16,16 +17,16 @@ struct TextProperties;
 
 using ActiveTextCallback = std::function<void()>;
 
-class ActiveText : public sf::Drawable, public Hideable
+class ActiveText : public ContextObject, public sf::Drawable, public Hideable
 {
 public:
 	static const int HIGHLIGHTS = 12;
 
-	ActiveText();
-	ActiveText(const std::string &text);
-	ActiveText(const std::string &text, const AnimationProperties &animDefault);
-	ActiveText(const std::string &text, const TextProperties &textProps);
-	ActiveText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
+	ActiveText(Context *context);
+	ActiveText(Context *context, const std::string &text);
+	ActiveText(Context *context, const std::string &text, const AnimationProperties &animDefault);
+	ActiveText(Context *context, const std::string &text, const TextProperties &textProps);
+	ActiveText(Context *context, const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
 
 	void reset(bool preservePosition = false);
 	void skipToNext(bool skipWaitForClick = false);

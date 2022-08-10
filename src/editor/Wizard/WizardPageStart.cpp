@@ -1,6 +1,7 @@
 #include "WizardPageStart.hpp"
 #include "ui_WizardPageStart.h"
 #include "Wizard.hpp"
+#include "../Widgets/MainWindow.hpp"
 #include <NovelTea/ProjectData.hpp>
 #include <QButtonGroup>
 
@@ -22,7 +23,7 @@ WizardPageStart::WizardPageStart(QWidget *parent) :
 	newSelectionGroup->addButton(ui->radioScript, Wizard::Page::Script);
 	newSelectionGroup->addButton(ui->radioVerb, Wizard::Page::Verb);
 
-	if (!Proj.isLoaded())
+	if (!MainWindow::instance().getProjectBackup()->isLoaded())
 	{
 		ui->radioAction->setEnabled(false);
 		ui->radioCutscene->setEnabled(false);

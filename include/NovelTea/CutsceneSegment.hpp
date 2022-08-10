@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_CUTSCENESEGMENT_HPP
 #define NOVELTEA_CUTSCENESEGMENT_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
 #include <memory>
@@ -8,7 +9,7 @@
 namespace NovelTea
 {
 
-class CutsceneSegment : public JsonSerializable
+class CutsceneSegment : public ContextObject, public JsonSerializable
 {
 public:
 	enum Type {
@@ -24,13 +25,13 @@ public:
 		PageEffectScrollLeft,
 	};
 
-	CutsceneSegment();
+	CutsceneSegment(Context *context);
 	virtual ~CutsceneSegment();
 
 	virtual Type type() const = 0;
 	bool conditionPasses() const;
 
-	static std::shared_ptr<CutsceneSegment> createSegment(const json &j);
+	static std::shared_ptr<CutsceneSegment> createSegment(Context *context, const json &j);
 
 	virtual size_t getFullDuration() const;
 	virtual size_t getFullDelay() const;

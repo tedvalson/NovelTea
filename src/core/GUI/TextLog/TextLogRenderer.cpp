@@ -1,5 +1,5 @@
 #include <NovelTea/GUI/TextLog/TextLogRenderer.hpp>
-#include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/GUI/TextLog/TextLogDialogueOptionItem.hpp>
 #include <NovelTea/GUI/TextLog/TextLogDialogueTextItem.hpp>
@@ -11,8 +11,9 @@
 namespace NovelTea
 {
 
-TextLogRenderer::TextLogRenderer()
-: m_needsUpdate(true)
+TextLogRenderer::TextLogRenderer(Context *context)
+: ContextObject(context)
+, m_needsUpdate(true)
 , m_mousePressed(false)
 , m_numLoaded(0)
 , m_alpha(255.f)
@@ -82,7 +83,7 @@ void TextLogRenderer::repositionItems(float posY, unsigned int startIndex)
 
 void TextLogRenderer::loadItems(unsigned int count)
 {
-	const auto& entries = ActiveGame->getTextLog()->entries();
+	const auto& entries = GTextLog->entries();
 	auto remaining = entries.size() - m_numLoaded;
 	if (count > remaining)
 		count = remaining;
@@ -103,11 +104,11 @@ void TextLogRenderer::loadItems(unsigned int count)
 			if (--i <= endPos)
 				break;
 			++m_numLoaded;
-			item = new TextLogDialogueTextItem(entries[i].text, text);
+			item = new TextLogDialogueTextItem(getContext(), entries[i].text, text);
 		} else if (entry.type == TextLogType::DialogueOption) {
-			item = new TextLogDialogueOptionItem(entry.text);
+			item = new TextLogDialogueOptionItem(getContext(), entry.text);
 		} else {
-			item = new TextLogGenericItem(entry.text);
+			item = new TextLogGenericItem(getContext(), entry.text);
 		}
 
 		if (item)

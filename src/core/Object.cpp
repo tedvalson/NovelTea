@@ -3,8 +3,9 @@
 namespace NovelTea
 {
 
-Object::Object()
-	: m_name("Object Name")
+Object::Object(Context *context)
+	: Entity(context)
+	, m_name("Object Name")
 	, m_caseSensitive(false)
 {
 }

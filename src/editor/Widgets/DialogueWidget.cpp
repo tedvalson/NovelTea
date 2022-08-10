@@ -5,6 +5,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/Game.hpp>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -13,7 +14,7 @@ using NovelTea::DialogueSegment;
 DialogueWidget::DialogueWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::DialogueWidget)
-	, m_treeModel(new DialogueTreeModel)
+	, m_treeModel(new DialogueTreeModel(getContext()))
 	, m_menuTreeView(new QMenu)
 	, m_selectedItem(nullptr)
 	, m_lastLogModeIndex(0)
@@ -76,19 +77,19 @@ void DialogueWidget::saveData() const
 		m_dialogue->setShowDisabledOptions(ui->checkBoxShowDisabled->isChecked());
 		m_dialogue->setEnableDisabledOptions(ui->checkBoxEnableDisabled->isChecked());
 		m_dialogue->setLogMode(static_cast<NovelTea::DialogueTextLogMode>(ui->comboBoxLogMode->currentIndex()));
-		Proj.set<NovelTea::Dialogue>(m_dialogue, idName());
+		Proj->set(m_dialogue, idName());
 	}
 }
 
 void DialogueWidget::loadData()
 {
-	m_dialogue = Proj.get<NovelTea::Dialogue>(idName());
+	m_dialogue = Proj->get<NovelTea::Dialogue>(idName(), getContext());
 
 	if (!m_dialogue)
 	{
 		// Dialogue is new, so show it as modified
 		setModified();
-		m_dialogue = std::make_shared<NovelTea::Dialogue>();
+		m_dialogue = std::make_shared<NovelTea::Dialogue>(getContext());
 	}
 
 	m_treeModel->loadDialogue(m_dialogue);
@@ -203,7 +204,7 @@ void DialogueWidget::checkIndexChange()
 	else if (m_selectedItem)
 	{
 		auto type = m_selectedItem->getDialogueSegment()->getType();
-		auto segment = std::make_shared<DialogueSegment>();
+		auto segment = std::make_shared<DialogueSegment>(getContext());
 		segment->setType(type);
 		segment->setDialogue(m_dialogue.get());
 
@@ -253,7 +254,7 @@ void DialogueWidget::on_actionAddObject_triggered()
 	if (type == DialogueSegment::Link)
 		return;
 
-	auto newSegment = std::make_shared<DialogueSegment>();
+	auto newSegment = std::make_shared<DialogueSegment>(getContext());
 	newSegment->setDialogue(m_dialogue.get());
 	if (type == DialogueSegment::Root || type == DialogueSegment::Option)
 	{
@@ -355,7 +356,7 @@ void DialogueWidget::on_actionPlayFromHere_triggered()
 		if (result == QMessageBox::Cancel)
 			return;
 		save();
-		Proj.saveToFile();
+		Proj->saveToFile();
 	}
 	int i = m_selectedItem->getDialogueSegment()->getId();
 	MainWindow::instance().launchPreview(NovelTea::EntityType::Dialogue, idName(), sj::Array("", i));

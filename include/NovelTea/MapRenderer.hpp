@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_MAPRENDERER_HPP
 #define NOVELTEA_MAPRENDERER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <NovelTea/Map.hpp>
@@ -19,7 +20,7 @@ namespace NovelTea
 
 class ActiveText;
 
-class MapRenderer : public sf::Drawable, public Hideable
+class MapRenderer : public ContextObject, public sf::Drawable, public Hideable
 {
 public:
 	static const int NAME_ALPHA  = 12;
@@ -53,7 +54,7 @@ public:
 		std::unique_ptr<TweenRectangleShape> shape;
 	};
 
-	MapRenderer();
+	MapRenderer(Context *context);
 
 	bool update(float delta) override;
 	bool processEvent(const sf::Event &event);

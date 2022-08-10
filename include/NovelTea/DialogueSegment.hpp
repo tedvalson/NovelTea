@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_DIALOGUESEGMENT_HPP
 #define NOVELTEA_DIALOGUESEGMENT_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
 #include <memory>
@@ -11,7 +12,7 @@ namespace NovelTea
 
 class Dialogue;
 
-class DialogueSegment : public JsonSerializable
+class DialogueSegment : public ContextObject, public JsonSerializable
 {
 public:
 	enum Type {
@@ -22,7 +23,7 @@ public:
 		Link      = 3,
 	};
 
-	DialogueSegment();
+	DialogueSegment(Context *context);
 
 	bool operator==(const DialogueSegment &segment) const;
 

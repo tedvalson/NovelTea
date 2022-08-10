@@ -1,4 +1,5 @@
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/TextTypes.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
@@ -14,14 +15,16 @@
 namespace NovelTea
 {
 
-ActionBuilder::ActionBuilder()
-: m_selectedIndex(0)
+ActionBuilder::ActionBuilder(Context *context)
+: ContextObject(context)
+, m_selectedIndex(0)
+, m_buttonCancel(context)
 , m_callback(nullptr)
 {
 	m_emptyRectAlpha = 40.f;
 	m_emptyRectColor = sf::Color(0.f, 0.f, 200.f, m_emptyRectAlpha);
 
-	m_buttonCancel.getText().setFont(*Proj.getFont("sysIcon"));
+	m_buttonCancel.getText().setFont(*Proj->getFont("sysIcon"));
 	m_buttonCancel.setString(L"\uf00d");
 	m_buttonCancel.setTextColor(sf::Color(255, 0, 0, 200));
 	m_buttonCancel.setTextActiveColor(sf::Color(255, 0, 0, 240));
@@ -107,7 +110,7 @@ float ActionBuilder::getAlpha() const
 void ActionBuilder::setVerb(const std::string &verbId)
 {
 	m_verbId = verbId;
-	auto verb = GSave->get<Verb>(verbId);
+	auto verb = GGame->get<Verb>(verbId);
 	m_selectedIndex = 0;
 	m_objectIds.resize(verb->getObjectCount());
 	for (auto &objectId : m_objectIds)
@@ -147,7 +150,7 @@ const std::vector<std::string> &ActionBuilder::getObjects() const
 
 std::shared_ptr<Action> ActionBuilder::getAction() const
 {
-	return Action::find(m_verbId, m_objectIds);
+	return Action::find(getContext(), m_verbId, m_objectIds);
 }
 
 void ActionBuilder::setSize(const sf::Vector2f &size)
@@ -205,7 +208,7 @@ void ActionBuilder::setCallback(ActionBuilderCallback callback)
 void ActionBuilder::updateText()
 {
 	std::string blankStr = "_____";
-	auto verb = GSave->get<Verb>(m_verbId);
+	auto verb = GGame->get<Verb>(m_verbId);
 	auto &actionStructure = verb->getActionStructure();
 
 	auto alpha = getAlpha();
@@ -227,9 +230,9 @@ void ActionBuilder::updateText()
 		if (i > 0)
 		{
 			auto objectStr = blankStr;
-			auto object = GSave->get<Object>(m_objectIds[i-1]);
+			auto object = GGame->get<Object>(m_objectIds[i-1]);
 			auto rect = new TweenRectangleShape;
-			ActiveText tmpText;
+			ActiveText tmpText(getContext());
 
 			if (!object->getId().empty())
 			{
@@ -258,7 +261,7 @@ void ActionBuilder::updateText()
 			}
 		}
 
-		auto text = new ActiveText;
+		auto text = new ActiveText(getContext());
 		text->setPosition(offsetX, offsetY);
 		text->setSize(size);
 		text->setAlpha(alpha);

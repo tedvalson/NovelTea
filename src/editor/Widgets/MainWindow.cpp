@@ -15,6 +15,7 @@
 #include "ProjectSettingsWidget.hpp"
 #include "NovelTeaWidget.hpp"
 #include "Wizard/WizardPageActionSelect.hpp"
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/StringUtils.hpp>
 #include <QFileDialog>
@@ -35,7 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow),
 	treeModel(new TreeModel),
 	menuTreeView(new QMenu),
-	selectedType(EditorTabWidget::Invalid)
+	selectedType(EditorTabWidget::Invalid),
+	m_project(new NovelTea::ProjectData),
+	m_projectBackup(new NovelTea::ProjectData)
 {
 	ui->setupUi(this);
 
@@ -70,8 +73,8 @@ bool MainWindow::loadProject(const QString &filename)
 {
 	if (closeProject() && !filename.isEmpty())
 	{
-		NovelTea::ProjectData project;
-		if (project.loadFromFile(filename.toStdString()))
+		auto project = std::make_shared<NovelTea::ProjectData>();
+		if (project->loadFromFile(filename.toStdString()))
 		{
 			m_recentProjects.removeAll(filename);
 			m_recentProjects.prepend(filename);
@@ -84,19 +87,20 @@ bool MainWindow::loadProject(const QString &filename)
 	return false;
 }
 
-bool MainWindow::loadProject(const NovelTea::ProjectData &project)
+bool MainWindow::loadProject(std::shared_ptr<NovelTea::ProjectData> project)
 {
 	if (!closeProject())
 		return false;
 
-	Proj = project;
-	treeModel->loadProject(Proj);
+	m_project = project;
+	m_projectBackup = m_project;
+	treeModel->loadProject(m_projectBackup);
 	warnIfInvalid();
-	setWindowTitle(QString::fromStdString(ProjData[NovelTea::ID::projectName].ToString()) + " - NovelTea Editor");
+	setWindowTitle(QString::fromStdString(m_project->data()[NovelTea::ID::projectName].ToString()) + " - NovelTea Editor");
 
-	for (auto &jtab : ProjData[NovelTea::ID::openTabs].ArrayRange())
+	for (auto &jtab : m_project->data()[NovelTea::ID::openTabs].ArrayRange())
 		addEditorTab(static_cast<EditorTabWidget::Type>(jtab[0].ToInt()), jtab[1].ToString());
-	auto index = ProjData[NovelTea::ID::openTabIndex].ToInt();
+	auto index = m_project->data()[NovelTea::ID::openTabIndex].ToInt();
 	ui->tabWidget->setCurrentIndex(index);
 
 	return true;
@@ -104,26 +108,26 @@ bool MainWindow::loadProject(const NovelTea::ProjectData &project)
 
 bool MainWindow::reloadProject()
 {
-	return loadProject(QString::fromStdString(Proj.filename()));
+	return loadProject(QString::fromStdString(m_project->fileName()));
 }
 
 void MainWindow::saveProject()
 {
 	auto jtabs = sj::Array();
 	auto count = ui->tabWidget->count();
-	ProjData[NovelTea::ID::openTabIndex] = ui->tabWidget->currentIndex();
+	m_project->data()[NovelTea::ID::openTabIndex] = ui->tabWidget->currentIndex();
 	for (int i = 0; i < count; ++i) {
 		auto tab = qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(i));
 		jtabs.append(sj::Array(static_cast<int>(tab->getType()), tab->idName()));
 	}
-	ProjData[NovelTea::ID::openTabs] = jtabs;
-	ProjData[NovelTea::ID::entityColors] = treeModel->getColorJSON();
-	Proj.saveToFile();
+	m_project->data()[NovelTea::ID::openTabs] = jtabs;
+	m_project->data()[NovelTea::ID::entityColors] = treeModel->getColorJSON();
+	m_project->saveToFile();
 }
 
 bool MainWindow::closeProject()
 {
-	if (!Proj.isLoaded())
+	if (!m_project->isLoaded())
 		return true;
 
 	if (!reallyWantToClose())
@@ -134,8 +138,8 @@ bool MainWindow::closeProject()
 	for (int i = 0; i < count; ++i)
 		delete qobject_cast<EditorTabWidget*>(ui->tabWidget->widget(0));
 
-	Proj.closeProject();
-	treeModel->loadProject(Proj);
+	m_project->closeProject();
+	treeModel->loadProject(m_project);
 	setWindowTitle("NovelTea Editor");
 
 	return true;
@@ -159,7 +163,7 @@ void MainWindow::addEditorTab(EditorTabWidget *widget, bool checkForExisting)
 	{
 		treeModel->insertEntity(widget->idName(), widget->getType());
 		widget->save();
-		Proj.saveToFile();
+		m_projectBackup->saveToFile();
 	}
 
 	auto index = ui->tabWidget->addTab(widget, widget->getIcon(), widget->tabText());
@@ -207,7 +211,7 @@ int MainWindow::getEditorTabIndex(EditorTabWidget::Type type, const std::string 
 void MainWindow::warnIfInvalid() const
 {
 	std::string error;
-	if (!Proj.isValid(error))
+	if (!m_project->isValid(error))
 		QMessageBox::critical(this->parentWidget(), "Project is Invalid", QString::fromStdString(error));
 }
 
@@ -227,7 +231,7 @@ bool MainWindow::validateEntityName(const QString &entityIdName, EditorTabWidget
 
 	auto existingNewIndex = getEditorTabIndex(type, name);
 	auto entityId = getEntityIdFromTabType(type);
-	if (checkForCollision && (existingNewIndex >= 0 || ProjData[entityId].hasKey(name))) {
+	if (checkForCollision && (existingNewIndex >= 0 || m_project->data()[entityId].hasKey(name))) {
 		QMessageBox::critical(this, "Failed to rename",
 			QString::fromStdString("\"" + name + "\" already exists."));
 		return false;
@@ -238,7 +242,7 @@ bool MainWindow::validateEntityName(const QString &entityIdName, EditorTabWidget
 
 void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::string &entityId, json jMetaData)
 {
-	if (Proj.filename().empty()) {
+	if (m_project->fileName().empty()) {
 		QMessageBox::warning(this, "Cannot Play", "You need to save the project before you can play it.");
 		return;
 	}
@@ -251,9 +255,9 @@ void MainWindow::launchPreview(NovelTea::EntityType entityType, const std::strin
 		m_process.waitForFinished();
 	}
 
-	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher";
+	auto launcherPath = QCoreApplication::applicationDirPath() + "/NovelTeaLauncher"; // TODO: Add exe for Windows?
 	QStringList args;
-	args << QString::fromStdString(Proj.filename());
+	args << QString::fromStdString(m_project->fileName());
 	if (entityType != NovelTea::EntityType::Invalid)
 	{
 		args << "entity";
@@ -548,7 +552,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 			if (ret == QMessageBox::Save)
 			{
 				editorTabWidget->save();
-				Proj.saveToFile();
+				m_project->saveToFile();
 			}
 			else if (ret == QMessageBox::Cancel)
 				return;
@@ -582,13 +586,13 @@ void MainWindow::on_actionSave_triggered()
 		warnIfInvalid();
 	}
 
-	if (Proj.filename().empty())
+	if (m_project->fileName().empty())
 	{
 		ui->actionSaveAs->trigger();
 		return;
 	}
 
-	Proj.saveToFile();
+	m_project->saveToFile();
 }
 
 void MainWindow::on_actionSaveAs_triggered()
@@ -603,11 +607,11 @@ void MainWindow::on_actionSaveAs_triggered()
 	if (!fileName.endsWith(".ntp"))
 		fileName += ".ntp";
 
-	m_recentProjects.removeAll(QString::fromStdString(Proj.filename()));
+	m_recentProjects.removeAll(QString::fromStdString(m_project->fileName()));
 	m_recentProjects.prepend(fileName);
 	updateRecentProjectList();
 
-	Proj.saveToFile(fileName.toStdString());
+	m_project->saveToFile(fileName.toStdString());
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -669,9 +673,13 @@ void MainWindow::on_actionRename_triggered()
 			refreshTabs();
 		}
 
+		NovelTea::ContextConfig config;
+		config.projectData = m_project;
+		auto context = new NovelTea::Context(config);
 		// Rename in project data, then save to file
-		Proj.renameEntity(entityType, selectedIdName, newName);
-		Proj.saveToFile();
+		m_project->renameEntity(context, entityType, selectedIdName, newName);
+		m_project->saveToFile();
+		delete context;
 
 		treeModel->rename(selectedType, QString::fromStdString(selectedIdName), QString::fromStdString(newName));
 
@@ -699,9 +707,9 @@ void MainWindow::on_actionDelete_triggered()
 
 	QModelIndex index = ui->treeView->selectionModel()->currentIndex();
 
-	auto &j = ProjData[getEntityIdFromTabType(selectedType)];
+	auto &j = m_project->data()[getEntityIdFromTabType(selectedType)];
 	j.erase(selectedIdName);
-	Proj.saveToFile();
+	m_project->saveToFile();
 
 	auto proxyIndex = ui->treeView->mapToSource(index);
 	treeModel->removeRow(proxyIndex.row(), proxyIndex.parent());
@@ -755,9 +763,9 @@ void MainWindow::on_actionSelectParent_triggered()
 		if (treeModel->changeParent(child, newParent))
 		{
 			auto newParentId = newParentItem->data(0).toString().toStdString();
-			auto &j = ProjData[getEntityIdFromTabType(selectedType)];
+			auto &j = m_project->data()[getEntityIdFromTabType(selectedType)];
 			j[selectedIdName][NovelTea::ID::entityParentId] = newParentId;
-			Proj.saveToFile();
+			m_project->saveToFile();
 		}
 	}
 }
@@ -770,9 +778,9 @@ void MainWindow::on_actionClearParentSelection_triggered()
 		parent = parent.parent();
 	if (treeModel->changeParent(child, parent))
 	{
-		auto &j = ProjData[getEntityIdFromTabType(selectedType)];
+		auto &j = m_project->data()[getEntityIdFromTabType(selectedType)];
 		j[selectedIdName][NovelTea::ID::entityParentId] = "";
-		Proj.saveToFile();
+		m_project->saveToFile();
 	}
 }
 
@@ -827,9 +835,9 @@ void MainWindow::on_actionCopyAs_triggered()
 
 	auto name = text.toStdString();
 	auto entityId = getEntityIdFromTabType(selectedType);
-	ProjData[entityId][name] = ProjData[entityId][selectedIdName];
-	ProjData[entityId][name][0] = name;
-	Proj.saveToFile();
+	m_project->data()[entityId][name] = m_project->data()[entityId][selectedIdName];
+	m_project->data()[entityId][name][0] = name;
+	m_project->saveToFile();
 
 	auto parent = ui->treeView->mapToSource(ui->treeView->currentIndex().parent());
 	treeModel->insertEntity(name, selectedType, parent);

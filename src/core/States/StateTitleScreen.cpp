@@ -3,6 +3,7 @@
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/TextTypes.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Settings.hpp>
@@ -15,9 +16,15 @@ namespace NovelTea
 
 StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
+, m_buttonStart(&context)
+, m_buttonSettings(&context)
+, m_buttonProfile(&context)
+, m_textTitle(&context)
+, m_textAuthor(&context)
+, m_textProfile(&context)
 , m_startPressed(false)
 {
-	auto bgColor = context.config.backgroundColor;
+	auto bgColor = GConfig.backgroundColor;
 
 	// Buttons
 	m_buttonStart.setString("Start");
@@ -29,7 +36,7 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 			return;
 		m_startPressed = true;
 		m_tweenManager.killAll();
-		GSettings.save();
+		GSettings->save();
 		TweenEngine::Tween::to(*this, ALPHA, 1.f)
 			.target(0.f)
 			.setCallback(TweenEngine::TweenCallback::COMPLETE, [this](TweenEngine::BaseTween*){
@@ -91,33 +98,24 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	TextProperties textProps;
 	textProps.fontStyle |= sf::Text::Bold;
 	textProps.fontSize = 0.1f * h;
+	textProps.outlineThickness = 2.f;
+	textProps.outlineColor = GConfig.backgroundColor;
 	m_textTitle.setSize(sf::Vector2f((portrait ? 0.95f : 0.8f) * w, h));
 	m_textTitle.setFontSizeMultiplier(portrait ? 0.4f : 0.7f);
 	m_textTitle.setText(ProjData[ID::projectName].ToString(), textProps);
 	m_textTitle.setOrigin(m_textTitle.getLocalBounds().width / 2, 0.f);
 	m_textTitle.setPosition(round(0.5f * w), round(0.05f * h));
-	for (auto& seg : m_textTitle.getSegments()) {
-		for (auto& segment : seg->getSegments()) {
-			segment.text.setOutlineColor(m_bg.getFillColor());
-			segment.text.setOutlineThickness(2.f);
-		}
-	}
 
 	// Author
 	textProps.fontStyle ^= sf::Text::Bold;
 	textProps.fontSize = 0.03f * h;
 	textProps.color = sf::Color(120, 120, 120);
+	textProps.outlineThickness = 1.f;
 	m_textAuthor.setSize(sf::Vector2f(0.9f * w, h));
 	m_textAuthor.setFontSizeMultiplier(portrait ? 0.35f : 0.6f);
 	m_textAuthor.setPosition(round(0.5f * w - m_textTitle.getLocalBounds().width / 2),
 							 round((0.07f * h) + m_textTitle.getLocalBounds().height));
 	m_textAuthor.setText("created by " + ProjData[ID::projectAuthor].ToString(), textProps);
-	for (auto& seg : m_textAuthor.getSegments()) {
-		for (auto& segment : seg->getSegments()) {
-			segment.text.setOutlineColor(m_bg.getFillColor());
-			segment.text.setOutlineThickness(1.f);
-		}
-	}
 
 	auto buttonWidth = (portrait ? 0.85f : 0.4f) * w;
 	auto buttonHeight = (portrait ? 0.09f : 0.12f) * h * 0.8f;
@@ -153,16 +151,16 @@ void StateTitleScreen::updateProfileText()
 	TextProperties textProps;
 	textProps.color = sf::Color(120, 120, 120);
 	textProps.fontSize = 0.3f * m_buttonFontSize;
-	if (GSettings.getProfiles().empty())
+	if (GSettings->getProfiles().empty())
 	{
 		if (GTextInput.finished())
 			GTextInput.run("Enter Profile Name", [this](const std::string &name){
-				GSettings.addProfile(name);
+				GSettings->addProfile(name);
 				updateProfileText();
 			});
 		return;
 	}
-	m_textProfile.setText(GSettings.getActiveProfile()->getName(), textProps);
+	m_textProfile.setText(GSettings->getActiveProfile()->getName(), textProps);
 	auto b = m_textProfile.getGlobalBounds();
 	m_textProfile.setPosition((m_size.x - b.width) / 2, m_size.y - b.height * 1.1f);
 }
@@ -177,6 +175,7 @@ bool StateTitleScreen::processEvent(const sf::Event &event)
 
 bool StateTitleScreen::update(float delta)
 {
+	m_textTitle.update(delta);
 	m_tweenManager.update(delta);
 	return true;
 }

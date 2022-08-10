@@ -100,35 +100,35 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 		auto item = new QTreeWidgetItem;
 
 		if (entityId == NovelTea::Action::id) {
-			entity = std::make_shared<NovelTea::Action>();
+			entity = std::make_shared<NovelTea::Action>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Action);
 		}
 		else if (entityId == NovelTea::Cutscene::id) {
-			entity = std::make_shared<NovelTea::Cutscene>();
+			entity = std::make_shared<NovelTea::Cutscene>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Cutscene);
 		}
 		else if (entityId == NovelTea::Dialogue::id) {
-			entity = std::make_shared<NovelTea::Dialogue>();
+			entity = std::make_shared<NovelTea::Dialogue>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Dialogue);
 		}
 		else if (entityId == NovelTea::Map::id) {
-			entity = std::make_shared<NovelTea::Map>();
+			entity = std::make_shared<NovelTea::Map>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Map);
 		}
 		else if (entityId == NovelTea::Object::id) {
-			entity = std::make_shared<NovelTea::Object>();
+			entity = std::make_shared<NovelTea::Object>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Object);
 		}
 		else if (entityId == NovelTea::Room::id) {
-			entity = std::make_shared<NovelTea::Room>();
+			entity = std::make_shared<NovelTea::Room>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Room);
 		}
 		else if (entityId == NovelTea::Script::id) {
-			entity = std::make_shared<NovelTea::Script>();
+			entity = std::make_shared<NovelTea::Script>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Script);
 		}
 		else if (entityId == NovelTea::Verb::id) {
-			entity = std::make_shared<NovelTea::Verb>();
+			entity = std::make_shared<NovelTea::Verb>(getContext());
 			item->setData(0, Qt::UserRole, EditorTabWidget::Verb);
 		}
 		else

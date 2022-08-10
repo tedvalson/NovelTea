@@ -6,7 +6,9 @@
 namespace NovelTea
 {
 
-TextLogDialogueOptionItem::TextLogDialogueOptionItem(const std::string &text)
+TextLogDialogueOptionItem::TextLogDialogueOptionItem(Context *context, const std::string &text)
+	: TextLogItem(context)
+	, m_text(context)
 {
 	TextProperties textProps;
 	m_text.setText(text, textProps);

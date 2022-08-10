@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_CUTSCENERENDERER_HPP
 #define NOVELTEA_CUTSCENERENDERER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/TweenObjects.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/GUI/Icon/IconGlow.hpp>
@@ -21,10 +22,10 @@ class CutscenePageBreakSegment;
 class CutscenePageSegment;
 class ActiveText;
 
-class CutsceneRenderer : public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>
+class CutsceneRenderer : public ContextObject, public sf::Drawable, public Scrollable, public TweenTransformable<sf::Transformable>
 {
 public:
-	CutsceneRenderer();
+	CutsceneRenderer(Context *context);
 
 	void setCutscene(const std::shared_ptr<Cutscene> &cutscene);
 	const std::shared_ptr<Cutscene> &getCutscene() const;

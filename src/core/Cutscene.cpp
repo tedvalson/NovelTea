@@ -8,8 +8,9 @@
 namespace NovelTea
 {
 
-Cutscene::Cutscene()
-	: m_fullScreen(true)
+Cutscene::Cutscene(Context *context)
+	: Entity(context)
+	, m_fullScreen(true)
 	, m_canFastForward(true)
 	, m_speedFactor(1.f)
 	, m_nextEntity(sj::Array(-1,""))
@@ -58,7 +59,7 @@ void Cutscene::loadJson(const json &j)
 	m_nextEntity = j[6];
 	for (auto &jsegment : j[7].ArrayRange())
 	{
-		auto segment = CutsceneSegment::createSegment(jsegment);
+		auto segment = CutsceneSegment::createSegment(getContext(), jsegment);
 		if (segment)
 			addSegment(segment);
 		else
@@ -86,8 +87,6 @@ void Cutscene::addSegment(std::shared_ptr<CutsceneSegment> segment)
 				// Don't wait for first seg if previous seg was a page break or script
 				if (m_internalSegments.size() > 1) {
 					auto prevSegmentType = m_internalSegments[m_internalSegments.size()-2]->type();
-					if (prevSegmentType == CutsceneSegment::PageBreak || prevSegmentType == CutsceneSegment::Script)
-						seg->setWaitForClick(false);
 				}
 			}
 			m_segments.push_back(seg);
@@ -157,7 +156,7 @@ void Cutscene::setNextEntity(std::shared_ptr<Entity> entity)
 
 std::shared_ptr<Entity> Cutscene::getNextEntity() const
 {
-	return Entity::fromEntityJson(m_nextEntity);
+	return Entity::fromEntityJson(getContext(), m_nextEntity);
 }
 
 } // namespace NovelTea

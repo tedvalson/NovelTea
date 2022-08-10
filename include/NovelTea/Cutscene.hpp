@@ -12,7 +12,7 @@ class CutsceneSegment;
 class Cutscene : public Entity
 {
 public:
-	Cutscene();
+	Cutscene(Context *context);
 	~Cutscene();
 	size_t jsonSize() const override;
 	json toJson() const override;

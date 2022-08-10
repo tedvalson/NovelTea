@@ -1,12 +1,16 @@
 #include "DialogueTreeItem.hpp"
 #include <NovelTea/Game.hpp>
 
-DialogueTreeItem::DialogueTreeItem(const std::string &dialogueId, const std::shared_ptr<NovelTea::DialogueSegment> &segment, DialogueTreeItem *parent)
-: m_parentItem(parent)
+DialogueTreeItem::DialogueTreeItem(NovelTea::Context *context, const std::string &dialogueId, const std::shared_ptr<NovelTea::DialogueSegment> &segment, DialogueTreeItem *parent)
+: NovelTea::ContextObject(context)
+, m_parentItem(parent)
 , m_linkItem(nullptr)
 , m_dialogueId(dialogueId)
 {
-	setDialogueSegment(segment);
+	if (segment)
+		setDialogueSegment(segment);
+	else
+		setDialogueSegment(std::make_shared<NovelTea::DialogueSegment>(context));
 }
 
 DialogueTreeItem::~DialogueTreeItem()
@@ -126,9 +130,9 @@ const std::shared_ptr<NovelTea::DialogueSegment> &DialogueTreeItem::getDialogueS
 
 DialogueTreeItem *DialogueTreeItem::makeCopy(DialogueTreeItem *parentItem)
 {
-	auto segment = std::make_shared<NovelTea::DialogueSegment>();
+	auto segment = std::make_shared<NovelTea::DialogueSegment>(getContext());
 	*segment = *m_segment;
-	auto result = new DialogueTreeItem(m_dialogueId, segment, parentItem);
+	auto result = new DialogueTreeItem(getContext(), m_dialogueId, segment, parentItem);
 	result->m_linkItem = m_linkItem;
 	for (auto &child : m_childItems)
 	{
@@ -140,7 +144,7 @@ DialogueTreeItem *DialogueTreeItem::makeCopy(DialogueTreeItem *parentItem)
 
 bool DialogueTreeItem::insertChildren(int position, int count, int columns)
 {
-	return insertSegment(position, count, std::make_shared<NovelTea::DialogueSegment>());
+	return insertSegment(position, count, std::make_shared<NovelTea::DialogueSegment>(getContext()));
 }
 
 bool DialogueTreeItem::removeChildren(int position, int count)
@@ -160,7 +164,7 @@ bool DialogueTreeItem::insertSegment(int position, int count, const std::shared_
 		return false;
 
 	for (int row = 0; row < count; ++row) {
-		auto item = new DialogueTreeItem(m_dialogueId, segment, this);
+		auto item = new DialogueTreeItem(getContext(), m_dialogueId, segment, this);
 		m_childItems.insert(position, item);
 	}
 
@@ -169,8 +173,8 @@ bool DialogueTreeItem::insertSegment(int position, int count, const std::shared_
 
 bool DialogueTreeItem::insertLink(int position, DialogueTreeItem *sourceItem)
 {
-	auto segment = std::make_shared<NovelTea::DialogueSegment>();
-	auto item = new DialogueTreeItem(m_dialogueId, segment, this);
+	auto segment = std::make_shared<NovelTea::DialogueSegment>(getContext());
+	auto item = new DialogueTreeItem(getContext(), m_dialogueId, segment, this);
 	segment->setType(NovelTea::DialogueSegment::Link);
 	item->m_linkItem = sourceItem;
 

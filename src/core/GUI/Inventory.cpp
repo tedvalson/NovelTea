@@ -1,4 +1,5 @@
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/GUI/Inventory.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ObjectList.hpp>
@@ -12,8 +13,9 @@
 namespace NovelTea
 {
 
-Inventory::Inventory()
-: m_needsUpdate(true)
+Inventory::Inventory(Context *context)
+: ContextObject(context)
+, m_needsUpdate(true)
 , m_margin(0.f)
 , m_itemHeight(20.f)
 , m_fontSizeMultiplier(1.f)
@@ -100,7 +102,7 @@ void Inventory::refreshItems()
 	auto width = 0.f;
 	auto height = 0.f;
 	m_items.clear();
-	for (auto &objectItem : ActiveGame->getObjectList()->items())
+	for (auto &objectItem : GGame->getObjectList()->items())
 	{
 		auto &object = objectItem->object;
 		auto item = new InventoryItem;
@@ -108,7 +110,7 @@ void Inventory::refreshItems()
 			item->text.setString(object->getName() + " (" + std::to_string(objectItem->count) + ")");
 		else
 			item->text.setString(object->getName());
-		item->text.setFont(*Proj.getFont());
+		item->text.setFont(*Proj->getFont());
 		item->text.setFillColor(sf::Color::Black);
 		item->text.setCharacterSize(m_itemHeight);
 		if (item->text.getLocalBounds().width > width)

@@ -2,6 +2,7 @@
 #define DIALOGUETREEMODEL_HPP
 
 #include "Widgets/EditorTabWidget.hpp"
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <QAbstractItemModel>
 #include <QModelIndex>
@@ -11,12 +12,12 @@
 class DialogueTreeItem;
 class QContextMenuEvent;
 
-class DialogueTreeModel : public QAbstractItemModel
+class DialogueTreeModel : public QAbstractItemModel, public NovelTea::ContextObject
 {
 	Q_OBJECT
 
 public:
-	explicit DialogueTreeModel(QObject *parent = 0);
+	explicit DialogueTreeModel(NovelTea::Context *context, QObject *parent = 0);
 	~DialogueTreeModel();
 
 	QVariant data(const QModelIndex &index, int role) const override;

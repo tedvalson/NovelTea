@@ -11,7 +11,7 @@ namespace NovelTea
 class CutscenePageSegment : public CutsceneSegment
 {
 public:
-	CutscenePageSegment();
+	CutscenePageSegment(Context *context);
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 	Type type() const override;

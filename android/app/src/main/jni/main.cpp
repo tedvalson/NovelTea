@@ -1,3 +1,4 @@
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Settings.hpp>
@@ -79,6 +80,9 @@ int main(int argc, char *argv[])
 {
 	if (attachThread(&attachedEnv) == JNI_ERR)
 		return EXIT_FAILURE;
+		
+	NovelTea::ContextConfig config;
+	
 	auto nativeActivity = sf::getNativeActivity();
 	jclass helperClass = fetchClass(attachedEnv);
 	jobject na = nativeActivity->clazz;
@@ -91,43 +95,38 @@ int main(int argc, char *argv[])
 	float xdpi = attachedEnv->GetFloatField(displayMetrics, xdpi_id);
 
 	// Get project file name passed to activity's Intent
-	std::string projectFileName;
 	methodID = attachedEnv->GetStaticMethodID(helperClass, "getProjectFileName", "(Landroid/app/NativeActivity;)Ljava/lang/String;");
 	jstring jstr = static_cast<jstring>(attachedEnv->CallStaticObjectMethod(helperClass, methodID, na));
 	if (jstr) {
 		auto cs = attachedEnv->GetStringUTFChars(jstr, 0);
 		if (cs)
-			projectFileName = cs;
+			config.projectFileName = cs;
 		attachedEnv->ReleaseStringUTFChars(jstr, cs);
 	}
 	
 	GTextInput.textInputTrigger = triggerTextInput;
-	GSettings.setDirectory(nativeActivity->internalDataPath);
-	GSettings.load();
 
 	sf::VideoMode screen(sf::VideoMode::getDesktopMode());
-	sf::RenderWindow window(screen, "");
+	sf::RenderWindow window(screen, "", sf::Style::Fullscreen);
 	window.setFramerateLimit(30);
 	
-	NovelTea::EngineConfig config;
 	config.width = window.getSize().x;
 	config.height = window.getSize().y;
-	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
 	config.dpiMultiplier = xdpi / 160.f;
-	config.fps = 30;
+	config.maxFps = 30;
 	config.initialState = NovelTea::StateID::Intro;
-	if (!projectFileName.empty()) // Skip intro
-		config.initialState = NovelTea::StateID::TitleScreen;
 	config.saveDir = nativeActivity->internalDataPath;
-	
-	auto engine = new NovelTea::Engine(config);
+	config.settingsDir = nativeActivity->internalDataPath;
+	if (config.projectFileName.empty()) // Skip intro
+		config.projectFileName = "test.ntp";
+	else
+		config.initialState = NovelTea::StateID::TitleScreen;
+
+	auto context = new NovelTea::Context(config);
+	auto engine = new NovelTea::Engine(context);
 	engine->initialize();
-
-	GSave->setDirectory(nativeActivity->internalDataPath);
-
-	if (projectFileName.empty())
-		Proj.loadFromFile("test.ntp");
-
+	engine->setFramerateLocked(true);
+	
 	// We shouldn't try drawing to the screen while in background
 	// so we'll have to track that. You can do minor background
 	// work, but keep battery life in mind.
@@ -176,7 +175,6 @@ int main(int argc, char *argv[])
 			detachThread();
 		}
 	}
-	
-	delete engine;
+
 	return EXIT_SUCCESS;
 }

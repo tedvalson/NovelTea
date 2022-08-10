@@ -3,7 +3,7 @@
 #include "MainWindow.hpp"
 #include "Map/Node.hpp"
 #include "../Wizard/WizardPageActionSelect.hpp"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Map.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <QInputDialog>
@@ -24,7 +24,7 @@ MapWidget::MapWidget(const std::string &idName, QWidget *parent)
 	load();
 
 	ui->preview->setMode(NovelTea::StateEditorMode::Map);
-	ui->preview->setFPS(0);
+	ui->preview->setFPS(2);
 
 	ui->sidebar->hide();
 
@@ -59,18 +59,18 @@ void MapWidget::saveData() const
 	updateSelectedObject();
 	updateMap();
 	if (m_map)
-		Proj.set<NovelTea::Map>(m_map, idName());
+		Proj->set(m_map, idName());
 }
 
 void MapWidget::loadData()
 {
-	m_map = Proj.get<NovelTea::Map>(idName());
+	m_map = Proj->get<NovelTea::Map>(idName(), getContext());
 
     if (!m_map)
 	{
 		// Object is new, so show it as modified
 		setModified();
-        m_map = std::make_shared<NovelTea::Map>();
+		m_map = std::make_shared<NovelTea::Map>(getContext());
 	}
 
 	ui->scriptRoomDefault->setPlainText(QString::fromStdString(m_map->getDefaultRoomScript()));
@@ -243,7 +243,7 @@ void MapWidget::on_listRooms_currentRowChanged(int currentRow)
 
 void MapWidget::updateMap() const
 {
-	auto map = ui->flowView->scene()->toMapEntity();
+	auto map = ui->flowView->scene()->toMapEntity(getContext());
 	if (map)
 	{
 		map->setId(m_map->getId());

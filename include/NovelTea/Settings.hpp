@@ -1,20 +1,19 @@
 #ifndef NOVELTEA_SETTINGS_HPP
 #define NOVELTEA_SETTINGS_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/json.hpp>
 #include <NovelTea/Profile.hpp>
 #include <NovelTea/Utils.hpp>
 #include <memory>
 
-#define GSettings NovelTea::Settings::get()
-
 namespace NovelTea
 {
 
-class Settings
+class Settings : public ContextObject
 {
 public:
-	static Settings &get();
+	Settings(Context* context);
 	void load();
 	void save() const;
 
@@ -34,8 +33,6 @@ public:
 	ADD_ACCESSOR(float, FontSizeMultiplier, m_fontSizeMultiplier)
 
 protected:
-	Settings();
-
 	void reloadProfiles();
 
 private:

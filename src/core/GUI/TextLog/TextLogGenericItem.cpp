@@ -4,7 +4,9 @@
 namespace NovelTea
 {
 
-TextLogGenericItem::TextLogGenericItem(const std::string &text)
+TextLogGenericItem::TextLogGenericItem(Context *context, const std::string &text)
+	: TextLogItem(context)
+	, m_text(context)
 {
 	TextProperties textProps;
 	m_text.setText(text, textProps);

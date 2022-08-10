@@ -7,20 +7,19 @@
 #include <SFML/System/String.hpp>
 #include <memory>
 
-#define Proj NovelTea::ProjectData::instance()
-#define ProjData NovelTea::ProjectData::instance().data()
-
 namespace NovelTea
 {
 
 class Action;
+class Context;
+class Entity;
 
 class ProjectData: public JsonSerializable
 {
 public:
 	ProjectData();
-	~ProjectData();
-	static ProjectData &instance();
+	ProjectData(const std::string &fileName);
+	virtual ~ProjectData();
 
 	void newProject();
 	void closeProject();
@@ -29,37 +28,15 @@ public:
 	bool isLoaded() const;
 	bool isValid(std::string &errorMessage) const;
 
-	void renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName);
+	void renameEntity(Context *context, EntityType entityType, const std::string &oldName, const std::string &newName);
 
 	void setFontData(const std::string &alias, const std::string &data);
 	const std::string &getFontData(const std::string &alias) const;
 	std::shared_ptr<sf::Font> getFont(const std::string &fontName = "sys") const;
 
-	template <typename T>
-	static std::shared_ptr<T> get(const std::string &idName)
-	{
-		if (idName.empty())
-			return nullptr;
-		if (!ProjData[T::id].hasKey(idName))
-			return nullptr;
-		auto result = std::make_shared<T>();
-		result->fromJson(ProjData[T::id][idName]);
-		return result;
-	}
-
-	template <typename T>
-	static void set(std::shared_ptr<T> obj, const std::string &idName = std::string())
-	{
-		if (!idName.empty())
-			obj->setId(idName);
-		else if (obj->getId().empty())
-			return;
-		ProjData[T::id][obj->getId()] = obj->toJson();
-	}
-
-	void saveToFile(const std::string &filename = std::string());
-	bool loadFromFile(const std::string &filename);
-	const std::string &filename() const;
+	void saveToFile(const std::string &fileName = std::string());
+	bool loadFromFile(const std::string &fileName);
+	const std::string &fileName() const;
 
 	void setImageData(const std::string &data);
 	const std::string &getImageData() const;
@@ -70,9 +47,23 @@ public:
 	const json &data() const;
 	json &data();
 
+	void set(std::shared_ptr<Entity> obj, const std::string &idName = std::string());
+
+	template <typename T>
+	std::shared_ptr<T> get(const std::string &idName, Context *context)
+	{
+		if (idName.empty())
+			return nullptr;
+		if (!m_json[T::id].hasKey(idName))
+			return nullptr;
+		auto result = std::make_shared<T>(context);
+		result->fromJson(m_json[T::id][idName]);
+		return result;
+	}
+
 private:
 	bool m_loaded;
-	std::string m_filename;
+	std::string m_fileName;
 	mutable json m_json;
 
 	std::map<std::string, std::shared_ptr<sf::Font>> m_fonts;

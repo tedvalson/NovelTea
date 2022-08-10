@@ -10,7 +10,7 @@ namespace NovelTea
 class Action : public Entity
 {
 public:
-	Action();
+	Action(Context *context);
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;
@@ -20,12 +20,15 @@ public:
 	json getVerbObjectCombo() const;
 
 	bool runScript();
-	bool runScript(const std::string &verbId, const std::vector<std::string> &objectIds);
+	bool runScript(const std::string &verbId,
+				   const std::vector<std::string> &objectIds);
 
-	static std::shared_ptr<Action> find(const std::string &verbId, const std::vector<std::string> &objectIds);
+	static std::shared_ptr<Action>
+	find(Context *context, const std::string &verbId,
+		 const std::vector<std::string> &objectIds);
 
 	static constexpr auto id = ID::Action;
-	const std::string entityId() const override {return id;}
+	const std::string entityId() const override { return id; }
 
 	ADD_ACCESSOR(std::string, VerbId, m_verbId)
 	ADD_ACCESSOR(std::string, Script, m_script)

@@ -1,4 +1,5 @@
 #include <NovelTea/Verb.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/SaveData.hpp>
@@ -7,9 +8,10 @@
 namespace NovelTea
 {
 
-Verb::Verb()
-: m_name("New Verb")
-, m_objectCount(1)
+Verb::Verb(Context* context)
+	: Entity(context)
+	, m_name("New Verb")
+	, m_objectCount(1)
 {
 	
 }
@@ -64,10 +66,10 @@ bool Verb::checkConditionScript(const std::string &verbId, const std::string &ob
 	if (!m_scriptConditional.empty())
 	{
 		try {
-			auto object = GSave->get<Object>(objectId);
-			auto verb = GSave->get<Verb>(verbId);
+			auto object = GGame->get<Object>(objectId);
+			auto verb = GGame->get<Verb>(verbId);
 			auto script = "function _f(verb,object){\n" + m_scriptConditional + "\nreturn true;}";
-			result = ActiveGame->getScriptManager()->call<bool>(script, "_f", verb, object);
+			result = ScriptMan->call<bool>(script, "_f", verb, object);
 		} catch (std::exception &e) {
 			std::cerr << "Verb::checkConditionScript " << e.what() << std::endl;
 			result = false;
@@ -76,7 +78,7 @@ bool Verb::checkConditionScript(const std::string &verbId, const std::string &ob
 
 	if (result && !m_parentId.empty())
 	{
-		auto parentVerb = GSave->get<Verb>(m_parentId);
+		auto parentVerb = GGame->get<Verb>(m_parentId);
 		result = parentVerb->checkConditionScript(verbId, objectId);
 	}
 
@@ -115,7 +117,7 @@ std::string Verb::getActionText(std::vector<std::string> objectIds, std::string 
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
-		objects.push_back(GSave->get<Object>(objectId));
+		objects.push_back(GGame->get<Object>(objectId));
 	return getActionText(objects, blankStr);
 }
 

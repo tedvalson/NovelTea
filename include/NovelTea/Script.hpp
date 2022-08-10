@@ -9,7 +9,7 @@ namespace NovelTea
 class Script : public Entity
 {
 public:
-	Script();
+	Script(Context *context);
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;

@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_NOTIFICATION_HPP
 #define NOVELTEA_NOTIFICATION_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/GUI/Button.hpp>
 #include <memory>
@@ -9,7 +10,7 @@ namespace NovelTea {
 
 class Notification : public Button {
 public:
-	Notification(const std::string &message);
+	Notification(Context *context, const std::string &message);
 
 	void setFontSizeMultiplier(float multiplier);
 	void setScreenSize(const sf::Vector2f &size);
@@ -22,9 +23,9 @@ private:
 	bool m_markForDelete;
 };
 
-class NotificationManager : public sf::Drawable {
+class NotificationManager : public ContextObject, public sf::Drawable {
 public:
-	NotificationManager();
+	NotificationManager(Context *context);
 
 	void spawn(const std::string &message, int durationMs = 0);
 	void update(float delta);

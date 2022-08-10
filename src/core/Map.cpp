@@ -1,11 +1,13 @@
 #include <NovelTea/Map.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
 
-Map::Map()
+Map::Map(Context *context)
+	: Entity(context)
 {
 }
 
@@ -106,7 +108,7 @@ bool Map::evalVisibility(std::shared_ptr<MapRoom> &room) const
 	if (!script.empty()) {
 		script = "function _f(roomIds){\n"+script+"\nreturn true;}";
 		try {
-			result = ActiveGame->getScriptManager()->call<bool>(script, "_f", room->roomIds);
+			result = ScriptMan->call<bool>(script, "_f", room->roomIds);
 		} catch (std::exception &e) {
 			std::cerr << "evalVisibility Room (" << room->name << ") " << e.what() << std::endl;
 			return false;
@@ -126,7 +128,7 @@ bool Map::evalVisibility(std::shared_ptr<MapConnection> &connection) const
 		try {
 			auto& roomStart = m_rooms[connection->roomStart];
 			auto& roomEnd = m_rooms[connection->roomEnd];
-			result = ActiveGame->getScriptManager()->call<bool>(script, "_f", roomStart->roomIds, roomEnd->roomIds);
+			result = ScriptMan->call<bool>(script, "_f", roomStart->roomIds, roomEnd->roomIds);
 		} catch (std::exception &e) {
 			std::cerr << "evalVisibility Path: " << e.what() << std::endl;
 			return false;

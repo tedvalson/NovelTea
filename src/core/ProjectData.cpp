@@ -1,6 +1,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
@@ -21,15 +22,14 @@ ProjectData::ProjectData()
 	newProject();
 }
 
+ProjectData::ProjectData(const std::string &fileName)
+{
+	loadFromFile(fileName);
+}
+
 ProjectData::~ProjectData()
 {
 
-}
-
-ProjectData &ProjectData::instance()
-{
-	static ProjectData obj;
-	return obj;
 }
 
 void ProjectData::newProject()
@@ -61,18 +61,19 @@ void ProjectData::newProject()
 	   "sysIcon", "fontawesome.ttf",
    });
 	fromJson(j);
+	m_loaded = false;
 }
 
 void ProjectData::closeProject()
 {
 	m_json = sj::Array();
 	m_loaded = false;
-	m_filename.clear();
+	m_fileName.clear();
 }
 
 void ProjectData::clearFilename()
 {
-	m_filename.clear();
+	m_fileName.clear();
 }
 
 bool ProjectData::isLoaded() const
@@ -101,7 +102,7 @@ void renameJsonEntity(json &jentity, EntityType entityType, const std::string &o
 		jentity[1] = newName;
 }
 
-void ProjectData::renameEntity(EntityType entityType, const std::string &oldName, const std::string &newName)
+void ProjectData::renameEntity(Context *context, EntityType entityType, const std::string &oldName, const std::string &newName)
 {
 	if (oldName == newName || entityType == EntityType::Invalid)
 		return;
@@ -127,7 +128,7 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	// Actions
 	if (entityType == EntityType::Object || entityType == EntityType::Verb)
 	{
-		auto action = std::make_shared<Action>();
+		auto action = std::make_shared<Action>(context);
 		for (auto &actionPair : m_json[Action::id].ObjectRange())
 		{
 			action->fromJson(actionPair.second);
@@ -144,7 +145,7 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	}
 
 	// Cutscenes
-	auto cutscene = std::make_shared<Cutscene>();
+	auto cutscene = std::make_shared<Cutscene>(context);
 	for (auto &pair : m_json[Cutscene::id].ObjectRange())
 	{
 		cutscene->fromJson(pair.second);
@@ -155,7 +156,7 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	}
 
 	// Dialogues
-	auto dialogue = std::make_shared<Dialogue>();
+	auto dialogue = std::make_shared<Dialogue>(context);
 	for (auto &pair : m_json[Dialogue::id].ObjectRange())
 	{
 		dialogue->fromJson(pair.second);
@@ -166,7 +167,7 @@ void ProjectData::renameEntity(EntityType entityType, const std::string &oldName
 	}
 
 	// Rooms
-	auto room = std::make_shared<Room>();
+	auto room = std::make_shared<Room>(context);
 	for (auto &roomPair : m_json[Room::id].ObjectRange())
 	{
 		room->fromJson(roomPair.second);
@@ -237,16 +238,16 @@ std::shared_ptr<sf::Font> ProjectData::getFont(const std::string &fontName) cons
 	return m_fonts.at(fontName);
 }
 
-void ProjectData::saveToFile(const std::string &filename)
+void ProjectData::saveToFile(const std::string &fileName)
 {
-	if (filename.empty() && m_filename.empty())
+	if (fileName.empty() && m_fileName.empty())
 		return;
-	if (!filename.empty())
-		m_filename = filename;
+	if (!fileName.empty())
+		m_fileName = fileName;
 
 	auto j = toJson();
 //	json::to_msgpack(j, file);
-	ZipWriter zip(m_filename);
+	ZipWriter zip(m_fileName);
 	zip.write("game", j.dump());
 	zip.write("image", m_imageData);
 
@@ -255,14 +256,14 @@ void ProjectData::saveToFile(const std::string &filename)
 	}
 }
 
-bool ProjectData::loadFromFile(const std::string &filename)
+bool ProjectData::loadFromFile(const std::string &fileName)
 {
 	try
 	{
 		std::string s;
 
 		sf::FileInputStream file;
-		if (!file.open(filename))
+		if (!file.open(fileName))
 			return false;
 		s.resize(file.getSize());
 		file.read(&s[0], s.size());
@@ -290,21 +291,21 @@ bool ProjectData::loadFromFile(const std::string &filename)
 				}
 			}
 			m_imageData = zip.read("image");
-			m_filename = filename;
+			m_fileName = fileName;
 		}
 		return success;
 	}
 	catch (std::exception &e)
 	{
-		std::cout << "Failed to load project: " << filename << std::endl;
+		std::cout << "Failed to load project: " << fileName << std::endl;
 		std::cout << e.what() << std::endl;
 		return false;
 	}
 }
 
-const std::string &ProjectData::filename() const
+const std::string &ProjectData::fileName() const
 {
-	return m_filename;
+	return m_fileName;
 }
 
 void ProjectData::setImageData(const std::string &data)
@@ -319,21 +320,13 @@ const std::string &ProjectData::getImageData() const
 
 json ProjectData::toJson() const
 {
-	// TextFormat list
-
-	// Project components all together
-//	auto jproject = json::object({
-//		{"config", jconfig},
-//		{"textformats", jtextformats}
-//	});
-
 	return m_json;
 }
 
 bool ProjectData::fromJson(const json &j)
 {
 	m_loaded = false;
-	m_filename.clear();
+	m_fileName.clear();
 	m_fonts.clear();
 	m_imageData.clear();
 
@@ -359,6 +352,15 @@ const json &ProjectData::data() const
 json &ProjectData::data()
 {
 	return m_json;
+}
+
+void ProjectData::set(std::shared_ptr<Entity> obj, const std::string &idName)
+{
+	if (!idName.empty())
+		obj->setId(idName);
+	else if (obj->getId().empty())
+		return;
+	data()[obj->entityId()][obj->getId()] = obj->toJson();
 }
 
 } // namespace NovelTea

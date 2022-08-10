@@ -1,15 +1,16 @@
 #ifndef NOVELTEA_TEXTLOGITEM_HPP
 #define NOVELTEA_TEXTLOGITEM_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/TweenObjects.hpp>
 
 namespace NovelTea
 {
 
-class TextLogItem : public sf::Drawable, public TweenTransformable<sf::Transformable>
+class TextLogItem : public ContextObject, public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
 public:
-	TextLogItem();
+	TextLogItem(Context *context);
 
 	virtual void setAlpha(float alpha) = 0;
 	virtual void setWidth(float width) = 0;

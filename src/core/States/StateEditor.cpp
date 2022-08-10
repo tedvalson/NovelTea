@@ -1,5 +1,6 @@
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/ActiveText.hpp>
@@ -18,10 +19,14 @@ namespace NovelTea
 
 StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
+, m_cutsceneRenderer(&context)
+, m_mapRenderer(&context)
+, m_previewText(&context)
+, m_roomActiveText(&context)
 , m_scrollPos(0.f)
 , m_mode(StateEditorMode::Nothing)
 {
-	ScriptMan.reset();
+	ScriptMan->reset();
 
 	m_cutsceneRenderer.setSkipWaitingForClick(true);
 	m_cutsceneRenderer.setSkipScriptSegments(true);
@@ -58,7 +63,7 @@ void StateEditor::resize(const sf::Vector2f &size)
 {
 	m_size = size;
 
-	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier;
+	auto fontSizeMultiplier = GConfig.fontSizeMultiplier;
 	m_roomTextPadding = round(1.f / 16.f * std::min(size.x, size.y));
 
 	m_roomActiveText.setSize(sf::Vector2f((size.x < size.y ? 1.f : 0.6f) * size.x - m_roomTextPadding*2, 0.f));
@@ -87,7 +92,7 @@ void StateEditor::resize(const sf::Vector2f &size)
 
 void StateEditor::repositionText()
 {
-	auto w = getContext().config.width;
+	auto w = GConfig.width;
 	m_roomActiveText.setPosition((w - m_roomActiveText.getSize().x)/2, m_roomTextPadding + m_scrollPos);
 }
 
@@ -129,9 +134,9 @@ void *StateEditor::processData(void *data)
 			return callback(j);
 		};
 
-		getContext().data["test"] = jsonData["test"];
-		getContext().data["record"] = jsonData["record"];
-		getContext().data["stopIndex"] = jsonData["stopIndex"];
+		getContext()->getData()["test"] = jsonData["test"];
+		getContext()->getData()["record"] = jsonData["record"];
+		getContext()->getData()["stopIndex"] = jsonData["stopIndex"];
 
 		requestStackPop();
 		requestStackPush(StateID::Main, false, stateCallback);
@@ -140,7 +145,7 @@ void *StateEditor::processData(void *data)
 	{
 		if (event == "cutscene")
 		{
-			auto cutscene = std::make_shared<Cutscene>();
+			auto cutscene = std::make_shared<Cutscene>(getContext());
 			cutscene->fromJson(jsonData["cutscene"]);
 			m_cutsceneRenderer.setCutscene(cutscene);
 		}
@@ -161,7 +166,7 @@ void *StateEditor::processData(void *data)
 	{
 		if (event == "map")
 		{
-			auto map = std::make_shared<Map>();
+			auto map = std::make_shared<Map>(getContext());
 			map->fromJson(jsonData["map"]);
 			m_mapRenderer.setMap(map);
 		}
@@ -172,7 +177,7 @@ void *StateEditor::processData(void *data)
 		{
 			try {
 				ScriptMan.reset();
-				auto r = ActiveGame->getRoom()->getDescription();
+				auto r = GGame->getRoom()->getDescription();
 				m_roomActiveText.setText(r);
 			} catch (std::exception &e) {
 				m_roomActiveText.setText(e.what());

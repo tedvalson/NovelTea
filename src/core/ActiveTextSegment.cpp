@@ -2,6 +2,7 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/BBCodeParser.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
@@ -11,8 +12,9 @@
 namespace NovelTea
 {
 
-ActiveTextSegment::ActiveTextSegment()
-	: m_lineMaxCharSize(0)
+ActiveTextSegment::ActiveTextSegment(Context *context)
+	: ContextObject(context)
+	, m_lineMaxCharSize(0)
 	, m_size(1024.f, 1024.f)
 	, m_needsUpdate(true)
 	, m_lineSpacing(5.f)
@@ -34,8 +36,8 @@ ActiveTextSegment::ActiveTextSegment()
 	reset();
 }
 
-ActiveTextSegment::ActiveTextSegment(const std::vector<std::shared_ptr<StyledSegment>> &segments)
-	: ActiveTextSegment()
+ActiveTextSegment::ActiveTextSegment(Context *context, const std::vector<std::shared_ptr<StyledSegment>> &segments)
+	: ActiveTextSegment(context)
 {
 	setStyledSegments(segments);
 }
@@ -527,15 +529,14 @@ void ActiveTextSegment::ensureUpdate() const
 		auto fontAlias = style.fontAlias;
 		if (fontAlias.empty())
 			fontAlias = ProjData[ID::projectFontDefault].ToString();
-		auto font = Proj.getFont(fontAlias);
+		auto font = Proj->getFont(fontAlias);
 		auto objectExists = false;
 		auto fontSize = 2.f * m_fontSizeMultiplier * style.fontSize;
 		auto color = style.color;
 		if (!objectId.empty()) {
-			objectExists = ActiveGame->getRoom()->containsId(objectId) ||
-						  ActiveGame->getObjectList()->containsId(objectId);
+			objectExists = GGame->getRoom()->containsId(objectId) ||
+						  GGame->getObjectList()->containsId(objectId);
 		}
-		color.a = m_alpha;
 
 		if (m_lineMaxCharSize == 0)
 			m_lineMaxCharSize = fontSize;

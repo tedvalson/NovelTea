@@ -1,22 +1,23 @@
 #ifndef NOVELTEA_BUTTON_HPP
 #define NOVELTEA_BUTTON_HPP
 
-#include <functional>
+#include "NinePatch.hpp"
+#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/TweenObjects.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Window/Event.hpp>
-#include "NinePatch.hpp"
-#include <NovelTea/TweenObjects.hpp>
+#include <functional>
 
 namespace NovelTea {
 
-class Button : public TweenNinePatch {
+class Button : public ContextObject, public TweenNinePatch {
 public:
 	static const int ALPHA       = 13;
 	static const int CONTENT_X   = 14;
 	static const int TEXTCOLOR_ALPHA = 15;
 
-	Button();
+	Button(Context *context);
 
 	bool processEvent(const sf::Event& event);
 

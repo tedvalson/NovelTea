@@ -1,15 +1,18 @@
 #include "NovelTeaWidget.hpp"
+#include "MainWindow.hpp"
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Engine.hpp>
 #include <NovelTea/States/StateEditor.hpp>
+#include <QCoreApplication>
 #include <QMouseEvent>
 #include <iostream>
 
 
-NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
-	SFMLWidget(parent),
-	m_engine(nullptr),
-//	_internalSize(480, 852)
-	m_internalSize(480, 700)
+NovelTeaWidget::NovelTeaWidget(QWidget *parent)
+	: SFMLWidget(parent)
+	, m_context(nullptr)
+	, m_engine(nullptr)
+	, m_internalSize(480, 700)
 {
 	m_internalRatio = m_internalSize.x / m_internalSize.y;
 	reset();
@@ -17,8 +20,8 @@ NovelTeaWidget::NovelTeaWidget(QWidget *parent) :
 
 NovelTeaWidget::~NovelTeaWidget()
 {
-	if (m_engine)
-		delete m_engine;
+	delete m_engine;
+	delete m_context;
 }
 
 json NovelTeaWidget::processData(json jsonData)
@@ -41,22 +44,26 @@ void NovelTeaWidget::setMode(NovelTea::StateEditorMode mode)
 	processData(jdata);
 }
 
-std::shared_ptr<NovelTea::Game> NovelTeaWidget::getGame()
-{
-	return m_engine->getGame();
-}
-
 void NovelTeaWidget::reset()
 {
-	NovelTea::EngineConfig config;
+	if (m_engine)
+		delete m_engine;
+	if (m_context)
+		delete m_context;
+
+	NovelTea::ContextConfig config;
 	config.width = m_internalSize.x;
 	config.height = m_internalSize.y;
 	config.initialState = NovelTea::StateID::Editor;
 	config.fontSizeMultiplier = 0.7f;
+	config.projectData = MainWindow::instance().getProjectBackup();
 
-	if (m_engine)
-		delete m_engine;
-	m_engine = new NovelTea::Engine(config);
+	auto dir = QCoreApplication::applicationDirPath().toStdString();
+	config.settingsDir = dir;
+	config.saveDir = dir;
+
+	m_context = new NovelTea::Context(config);
+	m_engine = new NovelTea::Engine(m_context);
 	m_engine->initialize();
 	m_engine->setFramerateLocked(false);
 	m_engine->update(0.01f); // This triggers update of state stack

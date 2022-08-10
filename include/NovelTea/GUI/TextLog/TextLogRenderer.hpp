@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TEXTLOGRENDERER_HPP
 #define NOVELTEA_TEXTLOGRENDERER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/TextLog/TextLogItem.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
@@ -12,10 +13,10 @@
 namespace NovelTea
 {
 
-class TextLogRenderer : public sf::Drawable, public Hideable, public Scrollable
+class TextLogRenderer : public ContextObject, public sf::Drawable, public Hideable, public Scrollable
 {
 public:
-	TextLogRenderer();
+	TextLogRenderer(Context *context);
 
 	bool processEvent(const sf::Event& event);
 	bool update(float delta) override;

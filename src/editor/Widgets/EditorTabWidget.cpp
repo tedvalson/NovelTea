@@ -1,18 +1,28 @@
 #include "EditorTabWidget.hpp"
 #include "EditorUtils.hpp"
+#include "MainWindow.hpp"
 #include <NovelTea/Game.hpp>
+#include <QCoreApplication>
 #include <QIcon>
 
 
 EditorTabWidget::EditorTabWidget(QWidget *parent)
 : QWidget(parent)
+, m_modified(false)
+, m_modifiedBackup(false)
 {
-
+	NovelTea::ContextConfig config;
+	auto dir = QCoreApplication::applicationDirPath().toStdString();
+	config.settingsDir = dir;
+	config.saveDir = dir;
+	config.projectData = MainWindow::instance().getProjectBackup();
+	m_context = new NovelTea::Context(config);
+	m_context->initialize();
 }
 
 EditorTabWidget::~EditorTabWidget()
 {
-
+	delete m_context;
 }
 
 bool EditorTabWidget::isModified() const
@@ -95,12 +105,22 @@ NovelTea::EntityType EditorTabWidget::tabTypeToEntityType(int tabType)
 	return tabTypeToEntityType(static_cast<Type>(tabType));
 }
 
+void EditorTabWidget::autosave()
+{
+	if (m_modifiedBackup)
+	{
+		saveData();
+		m_modifiedBackup = false;
+	}
+}
+
 void EditorTabWidget::save()
 {
 	if (m_modified)
 	{
-		m_modified = false;
 		saveData();
+		m_modified = false;
+		m_modifiedBackup = false;
 		emit saved();
 	}
 }
@@ -108,6 +128,7 @@ void EditorTabWidget::save()
 void EditorTabWidget::load()
 {
 	m_modified = false;
+	m_modifiedBackup = false;
 	loadData();
 	emit loaded();
 }
@@ -117,6 +138,7 @@ void EditorTabWidget::setModified()
 	if (!m_modified)
 	{
 		m_modified = true;
+		m_modifiedBackup = true;
 		emit modified();
 	}
 }

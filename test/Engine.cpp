@@ -10,29 +10,29 @@ extern std::string g_dir;
 
 bool EngineTest::initialized = false;
 
-void EngineTest::SetUp()
+EngineTest::EngineTest()
 {
-	if (!initialized) {
-		initialized = true;
 		resetEngineDir();
-	}
 	
-	auto dir = g_dir + "settings";
-	GSettings.setDirectory(dir);
-	GSettings.load();
 
 	config.width = 480;
 	config.height = 700;
 //	config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
 	config.dpiMultiplier = 2.f;
-	config.saveDir = dir;
 //	config.initialState = StateID::Main;
 
-	engine = new Engine(config);
+	auto dir = g_dir + "settings";
+	config.settingsDir = dir;
+	config.saveDir = dir;
+	
+	context = new Context(config);
+}
+
+void EngineTest::SetUp()
+{
+	engine = new Engine(context);
 	engine->initialize();
 	engine->setFramerateLocked(false);
-
-	GSave->setDirectory(dir);
 }
 
 void EngineTest::TearDown()
@@ -42,7 +42,6 @@ void EngineTest::TearDown()
 
 void EngineTest::loadProject(const std::string &fileName)
 {
-	ASSERT_TRUE(Proj.loadFromFile(g_dir + fileName)) << fileName;
 }
 
 void EngineTest::resetEngineDir()

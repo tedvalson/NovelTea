@@ -1,19 +1,21 @@
 #ifndef NOVELTEA_ENTITY_HPP
 #define NOVELTEA_ENTITY_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
-#include <NovelTea/PropertyList.hpp>
+#include <dukglue/dukvalue.h>
 
 namespace NovelTea
 {
 
+class PropertyList;
 class SaveData;
 
-class Entity : public JsonSerializable
+class Entity : public ContextObject, public JsonSerializable
 {
 public:
-	Entity();
+	Entity(Context* context);
 	virtual size_t jsonSize() const = 0;
 	virtual void loadJson(const json &j) = 0;
 	virtual const std::string entityId() const = 0;
@@ -32,7 +34,7 @@ public:
 	ADD_ACCESSOR(std::string, ParentId, m_parentId)
 	ADD_ACCESSOR(json, Properties, m_properties)
 
-	static std::shared_ptr<Entity> fromEntityJson(const json &j);
+	static std::shared_ptr<Entity> fromEntityJson(Context* context, const json &j);
 
 protected:
 	std::string m_id;

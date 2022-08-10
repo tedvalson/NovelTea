@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_SCRIPTMANAGER_HPP
 #define NOVELTEA_SCRIPTMANAGER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <SFML/System/Err.hpp>
 #include <dukglue/dukglue.h>
 #include <NovelTea/json.hpp>
@@ -15,10 +16,10 @@ class Script;
 
 const std::string strUseStrict = "\n\"use strict\";\n";
 
-class ScriptManager
+class ScriptManager : public ContextObject
 {
 public:
-	ScriptManager(Game *game);
+	ScriptManager(Context* context);
 	~ScriptManager();
 	void reset();
 
@@ -114,7 +115,6 @@ protected:
 
 private:
 	duk_context *m_context;
-	Game *m_game;
 
 	std::default_random_engine m_randEngine;
 	std::uniform_real_distribution<double> m_uniformDist;

@@ -27,9 +27,6 @@ SaveData::SaveData()
 	, m_directory(".")
 	, m_profileIndex(-1)
 {
-	m_json = sj::JSON({
-		ID::playTime, 0.f,
-	});
 }
 
 bool SaveData::isLoaded() const
@@ -83,31 +80,17 @@ const std::string &SaveData::filename() const
 	return m_filename;
 }
 
-std::string SaveData::getParentId(const std::string &entityType, const std::string &entityId)
-{
-	if (entityType.empty())
-		return std::string();
-
-	json j;
-	if (data()[entityType].hasKey(entityId))
-		j = data()[entityType][entityId];
-	else
-		j = ProjData[entityType][entityId];
-	return j[1].ToString();
-}
-
 void SaveData::reset()
 {
-	if (!Proj.isLoaded())
-		return;
 	m_json = sj::JSON({
 		ID::playTime, 0.f,
 		ID::navigationEnabled, true,
+		ID::mapEnabled, true,
+		ID::log, sj::Array(),
+		ID::properties, sj::Object(),
+		ID::roomDescriptions, sj::Object(),
+		ID::visitedRooms, sj::Object(),
 	});
-	m_json[ID::objectLocations][Room::id] = Room::getProjectRoomObjects();
-	m_json[ID::roomDescriptions] = sj::Object();
-	m_json[ID::properties] = sj::Object();
-	resetRoomDescriptions();
 }
 
 std::string SaveData::roomDescription(const std::string &id, const std::string &newDescription)
@@ -125,7 +108,6 @@ void SaveData::resetRoomDescriptions()
 
 json SaveData::toJson() const
 {
-//	_json[NT_ENGINE_VERSION] = m_engineVersion;
 	return m_json;
 }
 
@@ -164,8 +146,6 @@ void SaveData::save(int slot)
 {
 	if (!m_saveEnabled)
 		return;
-	if (m_profileIndex < 0)
-		GSettings.ensureProfileExists();
 	saveToFile(getSlotFilename(slot));
 
 	std::ofstream file(getProfileDirName() + "/" + lastFilename);

@@ -1,14 +1,14 @@
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Object.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/Context.hpp>
 #include <string>
 
 namespace NovelTea
 {
 
-ObjectList::ObjectList(std::shared_ptr<SaveData> saveData)
-	: m_saveData(saveData)
+ObjectList::ObjectList(Context* context)
+	: ContextObject(context)
 {
 }
 
@@ -17,7 +17,7 @@ bool ObjectList::add(std::shared_ptr<Object> object)
 	return addCount(object, 1);
 }
 
-// Inserts new items based on object's name (making it sorted)
+/// Inserts new items based on object's name (making it sorted)
 bool ObjectList::addCount(std::shared_ptr<Object> object, int count)
 {
 	if (!object || object->getId().empty())
@@ -50,7 +50,7 @@ bool ObjectList::addId(const std::string &objectId)
 
 bool ObjectList::addIdCount(const std::string &objectId, int count)
 {
-	return addCount(m_saveData->get<Object>(objectId), count);
+	return addCount(GGame->get<Object>(objectId), count);
 }
 
 bool ObjectList::remove(std::shared_ptr<Object> object)
@@ -88,7 +88,7 @@ bool ObjectList::removeId(const std::string &objectId)
 
 bool ObjectList::removeIdCount(const std::string &objectId, int count)
 {
-	return removeCount(m_saveData->get<Object>(objectId), count);
+	return removeCount(GGame->get<Object>(objectId), count);
 }
 
 bool ObjectList::contains(const std::shared_ptr<Object> &object) const
@@ -136,14 +136,14 @@ void ObjectList::attach(const std::string &type, const std::string &id)
 {
 	m_attachedType = type;
 	m_attachedId = id;
-	auto &j = m_saveData->data()[ID::objectLocations][type][id];
+	auto &j = GSaveData[ID::objectLocations][type][id];
 
 	// If no object in list, load from SaveData.
 	// Otherwise, save the existing ones.
 	if (m_items.empty())
 	{
 		for (auto &jitem : j.ArrayRange()) {
-			auto item = new ObjectItem(m_saveData->get<Object>(jitem[0].ToString()), jitem[1].ToInt());
+			auto item = new ObjectItem(GGame->get<Object>(jitem[0].ToString()), jitem[1].ToInt());
 			m_items.emplace_back(item);
 		}
 	}
@@ -167,7 +167,7 @@ void ObjectList::saveChanges()
 		if (!item->object->getId().empty())
 			jobjects.append(sj::Array(item->object->getId(), item->count));
 
-	m_saveData->data()[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
+	GSaveData[ID::objectLocations][m_attachedType][m_attachedId] = jobjects;
 }
 
 void ObjectList::sync()

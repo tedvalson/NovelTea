@@ -1,11 +1,13 @@
 #include "SpellChecker.hpp"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/StringUtils.hpp>
 #include <QCoreApplication>
 #include <iostream>
 
 
-SpellChecker::SpellChecker()
+SpellChecker::SpellChecker(NovelTea::Context *context)
+	: NovelTea::ContextObject(context)
 {
 	auto dictPath = QCoreApplication::applicationDirPath().toStdString() + "/dicts/";
 	auto affPath = dictPath + "en_US.aff";

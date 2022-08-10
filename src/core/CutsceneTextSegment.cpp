@@ -4,8 +4,9 @@
 namespace NovelTea
 {
 
-CutsceneTextSegment::CutsceneTextSegment()
-: m_offsetX(0)
+CutsceneTextSegment::CutsceneTextSegment(Context *context)
+: CutsceneSegment(context)
+, m_offsetX(0)
 , m_offsetY(0)
 , m_transition(TextEffect::Fade)
 {
@@ -71,7 +72,7 @@ void CutsceneTextSegment::setText(const std::string &text)
 	anim.waitForClick = false;
 	if (anim.type == TextEffect::FadeAcross)
 		anim.equation = &TweenEngine::TweenEquations::easeInOutLinear;
-	m_activeText = std::make_shared<ActiveText>(m_text, textProps, anim);
+	m_activeText = std::make_shared<ActiveText>(getContext(), m_text, textProps, anim);
 }
 
 const std::string &CutsceneTextSegment::getText() const

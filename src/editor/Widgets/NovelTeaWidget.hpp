@@ -22,7 +22,6 @@ public:
 
 	json processData(json jsonData);
 	void setMode(NovelTea::StateEditorMode mode);
-	std::shared_ptr<NovelTea::Game> getGame();
 
 	void reset();
 
@@ -41,6 +40,7 @@ protected:
 	void onUpdate(float delta) override;
 
 private:
+	NovelTea::Context *m_context;
 	NovelTea::Engine *m_engine;
 //	NovelTea::InputManager *_inputManager;
 

@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_INVENTORY_HPP
 #define NOVELTEA_INVENTORY_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
@@ -19,10 +20,10 @@ struct InventoryItem
 	std::string objectId;
 };
 
-class Inventory : public sf::Drawable, public Scrollable, public Hideable
+class Inventory : public ContextObject, public sf::Drawable, public Scrollable, public Hideable
 {
 public:
-	Inventory();
+	Inventory(Context *context);
 
 	bool update(float delta) override;
 	bool processEvent(const sf::Event& event);

@@ -1,6 +1,7 @@
 #ifndef ACTIONBUILDWIDGET_HPP
 #define ACTIONBUILDWIDGET_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <QWidget>
 #include <QComboBox>
@@ -11,12 +12,12 @@ class ActionBuildWidget;
 }
 class TreeModel;
 
-class ActionBuildWidget : public QWidget
+class ActionBuildWidget : public QWidget, public NovelTea::ContextObject
 {
 	Q_OBJECT
 
 public:
-	explicit ActionBuildWidget(QWidget *parent = 0);
+	explicit ActionBuildWidget(NovelTea::Context *context, QWidget *parent = 0);
 	~ActionBuildWidget();
 
 	void setValue(sj::JSON value);

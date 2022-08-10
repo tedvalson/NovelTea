@@ -2,14 +2,17 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <dukglue/dukglue.h>
 #include <iostream>
 
 namespace NovelTea
 {
 
-PropertyList::PropertyList()
-	: m_projectProperties(sj::Object())
+PropertyList::PropertyList(Context* context)
+	: ContextObject(context)
+	, m_projectProperties(sj::Object())
 	, m_savedProperties(sj::Object())
 {
 }
@@ -20,11 +23,11 @@ DukValue PropertyList::get(const std::string &key, const DukValue &defaultValue)
 
 	if (!contains(key))
 	{
-		auto parentId = GSave->getParentId(m_attachedType, m_attachedId);
+		auto parentId = GGame->getParentId(m_attachedType, m_attachedId);
 		if (parentId.empty())
 			return defaultValue;
 
-		auto parentPropertyList = std::make_shared<PropertyList>();
+		auto parentPropertyList = std::make_shared<PropertyList>(getContext());
 		parentPropertyList->attach(m_attachedType, parentId);
 		return parentPropertyList->get(key, defaultValue);
 	}

@@ -3,8 +3,9 @@
 namespace NovelTea
 {
 
-Script::Script()
-	: m_autorun(false)
+Script::Script(Context *context)
+	: Entity(context)
+	, m_autorun(false)
 {
 }
 

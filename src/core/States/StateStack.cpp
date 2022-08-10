@@ -1,15 +1,16 @@
 #include <NovelTea/States/StateStack.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Engine.hpp>
 #include <cassert>
 
 
 namespace NovelTea {
 
-StateStack::StateStack(State::Context context)
-: m_stack()
-, m_pendingList()
-, m_context(context)
-, m_factories()
+StateStack::StateStack(Context* context)
+	: ContextObject(context)
+	, m_stack()
+	, m_pendingList()
+	, m_factories()
 {
 }
 
@@ -104,7 +105,7 @@ void StateStack::applyPendingChanges()
 		{
 			case Push: {
 				auto state = createState(change.stateID, change.callback);
-				state->resize(sf::Vector2f(m_context.config.width, m_context.config.height));
+				state->resize(sf::Vector2f(GConfig.width, GConfig.height));
 				m_stack.push_back({change.stateID, std::move(state), change.renderAlone, true});
 				updateRenderConfig();
 				break;

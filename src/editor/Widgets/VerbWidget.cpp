@@ -1,6 +1,6 @@
 #include "VerbWidget.hpp"
 #include "ui_VerbWidget.h"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Verb.hpp>
 #include <QDebug>
 
@@ -46,13 +46,13 @@ void VerbWidget::saveData() const
 		m_verb->setScriptConditional(ui->scriptEditConditional->toPlainText().toStdString());
 		m_verb->setActionStructure(actionStructure);
 		m_verb->setProperties(ui->propertyEditor->getValue());
-		Proj.set<NovelTea::Verb>(m_verb, idName());
+		Proj->set(m_verb, idName());
 	}
 }
 
 void VerbWidget::loadData()
 {
-	m_verb = Proj.get<NovelTea::Verb>(idName());
+	m_verb = Proj->get<NovelTea::Verb>(idName(), getContext());
 
 	qDebug() << "Loading verb data... " << QString::fromStdString(idName());
 
@@ -60,7 +60,7 @@ void VerbWidget::loadData()
 	{
 		// Object is new, so show it as modified
 		setModified();
-		m_verb = std::make_shared<NovelTea::Verb>();
+		m_verb = std::make_shared<NovelTea::Verb>(getContext());
 	}
 
 	ui->lineEditName->setText(QString::fromStdString(m_verb->getName()));

@@ -1,6 +1,7 @@
 #include <NovelTea/States/StateTextLog.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <TweenEngine/Tween.h>
@@ -11,8 +12,10 @@ namespace NovelTea
 
 StateTextLog::StateTextLog(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
+, m_buttonClose(&context)
+, m_textLogRenderer(&context)
 {
-	m_buttonClose.getText().setFont(*Proj.getFont("sysIcon"));
+	m_buttonClose.getText().setFont(*Proj->getFont("sysIcon"));
 	m_buttonClose.setString(L"\uf00d");
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);
@@ -55,7 +58,7 @@ void StateTextLog::resize(const sf::Vector2f &size)
 	auto wi = std::min(w, h);
 	auto portrait = (w < h);
 	auto margin = 0.1f * wi;
-	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier * getContext().config.dpiMultiplier;
+	auto fontSizeMultiplier = GConfig.fontSizeMultiplier * GConfig.dpiMultiplier;
 	m_screenSize = size;
 
 	auto buttonHeight = wi * 0.09f;

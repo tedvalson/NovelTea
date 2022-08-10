@@ -12,7 +12,7 @@ class Object;
 class Verb : public Entity
 {
 public:
-	Verb();
+	Verb(Context* context);
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;

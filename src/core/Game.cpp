@@ -1,20 +1,23 @@
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/Settings.hpp>
+#include <NovelTea/PropertyList.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <iostream>
 
 namespace NovelTea
 {
 
-Game::Game()
-	: m_objectList(nullptr)
+Game::Game(Context* context)
+	: ContextObject(context)
+	, m_objectList(nullptr)
 	, m_propertyList(nullptr)
 	, m_map(nullptr)
 	, m_room(nullptr)
@@ -26,11 +29,9 @@ Game::Game()
 	, m_initialized(false)
 	, m_messageCallback(nullptr)
 	, m_saveCallback(nullptr)
+	, m_settings(new Settings(context))
+	, m_projectData(new ProjectData)
 	, m_saveData(new SaveData)
-	, m_timerManager(new TimerManager)
-	, m_notificationManager(new NotificationManager)
-	, m_textLog(new TextLog)
-	, m_scriptManager(new ScriptManager(this))
 {
 }
 
@@ -42,35 +43,51 @@ Game::~Game()
 }
 
 // Game must be active before initialized
-void Game::initialize()
+bool Game::initialize()
 {
 	if (m_initialized) {
 		std::cerr << "Game already initialized!" << std::endl;
-		return;
+		return false;
 	}
 
+	m_saveData->setDirectory(GConfig.saveDir);
+
+	m_settings->setDirectory(GConfig.settingsDir);
+	m_settings->load();
+	if (GConfig.projectData)
+		m_projectData = GConfig.projectData;
+	else
+		m_projectData->loadFromFile(GConfig.projectFileName);
+
 	reset();
+
+	GSaveData[NovelTea::ID::entityPreview] = GConfig.entityPreview;
+	GSaveData[NovelTea::ID::entrypointEntity] = GConfig.entryEntity;
+	GSaveData[NovelTea::ID::entrypointMetadata] = GConfig.entryMeta;
+
 	m_initialized = true;
+	return true;
 }
 
 void Game::reset()
 {
-	if (!Proj.isLoaded())
+	if (!m_projectData->isLoaded())
 		return;
 
 	while (!m_entityQueue.empty())
 		m_entityQueue.pop();
 
 	m_quitting = false;
-	m_saveData->setProfileIndex(GSettings.getActiveProfileIndex()); // Should reset() SaveData
-	m_timerManager->reset();
-	m_scriptManager->reset();
+	m_saveData->setProfileIndex(m_settings->getActiveProfileIndex()); // Should reset() SaveData
+	m_saveData->data()[ID::objectLocations][Room::id] = Room::getProjectRoomObjects(getContext());
+	TimerMan->reset();
+	ScriptMan->reset();
 	syncToSave();
 }
 
 void Game::setRoomId(const std::string &roomId)
 {
-	m_room = m_saveData->get<Room>(roomId);
+	m_room = get<Room>(roomId);
 }
 
 void Game::setRoom(const std::shared_ptr<Room> &room)
@@ -93,7 +110,7 @@ void Game::setMapId(const std::string &mapId)
 	if (mapId.empty())
 		m_map = nullptr;
 	else
-		m_map = m_saveData->get<Map>(mapId);
+		m_map = get<Map>(mapId);
 }
 
 const std::string Game::getMapId() const
@@ -130,7 +147,7 @@ void Game::pushNextEntity(std::shared_ptr<Entity> entity, const DukValue &value)
 
 void Game::pushNextEntityJson(json jentity)
 {
-	pushNextEntity(Entity::fromEntityJson(jentity));
+	pushNextEntity(Entity::fromEntityJson(getContext(), jentity));
 }
 
 std::shared_ptr<Entity> Game::popNextEntity()
@@ -142,7 +159,7 @@ std::shared_ptr<Entity> Game::popNextEntity()
 	auto& callback = nextPair.second;
 	m_entityQueue.pop();
 	if (callback.type() != DukValue::UNDEFINED)
-		m_scriptManager->call<void>(callback);
+		ScriptMan->call<void>(callback);
 	return nextEntity;
 }
 
@@ -150,12 +167,14 @@ void Game::save(int slot)
 {
 	if (!getSaveEnabled())
 		return;
-	m_scriptManager->runInClosure(ProjData[ID::scriptBeforeSave].ToString());
+	if (m_saveData->getProfileIndex() < 0)
+		m_settings->ensureProfileExists();
+	ScriptMan->runInClosure(ProjData[ID::scriptBeforeSave].ToString());
 	if (m_saveCallback)
 		m_saveCallback();
 	m_saveData->data()[ID::mapEnabled] = m_minimapEnabled;
 	m_saveData->data()[ID::navigationEnabled] = m_navigationEnabled;
-	m_saveData->data()[ID::log] = m_textLog->toJson();
+	m_saveData->data()[ID::log] = GTextLog->toJson();
 	m_saveData->save(slot);
 }
 
@@ -164,7 +183,7 @@ bool Game::load(int slot)
 	if (!m_saveData->load(slot))
 		return false;
 	syncToSave();
-	m_scriptManager->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
+	ScriptMan->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
 	return true;
 }
 
@@ -173,7 +192,7 @@ bool Game::loadLast()
 	if (!m_saveData->loadLast())
 		return false;
 	syncToSave();
-	m_scriptManager->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
+	ScriptMan->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
 	return true;
 }
 
@@ -185,17 +204,17 @@ void Game::autosave()
 
 void Game::syncToSave()
 {
-	m_room = std::make_shared<Room>();
-	m_objectList = std::make_shared<ObjectList>(m_saveData);
-	m_propertyList = std::make_shared<PropertyList>();
+	m_room = std::make_shared<Room>(getContext());
+	m_objectList = std::make_shared<ObjectList>(getContext());
+	m_propertyList = std::make_shared<PropertyList>(getContext());
 	if (!m_saveData->isLoaded()) {
-		auto &j = ProjData[ID::startingInventory];
+		auto &j = m_projectData->data()[ID::startingInventory];
 		for (auto &jObjectId : j.ArrayRange())
 			m_objectList->addId(jObjectId.ToString());
 	}
 	m_objectList->attach("player", "inv");
 	m_propertyList->attach("game", "globals");
-	m_textLog->fromJson(m_saveData->data()[ID::log]);
+	GTextLog->fromJson(m_saveData->data()[ID::log]);
 	m_minimapEnabled = m_saveData->data()[ID::mapEnabled].ToBool();
 	m_navigationEnabled = m_saveData->data()[ID::navigationEnabled].ToBool();
 }
@@ -212,9 +231,9 @@ bool Game::isQuitting() const
 
 void Game::spawnNotification(const std::string &message, bool addToLog, int durationMs)
 {
-	m_notificationManager->spawn(message, durationMs);
+	NotificationMan->spawn(message, durationMs);
 	if (addToLog)
-		m_textLog->push(message, TextLogType::Notification);
+		GTextLog->push(message, TextLogType::Notification);
 }
 
 //void Game::execMessageCallback(const std::string &message, const DukValue &callback)
@@ -232,66 +251,25 @@ void Game::execMessageCallbackLog(const std::vector<std::string> &messageArray, 
 {
 	execMessageCallback(messageArray, callback);
 	for (auto &s : messageArray)
-		m_textLog->push(s, TextLogType::TextOverlay);
+		GTextLog->push(s, TextLogType::TextOverlay);
 }
 
-std::shared_ptr<ScriptManager> Game::getScriptManager()
+std::string Game::getParentId(const std::string &entityType, const std::string &entityId)
 {
-	return m_scriptManager;
+	if (entityType.empty())
+		return std::string();
+
+	json j;
+	if (m_saveData->data()[entityType].hasKey(entityId))
+		j = m_saveData->data()[entityType][entityId];
+	else
+		j = m_projectData->data()[entityType][entityId];
+	return j[1].ToString();
 }
 
-std::shared_ptr<SaveData> Game::getSaveData()
+void Game::set(std::shared_ptr<Entity> obj, const std::string &idName)
 {
-	return m_saveData;
+	m_saveData->set(obj, idName);
 }
-
-std::shared_ptr<TimerManager> Game::getTimerManager()
-{
-	return m_timerManager;
-}
-
-std::shared_ptr<NotificationManager> Game::getNotificationManager()
-{
-	return m_notificationManager;
-}
-
-std::shared_ptr<TextLog> Game::getTextLog()
-{
-	return m_textLog;
-}
-
-
-GameManager::GameManager()
-	: m_defaultGame(std::make_shared<Game>())
-{
-	setDefault();
-}
-
-GameManager &GameManager::instance()
-{
-	static GameManager obj;
-	return obj;
-}
-
-std::shared_ptr<Game> GameManager::getActive() const
-{
-	return m_activeGame;
-}
-
-std::shared_ptr<Game> GameManager::getDefault() const
-{
-	return m_defaultGame;
-}
-
-void GameManager::setDefault()
-{
-	setActive(m_defaultGame);
-}
-
-void GameManager::setActive(std::shared_ptr<Game> game)
-{
-	m_activeGame = game;
-}
-
 
 } // namespace NovelTea

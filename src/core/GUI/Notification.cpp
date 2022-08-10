@@ -13,8 +13,9 @@ namespace
 	int durationPerLetter = 30;
 }
 
-Notification::Notification(const std::string &message)
-: m_string(message)
+Notification::Notification(Context *context, const std::string &message)
+: Button(context)
+, m_string(message)
 , m_markForDelete(false)
 {
 	setTexture(AssetManager<sf::Texture>::get("images/notification.9.png").get());
@@ -52,8 +53,9 @@ bool Notification::isMarkedForDelete() const
 	return m_markForDelete;
 }
 
-NotificationManager::NotificationManager()
-: m_fontSizeMultiplier(1.f)
+NotificationManager::NotificationManager(Context *context)
+: ContextObject(context)
+, m_fontSizeMultiplier(1.f)
 , m_spawnOffsetY(0.f)
 {
 
@@ -100,7 +102,7 @@ void NotificationManager::spawn(const std::string &message, int durationMs)
 {
 	if (durationMs <= 0)
 		durationMs = durationBaseDefault + message.size() * durationPerLetter;
-	auto notification = new Notification(message);
+	auto notification = new Notification(getContext(), message);
 
 	notification->setColor(sf::Color(255, 255, 255, 0));
 	notification->setTextColor(sf::Color(60, 60, 60, 0));

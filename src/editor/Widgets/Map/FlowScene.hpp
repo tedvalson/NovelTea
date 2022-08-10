@@ -15,6 +15,7 @@ class Connection;
 class ConnectionGraphicsObject;
 
 namespace NovelTea {
+class Context;
 class Map;
 }
 
@@ -28,7 +29,7 @@ public:
 	~FlowScene();
 
 public:
-	std::shared_ptr<NovelTea::Map> toMapEntity() const;
+	std::shared_ptr<NovelTea::Map> toMapEntity(NovelTea::Context *context) const;
 
 	std::shared_ptr<Connection> createConnection(Node& node,
 												 QPoint portPoint);

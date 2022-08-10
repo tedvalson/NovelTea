@@ -1,5 +1,6 @@
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
@@ -26,7 +27,7 @@
 #include <iostream>
 
 #define REGISTER_CONSTRUCTOR(className) \
-	dukglue_register_function(m_context, std::make_shared<className>, "make"#className)
+	dukglue_register_method(m_context, &Game::makeContextObject<className>, "make"#className)
 
 #define REGISTER_ENTITY(className) \
 	dukglue_set_base_class<Entity, className>(m_context);  \
@@ -34,8 +35,8 @@
 	dukglue_register_method(m_context, &className::setProp, "setProp"); \
 	dukglue_register_method(m_context, &className::unsetProp, "unsetProp"); \
 	dukglue_register_property(m_context, &className::getId, nullptr, "id"); \
-	dukglue_register_method(m_context, &SaveData::get<className>, "load"#className); \
-	dukglue_register_method(m_context, &SaveData::exists<className>, "exists"#className);
+	dukglue_register_method(m_context, &Game::get<className>, "load"#className); \
+	dukglue_register_method(m_context, &Game::exists<className>, "exists"#className);
 
 namespace
 {
@@ -53,12 +54,11 @@ namespace
 namespace NovelTea
 {
 
-ScriptManager::ScriptManager(Game *game)
-	: m_context(nullptr)
-	, m_game(game)
+ScriptManager::ScriptManager(Context* context)
+	: ContextObject(context)
+	, m_context(nullptr)
 	, m_randSeed(0)
 {
-	reset();
 }
 
 ScriptManager::~ScriptManager()
@@ -107,15 +107,15 @@ DukValue ScriptManager::runScript(std::shared_ptr<Script> script)
 
 DukValue ScriptManager::runScriptId(const std::string &scriptId)
 {
-	return runScript(m_game->getSaveData()->get<Script>(scriptId));
+	return runScript(GGame->get<Script>(scriptId));
 }
 
 bool ScriptManager::runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script)
 {
 	std::vector<std::shared_ptr<Object>> objects;
 	for (auto &objectId : objectIds)
-		objects.push_back(m_game->getSaveData()->get<Object>(objectId));
-	auto verb = m_game->getSaveData()->get<Verb>(verbId);
+		objects.push_back(GGame->get<Object>(objectId));
+	auto verb = GGame->get<Verb>(verbId);
 	auto objectCount = objects.size();
 	auto s = "function f(verb,object1,object2,object3,object4){\n"+script+"\nreturn false;}";
 	try {
@@ -137,7 +137,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 
 bool ScriptManager::runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds)
 {
-	auto verb = m_game->getSaveData()->get<Verb>(verbId);
+	auto verb = GGame->get<Verb>(verbId);
 	auto script = verb->getScriptDefault();
 	auto result = false;
 	if (!script.empty())
@@ -224,7 +224,6 @@ void ScriptManager::registerFunctions()
 void ScriptManager::registerClasses()
 {
 	// ActiveText
-	REGISTER_CONSTRUCTOR(ActiveText);
 
 	// ObjectList
 	dukglue_register_method(m_context, &ObjectList::add, "add");
@@ -329,12 +328,11 @@ void ScriptManager::registerClasses()
 void ScriptManager::registerGlobals()
 {
 	// Save
-	dukglue_register_global(m_context, m_game->getSaveData(), "Save");
-	dukglue_register_method(m_context, &SaveData::set, "saveEntity");
+	dukglue_register_global(m_context, GSave, "Save");
 	dukglue_register_method(m_context, &SaveData::resetRoomDescriptions, "resetRoomDescriptions");
 
 	// Game
-	dukglue_register_global(m_context, m_game, "Game");
+	dukglue_register_global(m_context, GGame, "Game");
 	dukglue_register_method(m_context, &Game::pushNextEntity, "pushNext");
 	dukglue_register_method(m_context, &Game::execMessageCallback, "message");
 	dukglue_register_method(m_context, &Game::execMessageCallbackLog, "messageLog");
@@ -345,6 +343,7 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &Game::load, "load");
 	dukglue_register_method(m_context, &Game::autosave, "autosave");
 	dukglue_register_method(m_context, &Game::quit, "quit");
+	dukglue_register_method(m_context, &Game::set, "saveEntity");
 	dukglue_register_property(m_context, &Game::getObjectList, nullptr, "inventory");
 	dukglue_register_property(m_context, &Game::getRoom, nullptr, "room");
 	dukglue_register_property(m_context, &Game::getMapId, &Game::setMapId, "mapId");
@@ -361,30 +360,30 @@ void ScriptManager::registerGlobals()
 	dukglue_register_method(m_context, &ScriptManager::randSeed, "seed");
 
 	// TextLog
-	dukglue_register_global(m_context, m_game->getTextLog(), "Log");
+	dukglue_register_global(m_context, GTextLog, "Log");
 	dukglue_register_method(m_context, &TextLog::pushScript, "push");
 
 	// TimerManager
-	dukglue_register_global(m_context, m_game->getTimerManager(), "Timer");
+	dukglue_register_global(m_context, TimerMan, "Timer");
 	dukglue_register_method(m_context, &TimerManager::start, "start");
 	dukglue_register_method(m_context, &TimerManager::startRepeat, "startRepeat");
 }
 
 void ScriptManager::runAutorunScripts()
 {
-	if (m_game->getSaveData()->isLoaded())
-		for (auto &item : m_game->getSaveData()->data()[Script::id].ObjectRange())
+	if (GSave->isLoaded())
+		for (auto &item : GSaveData[Script::id].ObjectRange())
 			checkAutorun(item.second);
-	if (Proj.isLoaded())
+	if (Proj->isLoaded())
 		for (auto &item : ProjData[Script::id].ObjectRange())
-			if (!m_game->getSaveData()->data()[Script::id].hasKey(item.first))
+			if (!GSaveData[Script::id].hasKey(item.first))
 				checkAutorun(item.second);
 }
 
 void ScriptManager::checkAutorun(const sj::JSON &j)
 {
 	auto entityId = j[ID::entityId].ToString();
-	auto script = m_game->getSaveData()->get<Script>(entityId);
+	auto script = GGame->get<Script>(entityId);
 	if (script->getAutorun())
 		runScript(script);
 }

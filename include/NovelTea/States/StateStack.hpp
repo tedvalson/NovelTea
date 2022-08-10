@@ -13,7 +13,7 @@
 
 namespace NovelTea {
 
-class StateStack : private sf::NonCopyable
+class StateStack : public ContextObject, private sf::NonCopyable
 {
 public:
 	enum Action {
@@ -24,7 +24,7 @@ public:
 	};
 
 public:
-	explicit StateStack(State::Context context);
+	explicit StateStack(Context* context);
 
 	template <typename T>
 	void registerState(StateID stateID);
@@ -74,7 +74,6 @@ private:
 	std::vector<StateStackItem>    m_stack;
 	std::vector<PendingChange> m_pendingList;
 
-	State::Context m_context;
 	std::map<StateID, std::function<State::Ptr(StateCallback)>> m_factories;
 };
 
@@ -84,7 +83,7 @@ void StateStack::registerState(StateID stateID)
 {
 	m_factories[stateID] = [this] (StateCallback callback)
 	{
-		return State::Ptr(new T(*this, m_context, callback));
+		return State::Ptr(new T(*this, *getContext(), callback));
 	};
 }
 

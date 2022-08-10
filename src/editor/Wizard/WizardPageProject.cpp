@@ -45,7 +45,7 @@ bool WizardPageProject::validatePage()
 	auto mainWindow = qobject_cast<MainWindow*>(wizard()->parent());
 	if (mainWindow)
 	{
-		NovelTea::ProjectData project;
+		auto project = std::make_shared<NovelTea::ProjectData>();
 		if (ui->groupBoxTemplates->isChecked()) {
 			auto item = ui->listWidgetTemplates->currentItem();
 			if (!item) {
@@ -53,16 +53,15 @@ bool WizardPageProject::validatePage()
 				return false;
 			}
 			auto filename = item->data(Qt::UserRole).toString().toStdString();
-			if (!project.loadFromFile(filename)) {
+			if (!project->loadFromFile(filename)) {
 				QMessageBox::critical(this, "Template Error", "Failed to load the selected template. It is invalid.");
 				return false;
 			}
-		} else
-			project.newProject();
+		}
 
-		project.data()[NovelTea::ID::projectName] = field("projectName").toString().toStdString();
-		project.data()[NovelTea::ID::projectAuthor] = field("projectAuthor").toString().toStdString();
-		project.clearFilename();
+		project->data()[NovelTea::ID::projectName] = field("projectName").toString().toStdString();
+		project->data()[NovelTea::ID::projectAuthor] = field("projectAuthor").toString().toStdString();
+		project->clearFilename();
 		auto success = mainWindow->loadProject(project);
 		if (success)
 			mainWindow->addEditorTab(EditorTabWidget::Settings, "");

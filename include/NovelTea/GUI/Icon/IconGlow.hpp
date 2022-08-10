@@ -1,17 +1,18 @@
 #ifndef NOVELTEA_ICONGLOW_HPP
 #define NOVELTEA_ICONGLOW_HPP
 
-#include <vector>
+#include <NovelTea/ContextObject.hpp>
 #include <TweenEngine/TweenManager.h>
 #include "../../TweenObjects.hpp"
+#include <vector>
 
 namespace NovelTea
 {
 
-class IconGlow : public sf::Drawable, public TweenTransformable<sf::Transformable>
+class IconGlow : public ContextObject, public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
 public:
-	IconGlow();
+	IconGlow(Context *context);
 
 	void reset();
 	void setSpeed(float factor);

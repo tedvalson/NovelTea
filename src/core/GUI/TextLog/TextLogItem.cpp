@@ -3,8 +3,9 @@
 namespace NovelTea
 {
 
-TextLogItem::TextLogItem()
-: m_fontSizeMultiplier(1.f)
+TextLogItem::TextLogItem(Context *context)
+	: ContextObject(context)
+	, m_fontSizeMultiplier(1.f)
 {
 
 }

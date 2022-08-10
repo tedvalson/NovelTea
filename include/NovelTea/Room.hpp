@@ -15,7 +15,7 @@ public:
 		bool placeInRoom;
 	};
 
-	Room();
+	Room(Context *context);
 
 	size_t jsonSize() const override;
 	json toJson() const override;
@@ -25,7 +25,7 @@ public:
 	bool contains(const std::shared_ptr<Object> &object);
 	bool containsId(const std::string &objectId);
 
-	static json getProjectRoomObjects();
+	static json getProjectRoomObjects(Context *context);
 
 	static constexpr auto id = ID::Room;
 	const std::string entityId() const override {return id;}

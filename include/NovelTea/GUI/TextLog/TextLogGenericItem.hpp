@@ -10,7 +10,7 @@ namespace NovelTea
 class TextLogGenericItem : public TextLogItem
 {
 public:
-	TextLogGenericItem(const std::string &text);
+	TextLogGenericItem(Context *context, const std::string &text);
 	virtual void setAlpha(float alpha) override;
 	virtual void setWidth(float width) override;
 

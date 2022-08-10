@@ -1,6 +1,7 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/BBCodeParser.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/StringUtils.hpp>
@@ -9,11 +10,13 @@
 namespace NovelTea
 {
 
-ActiveText::ActiveText()
-: m_alpha(255.f)
+ActiveText::ActiveText(Context *context)
+: ContextObject(context)
+, m_alpha(255.f)
 , m_fontSizeMultiplier(1.f)
 , m_highlightFactor(1.f)
 , m_lineSpacing(5.f)
+, m_segmentIndex(-1)
 , m_isAnimating(true)
 , m_isComplete(true)
 , m_isWaitingForClick(false)
@@ -27,20 +30,20 @@ ActiveText::ActiveText()
 	m_timeToNext = sf::Time::Zero;
 }
 
-ActiveText::ActiveText(const std::string &text)
-: ActiveText(text, TextProperties(), AnimationProperties())
+ActiveText::ActiveText(Context *context, const std::string &text)
+: ActiveText(context, text, TextProperties(), AnimationProperties())
 {}
 
-ActiveText::ActiveText(const std::string &text, const AnimationProperties &animProps)
-: ActiveText(text, TextProperties(), animProps)
+ActiveText::ActiveText(Context *context, const std::string &text, const AnimationProperties &animProps)
+: ActiveText(context, text, TextProperties(), animProps)
 {}
 
-ActiveText::ActiveText(const std::string &text, const TextProperties &textProps)
-: ActiveText(text, textProps, AnimationProperties())
+ActiveText::ActiveText(Context *context, const std::string &text, const TextProperties &textProps)
+: ActiveText(context, text, textProps, AnimationProperties())
 {}
 
-ActiveText::ActiveText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps)
-: ActiveText()
+ActiveText::ActiveText(Context *context, const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps)
+: ActiveText(context)
 {
 	setText(text, textProps, animProps);
 }
@@ -117,7 +120,7 @@ void ActiveText::setText(const std::string &text, const TextProperties &textProp
 
 void ActiveText::setText(const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps)
 {
-	m_text = ActiveGame->getScriptManager()->evalExpressions(text);
+	m_text = ScriptMan->evalExpressions(text);
 	buildSegments(textProps, animProps);
 	reset();
 }
@@ -239,7 +242,7 @@ bool ActiveText::update(float delta)
 {
 
 	auto timeDelta = sf::seconds(delta);
-	while (timeDelta >= m_timeToNext && m_timeToNext > sf::Time::Zero)
+	while (timeDelta >= m_timeToNext)
 	{
 		if (isComplete())
 			break;
@@ -429,7 +432,7 @@ void ActiveText::addSegmentToQueue(size_t segmentIndex)
 	};
 
 		TweenEngine::Tween::mark()
-			.delay(timeToNext)
+			.delay(m_timeToNext.asSeconds())
 			.setCallback(TweenEngine::TweenCallback::BEGIN, endCallback)
 			.start(m_tweenManager);
 }
@@ -441,14 +444,14 @@ void ActiveText::buildSegments(const TextProperties &textProps, const AnimationP
 	auto s = BBCodeParser::makeSegments(m_text, textProps, animProps);
 	for (auto &ss : s) {
 		if (ss->newGroup && !segGroup.empty()) {
-			m_segments.emplace_back(new ActiveTextSegment(segGroup));
+			m_segments.emplace_back(new ActiveTextSegment(getContext(), segGroup));
 			segGroup.clear();
 		}
 		segGroup.push_back(ss);
 	}
 
 	if (!segGroup.empty())
-		m_segments.emplace_back(new ActiveTextSegment(segGroup));
+		m_segments.emplace_back(new ActiveTextSegment(getContext(), segGroup));
 
 	setHighlightFactor(m_highlightFactor);
 	setHighlightId(m_highlightId);

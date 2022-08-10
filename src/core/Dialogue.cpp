@@ -1,17 +1,19 @@
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialogueSegment.hpp>
+#include <NovelTea/PropertyList.hpp>
 
 namespace NovelTea
 {
 
-Dialogue::Dialogue()
-: m_rootIndex(0)
+Dialogue::Dialogue(Context *context)
+: Entity(context)
+, m_rootIndex(0)
 , m_enableDisabledOptions(false)
 , m_showDisabledOptions(false)
 , m_logMode(DialogueTextLogMode::Everything)
 , m_nextEntity(sj::Array(-1,""))
 {
-	auto rootSegment = std::make_shared<DialogueSegment>();
+	auto rootSegment = std::make_shared<DialogueSegment>(context);
 	rootSegment->setType(DialogueSegment::Root);
 	m_segments.push_back(rootSegment);
 }
@@ -58,7 +60,7 @@ void Dialogue::loadJson(const json &j)
 	int i = 0;
 	for (auto &jsegment : j[9].ArrayRange())
 	{
-		auto segment = std::make_shared<DialogueSegment>();
+		auto segment = std::make_shared<DialogueSegment>(getContext());
 		segment->fromJson(jsegment);
 		segment->setId(i++);
 		segment->setDialogue(this);
@@ -127,7 +129,7 @@ void Dialogue::setNextEntity(std::shared_ptr<Entity> entity)
 
 std::shared_ptr<Entity> Dialogue::getNextEntity() const
 {
-	return Entity::fromEntityJson(m_nextEntity);
+	return Entity::fromEntityJson(getContext(), m_nextEntity);
 }
 
 } // namespace NovelTea

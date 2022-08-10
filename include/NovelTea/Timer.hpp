@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TIMER_HPP
 #define NOVELTEA_TIMER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/Utils.hpp>
 #include <dukglue/dukvalue.h>
 #include <memory>
@@ -9,10 +10,10 @@
 namespace NovelTea
 {
 
-class Timer
+class Timer : public ContextObject
 {
 public:
-	Timer(const DukValue &func);
+	Timer(Context *context, const DukValue &func);
 
 	bool update(float delta);
 	bool isComplete() const;
@@ -35,10 +36,10 @@ private:
 	int m_duration;
 };
 
-class TimerManager
+class TimerManager : public ContextObject
 {
 public:
-	TimerManager();
+	TimerManager(Context *context);
 	void reset();
 	bool update(float delta);
 

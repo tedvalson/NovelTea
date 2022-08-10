@@ -4,17 +4,11 @@
 
 namespace NovelTea {
 
-State::Context::Context(EngineConfig& config, std::shared_ptr<Game>& game, sj::JSON& data)
-: config(config)
-, game(game)
-, data(data)
-{
-}
 
 State::State(StateStack& stack, Context& context, StateCallback callback)
-: m_stack(&stack)
-, m_context(context)
-, m_callback(callback)
+	: ContextObject(&context)
+	, m_stack(&stack)
+	, m_callback(callback)
 {
 }
 
@@ -71,11 +65,6 @@ void State::setAlpha(float alpha)
 float State::getAlpha() const
 {
 	return m_alpha;
-}
-
-State::Context State::getContext() const
-{
-	return m_context;
 }
 
 StateStack &State::getStack() const

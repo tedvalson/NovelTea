@@ -33,8 +33,6 @@ public:
 	bool loadFromFile(const std::string &filename);
 	const std::string &filename() const;
 
-	std::string getParentId(const std::string &entityType, const std::string &entityId);
-
 	// Reset to conform to loaded project
 	void reset();
 
@@ -51,30 +49,6 @@ public:
 	const std::string &getDirectory() const;
 
 	void set(std::shared_ptr<Entity> obj, const std::string &idName = std::string());
-
-	template <typename T>
-	bool exists(const std::string &idName)
-	{
-		if (idName.empty())
-			return false;
-		return (ProjData[T::id].hasKey(idName) || data()[T::id].hasKey(idName));
-	}
-
-	template <typename T>
-	std::shared_ptr<T> get(const std::string &idName)
-	{
-		auto result = std::make_shared<T>();
-		if (exists<T>(idName))
-		{
-			if (data()[T::id].hasKey(idName))
-				result->fromJson(data()[T::id][idName]);
-			else
-				result->fromJson(ProjData[T::id][idName]);
-		} else {
-			std::cerr << "Warning: Entity doesn't exist - " << T::id << " '" << idName << "'" << std::endl;
-		}
-		return result;
-	}
 
 private:
 	bool m_loaded;

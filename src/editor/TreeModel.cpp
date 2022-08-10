@@ -125,7 +125,7 @@ void loadEntities(const json &data, TreeItem *root, NovelTea::EntityType type, s
 		loadColors(root->child(i), data[NovelTea::ID::entityColors][typeIndex]);
 }
 
-void TreeModel::loadProject(const NovelTea::ProjectData &project)
+void TreeModel::loadProject(std::shared_ptr<NovelTea::ProjectData> project)
 {
 	beginResetModel();
 
@@ -150,9 +150,9 @@ void TreeModel::loadProject(const NovelTea::ProjectData &project)
 	rootItem->appendChild(scriptRoot);
 	rootItem->appendChild(verbRoot);
 
-	if (project.isLoaded())
+	if (project->isLoaded())
 	{
-		auto jdata = project.data();
+		auto jdata = project->data();
 
 		loadEntities(jdata, actionRoot, NovelTea::EntityType::Action, NovelTea::ID::Action);
 		loadEntities(jdata, cutsceneRoot, NovelTea::EntityType::Cutscene, NovelTea::ID::Cutscene);

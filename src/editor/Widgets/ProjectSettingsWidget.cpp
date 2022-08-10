@@ -170,10 +170,10 @@ void ProjectSettingsWidget::saveData() const
 		}
 	}
 	for (auto &data : m_fontsData)
-		Proj.setFontData(data.first, data.second);
+		Proj->setFontData(data.first, data.second);
 	j[ID::projectFonts] = jfonts;
 
-	Proj.setImageData(m_imageData);
+	Proj->setImageData(m_imageData);
 
 	j[ID::projectName] = ui->lineEditName->text().toStdString();
 	j[ID::projectVersion] = ui->lineEditVersion->text().toStdString();
@@ -214,7 +214,7 @@ void ProjectSettingsWidget::loadData()
 	for (auto &jObjectId : jobjects.ArrayRange())
 		ui->listInventory->addItem(QString::fromStdString(jObjectId.ToString()));
 
-	loadImageData(Proj.getImageData());
+	loadImageData(Proj->getImageData());
 
 	ui->scriptBeforeSaveEdit->setPlainText(QString::fromStdString(j[ID::scriptBeforeSave].ToString()));
 	ui->scriptAfterLoadEdit->setPlainText(QString::fromStdString(j[ID::scriptAfterLoad].ToString()));
@@ -232,7 +232,7 @@ void ProjectSettingsWidget::loadData()
 		addFontFromFile(true, "/home/android/dev/NovelTea/res/assets/fonts/" + fileName, QString::fromStdString(jfont.first));
 	}
 	for (auto& jfont : j[ID::projectFonts].ObjectRange()) {
-		auto &data = Proj.getFontData(jfont.first);
+		auto &data = Proj->getFontData(jfont.first);
 		addFontFromData(false, QString::fromStdString(jfont.second.ToString()), data, QString::fromStdString(jfont.first));
 	}
 	m_defaultFontAlias = QString::fromStdString(j[ID::projectFontDefault].ToString());

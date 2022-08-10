@@ -1,13 +1,14 @@
 #ifndef SPELLCHECKER_HPP
 #define SPELLCHECKER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <hunspell.hxx>
 #include <memory>
 
-class SpellChecker
+class SpellChecker : public NovelTea::ContextObject
 {
 public:
-	SpellChecker();
+	SpellChecker(NovelTea::Context *context);
 
 	std::shared_ptr<Hunspell> hunspell();
 

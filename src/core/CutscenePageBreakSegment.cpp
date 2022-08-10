@@ -3,7 +3,8 @@
 namespace NovelTea
 {
 
-CutscenePageBreakSegment::CutscenePageBreakSegment()
+CutscenePageBreakSegment::CutscenePageBreakSegment(Context *context)
+	: CutsceneSegment(context)
 {
 	setWaitForClick(false);
 	setCanSkip(false);

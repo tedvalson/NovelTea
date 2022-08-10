@@ -1,6 +1,6 @@
 #include "ObjectWidget.hpp"
 #include "ui_ObjectWidget.h"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
 #include <QDebug>
 
@@ -62,13 +62,13 @@ void ObjectWidget::saveData() const
 	if (m_object)
 	{
 		m_object->setProperties(ui->propertyEditor->getValue());
-		Proj.set<NovelTea::Object>(m_object, idName());
+		Proj->set(m_object, idName());
 	}
 }
 
 void ObjectWidget::loadData()
 {
-	m_object = Proj.get<NovelTea::Object>(idName());
+	m_object = Proj->get<NovelTea::Object>(idName(), getContext());
 
 	qDebug() << "Loading object data... " << QString::fromStdString(idName());
 
@@ -76,7 +76,7 @@ void ObjectWidget::loadData()
 	{
 		// Object is new, so show it as modified
 		setModified();
-		m_object = std::make_shared<NovelTea::Object>();
+		m_object = std::make_shared<NovelTea::Object>(getContext());
 	}
 
 	ui->propertyEditor->setValue(m_object->getProperties());

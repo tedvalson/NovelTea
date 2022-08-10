@@ -378,13 +378,13 @@ void CutsceneWidget::saveData() const
 	if (m_cutscene)
 	{
 		m_cutscene->setProperties(ui->propertyEditor->getValue());
-		Proj.set<NovelTea::Cutscene>(m_cutscene, idName());
+		Proj->set(m_cutscene, idName());
 	}
 }
 
 void CutsceneWidget::loadData()
 {
-	m_cutscene = Proj.get<NovelTea::Cutscene>(idName());
+	m_cutscene = Proj->get<NovelTea::Cutscene>(idName(), getContext());
 //	ui->listWidget->model()->disconnect();
 	ui->listWidget->clear();
 
@@ -400,7 +400,7 @@ void CutsceneWidget::loadData()
 	{
 		// Cutscene is new, so show it as modified
 		setModified();
-		m_cutscene = std::make_shared<NovelTea::Cutscene>();
+		m_cutscene = std::make_shared<NovelTea::Cutscene>(getContext());
 	}
 
 	ui->propertyEditor->setValue(m_cutscene->getProperties());
@@ -548,22 +548,22 @@ void CutsceneWidget::on_rowsMoved(const QModelIndex &sourceParent, int sourceSta
 
 void CutsceneWidget::on_actionAddText_triggered()
 {
-	addItem(std::make_shared<NovelTea::CutsceneTextSegment>(), true, ui->listWidget->currentRow());
+	addItem(std::make_shared<NovelTea::CutsceneTextSegment>(getContext()), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::on_actionAddPage_triggered()
 {
-	addItem(std::make_shared<NovelTea::CutscenePageSegment>(), true, ui->listWidget->currentRow());
+	addItem(std::make_shared<NovelTea::CutscenePageSegment>(getContext()), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::on_actionAddPageBreak_triggered()
 {
-	addItem(std::make_shared<NovelTea::CutscenePageBreakSegment>(), true, ui->listWidget->currentRow());
+	addItem(std::make_shared<NovelTea::CutscenePageBreakSegment>(getContext()), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::on_actionAddScript_triggered()
 {
-	addItem(std::make_shared<NovelTea::CutsceneScriptSegment>(), true, ui->listWidget->currentRow());
+	addItem(std::make_shared<NovelTea::CutsceneScriptSegment>(getContext()), true, ui->listWidget->currentRow());
 }
 
 void CutsceneWidget::timerEvent(QTimerEvent *event)

@@ -1,17 +1,18 @@
 #ifndef NOVELTEA_ICONCONTINUE_HPP
 #define NOVELTEA_ICONCONTINUE_HPP
 
-#include <vector>
+#include <NovelTea/ContextObject.hpp>
 #include <TweenEngine/TweenManager.h>
 #include "../../TweenObjects.hpp"
+#include <vector>
 
 namespace NovelTea
 {
 
-class IconContinue : public sf::Drawable, public TweenTransformable<sf::Transformable>
+class IconContinue : public ContextObject, public sf::Drawable, public TweenTransformable<sf::Transformable>
 {
 public:
-	IconContinue();
+	IconContinue(Context *context);
 
 	void reset();
 

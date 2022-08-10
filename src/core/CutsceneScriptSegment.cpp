@@ -1,13 +1,15 @@
 #include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
 
-CutsceneScriptSegment::CutsceneScriptSegment()
-: m_autosaveAfter(false)
+CutsceneScriptSegment::CutsceneScriptSegment(Context *context)
+: CutsceneSegment(context)
+, m_autosaveAfter(false)
 , m_autosaveBefore(false)
 {
 	setDuration(10);
@@ -47,8 +49,8 @@ void CutsceneScriptSegment::runScript(const std::shared_ptr<Cutscene> &cutscene)
 	if (m_script.empty())
 		return;
 	try {
-		ActiveGame->getScriptManager()->setActiveEntity(cutscene);
-		ActiveGame->getScriptManager()->runInClosure(m_script);
+		ScriptMan->setActiveEntity(cutscene);
+		ScriptMan->runInClosure(m_script);
 	} catch (std::exception &e) {
 		std::cerr << "CutsceneScriptSegment::runScript() " << e.what() << std::endl;
 	}

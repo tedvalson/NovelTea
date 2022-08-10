@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_VERBLIST_HPP
 #define NOVELTEA_VERBLIST_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/Scrollable.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
@@ -17,10 +18,10 @@ namespace NovelTea
 using VerbSelectCallback = std::function<void(const std::string&)>;
 using VerbShowHideCallback = std::function<void(bool)>;
 
-class VerbList : public sf::Drawable, public Scrollable, public Hideable
+class VerbList : public ContextObject, public sf::Drawable, public Scrollable, public Hideable
 {
 public:
-	VerbList();
+	VerbList(Context *context);
 
 	bool update(float delta) override;
 	bool processEvent(const sf::Event& event);

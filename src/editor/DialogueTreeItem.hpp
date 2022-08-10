@@ -1,13 +1,14 @@
 #ifndef DIALOGUETREEITEM_HPP
 #define DIALOGUETREEITEM_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/DialogueSegment.hpp>
 #include <QVariant>
 
-class DialogueTreeItem
+class DialogueTreeItem : public NovelTea::ContextObject
 {
 public:
-	explicit DialogueTreeItem(const std::string &dialogueId, const std::shared_ptr<NovelTea::DialogueSegment> &segment = std::make_shared<NovelTea::DialogueSegment>(), DialogueTreeItem *parent = 0);
+	explicit DialogueTreeItem(NovelTea::Context *context, const std::string &dialogueId, const std::shared_ptr<NovelTea::DialogueSegment> &segment = nullptr, DialogueTreeItem *parent = 0);
 	~DialogueTreeItem();
 
 	void appendChild(DialogueTreeItem *child);

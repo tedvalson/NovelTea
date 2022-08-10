@@ -8,10 +8,13 @@
 namespace NovelTea
 {
 
-TextOverlay::TextOverlay()
-: m_needsUpdate(true)
+TextOverlay::TextOverlay(Context *context)
+: ContextObject(context)
+, m_needsUpdate(true)
 , m_mousePressed(false)
 , m_alpha(255.f)
+, m_text(context)
+, m_oldText(context)
 , m_nextStringIndex(0)
 {
 	m_bg.setFillColor(sf::Color(240.f, 240.f, 240.f));

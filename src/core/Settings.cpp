@@ -1,4 +1,5 @@
 #include <NovelTea/Settings.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/FileUtils.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
@@ -16,11 +17,12 @@ namespace
 namespace NovelTea
 {
 
-Settings::Settings()
-: m_directory("./")
-, m_saveEnabled(false)
-, m_fontSizeMultiplier(1.f)
-, m_activeProfileIndex(-1)
+Settings::Settings(Context* context)
+	: ContextObject(context)
+	, m_directory("./")
+	, m_saveEnabled(false)
+	, m_fontSizeMultiplier(1.f)
+	, m_activeProfileIndex(-1)
 {
 }
 
@@ -40,12 +42,6 @@ void Settings::ensureProfileExists()
 	{
 		addProfile("Default");
 	}
-}
-
-Settings &Settings::get()
-{
-	static Settings obj;
-	return obj;
 }
 
 void Settings::load()

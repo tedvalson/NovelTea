@@ -12,7 +12,7 @@ class Cutscene;
 class CutsceneScriptSegment : public CutsceneSegment
 {
 public:
-	CutsceneScriptSegment();
+	CutsceneScriptSegment(Context *context);
 	json toJson() const override;
 	bool fromJson(const json &j) override;
 	Type type() const override;

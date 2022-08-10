@@ -2,6 +2,7 @@
 #define NOVELTEA_STATE_HPP
 
 #include "StateIdentifiers.hpp"
+#include <NovelTea/ContextObject.hpp>
 #include <SFML/Window/Event.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/json.hpp>
@@ -9,9 +10,6 @@
 #include <functional>
 #include <memory>
 #include <vector>
-
-#define GGame getContext().game
-#define ScriptMan getContext().game->getScriptManager()
 
 namespace sf
 {
@@ -25,18 +23,11 @@ class StateStack;
 
 typedef std::function<bool(void*)> StateCallback;
 
-class State : public Hideable
+class State : public ContextObject, public Hideable
 {
 public:
 	typedef std::unique_ptr<State> Ptr;
 
-	struct Context
-	{
-		Context(EngineConfig& config, std::shared_ptr<Game>& game, sj::JSON& data);
-		EngineConfig& config;
-		std::shared_ptr<Game>& game;
-		sj::JSON& data;
-	};
 
 	State(StateStack& stack, Context& context, StateCallback callback);
 	virtual ~State();
@@ -57,13 +48,11 @@ public:
 	bool runCallback(void *data);
 	void close(float duration = 0.5f, StateID stateId = StateID::None);
 
-	Context getContext() const;
 	StateStack &getStack() const;
 
 private:
 	float        m_alpha;
 	StateStack*  m_stack;
-	Context      m_context;
 	StateCallback m_callback;
 };
 

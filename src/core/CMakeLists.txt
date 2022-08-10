@@ -8,6 +8,8 @@ set(SOURCE_FILES
 	${SRCROOT}/ActiveTextSegment.cpp
 	${SRCROOT}/AssetManager.cpp
 	${SRCROOT}/BBCodeParser.cpp
+	${SRCROOT}/Context.cpp
+	${SRCROOT}/ContextObject.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/CutscenePageBreakSegment.cpp
 	${SRCROOT}/CutscenePageSegment.cpp
@@ -87,6 +89,6 @@ install(TARGETS NovelTea
 	ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel)
 
 if (NOT ANDROID)
-	add_executable(NovelTeaLauncher ${SRCROOT}/main.cpp)
+	add_executable(NovelTeaLauncher ${SRCROOT}/launcher.cpp)
 	target_link_libraries(NovelTeaLauncher NovelTea)
 endif()

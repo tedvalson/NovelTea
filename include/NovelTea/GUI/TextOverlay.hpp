@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TEXTOVERLAY_HPP
 #define NOVELTEA_TEXTOVERLAY_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/Utils.hpp>
@@ -11,10 +12,10 @@
 namespace NovelTea
 {
 
-class TextOverlay : public sf::Drawable, public Hideable, public Scrollable
+class TextOverlay : public ContextObject, public sf::Drawable, public Hideable, public Scrollable
 {
 public:
-	TextOverlay();
+	TextOverlay(Context *context);
 
 	bool processEvent(const sf::Event& event);
 	bool update(float delta) override;

@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_OBJECTLIST_HPP
 #define NOVELTEA_OBJECTLIST_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/Utils.hpp>
 #include <NovelTea/Game.hpp>
 #include <cstring>
@@ -20,10 +21,10 @@ struct ObjectItem {
 	int count = 1;
 };
 
-class ObjectList
+class ObjectList : public ContextObject
 {
 public:
-	ObjectList(std::shared_ptr<SaveData> saveData = GSave);
+	ObjectList(Context* context);
 
 	bool add(std::shared_ptr<Object> object);
 	bool addCount(std::shared_ptr<Object> object, int count);
@@ -56,7 +57,6 @@ private:
 	std::string m_attachedType;
 	std::string m_attachedId;
 	std::vector<std::shared_ptr<ObjectItem>> m_items;
-	std::shared_ptr<SaveData> m_saveData;
 };
 
 } // namespace NovelTea

@@ -2,6 +2,7 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
@@ -25,11 +26,25 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_testPlaybackMode(false)
 , m_testRecordMode(false)
 , m_quitting(false)
+, m_roomActiveText(&context)
+, m_roomActiveTextFadeOut(&context)
 , m_roomTextChanging(false)
 , m_scrollPos(0.f)
+, m_buttonInventory(&context)
+, m_buttonSettings(&context)
+, m_buttonTextLog(&context)
+, m_verbList(&context)
+, m_actionBuilder(&context)
+, m_inventory(&context)
+, m_navigation(&context)
+, m_textOverlay(&context)
+, m_iconSave(&context)
 , m_playTime(0.f)
 , m_quickVerbPressed(false)
+, m_cutsceneRenderer(&context)
 , m_cutsceneSpeed(1.f)
+, m_dialogueRenderer(&context)
+, m_mapRenderer(&context)
 {
 	ScriptMan.reset();
 
@@ -59,7 +74,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Toolbar
 	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 
-	m_buttonInventory.getText().setFont(*Proj.getFont("sysIcon"));
+	m_buttonInventory.getText().setFont(*Proj->getFont("sysIcon"));
 	m_buttonInventory.setString(L"\uf0b1");
 	m_buttonInventory.setAlpha(0.f);
 	m_buttonInventory.setActiveColor(sf::Color(0, 0, 0, 50));
@@ -158,7 +173,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	GGame->setSaveCallback([this](){
 		auto entityType = EntityType::Room;
-		auto entityId = ActiveGame->getRoom()->getId();
+		auto entityId = GGame->getRoom()->getId();
 		auto metaData = sj::Array(entityId);
 
 		if (m_mode == Mode::Cutscene) {
@@ -186,9 +201,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 	hideToolbar(0.f);
 
-	auto &saveEntryPoint = GSave->data()[ID::entrypointEntity];
+	auto &saveEntryPoint = GSaveData[ID::entrypointEntity];
 	auto &projEntryPoint = ProjData[ID::entrypointEntity];
-	auto &entryMetadata = GSave->data()[ID::entrypointMetadata];
+	auto &entryMetadata = GSaveData[ID::entrypointMetadata];
 	if (!saveEntryPoint.IsEmpty())
 	{
 		auto roomId = entryMetadata[0].ToString();
@@ -200,7 +215,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 
 		if (!roomId.empty())
 		{
-			GGame->pushNextEntity(GSave->get<Room>(roomId));
+			GGame->pushNextEntity(GGame->get<Room>(roomId));
 			gotoNextEntity();
 		}
 		// Don't double-push room mode
@@ -217,6 +232,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	}
 	else if (!projEntryPoint.IsEmpty())
 		GGame->pushNextEntityJson(projEntryPoint);
+	else
+		std::cerr << "No entry point?" << std::endl;
 
 	processTest();
 }
@@ -257,19 +274,20 @@ void StateMain::render(sf::RenderTarget &target)
 	target.draw(m_bgToolbar);
 	target.draw(m_navigation);
 
-	if (!ActiveGame->getObjectList()->items().empty())
+	if (!GGame->getObjectList()->items().empty())
 		target.draw(m_buttonInventory);
 	target.draw(m_inventory);
 	target.draw(m_mapRenderer);
 
 	target.draw(m_textOverlay);
+
 	target.draw(m_buttonSettings);
 	target.draw(m_buttonTextLog);
 	if (m_verbList.isVisible())
 		target.draw(m_verbList);
 
 	target.draw(m_iconSave);
-	target.draw(*GGame->getNotificationManager());
+	target.draw(*NotificationMan);
 }
 
 void StateMain::resize(const sf::Vector2f &size)
@@ -282,12 +300,15 @@ void StateMain::resize(const sf::Vector2f &size)
 	auto toolbarPadding = toolbarHeight / 10.f;
 
 	// Room
-	auto fontSizeMultiplier = getContext().config.fontSizeMultiplier * getContext().config.dpiMultiplier;
+	auto fontSizeMultiplier = GConfig.fontSizeMultiplier * GConfig.dpiMultiplier;
 	m_roomScrollbar.setPosition(w - 4.f, 4.f);
 	m_roomTextPadding = round(1.f / 16.f * wi);
 	m_roomActiveText.setFontSizeMultiplier(fontSizeMultiplier);
 	m_roomActiveText.setLineSpacing(fontSizeMultiplier * 5.f);
 	m_roomActiveText.setSize(sf::Vector2f((portrait ? 1.f : 0.6f) * w - m_roomTextPadding*2, 0.f));
+
+	m_roomActiveTextFadeOut.setFontSizeMultiplier(fontSizeMultiplier);
+	m_roomActiveTextFadeOut.setLineSpacing(fontSizeMultiplier * 5.f);
 
 	// Cutscene
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
@@ -320,8 +341,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_inventory.refreshItems();
 
 	// Notification setup
-	GGame->getNotificationManager()->setScreenSize(size);
-	GGame->getNotificationManager()->setFontSizeMultiplier(fontSizeMultiplier);
+	NotificationMan->setScreenSize(size);
+	NotificationMan->setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_textOverlay.setFontSizeMultiplier(fontSizeMultiplier);
 
@@ -377,18 +398,18 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 
 	if (mode == Mode::Cutscene)
 	{
-		m_cutscene = GSave->get<Cutscene>(idName);
+		m_cutscene = GGame->get<Cutscene>(idName);
 		m_cutsceneRenderer.setCutscene(m_cutscene);
 	}
 	else if (mode == Mode::Dialogue)
 	{
-		m_dialogue = GSave->get<Dialogue>(idName);
+		m_dialogue = GGame->get<Dialogue>(idName);
 		m_dialogueRenderer.setDialogue(m_dialogue);
 		m_dialogueRenderer.show();
 	}
 	else if (mode == Mode::Room)
 	{
-		auto nextRoom = GSave->get<Room>(idName);
+		auto nextRoom = GGame->get<Room>(idName);
 		auto room = GGame->getRoom();
 		if (room->getId() != idName)
 		{
@@ -539,11 +560,11 @@ void StateMain::setValues(int tweenType, float *newValues)
 
 void StateMain::processTest()
 {
-	if (!getContext().data.hasKey("test"))
+	if (!getContext()->getData().hasKey("test"))
 		return;
 
-	auto &jtest = getContext().data["test"];
-	m_testRecordMode = getContext().data["record"].ToBool();
+	auto &jtest = getContext()->getData()["test"];
+	m_testRecordMode = getContext()->getData()["record"].ToBool();
 
 	GGame->reset();
 	GGame->getObjectList()->clear();
@@ -573,8 +594,8 @@ bool StateMain::processTestSteps()
 		});
 
 	auto success = true;
-	auto stopIndex = getContext().data["stopIndex"].ToInt();
-	auto &jtest = getContext().data["test"];
+	auto stopIndex = getContext()->getData()["stopIndex"].ToInt();
+	auto &jtest = getContext()->getData()["test"];
 	auto &jsteps = jtest[ID::testSteps];
 
 	if (stopIndex < 0)
@@ -606,7 +627,7 @@ bool StateMain::processTestSteps()
 			}
 
 			if (waiting && waitTimeLeft > 0.f) {
-				if (GGame->getTimerManager()->update(0.01f))
+				if (TimerMan->update(0.01f))
 					updateUI();
 				waitTimeLeft -= 0.01f;
 			}
@@ -660,7 +681,7 @@ bool StateMain::processTestSteps()
 
 bool StateMain::processTestInit()
 {
-	auto &jtest = getContext().data["test"];
+	auto &jtest = getContext()->getData()["test"];
 	std::string error;
 
 	try {
@@ -680,9 +701,9 @@ bool StateMain::processTestInit()
 bool StateMain::processTestCheck()
 {
 	// Just return true if the test is only being partially run
-	if (getContext().data["stopIndex"].ToInt() >= 0)
+	if (getContext()->getData()["stopIndex"].ToInt() >= 0)
 		return true;
-	auto &jtest = getContext().data["test"];
+	auto &jtest = getContext()->getData()["test"];
 	auto script = jtest[ID::testScriptCheck].ToString() + "\nreturn true;";
 	auto success = false;
 	std::string error;
@@ -711,7 +732,7 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 	if (!success)
 		return false;
 
-	auto action = Action::find(verbId, objectIds);
+	auto action = Action::find(getContext(), verbId, objectIds);
 	if (action)
 		success = action->runScript();
 	else
@@ -832,8 +853,8 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 
 void StateMain::setActionBuilderShowPos(float position)
 {
-	auto width = getContext().config.width;
-	auto height = getContext().config.height;
+	auto width = GConfig.width;
+	auto height = GConfig.height;
 	auto toolbarHeight = m_bgToolbar.getSize().y;
 	auto pos = position * m_actionBuilder.getSize().y;
 
@@ -861,7 +882,7 @@ void StateMain::callOverlayFunc()
 
 void StateMain::repositionText()
 {
-	auto w = getContext().config.width;
+	auto w = GConfig.width;
 	m_roomActiveText.setPosition((w - m_roomActiveText.getSize().x)/2, m_roomTextPadding + m_scrollPos);
 }
 
@@ -894,7 +915,7 @@ void StateMain::quit()
 		.target(0.f)
 		.start(m_tweenManager);
 
-	m_bg.setFillColor(getContext().config.backgroundColor);
+	m_bg.setFillColor(GConfig.backgroundColor);
 	TweenEngine::Tween::to(m_bg, TweenRectangleShape::FILL_COLOR_RGB, duration)
 		.target(255.f, 255.f, 255.f)
 		.start(m_tweenManager);
@@ -1040,6 +1061,8 @@ bool StateMain::update(float delta)
 	m_dialogueRenderer.update(delta);
 	if (m_mode == Mode::Room)
 	{
+		m_roomActiveText.update(delta);
+		m_roomActiveTextFadeOut.update(delta);
 		if (m_quickVerbPressed && m_clock.getElapsedTime() > sf::milliseconds(800))
 		{
 			auto callback = m_verbList.getSelectCallback();
@@ -1088,8 +1111,8 @@ bool StateMain::update(float delta)
 	m_textOverlay.update(delta);
 	m_iconSave.update(delta);
 
-	GGame->getNotificationManager()->update(delta);
-	if (GGame->getTimerManager()->update(delta)) {
+	NotificationMan->update(delta);
+	if (TimerMan->update(delta)) {
 		if (m_mode == Mode::Room) {
 			updateUI();
 		}

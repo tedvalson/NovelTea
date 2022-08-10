@@ -12,32 +12,12 @@
 namespace NovelTea
 {
 
-enum class EngineOrientation
-{
-	Auto,
-	Portrait,
-	Landscape,
-};
-
-struct EngineConfig
-{
-	EngineConfig();
-	size_t width;
-	size_t height;
-	unsigned fps;
-	float fontSizeMultiplier;
-	float dpiMultiplier;
-	sf::Color backgroundColor;
-	StateID initialState;
-	EngineOrientation orientation;
-	std::string saveDir;
-};
-
-class Engine
+class Engine : public ContextObject
 {
 public:
-	Engine(EngineConfig config);
-	void run();
+	Engine(Context* context);
+	int run();
+	void initialize();
 	bool isRunning() const;
 	void resize(size_t width, size_t height);
 	void render(sf::RenderTarget &target);
@@ -48,18 +28,12 @@ public:
 
 	static size_t getSystemTimeMs();
 
-	std::shared_ptr<Game> getGame();
-
 	void setFramerateLocked(bool locked);
 	bool getFramerateLocked() const;
-
-//protected:
-	void initialize();
 
 	sf::Vector2f mapPixelToCoords(const sf::Vector2i& point) const;
 
 private:
-	EngineConfig m_config;
 	bool m_framerateLocked;
 	float m_deltaPerFrame;
 	std::unique_ptr<StateStack> m_stateStack;
@@ -75,7 +49,6 @@ private:
 
 	// Shared State context variables
 	sj::JSON m_data;
-	std::shared_ptr<Game> m_game;
 };
 
 } // namespace NovelTea

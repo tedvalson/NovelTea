@@ -1,4 +1,6 @@
 #include <NovelTea/GUI/Button.hpp>
+#include <NovelTea/Context.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <cmath>
@@ -6,8 +8,9 @@
 namespace NovelTea
 {
 
-Button::Button()
-: m_backgroundColor(sf::Color::White)
+Button::Button(Context *context)
+: ContextObject(context)
+, m_backgroundColor(sf::Color::White)
 , m_clickFunction(nullptr)
 , m_needsUpdate(true)
 , m_autoSize(true)
@@ -18,7 +21,7 @@ Button::Button()
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	setTexture(texture.get());
 
-	m_text.setFont(*Proj.getFont());
+	m_text.setFont(*Proj->getFont());
 }
 
 

@@ -85,7 +85,7 @@ void RoomWidget::refreshObjectColors()
 
 void RoomWidget::renamed(NovelTea::EntityType entityType, const std::string &oldName, const std::string &newName)
 {
-	m_room = Proj.get<NovelTea::Room>(idName());
+	m_room = GGame->get<NovelTea::Room>(idName());
 	refreshObjectList();
 	ui->scriptEdit->blockSignals(true);
 	ui->scriptEdit->setPlainText(QString::fromStdString(m_room->getDescriptionRaw()));
@@ -158,9 +158,9 @@ void RoomWidget::updatePreview()
 			m_room->getObjectList()->saveChanges();
 			GSave->data()[NovelTea::ID::properties][NovelTea::Room::id][m_room->getId()] = ui->propertyEditor->getValue();
 			// Save room in case changes aren't yet saved to project
-			GSave->set(m_room);
+			GGame->set(m_room);
 			// Force reloading of room data we just saved in player
-			ActiveGame->setRoomId(m_room->getId());
+			GGame->setRoomId(m_room->getId());
 		}
 
 		ui->preview->processData(jdata);
@@ -188,13 +188,13 @@ void RoomWidget::saveData() const
 	if (m_room)
 	{
 		updateRoom();
-		Proj.set<NovelTea::Room>(m_room, idName());
+		Proj->set(m_room, idName());
 	}
 }
 
 void RoomWidget::loadData()
 {
-	m_room = Proj.get<NovelTea::Room>(idName());
+	m_room = Proj->get<NovelTea::Room>(idName(), getContext());
 
 	qDebug() << "Loading room data... " << QString::fromStdString(idName());
 
@@ -202,7 +202,7 @@ void RoomWidget::loadData()
 	{
 		// Room is new, so show it as modified
 		setModified();
-		m_room = std::make_shared<NovelTea::Room>();
+		m_room = std::make_shared<NovelTea::Room>(getContext());
 	}
 
 	refreshObjectList();

@@ -80,7 +80,7 @@ void SpellCheckWidget::saveData() const
 
 void SpellCheckWidget::loadData()
 {
-	m_spellChecker.reset(new SpellChecker);
+	m_spellChecker.reset(new SpellChecker(getContext()));
 	ui->listWhitelist->clear();
 	for (auto &jitem : ProjData[NovelTea::ID::spellWhitelist].ArrayRange())
 		ui->listWhitelist->addItem(QString::fromStdString(jitem.ToString()));
@@ -169,19 +169,19 @@ void SpellCheckWidget::checkEntities(const std::string &entityId, const QString 
 		auto item = new QTreeWidgetItem;
 
 		if (entityId == NovelTea::Cutscene::id) {
-			entity = std::make_shared<NovelTea::Cutscene>();
+			entity = std::make_shared<NovelTea::Cutscene>(getContext());
 			item->setData(0, TabType, EditorTabWidget::Cutscene);
 		}
 		else if (entityId == NovelTea::Dialogue::id) {
-			entity = std::make_shared<NovelTea::Dialogue>();
+			entity = std::make_shared<NovelTea::Dialogue>(getContext());
 			item->setData(0, TabType, EditorTabWidget::Dialogue);
 		}
 		else if (entityId == NovelTea::Object::id) {
-			entity = std::make_shared<NovelTea::Object>();
+			entity = std::make_shared<NovelTea::Object>(getContext());
 			item->setData(0, TabType, EditorTabWidget::Object);
 		}
 		else if (entityId == NovelTea::Room::id) {
-			entity = std::make_shared<NovelTea::Room>();
+			entity = std::make_shared<NovelTea::Room>(getContext());
 			item->setData(0, TabType, EditorTabWidget::Room);
 		}
 		else

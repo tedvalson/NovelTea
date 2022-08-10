@@ -1,8 +1,9 @@
 #ifndef NOVELTEA_PROPERTYLIST_HPP
 #define NOVELTEA_PROPERTYLIST_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/Utils.hpp>
-#include <dukglue/dukglue.h>
+#include <dukglue/dukvalue.h>
 #include <NovelTea/json.hpp>
 #include <vector>
 
@@ -11,10 +12,10 @@ namespace NovelTea
 
 class Object;
 
-class PropertyList
+class PropertyList : public ContextObject
 {
 public:
-	PropertyList();
+	PropertyList(Context* context);
 
 	DukValue get(const std::string &key, const DukValue &defaultValue) const;
 	void set(const std::string &key, const DukValue &value);

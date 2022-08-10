@@ -1,5 +1,6 @@
 #include <NovelTea/States/StateTextSettings.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Settings.hpp>
 #include <TweenEngine/Tween.h>
@@ -10,8 +11,12 @@ namespace NovelTea
 
 StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
+, m_buttonCancel(&context)
+, m_buttonFinish(&context)
+, m_buttonSizeDec(&context)
+, m_buttonSizeInc(&context)
 {
-	auto &defaultFont = *Proj.getFont();
+	auto &defaultFont = *Proj->getFont();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Text Settings");
 
@@ -25,7 +30,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 		s += "\n";
 	}
 
-	m_buttonFinish.getText().setFont(*Proj.getFont("sysIcon"));
+	m_buttonFinish.getText().setFont(*Proj->getFont("sysIcon"));
 	m_buttonFinish.setString(L"\uf00c");
 	m_buttonCancel = m_buttonFinish;
 	m_buttonCancel.setString(L"\uf00d");
@@ -41,20 +46,20 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 		changeSizeMultiplier(m_multiplier - 0.1f);
 	});
 	m_buttonCancel.onClick([this](){
-		getContext().config.fontSizeMultiplier = GSettings.getFontSizeMultiplier();
-		getStack().resize(sf::Vector2f(getContext().config.width, getContext().config.height));
+		GConfig.fontSizeMultiplier = GSettings->getFontSizeMultiplier();
+		getStack().resize(sf::Vector2f(GConfig.width, GConfig.height));
 		close(0.5f, StateID::Settings);
 	});
 	m_buttonFinish.onClick([this](){
-		GSettings.setFontSizeMultiplier(m_multiplier);
-		GSettings.save();
+		GSettings->setFontSizeMultiplier(m_multiplier);
+		GSettings->save();
 		close(0.5f, StateID::Settings);
 	});
 
 	m_bg.setFillColor(sf::Color::Black);
 	m_toolbarBg.setFillColor(sf::Color(200, 200, 200));
 
-	changeSizeMultiplier(context.config.fontSizeMultiplier);
+	changeSizeMultiplier(GConfig.fontSizeMultiplier);
 
 	hide(0.f);
 	show(0.5f);
@@ -136,8 +141,8 @@ void StateTextSettings::changeSizeMultiplier(float multiplier)
 	str.resize(3);
 	m_textValue.setString("x" + str);
 
-	getContext().config.fontSizeMultiplier = m_multiplier;
-	getStack().resize(sf::Vector2f(getContext().config.width, getContext().config.height));
+	GConfig.fontSizeMultiplier = m_multiplier;
+	getStack().resize(sf::Vector2f(GConfig.width, GConfig.height));
 }
 
 bool StateTextSettings::processEvent(const sf::Event &event)

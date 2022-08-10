@@ -18,7 +18,7 @@ enum class DialogueTextLogMode {
 class Dialogue : public Entity
 {
 public:
-	Dialogue();
+	Dialogue(Context *context);
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;

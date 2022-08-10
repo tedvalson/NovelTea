@@ -1,5 +1,6 @@
 #include "ScriptEdit.hpp"
-#include <NovelTea/Game.hpp>
+#include "MainWindow.hpp"
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <QWhatsThis>
 #include <QTextBlock>
@@ -229,16 +230,17 @@ public:
 
 	int lineWithError;
 	std::string errorMessage;
-	std::shared_ptr<NovelTea::Game> game;
+	std::shared_ptr<NovelTea::Context> context;
 };
 
 ScriptEdit::ScriptEdit(QWidget *parent)
 : QPlainTextEdit(parent)
 , d_ptr(new ScriptEditPrivate)
 {
-	d_ptr->game = std::make_shared<NovelTea::Game>();
-	GMan.setActive(d_ptr->game);
-	d_ptr->game->initialize();
+	NovelTea::ContextConfig config;
+	config.projectData = MainWindow::instance().getProjectBackup();
+	d_ptr->context = std::make_shared<NovelTea::Context>(config);
+	d_ptr->context->initialize();
 
 	d_ptr->editor = this;
 	d_ptr->layout = new DocLayout(document());
@@ -626,11 +628,12 @@ bool ScriptEdit::checkErrors(const std::string &script)
 	auto result = false;
 	try
 	{
-		d_ptr->game->getScriptManager().reset();
+		auto scriptMan = d_ptr->context->getScriptManager();
+		scriptMan->reset();
 		if (script.empty())
-			d_ptr->game->getScriptManager()->runInClosure<T>(toPlainText().toStdString());
+			scriptMan->runInClosure<T>(toPlainText().toStdString());
 		else
-			d_ptr->game->getScriptManager()->runInClosure<T>(script);
+			scriptMan->runInClosure<T>(script);
 
 		d_ptr->lineWithError = -1;
 		result = true;

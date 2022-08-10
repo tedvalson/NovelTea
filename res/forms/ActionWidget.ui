@@ -85,9 +85,6 @@
         </layout>
        </item>
        <item>
-        <widget class="ActionBuildWidget" name="actionBuilder" native="true"/>
-       </item>
-       <item>
         <widget class="QLabel" name="labelScript">
          <property name="text">
           <string>Script</string>
@@ -138,12 +135,6 @@
    <class>PropertyEditor</class>
    <extends>QWidget</extends>
    <header>Widgets/PropertyEditor.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ActionBuildWidget</class>
-   <extends>QWidget</extends>
-   <header>Widgets/ActionBuildWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

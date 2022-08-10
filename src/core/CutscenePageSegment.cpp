@@ -6,8 +6,9 @@
 namespace NovelTea
 {
 
-CutscenePageSegment::CutscenePageSegment()
-: m_textDelay(2000)
+CutscenePageSegment::CutscenePageSegment(Context *context)
+: CutsceneSegment(context)
+, m_textDelay(2000)
 , m_textDuration(1000)
 , m_breakDelay(3000)
 , m_breakDuration(2000)
@@ -106,7 +107,7 @@ void CutscenePageSegment::buildSegments()
 	m_delay = 0;
 
 	auto pushPageBreak = [this](){
-		auto pageBreakSegment = new CutscenePageBreakSegment;
+		auto pageBreakSegment = new CutscenePageBreakSegment(getContext());
 		pageBreakSegment->setTransition(getBreakEffect());
 		pageBreakSegment->setDuration(getBreakDuration());
 		pageBreakSegment->setDelay(getBreakDelay());
@@ -127,7 +128,7 @@ void CutscenePageSegment::buildSegments()
 		auto texts = split(textPages[i], getTextDelimiter());
 		for (auto& text : texts)
 		{
-			auto textSegment = new CutsceneTextSegment;
+			auto textSegment = new CutsceneTextSegment(getContext());
 			textSegment->setBeginWithNewLine(getBeginWithNewLine());
 			textSegment->setTransition(getTextEffect());
 			textSegment->setDuration(getTextDuration());

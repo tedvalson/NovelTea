@@ -37,7 +37,7 @@ struct MapConnection {
 class Map : public Entity
 {
 public:
-	Map();
+	Map(Context *context);
 	size_t jsonSize() const override;
 	json toJson() const override;
 	void loadJson(const json &j) override;

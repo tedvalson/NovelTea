@@ -7,9 +7,10 @@
 #include <QIcon>
 #include <iostream>
 
-DialogueTreeModel::DialogueTreeModel(QObject *parent)
+DialogueTreeModel::DialogueTreeModel(NovelTea::Context *context, QObject *parent)
 	: QAbstractItemModel(parent)
-	, m_rootItem(new DialogueTreeItem(""))
+	, NovelTea::ContextObject(context)
+	, m_rootItem(new DialogueTreeItem(context, ""))
 {
 
 }
@@ -89,14 +90,14 @@ int saveNode(const std::shared_ptr<NovelTea::Dialogue> &dialogue, DialogueTreeIt
 	return dialogue->segments().size() - 1;
 }
 
-void addNode(std::map<int, DialogueTreeItem*> &map, const std::shared_ptr<NovelTea::Dialogue> &dialogue, size_t segmentIndex, DialogueTreeItem *parentNode)
+void addNode(NovelTea::Context *context, std::map<int, DialogueTreeItem*> &map, const std::shared_ptr<NovelTea::Dialogue> &dialogue, size_t segmentIndex, DialogueTreeItem *parentNode)
 {
 	auto &segment = dialogue->segments()[segmentIndex];
-	auto node = new DialogueTreeItem(dialogue->getId(), segment, parentNode);
+	auto node = new DialogueTreeItem(context, dialogue->getId(), segment, parentNode);
 	map[segmentIndex] = node;
 	parentNode->appendChild(node);
 	for (auto childId : segment->getChildrenIds())
-		addNode(map, dialogue, childId, node);
+		addNode(context, map, dialogue, childId, node);
 }
 } // namespace
 
@@ -115,11 +116,11 @@ void DialogueTreeModel::loadDialogue(const std::shared_ptr<NovelTea::Dialogue> &
 	m_dialogueId = dialogue->getId();
 
 	delete m_rootItem;
-	m_rootItem = new DialogueTreeItem(m_dialogueId);
+	m_rootItem = new DialogueTreeItem(getContext(), m_dialogueId);
 
 	// Add root node
 	std::map<int, DialogueTreeItem*> map;
-	addNode(map, dialogue, dialogue->getRootIndex(), m_rootItem);
+	addNode(getContext(), map, dialogue, dialogue->getRootIndex(), m_rootItem);
 
 	// Link nodes where needed
 	for (auto &p : map)
@@ -255,7 +256,7 @@ QVariant DialogueTreeModel::decorationFromSegment(std::shared_ptr<NovelTea::Dial
 	if (segment->getScriptedText())
 	{
 		bool ok;
-		ActiveGame->reset();
+		GGame->reset();
 		auto text = segment->getText(&ok);
 		if (!ok) {
 			if (QIcon::hasThemeIcon("dialog-error"))

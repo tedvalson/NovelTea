@@ -10,7 +10,7 @@ namespace NovelTea
 class TextLogDialogueTextItem : public TextLogItem
 {
 public:
-	TextLogDialogueTextItem(const std::string &name, const std::string &text);
+	TextLogDialogueTextItem(Context *context, const std::string &name, const std::string &text);
 	virtual void setAlpha(float alpha) override;
 	virtual void setWidth(float width) override;
 

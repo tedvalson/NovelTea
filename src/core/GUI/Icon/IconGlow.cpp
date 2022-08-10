@@ -1,4 +1,6 @@
 #include <NovelTea/GUI/Icon/IconGlow.hpp>
+#include <NovelTea/Context.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -6,10 +8,11 @@
 namespace NovelTea
 {
 
-IconGlow::IconGlow()
-: m_speedFactor(1.f)
+IconGlow::IconGlow(Context *context)
+	: ContextObject(context)
+	, m_speedFactor(1.f)
 {
-	m_text.setFont(*Proj.getFont("sysIcon"));
+	m_text.setFont(*Proj->getFont("sysIcon"));
 	m_text.setString(L"\uf138");
 	reset();
 }

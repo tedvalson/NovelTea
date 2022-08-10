@@ -1,6 +1,6 @@
 #include "ScriptWidget.hpp"
 #include "ui_ScriptWidget.h"
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/Game.hpp>
 #include <NovelTea/Script.hpp>
 #include <QDebug>
 
@@ -35,13 +35,13 @@ void ScriptWidget::saveData() const
 		m_script->setAutorun(ui->checkBoxAutorun->isChecked());
 		m_script->setContent(ui->scriptEdit->toPlainText().toStdString());
 		m_script->setProperties(ui->propertyEditor->getValue());
-		Proj.set<NovelTea::Script>(m_script, idName());
+		Proj->set(m_script, idName());
 	}
 }
 
 void ScriptWidget::loadData()
 {
-	m_script = Proj.get<NovelTea::Script>(idName());
+	m_script = Proj->get<NovelTea::Script>(idName(), getContext());
 
 	qDebug() << "Loading Script data... " << QString::fromStdString(idName());
 
@@ -49,7 +49,7 @@ void ScriptWidget::loadData()
 	{
 		// Script is new, so show it as modified
 		setModified();
-		m_script = std::make_shared<NovelTea::Script>();
+		m_script = std::make_shared<NovelTea::Script>(getContext());
 	}
 
 	ui->checkBoxAutorun->setChecked(m_script->getAutorun());

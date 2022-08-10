@@ -20,10 +20,13 @@ public:
 	static MainWindow &instance();
 
 	bool loadProject(const QString &filename);
-	bool loadProject(const NovelTea::ProjectData &project);
+	bool loadProject(std::shared_ptr<NovelTea::ProjectData> project);
 	bool reloadProject();
 	void saveProject();
 	bool closeProject();
+
+	std::shared_ptr<NovelTea::ProjectData> getProject() const { return m_project; }
+	std::shared_ptr<NovelTea::ProjectData> getProjectBackup() const { return m_projectBackup; }
 
 	void addEditorTab(EditorTabWidget *widget, bool checkForExisting = true);
 	void addEditorTab(EditorTabWidget::Type type, const std::string &idName);
@@ -104,6 +107,9 @@ private:
 
 	QStringList m_recentProjects;
 	QAction *m_recentProjectActions[MaxRecentProjects];
+
+	std::shared_ptr<NovelTea::ProjectData> m_project;
+	std::shared_ptr<NovelTea::ProjectData> m_projectBackup;
 
 	QProcess m_process;
 };

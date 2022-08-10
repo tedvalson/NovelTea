@@ -13,11 +13,17 @@
 namespace NovelTea
 {
 
-DialogueRenderer::DialogueRenderer()
-: m_callback(nullptr)
+DialogueRenderer::DialogueRenderer(Context *context)
+: ContextObject(context)
+, m_callback(nullptr)
 , m_isShowing(false)
 , m_logCurrentIndex(false)
 , m_textLineIndex(-1)
+, m_textName(context)
+, m_textNameOld(context)
+, m_text(context)
+, m_textOld(context)
+, m_iconContinue(context)
 , m_fontSize(22.f)
 , m_fontSizeMultiplier(1.f)
 , m_fadeTween(nullptr)
@@ -42,7 +48,7 @@ DialogueRenderer::DialogueRenderer()
 	m_animNameProps.delay = 0;
 
 	m_size = sf::Vector2f(400.f, 400.f);
-	setDialogue(std::make_shared<Dialogue>());
+	setDialogue(std::make_shared<Dialogue>(context));
 }
 
 void DialogueRenderer::setDialogue(const std::shared_ptr<Dialogue> &dialogue)
@@ -249,7 +255,7 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 			auto lines = startSegment->getOptionMultiline();
 			auto text = (lines.size() == 1) ? lines[0] : lines[buttonSubindex];
 			if (run && startSegment->getIsLogged())
-				ActiveGame->getTextLog()->push(text, TextLogType::DialogueOption);
+				GTextLog->push(text, TextLogType::DialogueOption);
 		}
 	}
 
@@ -327,8 +333,8 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_scrollBar.setScroll(0.f);
 
 	if (m_logCurrentIndex) {
-		ActiveGame->getTextLog()->push(line.first, TextLogType::DialogueTextName);
-		ActiveGame->getTextLog()->push(line.second, TextLogType::DialogueText);
+		GTextLog->push(line.first, TextLogType::DialogueTextName);
+		GTextLog->push(line.second, TextLogType::DialogueText);
 	}
 
 	// Check last segment to see if it expects to wait for click
@@ -578,7 +584,7 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 				}
 			}
 
-			auto btn = new Button;
+			auto btn = new Button(getContext());
 			btn->setCentered(false);
 			btn->setTexture(m_buttonTexture);
 			// Check if button is enabled
@@ -611,7 +617,7 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 
 			TextProperties buttonTextProps;
 			buttonTextProps.fontSize = m_fontSize / 2;
-			m_buttonTexts.emplace_back(new ActiveText(buttonText, buttonTextProps));
+			m_buttonTexts.emplace_back(new ActiveText(getContext(), buttonText, buttonTextProps));
 		}
 	}
 

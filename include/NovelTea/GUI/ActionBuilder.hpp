@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_ACTIONBUILDER_HPP
 #define NOVELTEA_ACTIONBUILDER_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <NovelTea/Utils.hpp>
@@ -18,10 +19,10 @@ class Object;
 
 using ActionBuilderCallback = std::function<void(bool)>;
 
-class ActionBuilder : public sf::Drawable, public Hideable
+class ActionBuilder : public ContextObject, public sf::Drawable, public Hideable
 {
 public:
-	ActionBuilder();
+	ActionBuilder(Context *context);
 
 	bool update(float delta) override;
 	bool processEvent(const sf::Event& event);

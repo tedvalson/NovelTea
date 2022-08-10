@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_NAVIGATION_HPP
 #define NOVELTEA_NAVIGATION_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/GUI/Hideable.hpp>
 #include <NovelTea/Utils.hpp>
 #include <SFML/Window/Event.hpp>
@@ -13,12 +14,12 @@ class Button;
 
 using NavigationCallback = std::function<void(int direction, const json &jentity)>;
 
-class Navigation : public sf::Drawable, public Hideable
+class Navigation : public ContextObject, public sf::Drawable, public Hideable
 {
 public:
 	static const int HIGHLIGHTS = 12;
 
-	Navigation();
+	Navigation(Context *context);
 	~Navigation();
 
 	bool processEvent(const sf::Event& event);
