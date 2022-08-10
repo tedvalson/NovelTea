@@ -1,6 +1,7 @@
 #include <NovelTea/States/StateIntro.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/Engine.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/TextTypes.hpp>
 #include <TweenEngine/Tween.h>
@@ -12,8 +13,9 @@ namespace NovelTea
 
 StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
+, m_textBg(&context)
 {
-	m_textCopyright.setFont(*Proj.getFont());
+	m_textCopyright.setFont(*Proj->getFont());
 	m_textCopyright.setString("NovelTea Engine");
 }
 

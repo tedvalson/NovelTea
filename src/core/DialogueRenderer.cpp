@@ -3,7 +3,9 @@
 #include <NovelTea/DialogueSegment.hpp>
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/PropertyList.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <TweenEngine/Tween.h>

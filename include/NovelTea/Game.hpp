@@ -6,6 +6,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Entity.hpp>
 #include <NovelTea/Utils.hpp>
+#include <functional>
 #include <queue>
 
 namespace NovelTea

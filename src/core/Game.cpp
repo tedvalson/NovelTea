@@ -39,7 +39,6 @@ Game::~Game()
 {
 	// TODO: Need to make sure active timers are destroyed first.
 	//       shared_ptrs here may not clean up when expected?
-	m_timerManager->reset();
 }
 
 // Game must be active before initialized
