@@ -201,6 +201,13 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 	for (auto it = text.cbegin(); it != text.cend(); ++it) {
 		auto c = *it;
 		if (c == '[') {
+			// First check for "!" tag cancel symbol
+			if (*(it + 1) == '!') {
+				str << c;
+				++it;
+				continue;
+			}
+
 			std::string tag;
 			bool closing;
 			auto r = parseTag(it, text.cend(), tag, closing);
