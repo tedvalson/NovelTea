@@ -37,8 +37,6 @@ Game::Game(Context* context)
 
 Game::~Game()
 {
-	// TODO: Need to make sure active timers are destroyed first.
-	//       shared_ptrs here may not clean up when expected?
 }
 
 // Game must be active before initialized
@@ -53,6 +51,7 @@ bool Game::initialize()
 
 	m_settings->setDirectory(GConfig.settingsDir);
 	m_settings->load();
+
 	if (GConfig.projectData)
 		m_projectData = GConfig.projectData;
 	else

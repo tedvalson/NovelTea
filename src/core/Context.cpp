@@ -4,6 +4,7 @@
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/Settings.hpp>
 #include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
@@ -14,7 +15,7 @@ ContextConfig::ContextConfig()
 	, height(720)
 	, maxFps(30)
 	, minFps(1)
-	, fontSizeMultiplier(1.f)
+	, fontSizeMultiplier(0.f) // (0) will use Settings value
 	, dpiMultiplier(1.f)
 	, backgroundColor(sf::Color(200, 200, 200))
 	, initialState(StateID::Intro)
@@ -48,6 +49,9 @@ bool Context::initialize()
 		return true;
 
 	m_game->initialize();
+
+	if (m_config.fontSizeMultiplier <= 0.f)
+		m_config.fontSizeMultiplier = GSettings->getFontSizeMultiplier();
 
 	// Run the "after load" script when "previewing" even though no real game load happened
 	if (m_config.entityPreview)
