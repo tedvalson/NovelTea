@@ -85,6 +85,9 @@ void Engine::initialize()
 	if (!getContext()->initialize())
 		return;
 
+	// Seed the script RNG with system time
+	ScriptMan->randSeed(getSystemTimeMs());
+
 	m_lastTime = getSystemTimeMs();
 	m_deltaPerFrame = 1.f / GConfig.maxFps;
 
@@ -131,8 +134,8 @@ void Engine::resize(size_t width, size_t height)
 	m_view.setViewport(viewport);
 	m_width = width;
 	m_height = height;
-//	m_config.width = width;
-//	m_config.height = height;
+	GConfig.width = width;
+	GConfig.height = height;
 
 	m_stateStack->resize(sf::Vector2f(width, height));
 }
