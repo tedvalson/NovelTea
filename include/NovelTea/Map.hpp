@@ -44,19 +44,32 @@ public:
 	EntityType entityType() const override;
 
 	static constexpr auto id = ID::Map;
-	const std::string entityId() const override {return id;}
+	const std::string entityId() const override { return id; }
 
-	int addRoom(const std::string &name, const sf::IntRect &rect, const std::vector<std::string>& roomIds, const std::string &script, RoomStyle style);
-	void addConnection(int roomStart, int roomEnd, const sf::Vector2i &portStart,
-					   const sf::Vector2i &portEnd, const std::string &script, ConnectionStyle style);
+	int addRoom(const std::string &name, const sf::IntRect &rect,
+				const std::vector<std::string> &roomIds,
+				const std::string &script, RoomStyle style);
+	void addConnection(int roomStart, int roomEnd,
+					   const sf::Vector2i &portStart,
+					   const sf::Vector2i &portEnd, const std::string &script,
+					   ConnectionStyle style);
+
+	/// Binding for ScriptManager
+	int scriptAddRoom(const std::string &name, int x, int y, int w, int h,
+					  const std::vector<std::string> &roomIds,
+					  const std::string &script, int style);
+	void scriptAddConnection(int roomStart, int roomEnd, int startX,
+							 int startY, int endX, int endY,
+							 const std::string &script, int style);
 
 	bool evalVisibility(std::shared_ptr<MapRoom> &room) const;
 	bool evalVisibility(std::shared_ptr<MapConnection> &connection) const;
 
-	const SharedVector<MapRoom> &getRooms() const {return m_rooms;}
-	const SharedVector<MapConnection> &getConnections() const {return m_connections;}
+	const SharedVector<MapRoom> &getRooms() const { return m_rooms; }
+	const SharedVector<MapConnection> &getConnections() const { return m_connections; }
 
-	bool checkForDoor(const MapConnection &connection, sf::FloatRect &doorRect) const;
+	bool checkForDoor(const MapConnection &connection,
+					  sf::FloatRect &doorRect) const;
 
 	ADD_ACCESSOR(std::string, DefaultRoomScript, m_defaultRoomScript)
 	ADD_ACCESSOR(std::string, DefaultPathScript, m_defaultPathScript)

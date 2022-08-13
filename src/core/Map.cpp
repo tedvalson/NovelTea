@@ -99,6 +99,16 @@ void Map::addConnection(int roomStart, int roomEnd, const sf::Vector2i &portStar
 	m_connections.emplace_back(c);
 }
 
+int Map::scriptAddRoom(const std::string &name, int x, int y, int w, int h, const std::vector<std::string> &roomIds, const std::string &script, int style)
+{
+	return addRoom(name, {x, y, w, h}, roomIds, script, static_cast<RoomStyle>(style));
+}
+
+void Map::scriptAddConnection(int roomStart, int roomEnd, int startX, int startY, int endX, int endY, const std::string &script, int style)
+{
+	addConnection(roomStart, roomEnd, {startX, startY}, {endX, endY}, script, static_cast<ConnectionStyle>(style));
+}
+
 bool Map::evalVisibility(std::shared_ptr<MapRoom> &room) const
 {
 	auto result = true;

@@ -295,6 +295,10 @@ void ScriptManager::registerClasses()
 	// Map
 	REGISTER_CONSTRUCTOR(Map);
 	REGISTER_ENTITY(Map);
+	dukglue_register_method(m_context, &Map::scriptAddRoom, "addRoom");
+	dukglue_register_method(m_context, &Map::scriptAddConnection, "addConnection");
+	dukglue_register_property(m_context, &Map::getDefaultRoomScript, &Map::setDefaultRoomScript, "defaultRoomScript");
+	dukglue_register_property(m_context, &Map::getDefaultPathScript, &Map::setDefaultPathScript, "defaultPathScript");
 
 	// Object
 	REGISTER_CONSTRUCTOR(Object);
