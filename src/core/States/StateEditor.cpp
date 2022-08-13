@@ -26,7 +26,6 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 , m_scrollPos(0.f)
 , m_mode(StateEditorMode::Nothing)
 {
-	ScriptMan->reset();
 
 	m_cutsceneRenderer.setSkipWaitingForClick(true);
 	m_cutsceneRenderer.setSkipScriptSegments(true);
@@ -173,11 +172,17 @@ void *StateEditor::processData(void *data)
 	}
 	else if (m_mode == StateEditorMode::Room)
 	{
-		if (event == "text")
+		if (event == "room")
 		{
 			try {
+				auto room = std::make_shared<Room>(getContext());
+				room->fromJson(jsonData["room"]);
+
+				GSaveData[NovelTea::ID::properties][NovelTea::Room::id][room->getId()] = jsonData["props"];
+				GGame->setRoomId(room->getId());
+
 				ScriptMan.reset();
-				auto r = GGame->getRoom()->getDescription();
+				auto r = room->getDescription();
 				m_roomActiveText.setText(r);
 			} catch (std::exception &e) {
 				m_roomActiveText.setText(e.what());

@@ -145,23 +145,15 @@ void RoomWidget::updatePreview()
 {
 	auto script = ui->scriptEdit->toPlainText().toStdString();
 	script = "thisEntity=Game.room;var text='';\n" + script + "\nreturn text;";
-	if (ui->scriptEdit->checkErrors<std::string>(script))
+	if (m_room && ui->scriptEdit->checkErrors<std::string>(script))
 	{
 		json jdata;
-		jdata["event"] = "text";
+		jdata["event"] = "room";
 
-		// Reset any changes made by previous script execution
-		GSave->reset();
-		if (m_room)
-		{
-			m_room->setDescriptionRaw(script);
-			m_room->getObjectList()->saveChanges();
-			GSave->data()[NovelTea::ID::properties][NovelTea::Room::id][m_room->getId()] = ui->propertyEditor->getValue();
-			// Save room in case changes aren't yet saved to project
-			GGame->set(m_room);
-			// Force reloading of room data we just saved in player
-			GGame->setRoomId(m_room->getId());
-		}
+		m_room->setDescriptionRaw(script);
+		m_room->getObjectList()->saveChanges();
+		jdata["room"] = m_room->toJson();
+		jdata["props"] = ui->propertyEditor->getValue();
 
 		ui->preview->processData(jdata);
 	}

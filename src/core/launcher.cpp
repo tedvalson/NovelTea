@@ -34,6 +34,8 @@ int main(int argc, char **argv)
 				auto segmentId = atoi(argv[5]);
 				config.entryMeta = sj::Array("", sj::Array(segmentId));
 			}
+			if (typeId == static_cast<int>(NovelTea::EntityType::Room))
+				config.entryMeta[0] = idName;
 		} else {
 			std::cout << "Unknown command: " << argv[2] << std::endl;
 			return 1;
