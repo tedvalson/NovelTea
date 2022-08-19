@@ -36,6 +36,7 @@ public:
 	void setVisitCount(int count);
 	int getVisitCount() const;
 
+	void setDescription(const std::string &description);
 	std::string getDescription() const;
 	void sync();
 

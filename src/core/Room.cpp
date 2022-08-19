@@ -133,6 +133,13 @@ int Room::getVisitCount() const
 	return j[getId()].ToInt();
 }
 
+void Room::setDescription(const std::string &description)
+{
+	// Use JSON object as a lazy way to escape the string
+	sj::JSON j = description;
+	m_descriptionRaw = "text=" + j.dump();
+}
+
 std::string Room::getDescription() const
 {
 	try {

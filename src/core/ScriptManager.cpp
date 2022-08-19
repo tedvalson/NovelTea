@@ -317,6 +317,12 @@ void ScriptManager::registerClasses()
 	dukglue_register_method(m_context, &Room::disablePath, "disablePath");
 	dukglue_register_property(m_context, &Room::getVisitCount, &Room::setVisitCount, "visitCount");
 	dukglue_register_property(m_context, &Room::getObjectList, nullptr, "objects");
+	dukglue_register_property(m_context, &Room::getScriptAfterEnter, &Room::setScriptAfterEnter, "scriptAfterEnter");
+	dukglue_register_property(m_context, &Room::getScriptAfterLeave, &Room::setScriptAfterLeave, "scriptAfterLeave");
+	dukglue_register_property(m_context, &Room::getScriptBeforeEnter, &Room::setScriptBeforeEnter, "scriptBeforeEnter");
+	dukglue_register_property(m_context, &Room::getScriptBeforeLeave, &Room::setScriptBeforeLeave, "scriptBeforeLeave");
+	dukglue_register_property(m_context, &Room::getDescription, &Room::setDescription, "description");
+	dukglue_register_property(m_context, &Room::getDescriptionRaw, &Room::setDescriptionRaw, "rawDescription");
 
 	// Script
 	REGISTER_CONSTRUCTOR(Script);
