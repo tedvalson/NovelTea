@@ -25,7 +25,7 @@ ContextConfig::ContextConfig()
 //	, projectFileName("")
 	, projectData(nullptr)
 	, entryEntity(sj::Array())
-	, entryMeta(sj::Array("", 0))
+	, entryMeta(sj::Array())
 	, entityPreview(false)
 {
 
