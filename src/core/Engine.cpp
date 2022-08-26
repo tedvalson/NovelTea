@@ -37,7 +37,10 @@ Engine::Engine(Context* context)
 
 int Engine::run()
 {
-	initialize();
+	if (!initialize()) {
+		sf::err() << "Failed to initialize NovelTea Engine." << std::endl;
+		return 1;
+	}
 
 	sf::RenderWindow window(sf::VideoMode(GConfig.width, GConfig.height, 16), "NovelTea Launcher");
 
@@ -80,10 +83,10 @@ int Engine::run()
 	return 0;
 }
 
-void Engine::initialize()
+bool Engine::initialize()
 {
 	if (!getContext()->initialize())
-		return;
+		return false;
 
 	// Seed the script RNG with system time
 	ScriptMan->randSeed(getSystemTimeMs());
@@ -94,6 +97,7 @@ void Engine::initialize()
 	resize(GConfig.width, GConfig.height);
 
 	m_stateStack->pushState(GConfig.initialState);
+	return true;
 }
 
 bool Engine::isRunning() const

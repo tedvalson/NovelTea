@@ -1,4 +1,5 @@
 #include <NovelTea/BBCodeParser.hpp>
+#include <iostream>
 
 namespace NovelTea
 {
@@ -209,14 +210,14 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 			}
 
 			std::string tag;
-			bool closing;
-			auto r = parseTag(it, text.cend(), tag, closing);
+			auto r = parseTag(it, text.cend(), tag);
 			if (r == it) {
 				str << c;
 			}
 			else
 				try {
-					TextStyle style(tag);
+					bool closing;
+					TextStyle style(tag, closing);
 
 					// First check for breaker tag [p]
 					if (style.type == TextStyleType::PBreak) {
@@ -249,6 +250,8 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 					if (style.type == TextStyleType::Animation)
 						newGroup = true;
 					if (style.type == TextStyleType::XOffset || style.type == TextStyleType::YOffset)
+						newGroup = true;
+					if (style.type == TextStyleType::Shader)
 						newGroup = true;
 
 					if (closing)
@@ -291,6 +294,19 @@ std::string BBCodeParser::stripTags(const std::string &bbstring)
 	return result;
 }
 
+void BBCodeParser::debugPrint(const std::vector<std::shared_ptr<StyledSegment> > &segments)
+{
+	for (auto &s : segments) {
+		std::cout << "[";
+		for (auto &style : s->styles)
+			std::cout << " +" << style.tagName;
+		std::cout << "] " << (s->newGroup ? "new" : "old") << (s->startOnNewLine ? " \\n" : "");
+		std::cout << " \"" << s->text << "\" " << s->style.fontSize;
+		std::cout << " " << (s->anim.waitForClick ? "wait" : "") <<  std::endl;
+	}
+	std::cout << std::endl;
+}
+
 std::vector<std::pair<TextStyle, bool> > BBCodeParser::getStylesDiff(const std::vector<TextStyle> &prevStyles, const std::vector<TextStyle> &currStyles)
 {
 	std::vector<std::pair<TextStyle,bool>> result;
@@ -314,31 +330,30 @@ std::vector<std::pair<TextStyle, bool> > BBCodeParser::getStylesDiff(const std::
 	return result;
 }
 
-cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag, bool &closing)
+cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag)
 {
 	if (start == end)
 		return start;
 
-	closing = false;
-	auto it = start;
-	if (*++it == '/') {
-		closing = true;
-		++it;
-	}
-
 	// See MainWindow::validateEntityName
-	// Entity naming needs to be restricted to these chars.
-	static const char allowedChars[] = " =.-#";
+	// For Object tag, entity naming needs to be restricted to these chars.
+	static const char allowedChars[] = " =_,.-#";
 
 	std::stringstream str;
-	for (; it != end; ++it) {
+	for (auto it = start + 1; it != end; ++it) {
 		auto c = *it;
-		if (c == ']') {
+		if (IsAlNum(c) || std::strchr(allowedChars, c) != nullptr)
+			str << c;
+		else if (c == ']') {
 			tag = str.str();
 			return it;
 		}
-		else if (IsAlNum(c) || std::strchr(allowedChars, c) != nullptr)
-			str << c;
+		else if (c == '/') {
+			if (it == start + 1)
+				str << c;
+			else
+				return start;
+		}
 		else
 			return start;
 	}
@@ -425,7 +440,8 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 		case TextStyleType::PBreak:
 			if (!s.params.empty()) {
 				auto delay = std::max(std::atof(s.params["delay"].c_str()), 0.0) * 1000;
-				anim.delay += (anim.delay > 0) ? delay : -delay;
+				// Negative delays considered for FadeAcross effect
+				anim.delay += (anim.delay >= 0) ? delay : -delay;
 				anim.waitForClick = false;
 			}
 			break;
@@ -438,6 +454,21 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 		case TextStyleType::YOffset:
 			style.yOffset = std::atol(s.params["y"].c_str());
 			break;
+		case TextStyleType::Shader: {
+			auto fragShaderId = s.params["f"];
+			auto vertexShaderId = s.params["v"];
+			if (!fragShaderId.empty())
+				style.fragShaderId = fragShaderId;
+			if (!vertexShaderId.empty())
+				style.vertexShaderId = vertexShaderId;
+			for (auto& param : s.params) {
+				auto& key = param.first;
+				if (key == "f" || key == "v")
+					continue;
+				style.shaderUniforms[key] = std::atof(param.second.c_str());
+			}
+			break;
+		}
 		case TextStyleType::Animation:
 			for (auto &param : s.params) {
 				auto& key = param.first;
@@ -446,6 +477,14 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 					auto it = textEffectMap.find(val);
 					if (it != textEffectMap.end())
 						anim.type = it->second;
+
+					// Change FadeAcross effects to special default delay/duration
+					int defaultDelay = (anim.type == TextEffect::FadeAcross) ? -1 : 0;
+					int defaultDuration = defaultDelay;
+					if (s.params.find(TextAnimation::Delay) == s.params.end())
+						anim.delay = defaultDelay;
+					if (s.params.find(TextAnimation::Time) == s.params.end())
+						anim.duration = defaultDuration;
 				}
 				else if (key == TextAnimation::Function) {
 					auto equation = getTweenEquation(val);
@@ -475,18 +514,22 @@ TextStyle::TextStyle()
 {
 }
 
-TextStyle::TextStyle(const std::string &tag)
+TextStyle::TextStyle(const std::string &tagFull, bool &closing)
 {
-	if (!tag.empty()) {
+	if (!tagFull.empty()) {
+		auto tag = tagFull;
+		closing = (tag[0] == '/');
+		if (closing)
+			tag.erase(0, 1);
 		auto s = split(tag, " ");
 		tagName = s[0];
 		if (!tagName.empty()) {
-			auto tagLower = tagName;
+			auto tagLower = tag;
 			std::transform(tagLower.begin(), tagLower.end(), tagLower.begin(), ::tolower);
 			auto c = tagLower[0];
 			if (c == 'a') {
 				type = TextStyleType::Animation;
-				parseKeyValPairs(tag);
+				parseKeyValPairs(tag, true);
 				// Recreate param map, normalizing the values
 				auto paramsCopy = params;
 				params.clear();
@@ -514,6 +557,9 @@ TextStyle::TextStyle(const std::string &tag)
 				type = TextStyleType::Bold;
 				if (tagLower.size() > 1) {
 					auto s = split(tagLower, "=");
+					if (closing)
+						s.push_back("");
+					tagName = s[0];
 					if (s.size() == 2) {
 						auto c2 = tagLower[1];
 						if (c2 == 'c' || s[0] == "border-color") {
@@ -550,8 +596,15 @@ TextStyle::TextStyle(const std::string &tag)
 				parseSingleArg(tag, "delay");
 			}
 			else if (c == 's') {
-				type = TextStyleType::Size;
-				parseSingleArg(tag, "size");
+				if (tagLower.size() > 1 && tagLower[1] == 'h') {
+					type = TextStyleType::Shader;
+					parseKeyValPairs(tag, false);
+					if (params.empty() && !closing)
+						throw std::exception();
+				} else {
+					type = TextStyleType::Size;
+					parseSingleArg(tag, "size");
+				}
 			}
 			else if (c == 'x') {
 				type = TextStyleType::XOffset;
@@ -577,7 +630,7 @@ void TextStyle::parseSingleArg(const std::string &tag, const std::string &paramK
 		params[paramKey] = s[1];
 }
 
-void TextStyle::parseKeyValPairs(const std::string &tag)
+void TextStyle::parseKeyValPairs(const std::string &tag, bool makeLowerCase)
 {
 	auto s = split(tag, " ");
 	for (int i = 1; i < s.size(); ++i) {
@@ -586,8 +639,10 @@ void TextStyle::parseKeyValPairs(const std::string &tag)
 			throw std::exception();
 		auto key = kv[0];
 		auto val = kv[1];
-		std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-		std::transform(val.begin(), val.end(), val.begin(), ::tolower);
+		if (makeLowerCase) {
+			std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+			std::transform(val.begin(), val.end(), val.begin(), ::tolower);
+		}
 		params[key] = val;
 	}
 }

@@ -2,11 +2,13 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/BBCodeParser.hpp>
 #include <NovelTea/Game.hpp>
+#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/Object.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/StringUtils.hpp>
+#include <SFML/Graphics/Shader.hpp>
 #include <TweenEngine/Tween.h>
 
 namespace NovelTea
@@ -25,6 +27,7 @@ ActiveTextSegment::ActiveTextSegment(Context *context)
 	, m_fadeAcrossPosition(1.f)
 	, m_fadeLineIndex(0)
 	, m_renderTexture(nullptr)
+	, m_shader(nullptr)
 {
 	auto texture = AssetManager<sf::Texture>::get("images/fade.png");
 	texture->setSmooth(true);
@@ -121,7 +124,6 @@ std::string ActiveTextSegment::getText() const
 void ActiveTextSegment::startAnim()
 {
 	auto& anim = getAnimProps();
-	auto delay = 0.001f * getDelayMs();
 	auto duration = 0.001f * getDurationMs();
 	m_tweenManager.killAll();
 
@@ -383,6 +385,10 @@ AnimationProperties &ActiveTextSegment::getAnimProps() const
 
 bool ActiveTextSegment::update(float delta)
 {
+	if (m_shader) {
+		m_shader->setUniform("time", 0.001f * Engine::getSystemTimeMs());
+		m_shader->setUniform("time_delta", delta);
+	}
 	m_tweenManager.update(delta);
 	Hideable::update(delta);
 	return m_tweenManager.getRunningTweensCount() > 0;
@@ -461,6 +467,8 @@ void ActiveTextSegment::draw(sf::RenderTarget &target, sf::RenderStates states) 
 	if (m_segments.empty() || m_alpha == 0.f || m_animAlpha == 0.f)
 		return;
 	states.transform *= getTransform();
+
+	states.shader = m_shader.get();
 
 	if (m_renderTexture)
 	{
@@ -664,6 +672,32 @@ void ActiveTextSegment::ensureUpdate() const
 	m_debugBorder.setOutlineThickness(2.f);
 	m_debugBorder.setSize(sf::Vector2f(m_bounds.width, m_bounds.height - m_bounds.top));
 	m_debugBorder.setPosition(m_bounds.left, m_bounds.top);
+
+#ifdef ANDROID
+	// Set up shaders, if needed
+	auto& style = m_styledSegments.back()->style;
+	auto& shaders = ProjData[ID::shaders];
+	m_shader = nullptr;
+	auto fragShader = shaders[shaders.hasKey(style.fragShaderId) ? style.fragShaderId : "defaultFrag"];
+	auto vertShader = shaders[shaders.hasKey(style.vertexShaderId) ? style.vertexShaderId : "defaultVert"];
+	if (!fragShader.IsEmpty() || !vertShader.IsEmpty()) {
+		std::cout << "shaderIds: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
+		m_shader = std::make_shared<sf::Shader>();
+		if (m_shader->loadFromMemory(vertShader[0].ToString(), fragShader[0].ToString())) {
+			m_shader->setUniform("texture", sf::Shader::CurrentTexture);
+			// Set uniform defaults, then set uniforms provided by BBcode style
+			for (auto& j : vertShader[1].ObjectRange())
+				m_shader->setUniform(j.first, static_cast<float>(j.second.ToFloat()));
+			for (auto& j : fragShader[1].ObjectRange())
+				m_shader->setUniform(j.first, static_cast<float>(j.second.ToFloat()));
+			for (auto& uniform : style.shaderUniforms)
+				m_shader->setUniform(uniform.first, uniform.second);
+		} else {
+			sf::err() << "Failed to link user provided shaders: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
+			m_shader = nullptr;
+		}
+	}
+#endif
 
 	m_needsUpdate = false;
 }

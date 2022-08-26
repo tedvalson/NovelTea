@@ -49,6 +49,7 @@ namespace ID
 	const auto entityProperties   = 2;
 	const auto cutsceneSegType    = 0;
 	const auto player             = "player";
+	const auto shaders            = "shaders";
 
 	// Entity IDs
 	constexpr auto Action   = "action";

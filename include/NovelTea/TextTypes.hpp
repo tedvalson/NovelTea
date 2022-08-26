@@ -20,6 +20,7 @@ enum class TextStyleType : int {
 	Object,
 	PBreak,
 	Size,
+	Shader,
 	XOffset,
 	YOffset,
 };
@@ -34,16 +35,19 @@ struct AnimationProperties {
 	TextEffect type = TextEffect::None;
 	TweenEngine::TweenEquation* equation = &TweenEngine::TweenEquations::easeInOutQuad;
 	std::string value;
-	int duration = -1;
-	int delay    = -1;
-	float speed  = 1.f;
-	bool skippable = true;
+	int duration  = 0;
+	int delay     = 0;
+	float speed   = 1.f;
+	bool skippable    = true;
 	bool waitForClick = false;
 };
 
 struct TextProperties {
 	std::string fontAlias;
 	std::string objectId;
+	std::string vertexShaderId;
+	std::string fragShaderId;
+	std::map<std::string, float> shaderUniforms;
 	int xOffset = 0;
 	int yOffset = 0;
 	sf::Uint32 fontSize = 12;

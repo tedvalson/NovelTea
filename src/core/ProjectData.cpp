@@ -16,6 +16,31 @@
 namespace NovelTea
 {
 
+static const std::string defaultFragShader = " \
+	precision mediump float; \
+	uniform sampler2D texture; \
+	varying vec4 v_color; \
+	varying vec2 v_texCoord; \
+	void main() { \
+		gl_FragColor = v_color * texture2D(texture, v_texCoord.st); \
+	}";
+
+static const std::string defaultVertexShader = " \
+	precision mediump float; \
+	uniform mat4 projMatrix; \
+	uniform mat4 textMatrix; \
+	uniform mat4 viewMatrix; \
+	attribute vec4 color; \
+	attribute vec2 position; \
+	attribute vec2 texCoord; \
+	varying vec4 v_color; \
+	varying vec2 v_texCoord; \
+	void main() { \
+		gl_Position = projMatrix * viewMatrix * vec4(position, 0.0, 1.0); \
+		v_texCoord = (textMatrix * vec4(texCoord, 0.0, 1.0)).xy; \
+		v_color = color; \
+	}";
+
 ProjectData::ProjectData()
 : m_loaded(false)
 {
@@ -56,10 +81,14 @@ void ProjectData::newProject()
 		ID::openTabIndex, -1,
 	});
 
+	j[ID::shaders] = json({
+		"defaultFrag", defaultFragShader,
+		"defaultVert", defaultVertexShader,
+	});
 	j[ID::engineFonts] = json({
-	   "sys", "LiberationSans.ttf",
-	   "sysIcon", "fontawesome.ttf",
-   });
+		"sys", "LiberationSans.ttf",
+		"sysIcon", "fontawesome.ttf",
+	});
 	fromJson(j);
 	m_loaded = false;
 }
@@ -333,7 +362,6 @@ bool ProjectData::fromJson(const json &j)
 	for (auto &jfont : j[ID::engineFonts].ObjectRange())
 	{
 		auto font = AssetManager<sf::Font>::get("fonts/" + jfont.second.ToString());
-		std::cout << "Loading font: " << jfont.second.ToString() << std::endl;
 		if (font)
 			m_fonts[jfont.first] = font;
 	}

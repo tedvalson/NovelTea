@@ -17,7 +17,7 @@ class Engine : public ContextObject
 public:
 	Engine(Context* context);
 	int run();
-	void initialize();
+	bool initialize();
 	bool isRunning() const;
 	void resize(size_t width, size_t height);
 	void render(sf::RenderTarget &target);

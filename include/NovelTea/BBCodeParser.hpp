@@ -13,13 +13,13 @@ using cStrIter = std::string::const_iterator;
 
 struct TextStyle {
 	TextStyle();
-	TextStyle(const std::string &tag);
+	TextStyle(const std::string &tag, bool &closing);
 
 	// Format: "tag=val"
 	void parseSingleArg(const std::string &tag, const std::string &paramKey);
 
 	// Format: "tag key=val key=val"
-	void parseKeyValPairs(const std::string &tag);
+	void parseKeyValPairs(const std::string &tag, bool makeLowerCase);
 
 	bool operator==(const TextStyle &style) const;
 
@@ -45,10 +45,11 @@ public:
 	static std::string makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags = true, bool closeTags = false);
 	static std::vector<std::shared_ptr<StyledSegment>> makeSegments(const std::string &text, const TextProperties &textDefault = TextProperties(), const AnimationProperties &animDefault = AnimationProperties());
 	static std::string stripTags(const std::string &bbstring);
+	static void debugPrint(const std::vector<std::shared_ptr<StyledSegment>> &segments);
 
 private:
 	static std::vector<std::pair<TextStyle,bool>> getStylesDiff(const std::vector<TextStyle> &prevStyles, const std::vector<TextStyle> &currStyles);
-	static cStrIter parseTag(cStrIter start, cStrIter end, std::string &tag, bool &closing);
+	static cStrIter parseTag(cStrIter start, cStrIter end, std::string &tag);
 };
 
 } // namespace NovelTea

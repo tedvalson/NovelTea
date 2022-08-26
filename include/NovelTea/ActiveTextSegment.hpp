@@ -128,6 +128,7 @@ private:
 	float m_fadeAcrossPosition;
 	int m_fadeLineIndex;
 	mutable std::shared_ptr<sf::RenderTexture> m_renderTexture;
+	mutable std::shared_ptr<sf::Shader> m_shader;
 	sf::Sprite m_sprite;
 	TweenRectangleShape m_shape;
 	TweenRectangleShape m_shapeFade;

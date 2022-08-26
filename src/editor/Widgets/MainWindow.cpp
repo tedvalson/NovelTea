@@ -8,6 +8,7 @@
 #include "MapWidget.hpp"
 #include "ObjectWidget.hpp"
 #include "ScriptWidget.hpp"
+#include "ShaderWidget.hpp"
 #include "VerbWidget.hpp"
 #include "SearchWidget.hpp"
 #include "SpellCheckWidget.hpp"
@@ -195,6 +196,8 @@ void MainWindow::addEditorTab(EditorTabWidget::Type type, const std::string &idN
 		addEditorTab(new VerbWidget(idName));
 	else if (type == EditorTabWidget::Settings)
 		addEditorTab(new ProjectSettingsWidget);
+	else if (type == EditorTabWidget::Shaders)
+		addEditorTab(new ShaderWidget);
 	else if (type == EditorTabWidget::Tests)
 		addEditorTab(new TestsWidget);
 }
@@ -221,7 +224,7 @@ bool MainWindow::validateEntityName(const QString &entityIdName, EditorTabWidget
 
 	// See BBCodeParser::parseTag
 	// Include all permitted chars except '='
-	static const char allowedChars[] = " .-#";
+	static const char allowedChars[] = " _,.-#";
 	for (auto& c : name)
 		if (!NovelTea::IsAlNum(c) && std::strchr(allowedChars, c) == nullptr) {
 			QMessageBox::critical(this, "Failed to rename",
@@ -796,6 +799,11 @@ void MainWindow::on_actionSearch_triggered()
 	if (searchTerm.isEmpty())
 		return;
 	addEditorTab(new SearchWidget(searchTerm.toStdString()));
+}
+
+void MainWindow::on_actionShaders_triggered()
+{
+	addEditorTab(new ShaderWidget);
 }
 
 void MainWindow::on_actionClearList_triggered()

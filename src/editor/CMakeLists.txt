@@ -28,8 +28,9 @@ set(UIFILES
 	${UIROOT}/PropertyEditor.ui
 	${UIROOT}/RoomWidget.ui
 	${UIROOT}/RichTextEditor.ui
-	${UIROOT}/SearchWidget.ui
 	${UIROOT}/ScriptWidget.ui
+	${UIROOT}/SearchWidget.ui
+	${UIROOT}/ShaderWidget.ui
 	${UIROOT}/SpellCheckWidget.ui
 	${UIROOT}/TestsWidget.ui
 	${UIROOT}/VerbWidget.ui
@@ -71,10 +72,11 @@ set(SRC
 	${SRCROOT}/Widgets/PropertyEditor.cpp
 	${SRCROOT}/Widgets/RichTextEditor.cpp
 	${SRCROOT}/Widgets/RoomWidget.cpp
-	${SRCROOT}/Widgets/SearchTreeWidget.cpp
-	${SRCROOT}/Widgets/SearchWidget.cpp
 	${SRCROOT}/Widgets/ScriptEdit.cpp
 	${SRCROOT}/Widgets/ScriptWidget.cpp
+	${SRCROOT}/Widgets/SearchTreeWidget.cpp
+	${SRCROOT}/Widgets/SearchWidget.cpp
+	${SRCROOT}/Widgets/ShaderWidget.cpp
 	${SRCROOT}/Widgets/SpellCheckWidget.cpp
 	${SRCROOT}/Widgets/SFMLWidget.cpp
 	${SRCROOT}/Widgets/TestsWidget.cpp

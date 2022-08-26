@@ -91,6 +91,7 @@ private slots:
 	void on_actionClearParentSelection_triggered();
 	void on_actionTests_triggered();
 	void on_actionSearch_triggered();
+	void on_actionShaders_triggered();
 	void on_actionClearList_triggered();
 	void on_actionCustomColor_triggered();
 	void on_actionClearColor_triggered();

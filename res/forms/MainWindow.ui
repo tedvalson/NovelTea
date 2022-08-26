@@ -157,6 +157,7 @@
     <addaction name="actionProjectSettings"/>
     <addaction name="actionTests"/>
     <addaction name="actionSearch"/>
+    <addaction name="actionShaders"/>
     <addaction name="actionSpellCheck"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
@@ -342,6 +343,11 @@
   <action name="actionCopyAs">
    <property name="text">
     <string>Copy As...</string>
+   </property>
+  </action>
+  <action name="actionShaders">
+   <property name="text">
+    <string>Shaders</string>
    </property>
   </action>
  </widget>

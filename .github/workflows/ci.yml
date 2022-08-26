@@ -25,7 +25,7 @@ jobs:
         path: |
           ${{ github.workspace }}/Qt
           SFML/install
-        key: ${{ runner.os }}-NovelTea9
+        key: ${{ runner.os }}-NovelTea1
         
     - name: Setup MacOS Environment
       if: ${{ runner.os == 'macOS' }}
@@ -59,9 +59,9 @@ jobs:
       if: ${{ !steps.cache.outputs.cache-hit }}
       uses: actions/checkout@v2
       with:
-        repository: tedvalson/SFML
+        repository: tedvalson/SFML_ES
         path: SFML
-        ref: '2.6.x'
+        ref: 'noveltea'
 
     - name: Compile SFML
       if: ${{ !steps.cache.outputs.cache-hit }}
