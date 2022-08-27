@@ -26,6 +26,7 @@ public:
 		Map,
 
 		// Icon files use above numeric values
+		Shaders,
 		SpellCheck,
 	};
 
