@@ -42,7 +42,11 @@ int Engine::run()
 		return 1;
 	}
 
+	auto shader = Proj->getShader(ID::shaderPostProcess);
+	shader->setUniform("backbuffer", m_renderTexture.getTexture());
+
 	sf::RenderWindow window(sf::VideoMode(GConfig.width, GConfig.height, 16), "NovelTea Launcher");
+	window.setDefaultShader(shader.get());
 
 	GTextInput.textInputTrigger = [&window](const std::string &message, int ref) {
 		std::string input;
@@ -57,6 +61,7 @@ int Engine::run()
 	};
 
 	auto active = true;
+	auto startTime = getSystemTimeMs();
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -76,6 +81,7 @@ int Engine::run()
 			processEvent(event);
 		}
 
+		shader->setUniform("time", 0.001f * (getSystemTimeMs() - startTime));
 		update();
 		render(window);
 		window.display();

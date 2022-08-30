@@ -676,20 +676,12 @@ void ActiveTextSegment::ensureUpdate() const
 #ifdef ANDROID
 	// Set up shaders, if needed
 	auto& style = m_styledSegments.back()->style;
-	auto& shaders = ProjData[ID::shaders];
 	m_shader = nullptr;
-	auto fragShader = shaders[shaders.hasKey(style.fragShaderId) ? style.fragShaderId : "defaultFrag"];
-	auto vertShader = shaders[shaders.hasKey(style.vertexShaderId) ? style.vertexShaderId : "defaultVert"];
-	if (!fragShader.IsEmpty() || !vertShader.IsEmpty()) {
+	if (!style.fragShaderId.empty() || !style.vertexShaderId.empty()) {
 		std::cout << "shaderIds: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
-		m_shader = std::make_shared<sf::Shader>();
-		if (m_shader->loadFromMemory(vertShader[0].ToString(), fragShader[0].ToString())) {
-			m_shader->setUniform("texture", sf::Shader::CurrentTexture);
+		m_shader = Proj->getShader(style.fragShaderId, style.vertexShaderId);
+		if (m_shader->getErrorLog().empty()) {
 			// Set uniform defaults, then set uniforms provided by BBcode style
-			for (auto& j : vertShader[1].ObjectRange())
-				m_shader->setUniform(j.first, static_cast<float>(j.second.ToFloat()));
-			for (auto& j : fragShader[1].ObjectRange())
-				m_shader->setUniform(j.first, static_cast<float>(j.second.ToFloat()));
 			for (auto& uniform : style.shaderUniforms)
 				m_shader->setUniform(uniform.first, uniform.second);
 		} else {

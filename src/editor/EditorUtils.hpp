@@ -17,6 +17,8 @@ public:
 	static QString escape(const QString &s);
 	static QString unescape(const QString &s);
 
+	static std::string getFileContents(const QString &fileName);
+
 	static QIcon iconFromTabType(EditorTabWidget::Type type);
 
 	static QString documentToBBCode(const QTextDocument *doc);

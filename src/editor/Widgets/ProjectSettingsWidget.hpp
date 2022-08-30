@@ -23,8 +23,6 @@ public:
 	bool addFontFromData(bool systemFont, const QString &name, const std::string &data, const QString &alias);
 	void refreshFontList();
 
-	static std::string getFileContents(const QString &fileName);
-
 protected:
 
 private:

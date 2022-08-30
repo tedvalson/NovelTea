@@ -12,6 +12,8 @@ class ShaderWidget;
 class QtVariantEditorFactory;
 class QtVariantPropertyManager;
 class QtProperty;
+class QComboBox;
+class QListWidgetItem;
 
 class ShaderWidget : public EditorTabWidget
 {
@@ -32,12 +34,19 @@ private slots:
 	void on_actionAddShader_triggered();
 	void on_actionDeleteShader_triggered();
 	void on_listWidget_currentRowChanged(int currentRow);
+	void on_tabWidget_currentChanged(int index);
 	void on_actionPreview_toggled(bool checked);
 	void on_actionUniforms_toggled(bool checked);
 	void on_actionCompileOutput_toggled(bool checked);
 	void on_scriptEdit_textChanged();
+	void on_actionAddTexture_triggered();
+	void on_actionRemoveTexture_triggered();
+	void on_listTextures_itemChanged(QListWidgetItem *item);
+	void on_listTextures_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
 
 private:
+	std::string makeTextureName(const std::string &textureName);
+	bool addTextureToList(const std::string &textureData, const std::string &textureName);
 	bool isVertexShader(const std::string &script);
 	void updateErrorLog();
 	void updatePropertyList(const sj::JSON *uniformArray = nullptr);
@@ -52,6 +61,9 @@ private:
 
 	QtVariantPropertyManager *m_variantManager;
 	QtVariantEditorFactory *m_variantFactory;
+	std::map<QComboBox*, int> m_systemShaderMap;
+	std::map<std::string, std::string> m_texturesData;
+	QString m_lastSelectedTextureName;
 
 	mutable sj::JSON m_shaders;
 	std::string m_currentShaderId;

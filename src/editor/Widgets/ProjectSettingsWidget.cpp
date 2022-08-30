@@ -1,5 +1,6 @@
 #include "ProjectSettingsWidget.hpp"
 #include "MainWindow.hpp"
+#include "EditorUtils.hpp"
 #include "ui_ProjectSettingsWidget.h"
 #include "Wizard/WizardPageActionSelect.hpp"
 #include <NovelTea/ProjectData.hpp>
@@ -77,7 +78,7 @@ EditorTabWidget::Type ProjectSettingsWidget::getType() const
 bool ProjectSettingsWidget::addFontFromFile(bool systemFont, const QString &fileName, const QString &alias)
 {
 	QFileInfo fileInfo(fileName);
-	auto data = getFileContents(fileName);
+	auto data = EditorUtils::getFileContents(fileName);
 	return addFontFromData(systemFont, fileInfo.fileName(), data, alias);
 }
 
@@ -113,17 +114,6 @@ void ProjectSettingsWidget::refreshFontList()
 	}
 }
 
-std::string ProjectSettingsWidget::getFileContents(const QString &fileName)
-{
-	QFile file(fileName);
-	if (!file.open(QIODevice::ReadOnly))
-		return "";
-	std::string data;
-	data.resize(file.size());
-	file.read(&data[0], data.size());
-	return data;
-}
-
 bool ProjectSettingsWidget::loadImageData(const std::string &data)
 {
 	QImage image;
@@ -147,7 +137,7 @@ bool ProjectSettingsWidget::loadImageFile(const QString &fileName)
 	}
 
 	setModified();
-	return loadImageData(getFileContents(fileName));
+	return loadImageData(EditorUtils::getFileContents(fileName));
 }
 
 void ProjectSettingsWidget::saveData() const
@@ -356,16 +346,15 @@ void ProjectSettingsWidget::fillVerbs(const TreeModel *model, const QModelIndex 
 
 void ProjectSettingsWidget::on_buttonSelectImage_clicked()
 {
-	QStringList mimeTypeFilters;
-	foreach (const QByteArray &mimeTypeName, QImageReader::supportedMimeTypes())
-		mimeTypeFilters.append(mimeTypeName);
-	mimeTypeFilters.sort();
+	QStringList filters;
+	filters << "Image files (*.jpg *jpeg *.png *.bmp *.gif *.tga)";
+	filters << "All Files (*)";
 	const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
 	QFileDialog dialog(this, tr("Open File"),
 					   picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.first());
 	dialog.setAcceptMode(QFileDialog::AcceptOpen);
-	dialog.setMimeTypeFilters(mimeTypeFilters);
-	dialog.selectMimeTypeFilter("image/jpeg");
+	dialog.setFileMode(QFileDialog::ExistingFile);
+	dialog.setNameFilters(filters);
 
 	while (dialog.exec() == QDialog::Accepted && !loadImageFile(dialog.selectedFiles().first())) {}
 }

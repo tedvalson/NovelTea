@@ -17,6 +17,17 @@ QString EditorUtils::unescape(const QString &s)
 	return result.replace("\\n", "\n").replace("\\t", "\t");
 }
 
+std::string EditorUtils::getFileContents(const QString &fileName)
+{
+	QFile file(fileName);
+	if (!file.open(QIODevice::ReadOnly))
+		return "";
+	std::string data;
+	data.resize(file.size());
+	file.read(&data[0], data.size());
+	return data;
+}
+
 QIcon EditorUtils::iconFromTabType(EditorTabWidget::Type type)
 {
 	QColor color;
