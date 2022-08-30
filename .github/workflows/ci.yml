@@ -136,9 +136,9 @@ jobs:
     - name: Checkout SFML
       uses: actions/checkout@v2
       with:
-        repository: tedvalson/SFML
+        repository: tedvalson/SFML_ES
         path: SFML
-        ref: '2.6.x'
+        ref: 'noveltea'
 
     - name: Compile SFML and NovelTea
       run: sh .github/build_android.sh ${{ steps.setup-ndk.outputs.ndk-path }}
