@@ -29,6 +29,7 @@ enum class TextEffect : int {
 	None = 0,
 	Fade = 1,
 	FadeAcross,
+	Pop,
 };
 
 struct AnimationProperties {
@@ -37,7 +38,10 @@ struct AnimationProperties {
 	std::string value;
 	int duration  = 0;
 	int delay     = 0;
+	int loopCount = 0;
+	int loopDelay = 0;
 	float speed   = 1.f;
+	bool loopYoyo     = true;
 	bool skippable    = true;
 	bool waitForClick = false;
 };

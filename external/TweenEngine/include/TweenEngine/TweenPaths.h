@@ -17,6 +17,7 @@ namespace TweenEngine
     public:
         static TweenPath &linear;
         static TweenPath &catmullRom;
+		static TweenPath &popOutPath;
     };
 }
 

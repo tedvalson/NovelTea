@@ -125,24 +125,51 @@ void ActiveTextSegment::startAnim()
 {
 	auto& anim = getAnimProps();
 	auto duration = 0.001f * getDurationMs();
+	auto loopDelay = 0.001f * anim.loopDelay;
 	m_tweenManager.killAll();
 
 	setFadeAcrossPosition(1.f);
 	setAnimAlpha(255.f);
+	m_effectIntensity = 1.f;
+	if (!anim.value.empty())
+		m_effectIntensity = std::max(std::atof(anim.value.c_str()), 0.1);
+	m_effectIntensity *= m_fontSizeMultiplier;
 
+	TweenEngine::Tween *tween;
+
+	// Start respective tweens
 	if (anim.type == TextEffect::Fade) {
 		setAnimAlpha(0.f);
-		TweenEngine::Tween::to(*this, ANIMALPHA, duration)
-			.target(255.f)
-			.start(m_tweenManager);
+		tween = &TweenEngine::Tween::to(*this, ANIMALPHA, duration)
+			.target(255.f);
 	}
 	else if (anim.type == TextEffect::FadeAcross) {
 		setFadeAcrossPosition(0.f);
-		TweenEngine::Tween::to(*this, FADEACROSS, duration)
-			.ease(TweenEngine::TweenEquations::easeInOutLinear)
-			.target(1.f)
-			.start(m_tweenManager);
+		tween = &TweenEngine::Tween::to(*this, FADEACROSS, duration)
+			.target(1.f);
 	}
+	else if (anim.type == TextEffect::Pop) {
+		setEffectFactor(0.f);
+		tween = &TweenEngine::Tween::to(*this, EFFECT_FACTOR, duration)
+			.path(TweenEngine::TweenPaths::popOutPath)
+			.waypoint(1.f)
+			.target(0.f);
+	}
+	else
+	{
+		setEffectFactor(0.f);
+		tween = &TweenEngine::Tween::to(*this, EFFECT_FACTOR, duration)
+			.target(1.f);
+	}
+
+	if (anim.loopYoyo)
+		tween->repeatYoyo(anim.loopCount * 2, loopDelay);
+	else
+		tween->repeat(anim.loopCount, loopDelay);
+
+	tween->ease(*anim.equation);
+	tween->start(m_tweenManager);
+
 	m_tweenManager.update(0.f); // TODO: why is this needed?????
 }
 
@@ -369,6 +396,24 @@ float ActiveTextSegment::getFadeAcrossLength() const
 	return len - m_segments[0].text.getPosition().x;
 }
 
+void ActiveTextSegment::setEffectFactor(float effectFactor)
+{
+	m_effectFactor = effectFactor;
+
+	auto& type = getAnimProps().type;
+	if (type == TextEffect::Pop) {
+		for (auto &seg : m_segments)
+		{
+			auto scale = 1.f + effectFactor * m_effectIntensity;
+			seg.text.setScale({scale, scale});
+		}
+	}
+
+float ActiveTextSegment::getEffectFactor() const
+{
+	return m_effectFactor;
+}
+
 std::vector<ActiveTextSegment::Segment> &ActiveTextSegment::getSegments()
 {
 	ensureUpdate();
@@ -406,6 +451,9 @@ void ActiveTextSegment::setValues(int tweenType, float *newValues)
 		case ANIMALPHA:
 			setAnimAlpha(newValues[0]);
 			break;
+		case EFFECT_FACTOR:
+			setEffectFactor(newValues[0]);
+			break;
 		default:
 			Hideable::setValues(tweenType, newValues);
 	}
@@ -422,6 +470,9 @@ int ActiveTextSegment::getValues(int tweenType, float *returnValues)
 		return 1;
 	case ANIMALPHA:
 		returnValues[0] = m_animAlpha;
+		return 1;
+	case EFFECT_FACTOR:
+		returnValues[0] = getEffectFactor();
 		return 1;
 	default:
 		return Hideable::getValues(tweenType, returnValues);

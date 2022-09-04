@@ -10,6 +10,7 @@ namespace TextAnimation {
 	const std::string Function  = "func";
 	const std::string Time      = "time";
 	const std::string Delay     = "delay";
+	const std::string Loop      = "loop";
 	const std::string Speed     = "speed";
 	const std::string CanSkip   = "cs";
 	const std::string Value     = "value";
@@ -25,6 +26,8 @@ std::map<std::string, TextEffect> textEffectMap = {
 	{"fade",       TextEffect::Fade},
 	{"fa",         TextEffect::FadeAcross},
 	{"fadeacross", TextEffect::FadeAcross},
+	{"p",          TextEffect::Pop},
+	{"pop",        TextEffect::Pop},
 };
 
 std::map<std::string, sf::Color> colorMap = {
@@ -491,6 +494,17 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 					if (equation)
 						anim.equation = equation;
 				}
+				else if (key == TextAnimation::Loop) {
+					auto v = split(val, ",");
+					if (v.size() > 1) {
+						anim.loopCount = std::atol(v[0].c_str());
+						anim.loopDelay = std::atof(v[1].c_str()) * 1000;
+						if (v.size() > 2)
+							anim.loopYoyo = v[2] != "0";
+					}
+					else
+						anim.loopCount = std::atol(val.c_str());
+				}
 				else if (key == TextAnimation::Delay)
 					anim.delay = std::atof(val.c_str()) * 1000;
 				else if (key == TextAnimation::Time)
@@ -545,6 +559,8 @@ TextStyle::TextStyle(const std::string &tagFull, bool &closing)
 						params[TextAnimation::Delay] = param.second;
 					else if (c == TextAnimation::Speed[0])
 						params[TextAnimation::Speed] = param.second;
+					else if (c == TextAnimation::Loop[0])
+						params[TextAnimation::Loop] = param.second;
 					else if (c == TextAnimation::CanSkip[0])
 						params[TextAnimation::CanSkip] = param.second;
 					else if (c == TextAnimation::Value[0])

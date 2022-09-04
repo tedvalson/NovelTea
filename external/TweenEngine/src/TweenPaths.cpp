@@ -9,9 +9,11 @@
 
 #include <TweenEngine/paths/LinearPath.h>
 #include <TweenEngine/paths/CatmullRom.h>
+#include <TweenEngine/paths/PopOutPath.h>
 
 namespace TweenEngine
 {
     TweenPath &TweenPaths::linear = *(new LinearPath());
-    TweenPath &TweenPaths::catmullRom = *(new CatmullRom());
+	TweenPath &TweenPaths::catmullRom = *(new CatmullRom());
+	TweenPath &TweenPaths::popOutPath = *(new PopOutPath());
 }

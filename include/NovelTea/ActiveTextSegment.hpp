@@ -22,6 +22,7 @@ public:
 	static const int HIGHLIGHTS = 12;
 	static const int FADEACROSS = 13;
 	static const int ANIMALPHA = 14;
+	static const int EFFECT_FACTOR = 15;
 
 	struct Segment {
 		bool objectExists;
@@ -90,6 +91,9 @@ public:
 	float getFadeAcrossPosition() const;
 	float getFadeAcrossLength() const;
 
+	void setEffectFactor(float effectFactor);
+	float getEffectFactor() const;
+
 	std::vector<Segment> &getSegments();
 
 	AnimationProperties &getAnimProps() const;
@@ -122,8 +126,12 @@ private:
 	float m_lineSpacing;
 	float m_alpha;
 	float m_animAlpha;
+	float m_effectFactor;
 	float m_highlightFactor;
 	float m_fontSizeMultiplier;
+
+	// Effect-specific values
+	float m_effectIntensity;
 
 	float m_fadeAcrossPosition;
 	int m_fadeLineIndex;

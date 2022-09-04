@@ -86,7 +86,7 @@
 namespace TweenEngine
 {
     int Tween::combinedAttrsLimit = 3;
-    int Tween::waypointsLimit = 0;
+	int Tween::waypointsLimit = 1;
     
 	/**
 	 * Changes the limit for combined attributes. Defaults to 3 to reduce
