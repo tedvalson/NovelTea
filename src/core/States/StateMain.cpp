@@ -74,6 +74,8 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Toolbar
 	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 
+	m_bg.setFillColor(GConfig.backgroundColor);
+
 	m_buttonInventory.getText().setFont(*Proj->getFont("sysIcon"));
 	m_buttonInventory.setString(L"\uf0b1");
 	m_buttonInventory.setAlpha(0.f);
@@ -186,18 +188,18 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 			metaData.append(m_dialogueRenderer.saveState());
 		}
 
-		GSave->data()[ID::entrypointEntity] = sj::Array(
+		GSaveData[ID::entrypointEntity] = sj::Array(
 			static_cast<int>(entityType),
 			entityId
 		);
 		auto& map = GGame->getMap();
-		GSave->data()[ID::entrypointMetadata] = metaData;
-		GSave->data()[ID::playTime] = m_playTime;
-		GSave->data()[ID::map] = map ? map->getId() : "";
+		GSaveData[ID::entrypointMetadata] = metaData;
+		GSaveData[ID::playTime] = m_playTime;
+		GSaveData[ID::map] = map ? map->getId() : "";
 		m_iconSave.show(0.4f, 3.f);
 	});
 
-	m_playTime = GSave->data()[ID::playTime].ToFloat();
+	m_playTime = GSaveData[ID::playTime].ToFloat();
 
 	hideToolbar(0.f);
 
@@ -207,7 +209,7 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	if (!saveEntryPoint.IsEmpty())
 	{
 		auto roomId = entryMetadata[0].ToString();
-		auto mapId = GSave->data()[ID::map].ToString();
+		auto mapId = GSaveData[ID::map].ToString();
 		auto entryPointType = static_cast<EntityType>(saveEntryPoint[0].ToInt());
 		GGame->setMapId(mapId);
 		m_mapRenderer.setActiveRoomId(roomId);
@@ -415,7 +417,7 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 		{
 			if (room->getId().empty()) {
 				GGame->setRoom(nextRoom);
-				if (GSave->data()[NovelTea::ID::entityPreview].ToBool())
+				if (GSaveData[NovelTea::ID::entityPreview].ToBool())
 					nextRoom->runScriptAfterEnter();
 			} else {
 				if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
@@ -811,7 +813,7 @@ void StateMain::updateRoomText(const std::string &newText, float duration)
 {
 	auto room = GGame->getRoom();
 	auto text = newText;
-	auto firstVisit = !GSave->data()[ID::roomDescriptions].hasKey(room->getId());
+	auto firstVisit = !GSaveData[ID::roomDescriptions].hasKey(room->getId());
 	if (text == " ")
 		text = room->getDescription();
 	if (text == m_roomActiveText.getText())

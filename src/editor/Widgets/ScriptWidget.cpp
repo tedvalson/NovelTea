@@ -43,8 +43,6 @@ void ScriptWidget::loadData()
 {
 	m_script = Proj->get<NovelTea::Script>(idName(), getContext());
 
-	qDebug() << "Loading Script data... " << QString::fromStdString(idName());
-
 	if (!m_script)
 	{
 		// Script is new, so show it as modified

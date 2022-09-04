@@ -12,6 +12,7 @@
 RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	: EditorTabWidget(parent)
 	, ui(new Ui::RoomWidget)
+	, m_previewNeedsUpdate(true)
 	, m_objectMenu(new QMenu)
 {
 	m_idName = idName;
@@ -28,10 +29,12 @@ RoomWidget::RoomWidget(const std::string &idName, QWidget *parent)
 	ui->scriptEditAfterLeave->hide();
 
 	load();
-	connect(ui->propertyEditor, &PropertyEditor::valueChanged, this, &RoomWidget::updatePreview);
+	connect(ui->propertyEditor, &PropertyEditor::valueChanged, this, &RoomWidget::updateAll);
 	connect(ui->listWidget->model(), &QAbstractItemModel::dataChanged, this, &RoomWidget::updateAll);
 	connect(&MainWindow::instance(), &MainWindow::renamed, this, &RoomWidget::renamed);
 	connect(&MainWindow::instance(), &MainWindow::entityColorChanged, this, &RoomWidget::refreshObjectColors);
+
+	startTimer(1000);
 }
 
 RoomWidget::~RoomWidget()
@@ -48,6 +51,11 @@ QString RoomWidget::tabText() const
 EditorTabWidget::Type RoomWidget::getType() const
 {
 	return EditorTabWidget::Room;
+}
+
+void RoomWidget::timerEvent(QTimerEvent *event)
+{
+	updatePreview();
 }
 
 void RoomWidget::refreshObjectList()
@@ -94,6 +102,7 @@ void RoomWidget::renamed(NovelTea::EntityType entityType, const std::string &old
 
 void RoomWidget::updateAll()
 {
+	m_previewNeedsUpdate = true;
 	updateRoom();
 	updatePreview();
 }
@@ -143,6 +152,9 @@ void RoomWidget::updateRoom() const
 
 void RoomWidget::updatePreview()
 {
+	if (!m_previewNeedsUpdate)
+		return;
+
 	auto script = ui->scriptEdit->toPlainText().toStdString();
 	script = "thisEntity=Game.room;var text='';\n" + script + "\nreturn text;";
 	if (m_room && ui->scriptEdit->checkErrors<std::string>(script))
@@ -159,6 +171,7 @@ void RoomWidget::updatePreview()
 	}
 
 	ui->preview->repaint();
+	m_previewNeedsUpdate = false;
 }
 
 void RoomWidget::savePathDirection(json &path, const QCheckBox *checkBox, const ActionSelectWidget *actionSelect) const
@@ -187,8 +200,6 @@ void RoomWidget::saveData() const
 void RoomWidget::loadData()
 {
 	m_room = Proj->get<NovelTea::Room>(idName(), getContext());
-
-	qDebug() << "Loading room data... " << QString::fromStdString(idName());
 
 	if (!m_room)
 	{
@@ -278,7 +289,7 @@ void RoomWidget::on_actionRemoveObject_triggered()
 
 void RoomWidget::on_scriptEdit_textChanged()
 {
-	updatePreview();
+	m_previewNeedsUpdate = true;
 }
 
 void RoomWidget::on_listWidget_itemPressed(QListWidgetItem *item)

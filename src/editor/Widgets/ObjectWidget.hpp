@@ -7,15 +7,16 @@
 #include <QMenu>
 #include <QStandardItemModel>
 #include <NovelTea/json.hpp>
-#include "QtPropertyBrowser/qtpropertymanager.h"
-#include "QtPropertyBrowser/qtvariantproperty.h"
-#include "QtPropertyBrowser/qttreepropertybrowser.h"
 
 using json = sj::JSON;
 
 namespace Ui {
 class ObjectWidget;
 }
+
+class QtVariantEditorFactory;
+class QtVariantPropertyManager;
+class QtProperty;
 
 class ObjectWidget : public EditorTabWidget
 {

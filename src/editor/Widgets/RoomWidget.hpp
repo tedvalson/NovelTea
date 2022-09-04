@@ -28,6 +28,9 @@ public:
 	QString tabText() const override;
 	Type getType() const override;
 
+protected:
+	void timerEvent(QTimerEvent *event);
+
 public slots:
 	void refreshObjectList();
 	void refreshObjectColors();
@@ -58,8 +61,8 @@ private:
 	void loadData() override;
 
 	Ui::RoomWidget *ui;
+	bool m_previewNeedsUpdate;
 
-	QStandardItemModel *itemModel;
 	QMenu *m_objectMenu;
 
 	std::shared_ptr<NovelTea::Room> m_room;

@@ -56,8 +56,6 @@ void ActionWidget::loadData()
 {
 	m_action = Proj->get<NovelTea::Action>(idName(), getContext());
 
-	qDebug() << "Loading action data... " << QString::fromStdString(idName());
-
 	if (!m_action)
 	{
 		// Object is new, so show it as modified

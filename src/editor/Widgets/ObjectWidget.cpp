@@ -3,6 +3,9 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Object.hpp>
 #include <QDebug>
+#include "QtPropertyBrowser/qtpropertymanager.h"
+#include "QtPropertyBrowser/qtvariantproperty.h"
+#include "QtPropertyBrowser/qttreepropertybrowser.h"
 
 namespace {
 	const auto propName = "Name";
@@ -69,8 +72,6 @@ void ObjectWidget::saveData() const
 void ObjectWidget::loadData()
 {
 	m_object = Proj->get<NovelTea::Object>(idName(), getContext());
-
-	qDebug() << "Loading object data... " << QString::fromStdString(idName());
 
 	if (!m_object)
 	{

@@ -388,8 +388,6 @@ void CutsceneWidget::loadData()
 //	ui->listWidget->model()->disconnect();
 	ui->listWidget->clear();
 
-	qDebug() << "Loading cutscene data... " << QString::fromStdString(idName());
-
 	if (m_cutscene)
 	{
 		m_cutscene->setSkipConditionChecks(true);

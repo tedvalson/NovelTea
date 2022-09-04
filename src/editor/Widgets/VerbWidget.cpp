@@ -54,8 +54,6 @@ void VerbWidget::loadData()
 {
 	m_verb = Proj->get<NovelTea::Verb>(idName(), getContext());
 
-	qDebug() << "Loading verb data... " << QString::fromStdString(idName());
-
 	if (!m_verb)
 	{
 		// Object is new, so show it as modified
