@@ -363,6 +363,9 @@ void MainWindow::readSettings()
 	ui->splitter->restoreState(settings.value("splitter").toByteArray());
 	settings.endGroup();
 
+	ui->actionViewStatusBar->setChecked(settings.value("viewStatusBar", true).toBool());
+	ui->actionViewToolBar->setChecked(settings.value("viewToolBar", true).toBool());
+
 	m_recentProjects = settings.value("recentProjects").toStringList();
 	updateRecentProjectList();
 }
@@ -375,6 +378,9 @@ void MainWindow::writeSettings()
 	settings.setValue("state", saveState());
 	settings.setValue("splitter", ui->splitter->saveState());
 	settings.endGroup();
+
+	settings.setValue("viewStatusBar", ui->actionViewStatusBar->isChecked());
+	settings.setValue("viewToolBar", ui->actionViewToolBar->isChecked());
 
 	settings.setValue("recentProjects", m_recentProjects);
 }
@@ -849,4 +855,14 @@ void MainWindow::on_actionCopyAs_triggered()
 
 	auto parent = ui->treeView->mapToSource(ui->treeView->currentIndex().parent());
 	treeModel->insertEntity(name, selectedType, parent);
+}
+
+void MainWindow::on_actionViewToolBar_toggled(bool checked)
+{
+	ui->toolBar->setVisible(checked);
+}
+
+void MainWindow::on_actionViewStatusBar_toggled(bool checked)
+{
+	ui->statusBar->setVisible(checked);
 }

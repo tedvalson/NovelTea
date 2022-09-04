@@ -149,11 +149,14 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <addaction name="actionViewToolBar"/>
+    <addaction name="actionViewStatusBar"/>
    </widget>
    <widget class="QMenu" name="menu_Project">
     <property name="title">
      <string>&amp;Project</string>
     </property>
+    <addaction name="actionPlayGame"/>
     <addaction name="actionProjectSettings"/>
     <addaction name="actionTests"/>
     <addaction name="actionSearch"/>
@@ -297,7 +300,10 @@
     </iconset>
    </property>
    <property name="text">
-    <string>Play Game</string>
+    <string>&amp;Play Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionSelectParent">
@@ -348,6 +354,28 @@
   <action name="actionShaders">
    <property name="text">
     <string>Shaders</string>
+   </property>
+  </action>
+  <action name="actionViewToolBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tool Bar</string>
+   </property>
+  </action>
+  <action name="actionViewStatusBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Status Bar</string>
    </property>
   </action>
  </widget>

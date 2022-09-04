@@ -97,6 +97,8 @@ private slots:
 	void on_actionClearColor_triggered();
 	void on_actionSpellCheck_triggered();
 	void on_actionCopyAs_triggered();
+	void on_actionViewToolBar_toggled(bool checked);
+	void on_actionViewStatusBar_toggled(bool checked);
 
 private:
 	static MainWindow *_instance;
