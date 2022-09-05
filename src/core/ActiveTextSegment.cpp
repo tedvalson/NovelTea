@@ -408,6 +408,7 @@ void ActiveTextSegment::setEffectFactor(float effectFactor)
 			seg.text.setScale({scale, scale});
 		}
 	}
+}
 
 float ActiveTextSegment::getEffectFactor() const
 {
