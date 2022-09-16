@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
 project("NovelTea")
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 0)
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
 set(SFML_STATIC_LIBRARIES FALSE CACHE BOOL "Choose whether SFML is linked statically or not.")

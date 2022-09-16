@@ -1,0 +1,31 @@
+html {
+	--side-nav-fixed-width: 250px;
+	--menu-display: block;
+}
+
+#titlearea {
+	padding: 0 var(--spacing-large);
+}
+
+.tablist li > a {
+	display: none;
+}
+
+.tablist li:last-child{
+    height: var(--searchbar-height);
+}
+
+doxygen-awesome-dark-mode-toggle {
+    float: left;
+    vertical-align: top;
+}
+
+.tabs #MSearchBox {
+	left: 0;
+	position: relative;
+	float:left;
+}
+
+#MSearchResultsWindow {
+	max-width: 96%;
+}

@@ -26,7 +26,6 @@ set(DOXYGEN_CONFIGURED_INPUT ${PROJECT_SOURCE_DIR}/doc/doxyfile)
 configure_file(${PROJECT_SOURCE_DIR}/doc/doxyfile.in ${DOXYGEN_CONFIGURED_INPUT} @ONLY)
 
 # copy the files needed by the documentation
-configure_file(${PROJECT_SOURCE_DIR}/doc/doxygen.css ${DOXYGEN_OUTPUT_DIR}/doxygen.css COPYONLY)
 
 # target setup
 add_custom_target(doc ALL
