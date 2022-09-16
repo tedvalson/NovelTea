@@ -36,7 +36,7 @@ jobs:
       if: ${{ runner.os == 'Windows' }}
       id: setup
       run: |
-        choco install doxygen.install wget unzip
+        choco install doxygen.install graphviz wget unzip
         wget https://github.com/tedvalson/NovelTea-site/releases/download/hunspell/hunspell.zip
         unzip hunspell.zip
         echo ::set-output name=include::$(pwd)/hunspell
