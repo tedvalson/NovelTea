@@ -805,7 +805,7 @@ void ActiveTextSegment::ensureUpdate() const
 			for (auto& uniform : style.shaderUniforms)
 				m_shader->setUniform(uniform.first, uniform.second);
 		} else {
-			sf::err() << "Failed to link user provided shaders: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
+			err() << "Failed to link user provided shaders: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
 			m_shader = nullptr;
 		}
 	}

@@ -2,7 +2,7 @@
 #define NOVELTEA_SCRIPTMANAGER_HPP
 
 #include <NovelTea/ContextObject.hpp>
-#include <SFML/System/Err.hpp>
+#include <NovelTea/Err.hpp>
 #include <dukglue/dukglue.h>
 #include <NovelTea/json.hpp>
 #include <random>
@@ -53,7 +53,7 @@ public:
 		}
 		catch (std::exception &e)
 		{
-			sf::err() << "ScriptManager::run() " << e.what() << std::endl;
+			err() << "ScriptManager::run() " << e.what() << std::endl;
 			throw e;
 		}
 	}
@@ -78,7 +78,7 @@ public:
 		}
 		catch (std::exception &e)
 		{
-			sf::err() << e.what() << std::endl;
+			err() << e.what() << std::endl;
 			throw e;
 		}
 	}
@@ -100,7 +100,7 @@ public:
 		}
 		catch (std::exception &e)
 		{
-			sf::err() << e.what() << std::endl;
+			err() << e.what() << std::endl;
 			throw e;
 		}
 	}

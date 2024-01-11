@@ -48,7 +48,7 @@ namespace
 
 	void alert(const std::string &str)
 	{
-		sf::err() << str << std::endl;
+		NovelTea::err() << str << std::endl;
 	}
 }
 
@@ -101,7 +101,7 @@ DukValue ScriptManager::runScript(std::shared_ptr<Script> script)
 		setActiveEntity(script);
 		return runInClosure<DukValue>(script->getContent());
 	} catch (std::exception &e) {
-		sf::err() << "ScriptManager::runScript " << e.what() << std::endl;
+		err() << "ScriptManager::runScript " << e.what() << std::endl;
 		return dukglue_peval<DukValue>(m_context, "\"#Error# runScript\"");
 	}
 }
@@ -131,7 +131,7 @@ bool ScriptManager::runActionScript(const std::string &verbId, const std::vector
 		else
 			return call<bool>(s, "f", verb, objects[0], objects[1], objects[2], objects[3]);
 	} catch (std::exception &e) {
-		sf::err() << e.what() << std::endl;
+		err() << e.what() << std::endl;
 		return false;
 	}
 }
@@ -197,7 +197,7 @@ void ScriptManager::getTextInput(const std::string &message, const DukValue &fun
 		try {
 			dukglue_pcall<void>(m_context, func, text);
 		} catch (std::exception e) {
-			sf::err() << "Error Script::getTextInput: " << e.what() << std::endl;
+			err() << "Error Script::getTextInput: " << e.what() << std::endl;
 		}
 	});
 	// Block execution for platforms (eg. Android) that have non-blocking input methods

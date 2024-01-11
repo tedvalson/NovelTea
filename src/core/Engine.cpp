@@ -38,7 +38,6 @@ Engine::Engine(Context* context)
 int Engine::run()
 {
 	if (!initialize()) {
-		sf::err() << "Failed to initialize NovelTea Engine." << std::endl;
 		return 1;
 	}
 

@@ -3,7 +3,7 @@
 #include <NovelTea/FileUtils.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
-#include <SFML/System/Err.hpp>
+#include <NovelTea/Err.hpp>
 #include <fstream>
 
 namespace
@@ -66,8 +66,8 @@ void Settings::load()
 	}
 	catch (std::exception &e)
 	{
-		sf::err() << "Failed to load game settings." << std::endl;
-		sf::err() << e.what() << std::endl;
+		err() << "Failed to load game settings." << std::endl;
+		err() << e.what() << std::endl;
 	}
 }
 
@@ -138,7 +138,7 @@ void Settings::setDirectory(const std::string &dirName)
 {
 	m_saveEnabled = !dirName.empty();
 	if (!dirExists(dirName)) {
-		sf::err() << "Directory does not exist for Settings: '" << dirName << "'" << std::endl;
+		err() << "Directory does not exist for Settings: '" << dirName << "'" << std::endl;
 		return;
 	}
 	m_directory = dirName;

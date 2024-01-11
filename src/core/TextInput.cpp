@@ -1,6 +1,6 @@
 #include <NovelTea/TextInput.hpp>
 #include <NovelTea/BBCodeParser.hpp>
-#include <SFML/System/Err.hpp>
+#include <NovelTea/Err.hpp>
 
 namespace NovelTea
 {

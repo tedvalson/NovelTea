@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_ASSETMANAGER_HPP
 #define NOVELTEA_ASSETMANAGER_HPP
 
-#include <SFML/System/Err.hpp>
+#include <NovelTea/Err.hpp>
 #include <memory>
 #include <map>
 #include <assert.h>
@@ -36,7 +36,7 @@ public:
 #endif
 			if (!asset->loadFromFile(fullPath))
 			{
-				sf::err() << "Failed to load asset: " << fullPath << std::endl;
+				err() << "Failed to load asset: " << fullPath << std::endl;
 				return nullptr;
 			}
 			manager.m_assets.insert(std::make_pair(filename, asset));

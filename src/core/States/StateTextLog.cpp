@@ -5,7 +5,7 @@
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <TweenEngine/Tween.h>
-#include <SFML/System/Err.hpp>
+#include <NovelTea/Err.hpp>
 
 namespace NovelTea
 {

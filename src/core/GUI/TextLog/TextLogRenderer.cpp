@@ -6,7 +6,7 @@
 #include <NovelTea/GUI/TextLog/TextLogGenericItem.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
-#include <SFML/System/Err.hpp>
+#include <NovelTea/Err.hpp>
 
 namespace NovelTea
 {
@@ -169,7 +169,7 @@ float TextLogRenderer::getAlpha() const
 
 void TextLogRenderer::setSize(const sf::Vector2f &size)
 {
-	sf::err() << "TextLogRenderer::setSize" << std::endl;
+	err() << "TextLogRenderer::setSize" << std::endl;
 	auto portrait = size.x < size.y;
 	m_padding = 1.f / 8.f * (portrait ? size.x : size.y);
 	m_needsUpdate = true;
