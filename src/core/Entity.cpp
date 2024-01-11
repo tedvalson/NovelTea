@@ -61,6 +61,11 @@ DukValue Entity::prop(const std::string &key, const DukValue &defaultValue)
 	return m_propertyList->get(key, defaultValue);
 }
 
+bool Entity::hasProp(const std::string &key)
+{
+	return m_propertyList->contains(key);
+}
+
 void Entity::setProp(const std::string &key, const DukValue &value)
 {
 	m_propertyList->set(key, value);

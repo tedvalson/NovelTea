@@ -20,14 +20,21 @@ namespace TextAnimation {
 // Lowercase mapping of text effects (e.g. [anim e=FADE] will match "fade")
 std::map<std::string, TextEffect> textEffectMap = {
 	{"0",          TextEffect::None},
-	{"n",          TextEffect::None},
+	{"no",         TextEffect::None},
 	{"none",       TextEffect::None},
 	{"f",          TextEffect::Fade},
 	{"fade",       TextEffect::Fade},
 	{"fa",         TextEffect::FadeAcross},
 	{"fadeacross", TextEffect::FadeAcross},
+	{"n",          TextEffect::Nod},
+	{"nod",        TextEffect::Nod},
+	{"s",          TextEffect::Shake},
+	{"shake",      TextEffect::Shake},
 	{"p",          TextEffect::Pop},
 	{"pop",        TextEffect::Pop},
+	{"t",          TextEffect::Tremble},
+	{"tremble",    TextEffect::Tremble},
+	{"test",       TextEffect::Test},
 };
 
 std::map<std::string, sf::Color> colorMap = {

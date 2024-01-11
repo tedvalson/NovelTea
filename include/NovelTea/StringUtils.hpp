@@ -12,6 +12,7 @@ namespace NovelTea
 std::vector<std::string> split(const std::string &text, const std::string &delimiter = "\n");
 std::string join(const std::vector<std::string> &words, const std::string &delimiter = "\n");
 std::string replace(const std::string &text, const std::string &textToReplace, const std::string &replacement = "");
+std::string trimLeft(const std::string &text);
 bool wrapText(sf::Text &text, float width);
 
 inline bool IsDigit(char c)

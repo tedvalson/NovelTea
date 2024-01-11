@@ -23,6 +23,8 @@ public:
 	static const int FADEACROSS = 13;
 	static const int ANIMALPHA = 14;
 	static const int EFFECT_FACTOR = 15;
+	static const int TREMBLE_FACTOR = 16;
+	static const int TEST_FACTOR = 99;
 
 	struct Segment {
 		bool objectExists;
@@ -91,6 +93,12 @@ public:
 	float getFadeAcrossPosition() const;
 	float getFadeAcrossLength() const;
 
+	void setTrembleFactor(float trembleFactor);
+	float getTrembleFactor() const;
+
+	void setTestFactor(float testFactor);
+	float getTestFactor() const;
+
 	void setEffectFactor(float effectFactor);
 	float getEffectFactor() const;
 
@@ -126,7 +134,9 @@ private:
 	float m_lineSpacing;
 	float m_alpha;
 	float m_animAlpha;
+	float m_trembleFactor;
 	float m_effectFactor;
+	float m_testFactor;
 	float m_highlightFactor;
 	float m_fontSizeMultiplier;
 

@@ -65,4 +65,18 @@ bool wrapText(sf::Text &text, float width)
 	return true;
 }
 
+std::string trimLeft(const std::string &text)
+{
+	auto result = text;
+	int count = 0;
+	for (auto& c : text) {
+		if (!IsSpace(c))
+			break;
+		++count;
+	}
+	if (count > 0)
+		result.erase(0, count);
+	return result;
+}
+
 } // namespace NovelTea

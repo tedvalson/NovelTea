@@ -300,15 +300,18 @@ std::shared_ptr<sf::Shader> ProjectData::getShader(const std::string &fragShader
 	{
 		auto loadUniforms = [this, &shader](json &jshader) {
 			for (auto& j : jshader.ObjectRange()) {
-				// Value is either a float or a string (with texture id)
+				// Uniforms is either a float or a string (with texture id)
 				bool ok;
 				float value = j.second.ToFloat(ok);
 				if (ok)
 					shader->setUniform(j.first, value);
 				else {
 					auto texture = getTexture(j.second.ToString());
-					if (texture)
+					if (texture) {
 						shader->setUniform(j.first, *texture);
+						texture->setRepeated(true);
+						shader->setUniform(j.first + "Matrix", texture->getMatrix(sf::Texture::Normalized));
+					}
 				}
 			}
 		};
@@ -387,8 +390,9 @@ bool ProjectData::loadFromFile(const std::string &fileName)
 				auto texture = std::make_shared<sf::Texture>();
 				m_texturesData[name] = zip.read("textures/" + jtexture.first);
 				auto &data = m_texturesData[name];
+				texture->flip(true);
+				texture->setRepeated(true);
 				if (texture->loadFromMemory(data.data(), data.size())) {
-					texture->flip(false);
 					m_textures[name] = texture;
 				} else {
 					std::cerr << "Failed to load project texture: " << jtexture.second.ToString() << std::endl;

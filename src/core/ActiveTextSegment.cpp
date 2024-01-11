@@ -22,8 +22,11 @@ ActiveTextSegment::ActiveTextSegment(Context *context)
 	, m_lineSpacing(5.f)
 	, m_alpha(255.f)
 	, m_animAlpha(255.f)
+	, m_effectFactor(0.f)
+	, m_testFactor(1.f)
 	, m_highlightFactor(1.f)
 	, m_fontSizeMultiplier(1.f)
+	, m_effectIntensity(1.f)
 	, m_fadeAcrossPosition(1.f)
 	, m_fadeLineIndex(0)
 	, m_renderTexture(nullptr)
@@ -128,6 +131,7 @@ void ActiveTextSegment::startAnim()
 	auto loopDelay = 0.001f * anim.loopDelay;
 	m_tweenManager.killAll();
 
+	// Reset values
 	setFadeAcrossPosition(1.f);
 	setAnimAlpha(255.f);
 	m_effectIntensity = 1.f;
@@ -147,6 +151,21 @@ void ActiveTextSegment::startAnim()
 		setFadeAcrossPosition(0.f);
 		tween = &TweenEngine::Tween::to(*this, FADEACROSS, duration)
 			.target(1.f);
+	}
+	else if (anim.type == TextEffect::Nod) {
+		tween = &TweenEngine::Tween::to(*this, POSITION_Y, duration)
+			.targetRelative(m_effectIntensity);
+	}
+	else if (anim.type == TextEffect::Shake) {
+		tween = &TweenEngine::Tween::to(*this, POSITION_X, duration)
+			.targetRelative(m_effectIntensity);
+	}
+	else if (anim.type == TextEffect::Tremble) {
+		setTrembleFactor(0.f);
+		tween = &TweenEngine::Tween::to(*this, TREMBLE_FACTOR, (duration == 0.f) ? 1.f : duration)
+			.target(1.f);
+		anim.loopCount = (duration == 0.f) ? -1 : 1;
+		loopDelay = 0.f;
 	}
 	else if (anim.type == TextEffect::Pop) {
 		setEffectFactor(0.f);
@@ -270,7 +289,7 @@ size_t ActiveTextSegment::getDurationMs() const
 	auto& anim = getAnimProps();
 	auto duration = anim.duration;
 	if (anim.type == TextEffect::FadeAcross && duration <= 0)
-		duration = 1000.f * getFadeAcrossLength() / 280.f; // TODO: Change based on font multiplier
+		duration = 1000.f * getFadeAcrossLength() / 410.f / GConfig.dpiMultiplier; // TODO: Change based on font multiplier
 	return duration / anim.speed;
 }
 
@@ -348,7 +367,7 @@ void ActiveTextSegment::setFadeAcrossPosition(float position)
 	m_fadeAcrossPosition = position;
 	if (m_segments.empty())
 		return;
-	if (position > 0.9999f) {
+	if (position == 1) {
 		m_renderTexture = nullptr;
 	} else {
 		if (!m_renderTexture)
@@ -394,6 +413,40 @@ float ActiveTextSegment::getFadeAcrossLength() const
 	for (auto &linePos : m_linePositions)
 		len += linePos.x + m_shapeFade.getSize().y;
 	return len - m_segments[0].text.getPosition().x;
+}
+
+void ActiveTextSegment::setTrembleFactor(float trembleFactor)
+{
+	m_trembleFactor = trembleFactor;
+	if (trembleFactor == 0.f || trembleFactor == 1.f)
+		setPosition({0.f, 0.f});
+	else {
+		auto intensity = m_effectIntensity * m_fontSizeMultiplier;
+		auto x = 2.f * intensity / RAND_MAX * std::rand();
+		auto y = 2.f * intensity / RAND_MAX * std::rand();
+		setPosition({x - intensity, y - intensity});
+	}
+}
+
+float ActiveTextSegment::getTrembleFactor() const
+{
+	return m_trembleFactor;
+}
+
+void ActiveTextSegment::setTestFactor(float testFactor)
+{
+	m_testFactor = testFactor;
+
+	for (auto &seg : m_segments)
+	{
+		auto scale = 1.f + testFactor * m_effectIntensity;
+		seg.text.setScale({scale, scale});
+	}
+}
+
+float ActiveTextSegment::getTestFactor() const
+{
+	return m_testFactor;
 }
 
 void ActiveTextSegment::setEffectFactor(float effectFactor)
@@ -455,6 +508,12 @@ void ActiveTextSegment::setValues(int tweenType, float *newValues)
 		case EFFECT_FACTOR:
 			setEffectFactor(newValues[0]);
 			break;
+		case TREMBLE_FACTOR:
+			setTrembleFactor(newValues[0]);
+			break;
+		case TEST_FACTOR:
+			setTestFactor(newValues[0]);
+			break;
 		default:
 			Hideable::setValues(tweenType, newValues);
 	}
@@ -474,6 +533,12 @@ int ActiveTextSegment::getValues(int tweenType, float *returnValues)
 		return 1;
 	case EFFECT_FACTOR:
 		returnValues[0] = getEffectFactor();
+		return 1;
+	case TREMBLE_FACTOR:
+		returnValues[0] = getTrembleFactor();
+		return 1;
+	case TEST_FACTOR:
+		returnValues[0] = getTestFactor();
 		return 1;
 	default:
 		return Hideable::getValues(tweenType, returnValues);
@@ -526,6 +591,7 @@ void ActiveTextSegment::draw(sf::RenderTarget &target, sf::RenderStates states) 
 	{
 		auto posY = m_segments[0].text.getPosition().y;
 		auto lineIndex = 0;
+		m_renderTexture->setDefaultShader(target.getDefaultShader());
 		m_renderTexture->clear(sf::Color::Transparent);
 		for (auto &segment : m_segments)
 		{
@@ -733,7 +799,9 @@ void ActiveTextSegment::ensureUpdate() const
 		std::cout << "shaderIds: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
 		m_shader = Proj->getShader(style.fragShaderId, style.vertexShaderId);
 		if (m_shader->getErrorLog().empty()) {
-			// Set uniform defaults, then set uniforms provided by BBcode style
+			sf::Glsl::Vec2 res(GConfig.width, GConfig.height);
+			m_shader->setUniform("resolution", res);
+			// Set uniforms provided by BBcode style
 			for (auto& uniform : style.shaderUniforms)
 				m_shader->setUniform(uniform.first, uniform.second);
 		} else {

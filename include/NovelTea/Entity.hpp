@@ -28,6 +28,7 @@ public:
 
 	const std::shared_ptr<PropertyList> &getPropertyList() const;
 	DukValue prop(const std::string &key, const DukValue &defaultValue);
+	bool hasProp(const std::string &key);
 	void setProp(const std::string &key, const DukValue &value);
 	void unsetProp(const std::string &key);
 

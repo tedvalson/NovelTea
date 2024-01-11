@@ -397,6 +397,7 @@ void MapRenderer::reset(float duration)
 	if (!m_activeRoomId.empty())
 	{
 		auto& indexSet = m_roomIdHashmap[m_activeRoomId];
+		// TODO: When multiple rooms are active, center and zoom on them all?
 		for (int i : indexSet) {
 			auto& room = m_rooms[i];
 			auto& shape = room->shape;
@@ -405,8 +406,10 @@ void MapRenderer::reset(float duration)
 			room->active = true;
 			shape->setFillColor(sf::Color::White);
 			if (m_miniMapMode) {
-				center = sf::Vector2f(pos.x + size.x / 2.f, pos.y + size.y / 2.f);
+				center = (pos + size) / 2.f;
 				zoomFactor = std::max(size.x, size.y) / m_miniMapSize.x * 2.f;
+			} else {
+				center = m_miniMapPosition + (pos + size) / 2.f;
 			}
 			if (room->visible || getShowEverything()) {
 				auto scale = 1.f;

@@ -43,6 +43,8 @@ DialogueRenderer::DialogueRenderer(Context *context)
 
 	m_animProps.type = TextEffect::FadeAcross;
 	m_animProps.equation = &TweenEngine::TweenEquations::easeInOutLinear;
+	m_animProps.duration = -1;
+	m_animProps.delay = -1;
 	m_animProps.waitForClick = true;
 
 	m_animNameProps.type = TextEffect::None;

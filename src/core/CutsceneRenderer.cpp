@@ -393,7 +393,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			activeText->setSize(sf::Vector2f((m_size.x < m_size.y ? 1.f : 0.6f) * m_size.x - m_margin*2, m_size.y));
 			activeText->setFontSizeMultiplier(m_fontSizeMultiplier);
 			activeText->setSkipWaitingForClick(m_skipWaitingForClick);
-			activeText->setSkipWaitingForClick(true);
+			activeText->setSkipWaitingForClick(true); // TODO: set this right
 			if (seg->getBeginWithNewLine()) {
 				m_cursorPos.x = 0.f;
 				m_cursorPos.y = std::max(0.f, m_scrollAreaSize.y - scrollAreaMargin);
