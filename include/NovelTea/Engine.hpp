@@ -16,6 +16,7 @@ class Engine : public ContextObject
 {
 public:
 	Engine(Context* context);
+	virtual ~Engine();
 	int run();
 	bool initialize();
 	bool isRunning() const;
@@ -40,6 +41,7 @@ private:
 
 	sf::View m_view;
 	sf::Sprite m_sprite;
+	std::shared_ptr<sf::Shader> m_shader; /// Shader used for post-processing
 	sf::RenderTexture m_renderTexture;
 	float m_internalRatio;
 	size_t m_width;

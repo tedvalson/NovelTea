@@ -13,6 +13,7 @@
 #include <NovelTea/States/StateTextSettings.hpp>
 #include <NovelTea/States/StateTitleScreen.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/OpenGL.hpp>
 #include <chrono>
 
 using namespace std::chrono;
@@ -24,6 +25,7 @@ Engine::Engine(Context* context)
 	: ContextObject(context)
 	, m_framerateLocked(false)
 	, m_stateStack(new StateStack(context))
+	, m_shader(nullptr)
 {
 	m_stateStack->registerState<StateEditor>(StateID::Editor);
 	m_stateStack->registerState<StateIntro>(StateID::Intro);
@@ -35,17 +37,21 @@ Engine::Engine(Context* context)
 	m_stateStack->registerState<StateTitleScreen>(StateID::TitleScreen);
 }
 
+Engine::~Engine()
+{
+
+}
+
 int Engine::run()
 {
 	if (!initialize()) {
+		err() << "Failed to initialize NovelTea Engine." << std::endl;
 		return 1;
 	}
 
-	auto shader = Proj->getShader(ID::shaderPostProcess);
-	shader->setUniform("backbuffer", m_renderTexture.getTexture());
 
 	sf::RenderWindow window(sf::VideoMode(GConfig.width, GConfig.height, 16), "NovelTea Launcher");
-	window.setDefaultShader(shader.get());
+	window.setDefaultShader(m_shader.get());
 
 	GTextInput.textInputTrigger = [&window](const std::string &message, int ref) {
 		std::string input;
@@ -80,7 +86,7 @@ int Engine::run()
 			processEvent(event);
 		}
 
-		shader->setUniform("time", 0.001f * (getSystemTimeMs() - startTime));
+		m_shader->setUniform("time", 0.001f * (getSystemTimeMs() - startTime));
 		update();
 		render(window);
 		window.display();
@@ -119,6 +125,11 @@ void Engine::resize(size_t width, size_t height)
 	m_renderTexture.setSmooth(true);
 	m_sprite.setTexture(m_renderTexture.getTexture(), true);
 
+	if (!m_shader)
+		m_shader = Proj->getShader(ID::shaderPostProcess);
+	m_shader->setUniform("backbuffer", m_renderTexture.getTexture());
+	m_shader->setUniform("resolution", sf::Glsl::Vec2(width, height));
+
 	NotificationMan->setScreenSize(sf::Vector2f(width, height));
 
 	sf::FloatRect viewport;
@@ -151,9 +162,11 @@ void Engine::resize(size_t width, size_t height)
 
 void Engine::render(sf::RenderTarget &target)
 {
-	m_renderTexture.clear(GConfig.backgroundColor);
+	m_renderTexture.clear(sf::Color(200, 200, 200));
 	m_stateStack->render(m_renderTexture);
 	m_renderTexture.display();
+
+	target.setDefaultShader(m_shader.get());
 
 	target.clear();
 	target.setView(m_view);
