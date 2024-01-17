@@ -1,7 +1,7 @@
 #include "NovelTeaWidget.hpp"
 #include "MainWindow.hpp"
 #include <NovelTea/Context.hpp>
-#include <NovelTea/Engine.hpp>
+#include <NovelTea/SFML/EngineSFML.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <QCoreApplication>
 #include <QMouseEvent>
@@ -55,7 +55,7 @@ void NovelTeaWidget::reset()
 	config.width = m_internalSize.x;
 	config.height = m_internalSize.y;
 	config.initialState = NovelTea::StateID::Editor;
-	config.fontSizeMultiplier = 0.7f;
+	config.fontSizeMultiplier = 0.7f; // TODO: Don't hardcode this value
 	config.projectData = MainWindow::instance().getProjectBackup();
 
 	auto dir = QCoreApplication::applicationDirPath().toStdString();
@@ -63,8 +63,11 @@ void NovelTeaWidget::reset()
 	config.saveDir = dir;
 
 	m_context = new NovelTea::Context(config);
-	m_engine = new NovelTea::Engine(m_context);
-	m_engine->initialize();
+	m_engine = new NovelTea::EngineSFML(m_context);
+	if (!m_engine->initialize()) {
+		std::cerr << "NovelTea Widget failed." << std::endl;
+		throw std::exception();
+	}
 	m_engine->setFramerateLocked(false);
 	m_engine->update(0.01f); // This triggers update of state stack
 	onResize();
@@ -118,8 +121,6 @@ void NovelTeaWidget::onUpdate(float delta)
 
 	m_engine->update(delta);
 	m_engine->render(*this);
-
-//	std::cout << "onupdate" << std::endl;
 
 	// Change time here according to FPS needs?
 //	timer.start(1, this);

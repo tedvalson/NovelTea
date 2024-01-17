@@ -9,8 +9,6 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/StringUtils.hpp>
 #include <NovelTea/Zip/Zip.hpp>
-#include <SFML/System/FileInputStream.hpp>
-#include <SFML/Graphics/Shader.hpp>
 #include <fstream>
 #include <iostream>
 
@@ -266,13 +264,6 @@ const std::string &ProjectData::getFontData(const std::string &alias) const
 	return m_fontsData.at(alias);
 }
 
-std::shared_ptr<sf::Font> ProjectData::getFont(const std::string &fontName) const
-{
-	if (m_fonts.find(fontName) == m_fonts.end())
-		return m_fonts.at("sys");
-	return m_fonts.at(fontName);
-}
-
 void ProjectData::setTextureData(const std::string &name, const std::string &data)
 {
 	m_texturesData[name] = data;
@@ -281,51 +272,6 @@ void ProjectData::setTextureData(const std::string &name, const std::string &dat
 const std::string &ProjectData::getTextureData(const std::string &name) const
 {
 	return m_texturesData.at(name);
-}
-
-std::shared_ptr<sf::Texture> ProjectData::getTexture(const std::string &textureName) const
-{
-	if (m_textures.find(textureName) == m_textures.end())
-		return nullptr;
-	return m_textures.at(textureName);
-}
-
-std::shared_ptr<sf::Shader> ProjectData::getShader(const std::string &fragShaderId, const std::string &vertShaderId)
-{
-	auto& shaders = data()[ID::shaders];
-	auto shader = std::make_shared<sf::Shader>();
-	auto fragShader = shaders[shaders.hasKey(fragShaderId) ? fragShaderId : "defaultFrag"];
-	auto vertShader = shaders[shaders.hasKey(vertShaderId) ? vertShaderId : "defaultVert"];
-	if (shader->loadFromMemory(vertShader[0].ToString(), fragShader[0].ToString()))
-	{
-		auto loadUniforms = [this, &shader](json &jshader) {
-			for (auto& j : jshader.ObjectRange()) {
-				// Uniforms is either a float or a string (with texture id)
-				bool ok;
-				float value = j.second.ToFloat(ok);
-				if (ok)
-					shader->setUniform(j.first, value);
-				else {
-					auto texture = getTexture(j.second.ToString());
-					if (texture) {
-						shader->setUniform(j.first, *texture);
-						texture->setRepeated(true);
-						shader->setUniform(j.first + "Matrix", texture->getMatrix(sf::Texture::Normalized));
-					}
-				}
-			}
-		};
-
-		shader->setUniform("texture", sf::Shader::CurrentTexture);
-		loadUniforms(fragShader[1]);
-		loadUniforms(vertShader[1]);
-	}
-	return shader;
-}
-
-std::shared_ptr<sf::Shader> ProjectData::getShader(int systemShaderIndex)
-{
-	return getShader(data()[ID::systemShaders][systemShaderIndex].ToString());
 }
 
 void ProjectData::saveToFile(const std::string &fileName)
@@ -353,13 +299,7 @@ bool ProjectData::loadFromFile(const std::string &fileName)
 {
 	try
 	{
-		std::string s;
-
-		sf::FileInputStream file;
-		if (!file.open(fileName))
-			return false;
-		s.resize(file.getSize());
-		file.read(&s[0], s.size());
+		std::string s = getFileContents(fileName);
 
 		ZipReader zip(s.data(), s.size());
 
@@ -372,31 +312,12 @@ bool ProjectData::loadFromFile(const std::string &fileName)
 			// Load fonts
 			for (auto& jfont : j[ID::projectFonts].ObjectRange()) {
 				auto& alias = jfont.first;
-				auto font = std::make_shared<sf::Font>();
 				m_fontsData[alias] = zip.read("fonts/" + jfont.second.ToString());
-				auto &data = m_fontsData[alias];
-				if (font->loadFromMemory(data.data(), data.size()))
-					m_fonts[alias] = font;
-				else {
-					std::cerr << "Failed to load project font: " << jfont.second.ToString() << std::endl;
-					auto &defaultFont = m_json[ID::projectFontDefault];
-					if (alias == defaultFont.ToString())
-						defaultFont = "sys";
-				}
 			}
 			// Load textures
 			for (auto& jtexture : j[ID::textures].ObjectRange()) {
 				auto& name = jtexture.first;
-				auto texture = std::make_shared<sf::Texture>();
 				m_texturesData[name] = zip.read("textures/" + jtexture.first);
-				auto &data = m_texturesData[name];
-				texture->flip(true);
-				texture->setRepeated(true);
-				if (texture->loadFromMemory(data.data(), data.size())) {
-					m_textures[name] = texture;
-				} else {
-					std::cerr << "Failed to load project texture: " << jtexture.second.ToString() << std::endl;
-				}
 			}
 			m_imageData = zip.read("image");
 			m_fileName = fileName;
@@ -435,14 +356,17 @@ bool ProjectData::fromJson(const json &j)
 {
 	m_loaded = false;
 	m_fileName.clear();
-	m_fonts.clear();
 	m_imageData.clear();
+
+	m_fontsData.clear();
+	m_texturesData.clear();
 
 	for (auto &jfont : j[ID::engineFonts].ObjectRange())
 	{
-		auto font = AssetManager<sf::Font>::get("fonts/" + jfont.second.ToString());
-		if (font)
-			m_fonts[jfont.first] = font;
+		auto fontData = getFileContents(AssetPath::get() + "fonts/" + jfont.second.ToString());
+		if (fontData.empty())
+			err() << "Font name '" << jfont.first << "' failed to load." << std::endl;
+		m_fontsData[jfont.first] = fontData;
 	}
 
 	m_json = j;

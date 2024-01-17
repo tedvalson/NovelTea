@@ -2,6 +2,7 @@
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/BBCodeParser.hpp>
 #include <NovelTea/Context.hpp>
+#include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/StringUtils.hpp>
@@ -46,6 +47,11 @@ ActiveText::ActiveText(Context *context, const std::string &text, const TextProp
 : ActiveText(context)
 {
 	setText(text, textProps, animProps);
+}
+
+std::shared_ptr<ActiveText> ActiveText::fromCutsceneTextSegment(const CutsceneTextSegment *seg)
+{
+	return std::make_shared<ActiveText>(seg->getContext(), seg->getText(), seg->getTextProps(), seg->getAnimProps());
 }
 
 void ActiveText::reset(bool preservePosition)

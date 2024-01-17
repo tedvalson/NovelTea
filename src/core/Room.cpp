@@ -87,7 +87,7 @@ bool Room::containsId(const std::string &objectId)
 json Room::getProjectRoomObjects(Context *context)
 {
 	auto j = sj::Object();
-	auto proj = context->getGame()->getProjectData();
+	auto proj = context->getSubsystem<Game>()->getProjectData();
 	if (proj->isLoaded())
 	{
 		for (auto &item : proj->data()[id].ObjectRange())

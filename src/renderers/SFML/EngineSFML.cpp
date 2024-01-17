@@ -1,9 +1,8 @@
-#include <NovelTea/Engine.hpp>
+#include <NovelTea/SFML/EngineSFML.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/TextInput.hpp>
-#include <NovelTea/GUI/Notification.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/States/StateIntro.hpp>
 #include <NovelTea/States/StateMain.hpp>
@@ -12,21 +11,21 @@
 #include <NovelTea/States/StateTextLog.hpp>
 #include <NovelTea/States/StateTextSettings.hpp>
 #include <NovelTea/States/StateTitleScreen.hpp>
-#include <SFML/System/Time.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
+#include <NovelTea/SFML/NotificationSFML.hpp>
 #include <SFML/OpenGL.hpp>
-#include <chrono>
-
-using namespace std::chrono;
 
 namespace NovelTea
 {
 
-Engine::Engine(Context* context)
-	: ContextObject(context)
-	, m_framerateLocked(false)
+EngineSFML::EngineSFML(Context* context)
+	: Engine(context)
 	, m_stateStack(new StateStack(context))
 	, m_shader(nullptr)
 {
+	context->registerSubsystem<AssetLoaderSFML>();
+	context->registerSubsystem<NotificationManagerSFML>();
+
 	m_stateStack->registerState<StateEditor>(StateID::Editor);
 	m_stateStack->registerState<StateIntro>(StateID::Intro);
 	m_stateStack->registerState<StateMain>(StateID::Main);
@@ -37,15 +36,15 @@ Engine::Engine(Context* context)
 	m_stateStack->registerState<StateTitleScreen>(StateID::TitleScreen);
 }
 
-Engine::~Engine()
+EngineSFML::~EngineSFML()
 {
 
 }
 
-int Engine::run()
+int EngineSFML::run()
 {
 	if (!initialize()) {
-		err() << "Failed to initialize NovelTea Engine." << std::endl;
+		err() << "Failed to initialize NovelTea EngineSFML." << std::endl;
 		return 1;
 	}
 
@@ -87,23 +86,17 @@ int Engine::run()
 		}
 
 		m_shader->setUniform("time", 0.001f * (getSystemTimeMs() - startTime));
-		update();
+		Engine::update();
 		render(window);
 		window.display();
 	}
 	return 0;
 }
 
-bool Engine::initialize()
+bool EngineSFML::initialize()
 {
-	if (!getContext()->initialize())
+	if (!Engine::initialize())
 		return false;
-
-	// Seed the script RNG with system time
-	ScriptMan->randSeed(getSystemTimeMs());
-
-	m_lastTime = getSystemTimeMs();
-	m_deltaPerFrame = 1.f / GConfig.maxFps;
 
 	resize(GConfig.width, GConfig.height);
 
@@ -111,12 +104,7 @@ bool Engine::initialize()
 	return true;
 }
 
-bool Engine::isRunning() const
-{
-	return true;
-}
-
-void Engine::resize(size_t width, size_t height)
+void EngineSFML::resize(size_t width, size_t height)
 {
 	m_internalRatio = static_cast<float>(width) / height;
 	m_view.reset(sf::FloatRect(0, 0, width, height));
@@ -126,11 +114,11 @@ void Engine::resize(size_t width, size_t height)
 	m_sprite.setTexture(m_renderTexture.getTexture(), true);
 
 	if (!m_shader)
-		m_shader = Proj->getShader(ID::shaderPostProcess);
+		m_shader = Asset->shader(ID::shaderPostProcess);
 	m_shader->setUniform("backbuffer", m_renderTexture.getTexture());
 	m_shader->setUniform("resolution", sf::Glsl::Vec2(width, height));
 
-	NotificationMan->setScreenSize(sf::Vector2f(width, height));
+	GSys(NotificationManagerSFML)->setScreenSize(sf::Vector2f(width, height));
 
 	sf::FloatRect viewport;
 	sf::Vector2f widgetSize(width, height);
@@ -160,7 +148,7 @@ void Engine::resize(size_t width, size_t height)
 	m_stateStack->resize(sf::Vector2f(width, height));
 }
 
-void Engine::render(sf::RenderTarget &target)
+void EngineSFML::render(sf::RenderTarget &target)
 {
 	m_renderTexture.clear(sf::Color(200, 200, 200));
 	m_stateStack->render(m_renderTexture);
@@ -173,29 +161,14 @@ void Engine::render(sf::RenderTarget &target)
 	target.draw(m_sprite, sf::BlendNone);
 }
 
-void Engine::update()
-{
-	auto elapsed = sf::milliseconds(getSystemTimeMs() - m_lastTime);
-	auto delta = elapsed.asSeconds();
-	if (delta < m_deltaPerFrame)
-	{
-		sf::sleep(sf::seconds(m_deltaPerFrame - delta));
-		update(m_deltaPerFrame);
-	}
-	else if (getFramerateLocked())
-		update(m_deltaPerFrame);
-	else
-		update(delta);
-}
-
-void Engine::update(float deltaSeconds)
+void EngineSFML::update(float deltaSeconds)
 {
 	m_lastTime = getSystemTimeMs();
 	if (deltaSeconds > 0.f)
 		m_stateStack->update(deltaSeconds);
 }
 
-void Engine::processEvent(const sf::Event &event)
+void EngineSFML::processEvent(const sf::Event &event)
 {
 	auto e = event;
 	sf::Vector2i pos;
@@ -243,29 +216,12 @@ void Engine::processEvent(const sf::Event &event)
 	m_stateStack->processEvent(e);
 }
 
-void *Engine::processData(void *data)
+void *EngineSFML::processData(void *data)
 {
 	return m_stateStack->processData(data);
 }
 
-size_t Engine::getSystemTimeMs()
-{
-	auto t = steady_clock::now().time_since_epoch();
-	auto ts = duration_cast<milliseconds>(t);
-	return ts.count();
-}
-
-void Engine::setFramerateLocked(bool locked)
-{
-	m_framerateLocked = locked;
-}
-
-bool Engine::getFramerateLocked() const
-{
-	return m_framerateLocked;
-}
-
-sf::Vector2f Engine::mapPixelToCoords(const sf::Vector2i &point) const
+sf::Vector2f EngineSFML::mapPixelToCoords(const sf::Vector2i &point) const
 {
 	// First, convert from viewport coordinates to homogeneous coordinates
 	sf::Vector2f normalized;

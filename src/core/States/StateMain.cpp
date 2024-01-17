@@ -1,7 +1,6 @@
 #include <NovelTea/States/StateMain.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Game.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Action.hpp>
@@ -13,7 +12,8 @@
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Timer.hpp>
-#include <NovelTea/GUI/Notification.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
+#include <NovelTea/SFML/NotificationSFML.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -74,9 +74,9 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Toolbar
 	m_bgToolbar.setFillColor(sf::Color(0, 0, 0, 0));
 
-	m_bg.setFillColor(GConfig.backgroundColor);
+	m_bg.setFillColor(sf::Color(200, 200, 200));
 
-	m_buttonInventory.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonInventory.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonInventory.setString(L"\uf0b1");
 	m_buttonInventory.setAlpha(0.f);
 	m_buttonInventory.setActiveColor(sf::Color(0, 0, 0, 50));
@@ -244,6 +244,8 @@ void StateMain::render(sf::RenderTarget &target)
 {
 	if (m_quitting)
 		target.clear(m_bg.getFillColor());
+	static auto shader = Asset->shader(ID::shaderBackground);
+	target.draw(m_bg, shader.get());
 
 	if (m_mode != Mode::Room && m_roomTextChanging)
 	{
@@ -274,11 +276,11 @@ void StateMain::render(sf::RenderTarget &target)
 
 	target.draw(m_dialogueRenderer);
 	target.draw(m_bgToolbar);
+	target.draw(m_inventory);
 	target.draw(m_navigation);
 
 	if (!GGame->getObjectList()->items().empty())
 		target.draw(m_buttonInventory);
-	target.draw(m_inventory);
 	target.draw(m_mapRenderer);
 
 	target.draw(m_textOverlay);
@@ -289,7 +291,7 @@ void StateMain::render(sf::RenderTarget &target)
 		target.draw(m_verbList);
 
 	target.draw(m_iconSave);
-	target.draw(*NotificationMan);
+	target.draw(*GSys(NotificationManagerSFML));
 }
 
 void StateMain::resize(const sf::Vector2f &size)
@@ -343,8 +345,8 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_inventory.refreshItems();
 
 	// Notification setup
-	NotificationMan->setScreenSize(size);
-	NotificationMan->setFontSizeMultiplier(fontSizeMultiplier);
+	GSys(NotificationManagerSFML)->setScreenSize(size);
+	GSys(NotificationManagerSFML)->setFontSizeMultiplier(fontSizeMultiplier);
 
 	m_textOverlay.setFontSizeMultiplier(fontSizeMultiplier);
 
@@ -917,7 +919,7 @@ void StateMain::quit()
 		.target(0.f)
 		.start(m_tweenManager);
 
-	m_bg.setFillColor(GConfig.backgroundColor);
+	m_bg.setFillColor(sf::Color(200, 200, 200));
 	TweenEngine::Tween::to(m_bg, TweenRectangleShape::FILL_COLOR_RGB, duration)
 		.target(255.f, 255.f, 255.f)
 		.start(m_tweenManager);
@@ -1113,7 +1115,7 @@ bool StateMain::update(float delta)
 	m_textOverlay.update(delta);
 	m_iconSave.update(delta);
 
-	NotificationMan->update(delta);
+	GSys(NotificationManagerSFML)->update(delta);
 	if (TimerMan->update(delta)) {
 		if (m_mode == Mode::Room) {
 			updateUI();

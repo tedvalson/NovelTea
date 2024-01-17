@@ -1,6 +1,6 @@
-#include <NovelTea/GUI/Notification.hpp>
+#include <NovelTea/SFML/NotificationSFML.hpp>
 #include <NovelTea/AssetManager.hpp>
-#include <NovelTea/StringUtils.hpp>
+#include <NovelTea/SFML/Utils.hpp>
 #include <TweenEngine/Tween.h>
 #include <cmath>
 
@@ -13,7 +13,7 @@ namespace
 	int durationPerLetter = 30;
 }
 
-Notification::Notification(Context *context, const std::string &message)
+NotificationSFML::NotificationSFML(Context *context, const std::string &message)
 : Button(context)
 , m_string(message)
 , m_markForDelete(false)
@@ -23,13 +23,13 @@ Notification::Notification(Context *context, const std::string &message)
 	setCentered(true);
 }
 
-void Notification::setFontSizeMultiplier(float multiplier)
+void NotificationSFML::setFontSizeMultiplier(float multiplier)
 {
 	getText().setCharacterSize(multiplier * 20);
 	setScreenSize(m_screenSize);
 }
 
-void Notification::setScreenSize(const sf::Vector2f &size)
+void NotificationSFML::setScreenSize(const sf::Vector2f &size)
 {
 	m_screenSize = size;
 	auto width = size.x;
@@ -43,25 +43,25 @@ void Notification::setScreenSize(const sf::Vector2f &size)
 	setContentSize(text.getLocalBounds().width, text.getLocalBounds().height);
 }
 
-void Notification::markForDelete()
+void NotificationSFML::markForDelete()
 {
 	m_markForDelete = true;
 }
 
-bool Notification::isMarkedForDelete() const
+bool NotificationSFML::isMarkedForDelete() const
 {
 	return m_markForDelete;
 }
 
-NotificationManager::NotificationManager(Context *context)
-: ContextObject(context)
+NotificationManagerSFML::NotificationManagerSFML(Context *context)
+: NotificationManager(context)
 , m_fontSizeMultiplier(1.f)
 , m_spawnOffsetY(0.f)
 {
-
 }
 
-void NotificationManager::update(float delta)
+
+void NotificationManagerSFML::update(float delta)
 {
 	for (auto i = m_notifications.begin(); i != m_notifications.end();)
 	{
@@ -78,7 +78,7 @@ void NotificationManager::update(float delta)
 	m_tweenManager.update(delta);
 }
 
-void NotificationManager::setScreenSize(const sf::Vector2f &size)
+void NotificationManagerSFML::setScreenSize(const sf::Vector2f &size)
 {
 	m_screenSize = size;
 	m_spawnPosition.x = size.x;
@@ -88,7 +88,7 @@ void NotificationManager::setScreenSize(const sf::Vector2f &size)
 	repositionItems();
 }
 
-void NotificationManager::setFontSizeMultiplier(float multiplier)
+void NotificationManagerSFML::setFontSizeMultiplier(float multiplier)
 {
 	if (m_fontSizeMultiplier == multiplier)
 		return;
@@ -98,11 +98,11 @@ void NotificationManager::setFontSizeMultiplier(float multiplier)
 	repositionItems();
 }
 
-void NotificationManager::spawn(const std::string &message, int durationMs)
+void NotificationManagerSFML::spawn(const std::string &message, int durationMs)
 {
 	if (durationMs <= 0)
 		durationMs = durationBaseDefault + message.size() * durationPerLetter;
-	auto notification = new Notification(getContext(), message);
+	auto notification = new NotificationSFML(getContext(), message);
 
 	notification->setColor(sf::Color(255, 255, 255, 0));
 	notification->setTextColor(sf::Color(60, 60, 60, 0));
@@ -114,14 +114,14 @@ void NotificationManager::spawn(const std::string &message, int durationMs)
 							  round(m_spawnPosition.y + m_spawnOffsetY));
 	m_spawnOffsetY += spacing + notification->getSize().y;
 
-	TweenEngine::Tween::from(*notification, Notification::POSITION_Y, 0.5f).target(notification->getPosition().y - 15.f).start(m_tweenManager);
-	TweenEngine::Tween::to(*notification, Notification::COLOR_ALPHA, 0.5f).target(225.f).start(m_tweenManager);
-	TweenEngine::Tween::to(*notification, Notification::TEXTCOLOR_ALPHA, 0.5f).target(255.f).start(m_tweenManager);
+	TweenEngine::Tween::from(*notification, NotificationSFML::POSITION_Y, 0.5f).target(notification->getPosition().y - 15.f).start(m_tweenManager);
+	TweenEngine::Tween::to(*notification, NotificationSFML::COLOR_ALPHA, 0.5f).target(225.f).start(m_tweenManager);
+	TweenEngine::Tween::to(*notification, NotificationSFML::TEXTCOLOR_ALPHA, 0.5f).target(255.f).start(m_tweenManager);
 
 	// Fade out and mark notification for deletion in update()
 	auto duration = 0.001f * durationMs;
-	TweenEngine::Tween::to(*notification, Notification::COLOR_ALPHA, 0.5f).target(0.f).delay(duration).start(m_tweenManager);
-	TweenEngine::Tween::to(*notification, Notification::TEXTCOLOR_ALPHA, 0.5f)
+	TweenEngine::Tween::to(*notification, NotificationSFML::COLOR_ALPHA, 0.5f).target(0.f).delay(duration).start(m_tweenManager);
+	TweenEngine::Tween::to(*notification, NotificationSFML::TEXTCOLOR_ALPHA, 0.5f)
 		.target(0.f)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [notification](TweenEngine::BaseTween*) {
 			notification->markForDelete();
@@ -131,13 +131,13 @@ void NotificationManager::spawn(const std::string &message, int durationMs)
 	m_notifications.emplace_back(notification);
 }
 
-void NotificationManager::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void NotificationManagerSFML::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 	for (auto &notification : m_notifications)
 		target.draw(*notification, states);
 }
 
-void NotificationManager::repositionItems()
+void NotificationManagerSFML::repositionItems()
 {
 	auto posY = 0.f;
 	for (auto &notification : m_notifications)
@@ -148,7 +148,7 @@ void NotificationManager::repositionItems()
 		auto x = round((m_spawnPosition.x - notification->getSize().x) / 2.f);
 		auto y = round(m_spawnPosition.y + posY);
 
-		TweenEngine::Tween::to(*notification, Notification::POSITION_XY, 0.5f)
+		TweenEngine::Tween::to(*notification, NotificationSFML::POSITION_XY, 0.5f)
 			.target(x, y)
 			.start(m_tweenManager);
 
@@ -158,7 +158,7 @@ void NotificationManager::repositionItems()
 	m_spawnOffsetY = posY;
 }
 
-void NotificationManager::killTweens(TweenEngine::Tweenable *notification)
+void NotificationManagerSFML::killTweens(TweenEngine::Tweenable *notification)
 {
 	for (auto &object : m_tweenManager.getObjects())
 	{

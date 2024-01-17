@@ -9,7 +9,7 @@ using json = sj::JSON;
 
 
 namespace NovelTea {
-class Engine;
+class EngineSFML;
 enum class StateEditorMode;
 }
 
@@ -41,7 +41,7 @@ protected:
 
 private:
 	NovelTea::Context *m_context;
-	NovelTea::Engine *m_engine;
+	NovelTea::EngineSFML *m_engine;
 //	NovelTea::InputManager *_inputManager;
 
 //	QBasicTimer timer;

@@ -6,6 +6,8 @@
 namespace NovelTea
 {
 
+std::string TimerManager::SubsystemName = "Timer";
+
 Timer::Timer(Context *context, const DukValue &func)
 	: ContextObject(context)
 	, m_func(func)
@@ -13,6 +15,10 @@ Timer::Timer(Context *context, const DukValue &func)
 	, m_repeat(false)
 	, m_completed(false)
 	, m_duration(1000)
+{
+}
+
+Timer::~Timer()
 {
 }
 
@@ -66,7 +72,10 @@ void Timer::exec()
 TimerManager::TimerManager(Context *context)
 	: ContextObject(context)
 {
+}
 
+TimerManager::~TimerManager()
+{
 }
 
 void TimerManager::reset()

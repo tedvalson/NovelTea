@@ -2,32 +2,30 @@
 #define NOVELTEA_CONTEXT_HPP
 
 #include <NovelTea/States/StateIdentifiers.hpp>
+#include <NovelTea/Err.hpp>
 #include <NovelTea/json.hpp>
-#include <SFML/Graphics/Color.hpp>
 #include <memory>
 
 #define CTX        getContext()
+#define GSys(x)    CTX->getSubsystem<x>()
 #define GConfig    CTX->getConfig()
-#define GTextLog   CTX->getTextLog()
+#define GTextLog   GSys(NovelTea::TextLog)
 #define GData      CTX->getData()
-#define GGame      CTX->getGame()
+#define GGame      GSys(NovelTea::Game)
 #define GSave      GGame->getSaveData()
 #define GSaveData  GSave->data()
 #define GSettings  GGame->getSettings()
 #define Proj       GGame->getProjectData()
 #define ProjData   Proj->data()
-#define ScriptMan  CTX->getScriptManager()
-#define TimerMan   CTX->getTimerManager()
-#define NotificationMan CTX->getNotificationManager()
+#define EventMan   GSys(NovelTea::EventManager)
+#define ScriptMan  GSys(NovelTea::ScriptManager)
+#define TimerMan   GSys(NovelTea::TimerManager)
+#define NotificationMan GSys(NovelTea::NotificationManager)
 
 namespace NovelTea {
 
-class Game;
+class ContextObject;
 class ProjectData;
-class ScriptManager;
-class NotificationManager;
-class TextLog;
-class TimerManager;
 
 struct ContextConfig
 {
@@ -38,7 +36,6 @@ struct ContextConfig
 	unsigned minFps;
 	float fontSizeMultiplier;
 	float dpiMultiplier;
-	sf::Color backgroundColor;
 	StateID initialState;
 //	EngineOrientation orientation;
 	std::string saveDir;
@@ -57,13 +54,37 @@ public:
 
 	bool initialize();
 
+	template <typename T>
+	void registerSubsystem(bool replaceExisting = true)
+	{
+		auto& name = T::SubsystemName;
+		if (m_initialized)
+			err() << "Cannot register subsystem '" << name << "' after Context is initialized." << std::endl;
+		if (!replaceExisting && hasSubsystem(name))
+			return;
+		m_subsystemFactories[name] = [this](){
+			return std::make_shared<T>(this);
+		};
+	}
+
+	template <typename T>
+	std::shared_ptr<T> getSubsystem()
+	{
+		auto& name = T::SubsystemName;
+		// Check if subsystems is empty too because initialize() uses this method (infinite loop)
+		if (!m_initialized && m_subsystems.empty()) {
+			warn() << "Accessing subsystem '" << name << "' has caused Context to auto-initialize." << std::endl;
+			initialize();
+		}
+		if (m_subsystems.find(name) == m_subsystems.end())
+			err() << "Accessing unregistered subsystem '" << name << "'. Using it will crash." << std::endl;
+		return std::static_pointer_cast<T>(m_subsystems[name]);
+	}
+
+	bool hasSubsystem(const std::string &name);
+
 	ContextConfig &getConfig() { return m_config; }
 	sj::JSON &getData() { return m_data; }
-	std::shared_ptr<Game> getGame() const { return m_game; }
-	std::shared_ptr<ScriptManager> getScriptManager() const { return m_scriptManager; }
-	std::shared_ptr<TimerManager> getTimerManager() const { return m_timerManager; }
-	std::shared_ptr<NotificationManager> getNotificationManager() const { return m_notificationManager; }
-	std::shared_ptr<TextLog> getTextLog() const { return m_textLog; }
 
 private:
 	// For compatibility with above defined macros
@@ -73,11 +94,8 @@ private:
 	bool m_initialized;
 	ContextConfig m_config;
 	sj::JSON m_data;
-	std::shared_ptr<Game> m_game;
-	std::shared_ptr<TimerManager> m_timerManager;
-	std::shared_ptr<NotificationManager> m_notificationManager;
-	std::shared_ptr<ScriptManager> m_scriptManager;
-	std::shared_ptr<TextLog> m_textLog;
+	std::map<std::string, std::function<std::shared_ptr<ContextObject>()>> m_subsystemFactories;
+	std::map<std::string, std::shared_ptr<ContextObject>> m_subsystems;
 };
 
 } // namespace NovelTea

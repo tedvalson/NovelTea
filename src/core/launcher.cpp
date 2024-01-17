@@ -1,13 +1,16 @@
-#include <NovelTea/Engine.hpp>
+#include <NovelTea/SFML/EngineSFML.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <iostream>
+
+#include <NovelTea/SFML/NotificationSFML.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 
 int main(int argc, char **argv)
 {
 	NovelTea::AssetPath::set("/home/android/dev/NovelTea/res/assets/");
 	auto dir = "/home/android/dev/NovelTea/bin";
-	
+
 	NovelTea::ContextConfig config;
 	config.width = 480/2;
 	config.height = 700/2;
@@ -54,7 +57,7 @@ int main(int argc, char **argv)
 	}
 
 	auto context = new NovelTea::Context(config);
-	auto engine = new NovelTea::Engine(context);
+	auto engine = new NovelTea::EngineSFML(context);
 	engine->setFramerateLocked(false);
 	return engine->run();
 }

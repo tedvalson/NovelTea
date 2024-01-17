@@ -1,42 +1,34 @@
-#ifndef NOVELTEA_ENGINE_H
-#define NOVELTEA_ENGINE_H
+#ifndef NOVELTEA_ENGINE_SFML_H
+#define NOVELTEA_ENGINE_SFML_H
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <NovelTea/Engine.hpp>
 #include <NovelTea/States/StateStack.hpp>
 #include <queue>
 
 namespace NovelTea
 {
 
-class Engine : public ContextObject
+class EngineSFML : public Engine
 {
 public:
-	Engine(Context* context);
-	virtual ~Engine();
+	EngineSFML(Context* context);
+	virtual ~EngineSFML();
 	int run();
 	bool initialize();
-	bool isRunning() const;
 	void resize(size_t width, size_t height);
 	void render(sf::RenderTarget &target);
-	void update();
-	void update(float deltaSeconds);
+	void update(float deltaSeconds) override;
 	void processEvent(const sf::Event &event);
 	void *processData(void *data);
-
-	static size_t getSystemTimeMs();
-
-	void setFramerateLocked(bool locked);
-	bool getFramerateLocked() const;
 
 	sf::Vector2f mapPixelToCoords(const sf::Vector2i& point) const;
 
 private:
-	bool m_framerateLocked;
-	float m_deltaPerFrame;
 	std::unique_ptr<StateStack> m_stateStack;
 
 	sf::View m_view;
@@ -46,13 +38,8 @@ private:
 	float m_internalRatio;
 	size_t m_width;
 	size_t m_height;
-
-	size_t m_lastTime;
-
-	// Shared State context variables
-	sj::JSON m_data;
 };
 
 } // namespace NovelTea
 
-#endif // NOVELTEA_ENGINE_H
+#endif // NOVELTEA_ENGINE_SFML_H

@@ -1,10 +1,9 @@
 #include <NovelTea/States/StateProfileManager.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/GUI/ScrollBar.hpp>
 #include <NovelTea/Settings.hpp>
 #include <NovelTea/TextInput.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -22,17 +21,17 @@ StateProfileManager::StateProfileManager(StateStack& stack, Context& context, St
 , m_buttonSpacing(0.f)
 , m_cancelButtonPress(false)
 {
-	auto &defaultFont = *Proj->getFont();
+	auto &defaultFont = *Asset->font();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Profiles");
 	m_textTitle.setFillColor(sf::Color::Black);
 
-	m_buttonBack.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonBack.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonBack.setString(L"\uf00d");
 	m_buttonBack.setColor(sf::Color(230, 0 , 0));
 	m_buttonBack.setTextColor(sf::Color::White);
 
-	m_buttonAdd.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonAdd.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonAdd.setString(L"\uf234");
 	m_buttonAdd.setColor(sf::Color(100, 100 , 100));
 	m_buttonAdd.setTextColor(sf::Color::White);

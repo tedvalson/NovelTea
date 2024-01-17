@@ -10,6 +10,7 @@ option(BUILD_DOCS "Build doxygen documentation" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EDITOR "Build NovelTea Qt5 editor" ON)
 option(BUILD_ANDROID "Build Android app" OFF)
+option(BUILD_SHARED_LIBS "Build as shared library" ON)
 option(ENABLE_COVERAGE "Enabled Coverage Flags" OFF)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})

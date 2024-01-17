@@ -24,6 +24,7 @@ enum class StateEditorMode : int {
 	Dialogue,
 	Map,
 	Text,
+	Shader,
 };
 
 class StateEditor : public State, public Scrollable

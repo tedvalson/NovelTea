@@ -1,6 +1,5 @@
 #include <NovelTea/States/StateStack.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/Engine.hpp>
 #include <cassert>
 
 
@@ -142,7 +141,7 @@ void StateStack::updateRenderConfig()
 }
 
 
-	StateStack::PendingChange::PendingChange(Action action, StateID stateID, bool renderAlone, StateCallback callback)
+StateStack::PendingChange::PendingChange(Action action, StateID stateID, bool renderAlone, StateCallback callback)
 : action(action)
 , stateID(stateID)
 , renderAlone(renderAlone)

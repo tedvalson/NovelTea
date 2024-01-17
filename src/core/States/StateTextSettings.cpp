@@ -1,7 +1,7 @@
 #include <NovelTea/States/StateTextSettings.hpp>
-#include <NovelTea/Engine.hpp>
+#include <NovelTea/States/StateStack.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <NovelTea/Settings.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -16,7 +16,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 , m_buttonSizeDec(&context)
 , m_buttonSizeInc(&context)
 {
-	auto &defaultFont = *Proj->getFont();
+	auto &defaultFont = *Asset->font();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Text Settings");
 
@@ -30,7 +30,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 		s += "\n";
 	}
 
-	m_buttonFinish.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonFinish.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonFinish.setString(L"\uf00c");
 	m_buttonCancel = m_buttonFinish;
 	m_buttonCancel.setString(L"\uf00d");
@@ -51,6 +51,7 @@ StateTextSettings::StateTextSettings(StateStack& stack, Context& context, StateC
 		close(0.5f, StateID::Settings);
 	});
 	m_buttonFinish.onClick([this](){
+		GConfig.fontSizeMultiplier = m_multiplier;
 		GSettings->setFontSizeMultiplier(m_multiplier);
 		GSettings->save();
 		close(0.5f, StateID::Settings);

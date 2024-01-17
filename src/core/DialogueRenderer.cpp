@@ -8,6 +8,7 @@
 #include <NovelTea/PropertyList.hpp>
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/GUI/Button.hpp>
+#include <NovelTea/SFML/Utils.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <iostream>
@@ -169,7 +170,7 @@ void DialogueRenderer::repositionButtons(float fontSize)
 		auto &padding = button->getPadding();
 		TextProperties textProps;
 		textProps.fontSize = 0.5f * fontSize;
-		textProps.color = button->getTextColor();
+		textProps.color = fromColorSFML(button->getTextColor());
 		text->setSize(sf::Vector2f(width - padding.left * 2, 0.f));
 		text->setLineSpacing(0.1f * fontSize);
 		text->updateProps(textProps, AnimationProperties());

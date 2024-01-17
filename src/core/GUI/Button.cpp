@@ -2,7 +2,7 @@
 #include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/AssetManager.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <cmath>
 
 namespace NovelTea
@@ -21,7 +21,7 @@ Button::Button(Context *context)
 	auto texture = AssetManager<sf::Texture>::get("images/button-radius.9.png");
 	setTexture(texture.get());
 
-	m_text.setFont(*Proj->getFont());
+	m_text.setFont(*Asset->font());
 }
 
 

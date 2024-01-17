@@ -1,4 +1,9 @@
 #include <NovelTea/StringUtils.hpp>
+#include <NovelTea/Err.hpp>
+#ifdef ANDROID
+#include <SFML/System/FileInputStream.hpp>
+#endif
+#include <fstream>
 
 namespace NovelTea
 {
@@ -35,36 +40,6 @@ std::string replace(const std::string &text, const std::string &textToReplace, c
 	return join(v, replacement);
 }
 
-bool wrapText(sf::Text &text, float width)
-{
-	if (text.getLocalBounds().width <= width)
-		return false;
-
-	auto s = text.getString().toAnsiString();
-	auto words = split(s, " ");
-	auto processedWidth = 0.f;
-	int pos = 0;
-	std::string out;
-	sf::Vector2f lastWordPos;
-	for (auto &word : words)
-	{
-		auto p = text.findCharacterPos(pos + word.size());
-		if (p.x - processedWidth > width)
-		{
-			out += "\n" + word + " ";
-			pos += word.size() + 1;
-			processedWidth += lastWordPos.x - processedWidth;
-		} else {
-			out += word + " ";
-			pos += word.size() + 1;
-		}
-		lastWordPos = p;
-	}
-
-	text.setString(out);
-	return true;
-}
-
 std::string trimLeft(const std::string &text)
 {
 	auto result = text;
@@ -77,6 +52,30 @@ std::string trimLeft(const std::string &text)
 	if (count > 0)
 		result.erase(0, count);
 	return result;
+}
+
+std::string getFileContents(const std::string &filename)
+{
+	std::string contents;
+#ifdef ANDROID
+	sf::FileInputStream file;
+	if (file.open(filename))
+	{
+		contents.resize(file.getSize());
+		file.read(&contents[0], contents.size());
+	}
+#else
+	std::ifstream ifs(filename, std::ios::binary);
+	if (!ifs.is_open()) {
+		err() << "Failed to read file '" << filename << "'" << std::endl;
+		return contents;
+	}
+	ifs.seekg(0, std::ios::end);
+	contents.reserve(ifs.tellg());
+	ifs.seekg(0, std::ios::beg);
+	contents.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+#endif
+	return contents;
 }
 
 } // namespace NovelTea

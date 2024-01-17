@@ -1,9 +1,8 @@
 #include <NovelTea/States/StateIntro.hpp>
 #include <NovelTea/AssetManager.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/ProjectData.hpp>
 #include <NovelTea/TextTypes.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/System/FileInputStream.hpp>
 #include <iostream>
@@ -15,13 +14,14 @@ StateIntro::StateIntro(StateStack& stack, Context& context, StateCallback callba
 : State(stack, context, callback)
 , m_textBg(&context)
 {
-	m_textCopyright.setFont(*Proj->getFont());
+	m_textCopyright.setFont(*Asset->font());
 	m_textCopyright.setString("NovelTea Engine");
 }
 
 void StateIntro::render(sf::RenderTarget &target)
 {
 	target.clear(sf::Color::White);
+	m_renderTexture.setDefaultShader(target.getDefaultShader());
 	m_renderTexture.clear(sf::Color::White);
 	m_renderTexture.draw(m_spriteLogo);
 	m_renderTexture.display();

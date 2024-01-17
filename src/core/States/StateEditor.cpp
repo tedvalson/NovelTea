@@ -2,14 +2,13 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Verb.hpp>
-#include <NovelTea/StringUtils.hpp>
+#include <NovelTea/SFML/Utils.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -39,7 +38,7 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 	m_mapRenderer.setMiniMapMode(false, 0.f);
 	m_mapRenderer.setModeLocked(true);
 
-	m_textProps.color = sf::Color::Black;
+	m_textProps.color = fromColorSFML(sf::Color::Black);
 	m_previewText.setSkipWaitingForClick(true);
 }
 

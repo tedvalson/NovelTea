@@ -8,6 +8,8 @@
 #include <NovelTea/Room.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/StringUtils.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
+#include <NovelTea/SFML/Utils.hpp>
 #include <SFML/Graphics/Shader.hpp>
 #include <TweenEngine/Tween.h>
 
@@ -251,7 +253,7 @@ void ActiveTextSegment::setHighlightId(const std::string &id)
 	{
 		if (id.empty() || id != segment.objectIdName)
 		{
-			segment.text.setOutlineColor(segment.style.outlineColor);
+			segment.text.setOutlineColor(toColorSFML(segment.style.outlineColor));
 			segment.text.setOutlineThickness(segment.style.outlineThickness);
 		}
 		else
@@ -620,9 +622,6 @@ void ActiveTextSegment::draw(sf::RenderTarget &target, sf::RenderStates states) 
 	}
 	else
 	{
-		target.draw(m_debugBorder, states);
-		for (auto &shape : m_debugSegmentShapes)
-			target.draw(shape, states);
 
 		for (auto &segment : m_segments)
 			target.draw(segment.text, states);
@@ -655,7 +654,7 @@ void ActiveTextSegment::ensureUpdate() const
 		auto fontAlias = style.fontAlias;
 		if (fontAlias.empty())
 			fontAlias = ProjData[ID::projectFontDefault].ToString();
-		auto font = Proj->getFont(fontAlias);
+		auto font = Asset->font(fontAlias);
 		auto objectExists = false;
 		auto fontSize = 2.f * m_fontSizeMultiplier * style.fontSize;
 		auto color = style.color;
@@ -708,7 +707,7 @@ void ActiveTextSegment::ensureUpdate() const
 			text.setFont(*font);
 			text.setCharacterSize(fontSize);
 			text.setStyle(style.fontStyle);
-			text.setOutlineColor(style.outlineColor);
+			text.setOutlineColor(toColorSFML(style.outlineColor));
 			text.setOutlineThickness(style.outlineThickness);
 
 			if (word.empty())
@@ -726,7 +725,7 @@ void ActiveTextSegment::ensureUpdate() const
 
 			auto string = sf::String::fromUtf8(word.begin(), word.end());
 			text.setString(string);
-			text.setFillColor(color);
+			text.setFillColor(toColorSFML(color));
 			m_lineMaxCharSize = std::max(m_lineMaxCharSize, text.getCharacterSize());
 
 			// Hack to prevent these chars from wrapping by themselves.

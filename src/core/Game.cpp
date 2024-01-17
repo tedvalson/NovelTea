@@ -1,4 +1,5 @@
 #include <NovelTea/Game.hpp>
+#include <NovelTea/AssetLoader.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Map.hpp>
@@ -9,11 +10,13 @@
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/Settings.hpp>
 #include <NovelTea/PropertyList.hpp>
-#include <NovelTea/GUI/Notification.hpp>
+#include <NovelTea/Notification.hpp>
 #include <iostream>
 
 namespace NovelTea
 {
+
+std::string Game::SubsystemName = "Game";
 
 Game::Game(Context* context)
 	: ContextObject(context)
@@ -43,7 +46,7 @@ Game::~Game()
 bool Game::initialize()
 {
 	if (m_initialized) {
-		std::cerr << "Game already initialized!" << std::endl;
+		err() << "Game already initialized!" << std::endl;
 		return false;
 	}
 
@@ -74,6 +77,8 @@ void Game::reset()
 
 	while (!m_entityQueue.empty())
 		m_entityQueue.pop();
+
+	GSys(AssetLoader)->reset();
 
 	m_quitting = false;
 	m_saveData->setProfileIndex(m_settings->getActiveProfileIndex()); // Should reset() SaveData
@@ -233,11 +238,6 @@ void Game::spawnNotification(const std::string &message, bool addToLog, int dura
 	if (addToLog)
 		GTextLog->push(message, TextLogType::Notification);
 }
-
-//void Game::execMessageCallback(const std::string &message, const DukValue &callback)
-//{
-//	m_messageCallback(message, callback);
-//}
 
 void Game::execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback)
 {

@@ -1,9 +1,7 @@
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
-#include <NovelTea/AssetManager.hpp>
-#include <NovelTea/Engine.hpp>
-#include <NovelTea/SaveData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Transform.hpp>
 #include <TweenEngine/Tween.h>
@@ -312,7 +310,7 @@ void VerbList::addVerbOption(const std::string &verbId)
 	VerbOption option;
 	option.verbId = verbId;
 	option.text.setFillColor(sf::Color::Black);
-	option.text.setFont(*Proj->getFont());
+	option.text.setFont(*Asset->font());
 
 	auto verb = GGame->get<Verb>(verbId);
 	option.text.setString(verb->getName());

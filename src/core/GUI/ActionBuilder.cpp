@@ -8,6 +8,7 @@
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/Object.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <TweenEngine/Tween.h>
 
 #include <iostream>
@@ -24,7 +25,7 @@ ActionBuilder::ActionBuilder(Context *context)
 	m_emptyRectAlpha = 40.f;
 	m_emptyRectColor = sf::Color(0.f, 0.f, 200.f, m_emptyRectAlpha);
 
-	m_buttonCancel.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonCancel.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonCancel.setString(L"\uf00d");
 	m_buttonCancel.setTextColor(sf::Color(255, 0, 0, 200));
 	m_buttonCancel.setTextActiveColor(sf::Color(255, 0, 0, 240));

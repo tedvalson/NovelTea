@@ -1,16 +1,16 @@
-#ifndef NOVELTEA_NOTIFICATION_HPP
-#define NOVELTEA_NOTIFICATION_HPP
+#ifndef NOVELTEA_NOTIFICATION_SFML_HPP
+#define NOVELTEA_NOTIFICATION_SFML_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Notification.hpp>
 #include <TweenEngine/TweenManager.h>
 #include <NovelTea/GUI/Button.hpp>
 #include <memory>
 
 namespace NovelTea {
 
-class Notification : public Button {
+class NotificationSFML : public Button {
 public:
-	Notification(Context *context, const std::string &message);
+	NotificationSFML(Context *context, const std::string &message);
 
 	void setFontSizeMultiplier(float multiplier);
 	void setScreenSize(const sf::Vector2f &size);
@@ -23,12 +23,12 @@ private:
 	bool m_markForDelete;
 };
 
-class NotificationManager : public ContextObject, public sf::Drawable {
+class NotificationManagerSFML : public NotificationManager, public sf::Drawable {
 public:
-	NotificationManager(Context *context);
+	NotificationManagerSFML(Context *context);
 
-	void spawn(const std::string &message, int durationMs = 0);
-	void update(float delta);
+	void spawn(const std::string &message, int durationMs = 0) override;
+	void update(float delta) override;
 
 	void setScreenSize(const sf::Vector2f &size);
 	void setFontSizeMultiplier(float multiplier);
@@ -43,10 +43,10 @@ private:
 	sf::Vector2f m_screenSize;
 	float m_fontSizeMultiplier;
 	float m_spawnOffsetY;
-	std::vector<std::unique_ptr<Notification>> m_notifications;
+	std::vector<std::unique_ptr<NotificationSFML>> m_notifications;
 	TweenEngine::TweenManager m_tweenManager;
 };
 
 } // namespace NovelTea
 
-#endif // NOVELTEA_NOTIFICATION_HPP
+#endif // NOVELTEA_NOTIFICATION_SFML_HPP

@@ -1,6 +1,7 @@
 #ifndef NOVELTEA_TEXTLOG_HPP
 #define NOVELTEA_TEXTLOG_HPP
 
+#include <NovelTea/ContextObject.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
 
@@ -22,13 +23,16 @@ struct TextLogEntry {
 	TextLogType type;
 };
 
-class TextLog : public JsonSerializable
+class TextLog : public ContextObject, public JsonSerializable
 {
 public:
-	TextLog();
+	TextLog(Context* context);
+	virtual ~TextLog();
 
-	void push(const std::string &text, TextLogType type);
-	void pushScript(const std::string &text);
+	static std::string SubsystemName;
+
+	virtual void push(const std::string &text, TextLogType type);
+	virtual void pushScript(const std::string &text);
 	const std::vector<TextLogEntry> &entries() const;
 
 	json toJson() const override;
@@ -36,9 +40,11 @@ public:
 
 	ADD_ACCESSOR(size_t, ItemLimit, m_itemLimit)
 
+protected:
+	std::vector<TextLogEntry> m_entries;
+
 private:
 	size_t m_itemLimit;
-	std::vector<TextLogEntry> m_entries;
 };
 
 } // namespace NovelTea

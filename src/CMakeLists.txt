@@ -3,6 +3,7 @@ if (ENABLE_COVERAGE)
 endif()
 
 add_subdirectory(core)
+add_subdirectory(renderers/SFML)
 
 if(BUILD_EDITOR)
 	add_subdirectory(editor)

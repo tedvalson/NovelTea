@@ -4,7 +4,7 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ObjectList.hpp>
 #include <NovelTea/Object.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
 
@@ -110,7 +110,7 @@ void Inventory::refreshItems()
 			item->text.setString(object->getName() + " (" + std::to_string(objectItem->count) + ")");
 		else
 			item->text.setString(object->getName());
-		item->text.setFont(*Proj->getFont());
+		item->text.setFont(*Asset->font());
 		item->text.setFillColor(sf::Color::Black);
 		item->text.setCharacterSize(m_itemHeight);
 		if (item->text.getLocalBounds().width > width)

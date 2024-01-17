@@ -28,7 +28,6 @@ class State : public ContextObject, public Hideable
 public:
 	typedef std::unique_ptr<State> Ptr;
 
-
 	State(StateStack& stack, Context& context, StateCallback callback);
 	virtual ~State();
 

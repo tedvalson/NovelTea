@@ -5,13 +5,21 @@
 namespace NovelTea
 {
 
-TextLog::TextLog()
-: m_itemLimit(100)
+std::string TextLog::SubsystemName = "TextLog";
+
+TextLog::TextLog(Context* context)
+: ContextObject(context)
+, m_itemLimit(5000)
+{
+}
+
+TextLog::~TextLog()
 {
 }
 
 void TextLog::push(const std::string &text, TextLogType type)
 {
+	// TODO: prune old items
 		m_entries.push_back({BBCodeParser::stripTags(text), type});
 }
 

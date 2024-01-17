@@ -19,12 +19,12 @@
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/SaveData.hpp>
+#include <NovelTea/StringUtils.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
-#include <SFML/System/FileInputStream.hpp>
-#include <SFML/System/Sleep.hpp>
 
 #include <fstream>
 #include <iostream>
+#include <thread>
 
 #define REGISTER_CONSTRUCTOR(className) \
 	dukglue_register_method(m_context, &Game::makeContextObject<className>, "make"#className)
@@ -55,6 +55,8 @@ namespace
 namespace NovelTea
 {
 
+std::string ScriptManager::SubsystemName = "ScriptManager";
+
 ScriptManager::ScriptManager(Context* context)
 	: ContextObject(context)
 	, m_context(nullptr)
@@ -79,18 +81,13 @@ void ScriptManager::reset()
 	registerFunctions();
 	registerClasses();
 
-	sf::FileInputStream file;
-	std::string script;
 #ifdef ANDROID
-	if (file.open("core.js"))
+	std::string script = getFileContents("core.js");
 #else
-	if (file.open("/home/android/dev/NovelTea/res/assets/core.js"))
+	std::string script = getFileContents("/home/android/dev/NovelTea/res/assets/core.js");
 #endif
-	{
-		script.resize(file.getSize());
-		file.read(&script[0], script.size());
+	if (!script.empty())
 		run(script);
-	}
 
 	runAutorunScripts();
 }
@@ -202,7 +199,7 @@ void ScriptManager::getTextInput(const std::string &message, const DukValue &fun
 	});
 	// Block execution for platforms (eg. Android) that have non-blocking input methods
 	while (!GTextInput.finished())
-		sf::sleep(sf::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
 void ScriptManager::randSeed(int seed)

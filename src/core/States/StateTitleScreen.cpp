@@ -2,7 +2,6 @@
 #include <NovelTea/AssetManager.hpp>
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/TextTypes.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
@@ -24,7 +23,7 @@ StateTitleScreen::StateTitleScreen(StateStack& stack, Context& context, StateCal
 , m_textProfile(&context)
 , m_startPressed(false)
 {
-	auto bgColor = GConfig.backgroundColor;
+	auto bgColor = sf::Color(200, 200, 200);
 
 	// Buttons
 	m_buttonStart.setString("Start");
@@ -99,7 +98,7 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	textProps.fontStyle |= sf::Text::Bold;
 	textProps.fontSize = 0.1f * h;
 	textProps.outlineThickness = 2.f;
-	textProps.outlineColor = GConfig.backgroundColor;
+	textProps.outlineColor = Color(200, 200, 200);
 	m_textTitle.setSize(sf::Vector2f((portrait ? 0.95f : 0.8f) * w, h));
 	m_textTitle.setFontSizeMultiplier(portrait ? 0.4f : 0.7f);
 	m_textTitle.setText(ProjData[ID::projectName].ToString(), textProps);
@@ -109,7 +108,7 @@ void StateTitleScreen::resize(const sf::Vector2f &size)
 	// Author
 	textProps.fontStyle ^= sf::Text::Bold;
 	textProps.fontSize = 0.03f * h;
-	textProps.color = sf::Color(120, 120, 120);
+	textProps.color = Color(120, 120, 120);
 	textProps.outlineThickness = 1.f;
 	m_textAuthor.setSize(sf::Vector2f(0.9f * w, h));
 	m_textAuthor.setFontSizeMultiplier(portrait ? 0.35f : 0.6f);
@@ -149,7 +148,7 @@ void StateTitleScreen::setAlpha(float alpha)
 void StateTitleScreen::updateProfileText()
 {
 	TextProperties textProps;
-	textProps.color = sf::Color(120, 120, 120);
+	textProps.color = Color(120, 120, 120);
 	textProps.fontSize = 0.3f * m_buttonFontSize;
 	if (GSettings->getProfiles().empty())
 	{

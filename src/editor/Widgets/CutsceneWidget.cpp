@@ -328,7 +328,7 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	if (type == NovelTea::CutsceneSegment::Text)
 	{
 		auto seg = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
-		auto text = QString::fromStdString(seg->getActiveText()->toPlainText(false, " | "));
+		auto text = QString::fromStdString(NovelTea::ActiveText::fromCutsceneTextSegment(seg)->toPlainText(false, " | "));
 		text.replace("\t", " ");
 		item = new QListWidgetItem(QIcon::fromTheme("format"), text);
 	}

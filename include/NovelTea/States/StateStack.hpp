@@ -3,8 +3,6 @@
 
 #include "State.hpp"
 #include "StateIdentifiers.hpp"
-#include <SFML/System/NonCopyable.hpp>
-#include <SFML/System/Time.hpp>
 #include <vector>
 #include <utility>
 #include <functional>
@@ -13,7 +11,7 @@
 
 namespace NovelTea {
 
-class StateStack : public ContextObject, private sf::NonCopyable
+class StateStack : public ContextObject
 {
 public:
 	enum Action {
@@ -54,7 +52,7 @@ private:
 	{
 		explicit PendingChange(Action action, StateID stateID = StateID::None, bool renderAlone = false, StateCallback = nullptr);
 
-		Action     action;
+		Action action;
 		StateID stateID;
 		bool renderAlone;
 		StateCallback callback;

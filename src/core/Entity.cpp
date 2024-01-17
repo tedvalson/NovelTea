@@ -78,7 +78,7 @@ void Entity::unsetProp(const std::string &key)
 
 std::shared_ptr<Entity> Entity::fromEntityJson(Context* context, const json &j)
 {
-	auto game = context->getGame();
+	auto game = context->getSubsystem<Game>();
 	auto type = static_cast<EntityType>(j[ID::selectEntityType].ToInt());
 	auto idName = j[ID::selectEntityId].ToString();
 	if (type == EntityType::Action)

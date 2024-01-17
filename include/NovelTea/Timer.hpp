@@ -14,21 +14,21 @@ class Timer : public ContextObject
 {
 public:
 	Timer(Context *context, const DukValue &func);
+	virtual ~Timer();
 
-	bool update(float delta);
-	bool isComplete() const;
-	void kill();
+	virtual bool update(float delta);
+	virtual bool isComplete() const;
+	virtual void kill();
 
-	void setTimePassed(int timeMs);
-	int getTimePassed() const;
+	virtual void setTimePassed(int timeMs);
+	virtual int getTimePassed() const;
 
 	ADD_ACCESSOR(bool, Repeat, m_repeat)
 	ADD_ACCESSOR(int, Duration, m_duration)
 
 protected:
-	void exec();
+	virtual void exec();
 
-private:
 	DukValue m_func;
 	float m_secondsPassed;
 	bool m_repeat;
@@ -40,13 +40,17 @@ class TimerManager : public ContextObject
 {
 public:
 	TimerManager(Context *context);
-	void reset();
-	bool update(float delta);
+	virtual ~TimerManager();
 
-	std::shared_ptr<Timer> start(int duration, const DukValue &func);
-	std::shared_ptr<Timer> startRepeat(int duration, const DukValue &func);
+	static std::string SubsystemName;
 
-private:
+	virtual void reset();
+	virtual bool update(float delta);
+
+	virtual std::shared_ptr<Timer> start(int duration, const DukValue &func);
+	virtual std::shared_ptr<Timer> startRepeat(int duration, const DukValue &func);
+
+protected:
 	std::vector<std::shared_ptr<Timer>> m_timers;
 };
 

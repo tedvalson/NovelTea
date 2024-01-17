@@ -1,7 +1,7 @@
 #include <NovelTea/GUI/Icon/IconContinue.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -12,7 +12,7 @@ IconContinue::IconContinue(Context *context)
 : ContextObject(context)
 , m_isShowing(false)
 {
-	m_text.setFont(*Proj->getFont("sysIcon"));
+	m_text.setFont(*Asset->font("sysIcon"));
 	m_text.setString(L"\uf0da");
 	m_text.setFillColor(sf::Color(90, 90, 90));
 	m_text.setOutlineColor(sf::Color(190, 190, 190));

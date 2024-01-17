@@ -1,8 +1,7 @@
 #include <NovelTea/States/StateTextLog.hpp>
 #include <NovelTea/ActiveText.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <TweenEngine/Tween.h>
 #include <NovelTea/Err.hpp>
@@ -15,7 +14,7 @@ StateTextLog::StateTextLog(StateStack& stack, Context& context, StateCallback ca
 , m_buttonClose(&context)
 , m_textLogRenderer(&context)
 {
-	m_buttonClose.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonClose.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonClose.setString(L"\uf00d");
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);

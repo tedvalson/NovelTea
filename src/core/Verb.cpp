@@ -4,6 +4,7 @@
 #include <NovelTea/Object.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
+#include <algorithm>
 
 namespace NovelTea
 {

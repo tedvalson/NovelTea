@@ -3,15 +3,7 @@
 
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
-#include <SFML/System/String.hpp>
 #include <memory>
-
-namespace sf
-{
-class Font;
-class Shader;
-class Texture;
-}
 
 namespace NovelTea
 {
@@ -38,14 +30,9 @@ public:
 
 	void setFontData(const std::string &alias, const std::string &data);
 	const std::string &getFontData(const std::string &alias) const;
-	std::shared_ptr<sf::Font> getFont(const std::string &fontName = "sys") const;
 
 	void setTextureData(const std::string &name, const std::string &data);
 	const std::string &getTextureData(const std::string &name) const;
-	std::shared_ptr<sf::Texture> getTexture(const std::string &name) const;
-
-	std::shared_ptr<sf::Shader> getShader(const std::string &fragShaderId, const std::string &vertShaderId = std::string());
-	std::shared_ptr<sf::Shader> getShader(int systemShaderIndex);
 
 	void saveToFile(const std::string &fileName = std::string());
 	bool loadFromFile(const std::string &fileName);
@@ -79,8 +66,6 @@ private:
 	std::string m_fileName;
 	mutable json m_json;
 
-	std::map<std::string, std::shared_ptr<sf::Font>> m_fonts;
-	std::map<std::string, std::shared_ptr<sf::Texture>> m_textures;
 	std::map<std::string, std::string> m_fontsData;
 	std::map<std::string, std::string> m_texturesData;
 	std::string m_imageData;

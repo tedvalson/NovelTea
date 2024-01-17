@@ -3,6 +3,7 @@
 #include "MainWindow.hpp"
 #include "ui_SpellCheckWidget.h"
 #include <NovelTea/ProjectData.hpp>
+#include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
@@ -197,7 +198,7 @@ void SpellCheckWidget::checkEntities(const std::string &entityId, const QString 
 				if (segment->type() != NovelTea::CutsceneSegment::Text)
 					continue;
 				auto textSeg = std::static_pointer_cast<NovelTea::CutsceneTextSegment>(segment);
-				auto text = QString::fromStdString(textSeg->getActiveText()->toPlainText(" "));
+				auto text = QString::fromStdString(NovelTea::ActiveText::fromCutsceneTextSegment(textSeg.get())->toPlainText(" "));
 				processString(item, text);
 			}
 		}

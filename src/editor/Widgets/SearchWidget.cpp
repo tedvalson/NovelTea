@@ -4,6 +4,7 @@
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/Action.hpp>
+#include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/CutscenePageSegment.hpp>
@@ -148,7 +149,7 @@ void SearchWidget::searchEntities(const std::string &entityId, const QString &na
 				processString(item, segment->getConditionScript(), caseSensitive);
 				if (segment->type() == NovelTea::CutsceneSegment::Text){
 					auto textSeg = std::static_pointer_cast<NovelTea::CutsceneTextSegment>(segment);
-					processString(item, textSeg->getActiveText()->toPlainText(" "), caseSensitive);
+					processString(item, NovelTea::ActiveText::fromCutsceneTextSegment(textSeg.get())->toPlainText(" "), caseSensitive);
 				} else if (segment->type() == NovelTea::CutsceneSegment::Page){
 					auto pageSeg = std::static_pointer_cast<NovelTea::CutscenePageSegment>(segment);
 					processString(item, pageSeg->getText(), caseSensitive);

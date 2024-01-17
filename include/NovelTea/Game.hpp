@@ -6,6 +6,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Entity.hpp>
 #include <NovelTea/Utils.hpp>
+#include <NovelTea/Err.hpp>
 #include <functional>
 #include <queue>
 
@@ -25,10 +26,12 @@ class Game : public ContextObject
 {
 public:
 	Game(Context* context);
-	~Game();
+	virtual ~Game();
 
-	bool initialize();
-	void reset();
+	static std::string SubsystemName;
+
+	virtual bool initialize();
+	virtual void reset();
 
 	void setRoomId(const std::string &roomId);
 	void setRoom(const std::shared_ptr<Room> &room);
@@ -46,19 +49,19 @@ public:
 	void pushNextEntityJson(json jentity);
 	std::shared_ptr<Entity> popNextEntity();
 
-	void save(int slot);
-	bool load(int slot);
-	bool loadLast();
-	void autosave();
-	void syncToSave();
+	virtual void save(int slot);
+	virtual bool load(int slot);
+	virtual bool loadLast();
+	virtual void autosave();
+	virtual void syncToSave();
 
 	void quit();
 	bool isQuitting() const;
 
-	void spawnNotification(const std::string &message, bool addToLog = true, int durationMs = 0);
+	virtual void spawnNotification(const std::string &message, bool addToLog = true, int durationMs = 0);
 
-	void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
-	void execMessageCallbackLog(const std::vector<std::string> &messageArray, const DukValue &callback);
+	virtual void execMessageCallback(const std::vector<std::string> &messageArray, const DukValue &callback);
+	virtual void execMessageCallbackLog(const std::vector<std::string> &messageArray, const DukValue &callback);
 
 	std::shared_ptr<Settings> getSettings() const { return m_settings; }
 	std::shared_ptr<SaveData> getSaveData() const { return m_saveData; }
@@ -101,12 +104,12 @@ public:
 				result->fromJson(m_projectData->data()[T::id][idName]);
 		} else {
 			if (!idName.empty())
-				std::cerr << "Warning: Entity doesn't exist - " << T::id << " '" << idName << "'" << std::endl;
+				warn() << "Entity doesn't exist - " << T::id << " '" << idName << "'" << std::endl;
 		}
 		return result;
 	}
 
-private:
+protected:
 	std::shared_ptr<ObjectList> m_objectList;
 	std::shared_ptr<PropertyList> m_propertyList;
 	std::shared_ptr<Map> m_map;

@@ -1,7 +1,6 @@
 #ifndef NOVELTEA_STRINGUTILS_HPP
 #define NOVELTEA_STRINGUTILS_HPP
 
-#include <SFML/Graphics/Text.hpp>
 #include <vector>
 #include <string>
 #include <cstring>
@@ -13,7 +12,7 @@ std::vector<std::string> split(const std::string &text, const std::string &delim
 std::string join(const std::vector<std::string> &words, const std::string &delimiter = "\n");
 std::string replace(const std::string &text, const std::string &textToReplace, const std::string &replacement = "");
 std::string trimLeft(const std::string &text);
-bool wrapText(sf::Text &text, float width);
+std::string getFileContents(const std::string &filename);
 
 inline bool IsDigit(char c)
 {

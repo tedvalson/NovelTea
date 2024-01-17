@@ -21,22 +21,25 @@ class ScriptManager : public ContextObject
 public:
 	ScriptManager(Context* context);
 	~ScriptManager();
-	void reset();
 
-	DukValue runScript(std::shared_ptr<Script> script);
-	DukValue runScriptId(const std::string &scriptId);
+	static std::string SubsystemName;
 
-	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script);
-	bool runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds);
-	bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds);
+	virtual void reset();
+
+	virtual DukValue runScript(std::shared_ptr<Script> script);
+	virtual DukValue runScriptId(const std::string &scriptId);
+
+	virtual bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds, const std::string &script);
+	virtual bool runActionScript(const std::string &verbId, const std::string &verbIdOrig, const std::vector<std::string> &objectIds);
+	virtual bool runActionScript(const std::string &verbId, const std::vector<std::string> &objectIds);
 
 	void setActiveEntity(std::shared_ptr<Entity> entity);
 
-	std::string evalExpressions(const std::string &s);
-	void getTextInput(const std::string &message, const DukValue &func);
+	virtual std::string evalExpressions(const std::string &s);
+	virtual void getTextInput(const std::string &message, const DukValue &func);
 
-	void randSeed(int seed);
-	double randGen();
+	virtual void randSeed(int seed);
+	virtual double randGen();
 
 	inline void run(const std::string &script)
 	{

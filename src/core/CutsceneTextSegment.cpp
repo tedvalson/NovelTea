@@ -10,7 +10,6 @@ CutsceneTextSegment::CutsceneTextSegment(Context *context)
 , m_offsetY(0)
 , m_transition(TextEffect::Fade)
 {
-	setText("");
 }
 
 json CutsceneTextSegment::toJson() const
@@ -51,43 +50,58 @@ CutsceneSegment::Type CutsceneTextSegment::type() const
 	return CutsceneSegment::Text;
 }
 
-const std::shared_ptr<ActiveText> &CutsceneTextSegment::getActiveText() const
-{
-	return m_activeText;
-}
-
-void CutsceneTextSegment::setText(const std::string &text)
-{
-	m_text = text;
-
-	TextProperties textProps;
-	textProps.xOffset = getOffsetX();
-	textProps.yOffset = getOffsetY();
-
-	AnimationProperties anim;
-	anim.type      = getTransition();
-	anim.duration  = getDuration();
-	anim.delay     = getDelay();
-	anim.skippable = getCanSkip();
-	anim.waitForClick = false;
-	if (anim.type == TextEffect::FadeAcross)
-		anim.equation = &TweenEngine::TweenEquations::easeInOutLinear;
-	m_activeText = std::make_shared<ActiveText>(getContext(), m_text, textProps, anim);
-}
-
-const std::string &CutsceneTextSegment::getText() const
-{
-	return m_text;
-}
-
 size_t CutsceneTextSegment::getFullDuration() const
 {
-	return m_activeText->getDurationMs();
+	std::cout << "CutsceneTextSegment::getFullDuration()" << std::endl;
+	size_t duration = 0;
+	auto s = BBCodeParser::makeSegments(getText(), getTextProps(), getAnimProps());
+	for (auto &ss : s) {
+		if (ss->newGroup) {
+			duration += ss->anim.duration / ss->anim.speed;
+//			auto d = ss->anim.duration;
+			// TODO: Figure out howto calculate length
+//			if (ss->anim.type == TextEffect::FadeAcross && duration <= 0)
+//				d = 1000.f * getFadeAcrossLength() / 410.f / GConfig.dpiMultiplier; // TODO: Change based on font multiplier
+		}
+	}
+	return duration;
 }
 
 size_t CutsceneTextSegment::getFullDelay() const
 {
-	return m_activeText->getDelayMs();
+	size_t delay = 0;
+	auto s = BBCodeParser::makeSegments(getText(), getTextProps(), getAnimProps());
+	for (auto &ss : s) {
+		if (ss->newGroup) {
+			delay += ss->anim.delay / ss->anim.speed;
+//			duration += ss->anim.duration / ss->anim.speed;
+//			if (anim.type == TextEffect::FadeAcross && delay < 0)
+//				return (ss->anim.duration / ss->anim.speed) - ss->anim.delay;
+//			return ss->anim.delay / ss->anim.speed;
+		}
+	}
+	return delay;
+}
+
+TextProperties CutsceneTextSegment::getTextProps() const
+{
+	TextProperties textProps;
+	textProps.xOffset = getOffsetX();
+	textProps.yOffset = getOffsetY();
+	return std::move(textProps);
+}
+
+AnimationProperties CutsceneTextSegment::getAnimProps() const
+{
+	AnimationProperties animProps;
+	animProps.type      = getTransition();
+	animProps.duration  = getDuration();
+	animProps.delay     = getDelay();
+	animProps.skippable = getCanSkip();
+	animProps.waitForClick = false;
+	if (animProps.type == TextEffect::FadeAcross)
+		animProps.equation = &TweenEngine::TweenEquations::easeInOutLinear;
+	return std::move(animProps);
 }
 
 } // namespace NovelTea

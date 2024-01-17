@@ -12,6 +12,7 @@ namespace NovelTea
 {
 
 class ActiveTextSegment;
+class CutsceneTextSegment;
 struct AnimationProperties;
 struct TextProperties;
 
@@ -27,6 +28,8 @@ public:
 	ActiveText(Context *context, const std::string &text, const AnimationProperties &animDefault);
 	ActiveText(Context *context, const std::string &text, const TextProperties &textProps);
 	ActiveText(Context *context, const std::string &text, const TextProperties &textProps, const AnimationProperties &animProps);
+
+	static std::shared_ptr<ActiveText> fromCutsceneTextSegment(const CutsceneTextSegment *segment);
 
 	void reset(bool preservePosition = false);
 	void skipToNext(bool skipWaitForClick = false);

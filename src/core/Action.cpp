@@ -4,6 +4,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
+#include <algorithm>
 
 namespace NovelTea
 {
@@ -100,7 +101,8 @@ std::shared_ptr<Action> Action::find(Context *context,
 									 const std::vector<std::string> &objectIds)
 {
 	// TODO: check SaveData
-	auto &projData = context->getGame()->getProjectData()->data();
+	auto game = context->getSubsystem<Game>();
+	auto &projData = game->getProjectData()->data();
 	for (auto &item : projData[Action::id].ObjectRange()) {
 		auto j = item.second;
 		if (j[3].ToString() == verbId) {
@@ -123,7 +125,7 @@ std::shared_ptr<Action> Action::find(Context *context,
 			}
 
 			if (match)
-				return context->getGame()->get<Action>(item.first);
+				return game->get<Action>(item.first);
 		}
 	}
 

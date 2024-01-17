@@ -1,7 +1,7 @@
 #include <NovelTea/GUI/Icon/IconGlow.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/Game.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -12,7 +12,7 @@ IconGlow::IconGlow(Context *context)
 	: ContextObject(context)
 	, m_speedFactor(1.f)
 {
-	m_text.setFont(*Proj->getFont("sysIcon"));
+	m_text.setFont(*Asset->font("sysIcon"));
 	m_text.setString(L"\uf138");
 	reset();
 }

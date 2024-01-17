@@ -6,7 +6,7 @@
 #include <NovelTea/ActiveText.hpp>
 #include <NovelTea/ActiveTextSegment.hpp>
 #include <NovelTea/AssetManager.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <TweenEngine/Tween.h>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <SFML/Window/Event.hpp>
@@ -33,7 +33,7 @@ MapRenderer::MapRenderer(Context *context)
 
 	m_bgShape.setFillColor(sf::Color(210, 210, 210));
 
-	m_buttonClose.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonClose.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonClose.setString(L"\uf00d");
 	m_buttonClose.setColor(sf::Color(230, 0 , 0));
 	m_buttonClose.setTextColor(sf::Color::White);

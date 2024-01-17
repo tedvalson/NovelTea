@@ -2,7 +2,7 @@
 #include <NovelTea/Context.hpp>
 #include <NovelTea/GUI/Navigation.hpp>
 #include <NovelTea/GUI/Button.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <TweenEngine/Tween.h>
 
@@ -20,7 +20,7 @@ Navigation::Navigation(Context *context)
 {
 	m_paths = sj::Array();
 
-	auto font = Proj->getFont("sysIcon");
+	auto font = Asset->font("sysIcon");
 	for (int i = 0; i < 8; ++i)
 	{
 		auto button = new Button(getContext());

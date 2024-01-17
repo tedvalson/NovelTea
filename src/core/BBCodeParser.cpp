@@ -1,5 +1,6 @@
 #include <NovelTea/BBCodeParser.hpp>
 #include <iostream>
+#include <algorithm>
 
 namespace NovelTea
 {
@@ -37,15 +38,8 @@ std::map<std::string, TextEffect> textEffectMap = {
 	{"test",       TextEffect::Test},
 };
 
-std::map<std::string, sf::Color> colorMap = {
-	{"black",    sf::Color::Black},
-	{"white",    sf::Color::White},
-	{"red",      sf::Color::Red},
-	{"green",    sf::Color::Green},
-	{"blue",     sf::Color::Blue},
-	{"yellow",   sf::Color::Yellow},
-	{"magenta",  sf::Color::Magenta},
-	{"cyan",     sf::Color::Cyan},
+std::map<std::string, Color> colorMap = {
+	{"black",    {0, 0, 0}},
 };
 
 TweenEngine::TweenEquation* getTweenEquation(const std::string &funcName)
@@ -370,9 +364,9 @@ cStrIter BBCodeParser::parseTag(cStrIter start, cStrIter end, std::string &tag)
 	return start;
 }
 
-sf::Color parseColor(std::string colorStr)
+Color parseColor(std::string colorStr)
 {
-	auto result = sf::Color::Black;
+	auto result = Color{0, 0, 0};
 	std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
 
 	// Check for predefined color matches if no "#" prefix
@@ -424,7 +418,7 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 		case TextStyleType::None:
 			break;
 		case TextStyleType::Bold:
-			style.fontStyle |= sf::Text::Bold;
+			style.fontStyle |= FontBold;
 			break;
 		case TextStyleType::BorderColor:
 			style.outlineColor = parseColor(s.params["color"]);
@@ -436,13 +430,13 @@ StyledSegment::StyledSegment(std::string text, std::vector<TextStyle> styles, co
 			style.color = parseColor(s.params["color"]);
 			break;
 		case TextStyleType::Diff:
-			style.color = sf::Color(150, 0, 0);
+			style.color = Color{150, 0, 0};
 			break;
 		case TextStyleType::Font:
 			style.fontAlias = s.params["id"];
 			break;
 		case TextStyleType::Italic:
-			style.fontStyle |= sf::Text::Italic;
+			style.fontStyle |= FontItalic;
 			break;
 		case TextStyleType::Object:
 			style.objectId = s.params["id"];

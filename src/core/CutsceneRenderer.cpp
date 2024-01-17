@@ -298,7 +298,7 @@ void CutsceneRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 {
 	auto text = segment->getText();
-	auto activeText = segment->getActiveText();
+	auto activeText = ActiveText::fromCutsceneTextSegment(segment);
 	auto effect = segment->getTransition();
 	auto duration = 0.001f * segment->getFullDuration();
 
@@ -388,7 +388,7 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			// This gives some padding at the bottom for text
 			auto scrollAreaMargin = m_margin * 2;
 
-			auto activeText = seg->getActiveText();
+			auto activeText = ActiveText::fromCutsceneTextSegment(seg);
 			activeText->reset();
 			activeText->setSize(sf::Vector2f((m_size.x < m_size.y ? 1.f : 0.6f) * m_size.x - m_margin*2, m_size.y));
 			activeText->setFontSizeMultiplier(m_fontSizeMultiplier);

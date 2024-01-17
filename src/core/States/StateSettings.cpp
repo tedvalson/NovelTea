@@ -1,7 +1,6 @@
 #include <NovelTea/States/StateSettings.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/ProjectData.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -13,12 +12,12 @@ StateSettings::StateSettings(StateStack& stack, Context& context, StateCallback 
 , m_buttonBack(&context)
 , m_buttonTextSize(&context)
 {
-	auto &defaultFont = *Proj->getFont();
+	auto &defaultFont = *Asset->font();
 	m_textTitle.setFont(defaultFont);
 	m_textTitle.setString("Settings");
 	m_textTitle.setFillColor(sf::Color::Black);
 
-	m_buttonBack.getText().setFont(*Proj->getFont("sysIcon"));
+	m_buttonBack.getText().setFont(*Asset->font("sysIcon"));
 	m_buttonBack.setString(L"\uf00d");
 
 	m_buttonTextSize.setString("Text Size");
