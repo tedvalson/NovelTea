@@ -628,7 +628,7 @@ bool ScriptEdit::checkErrors(const std::string &script)
 	auto result = false;
 	try
 	{
-		auto scriptMan = d_ptr->context->getScriptManager();
+		auto scriptMan = d_ptr->context->getSubsystem<NovelTea::ScriptManager>();
 		scriptMan->reset();
 		if (script.empty())
 			scriptMan->runInClosure<T>(toPlainText().toStdString());
