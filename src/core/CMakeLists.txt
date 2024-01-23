@@ -4,18 +4,18 @@ FILE(GLOB_RECURSE TWEEN_ENGINE_SOURCE ${PROJECT_SOURCE_DIR}/external/TweenEngine
 
 set(SOURCE_FILES
 	${SRCROOT}/Action.cpp
-	${SRCROOT}/AssetLoader.cpp
 	${SRCROOT}/AssetManager.cpp
 	${SRCROOT}/BBCodeParser.cpp
 	${SRCROOT}/Context.cpp
-	${SRCROOT}/ContextObject.cpp
 	${SRCROOT}/Cutscene.cpp
 	${SRCROOT}/CutscenePageBreakSegment.cpp
 	${SRCROOT}/CutscenePageSegment.cpp
+	${SRCROOT}/CutscenePlayer.cpp
 	${SRCROOT}/CutsceneScriptSegment.cpp
 	${SRCROOT}/CutsceneSegment.cpp
 	${SRCROOT}/CutsceneTextSegment.cpp
 	${SRCROOT}/Dialogue.cpp
+	${SRCROOT}/DialoguePlayer.cpp
 	${SRCROOT}/DialogueSegment.cpp
 	${SRCROOT}/Diff.cpp
 	${SRCROOT}/Engine.cpp
@@ -38,6 +38,7 @@ set(SOURCE_FILES
 	${SRCROOT}/Script.cpp
 	${SRCROOT}/ScriptManager.cpp
 	${SRCROOT}/Settings.cpp
+	${SRCROOT}/StateEventManager.cpp
 	${SRCROOT}/StringUtils.cpp
 	${SRCROOT}/TextInput.cpp
 	${SRCROOT}/TextLog.cpp

@@ -2,10 +2,8 @@
 
 namespace NovelTea {
 
-std::string AssetLoader::SubsystemName = "AssetLoader";
-
 AssetLoader::AssetLoader(Context *context)
-: ContextObject(context)
+: Subsystem(context)
 {
 }
 

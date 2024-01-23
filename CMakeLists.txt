@@ -4,7 +4,7 @@ project("NovelTea")
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 
-set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build (Debug or Release)")
 set(SFML_STATIC_LIBRARIES FALSE CACHE BOOL "Choose whether SFML is linked statically or not.")
 option(BUILD_DOCS "Build doxygen documentation" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
@@ -55,7 +55,7 @@ include_directories(
 )
 
 # C++11 support
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 
 # rpath stuff
 set(CMAKE_SKIP_BUILD_RPATH FALSE)

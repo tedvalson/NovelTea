@@ -8,8 +8,8 @@ class Context;
 class ContextObject
 {
 public:
-	ContextObject(Context* context);
-	virtual ~ContextObject();
+	ContextObject(Context* context) : m_context(context) {}
+	virtual ~ContextObject() {}
 
 	Context* getContext() const { return m_context; }
 

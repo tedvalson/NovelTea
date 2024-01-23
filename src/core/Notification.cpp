@@ -10,15 +10,13 @@ namespace
 	int durationPerLetter = 30;
 }
 
-std::string NotificationManager::SubsystemName = "Notification";
-
 Notification::Notification(Context *context, const std::string &message)
 : m_string(message)
 {
 }
 
 NotificationManager::NotificationManager(Context *context)
-: ContextObject(context)
+: Subsystem(context)
 {
 }
 

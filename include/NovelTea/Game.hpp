@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_GAME_HPP
 #define NOVELTEA_GAME_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Subsystem.hpp>
 #include <NovelTea/ProjectData.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Entity.hpp>
@@ -22,15 +22,15 @@ class Room;
 class SaveData;
 class Settings;
 
-class Game : public ContextObject
+class Game : public Subsystem
 {
 public:
 	Game(Context* context);
 	virtual ~Game();
 
-	static std::string SubsystemName;
+	static std::string name() { return "Game"; }
 
-	virtual bool initialize();
+	virtual bool initialize() override;
 	virtual void reset();
 
 	void setRoomId(const std::string &roomId);

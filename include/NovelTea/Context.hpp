@@ -24,7 +24,7 @@
 
 namespace NovelTea {
 
-class ContextObject;
+class Subsystem;
 class ProjectData;
 
 struct ContextConfig
@@ -53,11 +53,12 @@ public:
 	Context(const ContextConfig &config = ContextConfig());
 
 	bool initialize();
+	void update(float delta);
 
 	template <typename T>
 	void registerSubsystem(bool replaceExisting = true)
 	{
-		auto& name = T::SubsystemName;
+		auto name = T::name();
 		if (m_initialized)
 			err() << "Cannot register subsystem '" << name << "' after Context is initialized." << std::endl;
 		if (!replaceExisting && hasSubsystem(name))
@@ -70,7 +71,7 @@ public:
 	template <typename T>
 	std::shared_ptr<T> getSubsystem()
 	{
-		auto& name = T::SubsystemName;
+		auto name = T::name();
 		// Check if subsystems is empty too because initialize() uses this method (infinite loop)
 		if (!m_initialized && m_subsystems.empty()) {
 			warn() << "Accessing subsystem '" << name << "' has caused Context to auto-initialize." << std::endl;
@@ -94,8 +95,8 @@ private:
 	bool m_initialized;
 	ContextConfig m_config;
 	sj::JSON m_data;
-	std::map<std::string, std::function<std::shared_ptr<ContextObject>()>> m_subsystemFactories;
-	std::map<std::string, std::shared_ptr<ContextObject>> m_subsystems;
+	std::map<std::string, std::function<std::shared_ptr<Subsystem>()>> m_subsystemFactories;
+	std::map<std::string, std::shared_ptr<Subsystem>> m_subsystems;
 };
 
 } // namespace NovelTea

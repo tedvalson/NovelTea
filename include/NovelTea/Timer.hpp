@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_TIMER_HPP
 #define NOVELTEA_TIMER_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Subsystem.hpp>
 #include <NovelTea/Utils.hpp>
 #include <dukglue/dukvalue.h>
 #include <memory>
@@ -36,16 +36,16 @@ protected:
 	int m_duration;
 };
 
-class TimerManager : public ContextObject
+class TimerManager : public Subsystem
 {
 public:
 	TimerManager(Context *context);
 	virtual ~TimerManager();
 
-	static std::string SubsystemName;
+	static std::string name() { return "Timer"; }
 
 	virtual void reset();
-	virtual bool update(float delta);
+	virtual void update(float delta) override;
 
 	virtual std::shared_ptr<Timer> start(int duration, const DukValue &func);
 	virtual std::shared_ptr<Timer> startRepeat(int duration, const DukValue &func);

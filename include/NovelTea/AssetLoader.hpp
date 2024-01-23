@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_ASSETLOADER_HPP
 #define NOVELTEA_ASSETLOADER_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Subsystem.hpp>
 #include <string>
 
 namespace NovelTea {
@@ -9,14 +9,14 @@ namespace NovelTea {
 // Loader for project fonts and textures. Does nothing itself.
 // Base class for platform-specific implementation.
 
-class AssetLoader : public ContextObject {
+class AssetLoader : public Subsystem {
 public:
-	AssetLoader(Context *context);
-	virtual ~AssetLoader();
+	AssetLoader(Context *context) : Subsystem(context) {}
+	virtual ~AssetLoader() {}
 
-	static std::string SubsystemName;
+	static std::string name() { return "AssetLoader"; }
 
-	virtual void reset();
+	virtual void reset() {}
 };
 
 } // namespace NovelTea

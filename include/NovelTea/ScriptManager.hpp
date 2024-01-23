@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_SCRIPTMANAGER_HPP
 #define NOVELTEA_SCRIPTMANAGER_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Subsystem.hpp>
 #include <NovelTea/Err.hpp>
 #include <dukglue/dukglue.h>
 #include <NovelTea/json.hpp>
@@ -16,13 +16,13 @@ class Script;
 
 const std::string strUseStrict = "\n\"use strict\";\n";
 
-class ScriptManager : public ContextObject
+class ScriptManager : public Subsystem
 {
 public:
 	ScriptManager(Context* context);
 	~ScriptManager();
 
-	static std::string SubsystemName;
+	static std::string name() { return "ScriptManager"; }
 
 	virtual void reset();
 

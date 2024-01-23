@@ -40,13 +40,8 @@ int Engine::run()
 
 	auto active = true;
 	auto startTime = getSystemTimeMs();
-//	while (window.isOpen())
+	while (active)
 	{
-		while (active)
-		{
-			active = false;
-		}
-
 		update();
 	}
 	return 0;
@@ -90,18 +85,13 @@ void Engine::update()
 void Engine::update(float deltaSeconds)
 {
 	m_lastTime = getSystemTimeMs();
-//	if (deltaSeconds > 0.f)
-//		m_stateStack->update(deltaSeconds);
+	if (deltaSeconds > 0.f)
+		getContext()->update(deltaSeconds);
 }
 
-void Engine::listen(EventFunc func)
+std::shared_ptr<EventManager> Engine::events()
 {
-	EventMan->listen(Event::All, func);
-}
-
-void Engine::listen(Event::EventType type, EventFunc func)
-{
-	EventMan->listen(type, func);
+	return EventMan;
 }
 
 int64_t Engine::getSystemTimeMs()

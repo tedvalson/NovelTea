@@ -55,10 +55,8 @@ namespace
 namespace NovelTea
 {
 
-std::string ScriptManager::SubsystemName = "ScriptManager";
-
 ScriptManager::ScriptManager(Context* context)
-	: ContextObject(context)
+	: Subsystem(context)
 	, m_context(nullptr)
 	, m_randSeed(0)
 {

@@ -1,12 +1,11 @@
 #include <NovelTea/Timer.hpp>
+#include <NovelTea/Event.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Context.hpp>
 #include <NovelTea/ScriptManager.hpp>
 
 namespace NovelTea
 {
-
-std::string TimerManager::SubsystemName = "Timer";
 
 Timer::Timer(Context *context, const DukValue &func)
 	: ContextObject(context)
@@ -70,7 +69,7 @@ void Timer::exec()
 }
 
 TimerManager::TimerManager(Context *context)
-	: ContextObject(context)
+	: Subsystem(context)
 {
 }
 
@@ -83,7 +82,7 @@ void TimerManager::reset()
 	m_timers.clear();
 }
 
-bool TimerManager::update(float delta)
+void TimerManager::update(float delta)
 {
 	auto result = false;
 
@@ -99,7 +98,8 @@ bool TimerManager::update(float delta)
 		else
 			++it;
 
-	return result;
+	if (result)
+		EventMan->push(Event::TimerCompleted);
 }
 
 std::shared_ptr<Timer> TimerManager::start(int duration, const DukValue &func)

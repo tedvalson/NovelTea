@@ -21,8 +21,7 @@ public:
 	virtual void update();
 	virtual void update(float deltaSeconds);
 
-	void listen(EventFunc func);
-	void listen(Event::EventType type, EventFunc func);
+	std::shared_ptr<EventManager> events();
 
 	static int64_t getSystemTimeMs();
 

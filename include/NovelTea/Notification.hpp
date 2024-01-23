@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_NOTIFICATION_HPP
 #define NOVELTEA_NOTIFICATION_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Subsystem.hpp>
 #include <vector>
 #include <memory>
 
@@ -15,12 +15,12 @@ private:
 	std::string m_string;
 };
 
-class NotificationManager : public ContextObject {
+class NotificationManager : public Subsystem {
 public:
 	NotificationManager(Context *context);
 	virtual ~NotificationManager();
 
-	static std::string SubsystemName;
+	static std::string name() { return "Notification"; }
 
 	virtual void spawn(const std::string &message, int durationMs = 0);
 	virtual void update(float delta);

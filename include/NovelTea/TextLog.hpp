@@ -1,7 +1,7 @@
 #ifndef NOVELTEA_TEXTLOG_HPP
 #define NOVELTEA_TEXTLOG_HPP
 
-#include <NovelTea/ContextObject.hpp>
+#include <NovelTea/Subsystem.hpp>
 #include <NovelTea/JsonSerializable.hpp>
 #include <NovelTea/Utils.hpp>
 
@@ -23,13 +23,13 @@ struct TextLogEntry {
 	TextLogType type;
 };
 
-class TextLog : public ContextObject, public JsonSerializable
+class TextLog : public Subsystem, public JsonSerializable
 {
 public:
 	TextLog(Context* context);
 	virtual ~TextLog();
 
-	static std::string SubsystemName;
+	static std::string name() { return "TextLog"; }
 
 	virtual void push(const std::string &text, TextLogType type);
 	virtual void pushScript(const std::string &text);

@@ -55,6 +55,12 @@ bool Context::initialize()
 
 	GGame->initialize();
 
+	for (auto& subsystem : m_subsystems)
+		if (!subsystem.second->initialize()) {
+			err() << "Failed to initialized subsystem '" << subsystem.first << "'" << std::endl;
+			return false;
+		}
+
 	if (m_config.fontSizeMultiplier <= 0.f)
 		m_config.fontSizeMultiplier = GSettings->getFontSizeMultiplier();
 
@@ -63,7 +69,13 @@ bool Context::initialize()
 		ScriptMan->runInClosure(ProjData[NovelTea::ID::scriptAfterLoad].ToString());
 
 	m_initialized = true;
-	return true;
+	return m_initialized;
+}
+
+void Context::update(float delta)
+{
+	for (auto& subsystem : m_subsystems)
+		subsystem.second->update(delta);
 }
 
 bool Context::hasSubsystem(const std::string &name)

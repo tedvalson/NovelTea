@@ -16,10 +16,8 @@
 namespace NovelTea
 {
 
-std::string Game::SubsystemName = "Game";
-
 Game::Game(Context* context)
-	: ContextObject(context)
+	: Subsystem(context)
 	, m_objectList(nullptr)
 	, m_propertyList(nullptr)
 	, m_map(nullptr)
@@ -45,10 +43,8 @@ Game::~Game()
 // Game must be active before initialized
 bool Game::initialize()
 {
-	if (m_initialized) {
-		err() << "Game already initialized!" << std::endl;
-		return false;
-	}
+	if (m_initialized)
+		return true;
 
 	m_saveData->setDirectory(GConfig.saveDir);
 

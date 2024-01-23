@@ -5,10 +5,8 @@
 namespace NovelTea
 {
 
-std::string TextLog::SubsystemName = "TextLog";
-
 TextLog::TextLog(Context* context)
-: ContextObject(context)
+: Subsystem(context)
 , m_itemLimit(5000)
 {
 }
