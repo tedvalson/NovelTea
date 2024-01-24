@@ -12,25 +12,48 @@
 namespace NovelTea
 {
 
+enum class TextLogType;
+
 struct Event
 {
 	enum EventType {
 		All,             // Special type used for event listener
 		TimerCompleted,  // Timer executed its callback
+		GameLoaded,
+		GameSaved,
+		Notification,
+		TextLogged,
 
 		EventCount,      // Special type
 	};
 
+	struct NotificationEvent {
+		std::string text;
+		int durationMs;
+	};
+
+	struct TextLogEvent {
+		std::string text;
+		TextLogType type;
+	};
+
+	int number;
 	std::string text;
+	std::shared_ptr<ContextObject> object;
 
 	union {
-		int number;
+		NotificationEvent *notification;
+		TextLogEvent *textlog;
+		void *ptr;
 	};
 
 	Event(int type);
 	Event(int type, int number);
 	Event(int type, const std::string &text);
-	virtual ~Event() = default;
+	Event(int type, std::shared_ptr<ContextObject> object);
+	Event(const Event&) = delete;
+	Event(Event&& event);
+	virtual ~Event();
 
 	int type() const { return m_type; }
 
@@ -50,20 +73,19 @@ class EventManager : public Subsystem
 {
 public:
 	EventManager(Context* context);
-	virtual ~EventManager();
 
 	static std::string name() { return "EventManager"; }
 
-	virtual void update(float delta) override;
+	void update(float delta) override;
 
-	virtual int listen(EventFunc func);
-	virtual int listen(int type, EventFunc func);
-	virtual void remove(int listenerId);
-	virtual bool trigger(const EventPtr &event);
-	virtual bool trigger(Event &&event);
-	virtual bool trigger(int eventType);
-	virtual void push(Event &&event);
-	virtual void push(int eventType);
+	int listen(EventFunc func);
+	int listen(int type, EventFunc func);
+	void remove(int listenerId);
+	bool trigger(const EventPtr &event);
+	bool trigger(Event &&event);
+	bool trigger(int eventType);
+	void push(Event &&event);
+	void push(int eventType);
 
 	template <class T, class = typename std::enable_if<!std::is_enum<T>::value>::type>
 	void push(T&&v) {

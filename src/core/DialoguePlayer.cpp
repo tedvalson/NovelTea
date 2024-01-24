@@ -16,7 +16,6 @@ namespace NovelTea
 DialoguePlayer::DialoguePlayer(Context *context)
 : ContextObject(context)
 , m_callback(nullptr)
-, m_isShowing(false)
 , m_logCurrentIndex(false)
 , m_textLineIndex(-1)
 {
@@ -47,11 +46,14 @@ const std::shared_ptr<Dialogue> &DialoguePlayer::getDialogue() const
 void DialoguePlayer::reset()
 {
 	m_isComplete = false;
+	m_currentSegmentIndex = -1;
 	m_nextForcedSegmentIndex = m_dialogue->getRootIndex();
 }
 
 void DialoguePlayer::update(float delta)
 {
+	if (m_currentSegmentIndex < 0)
+		changeSegment(m_nextForcedSegmentIndex);
 }
 
 void DialoguePlayer::processLines()
@@ -93,7 +95,6 @@ void DialoguePlayer::changeSegment(int newSegmentIndex, bool run, int buttonSubi
 	m_options.clear();
 	m_currentSegmentIndex = newSegmentIndex;
 	m_nextForcedSegmentIndex = -1;
-	m_isShowing = false;
 
 	std::shared_ptr<DialogueSegment> textSegment = nullptr;
 	auto startSegment = m_dialogue->getSegment(m_currentSegmentIndex);
@@ -171,7 +172,7 @@ void DialoguePlayer::changeLine(int newLineIndex)
 	}
 
 	auto data = StateEvent::DialogueEvent {line.first, line.second, true};
-	if (!m_options.empty())
+	if (!m_options.empty() && m_textLineIndex + 1 == m_textLines.size())
 		for (auto& option : m_options)
 			data.options.push_back({option->text, (bool)option->exec, option->enabled});
 	EventMan->push(data);

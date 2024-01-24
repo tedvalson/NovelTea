@@ -1,6 +1,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/AssetLoader.hpp>
 #include <NovelTea/Context.hpp>
+#include <NovelTea/Event.hpp>
 #include <NovelTea/ProjectDataIdentifiers.hpp>
 #include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
@@ -231,6 +232,11 @@ bool Game::isQuitting() const
 void Game::spawnNotification(const std::string &message, bool addToLog, int durationMs)
 {
 	NotificationMan->spawn(message, durationMs);
+
+	Event event(Event::Notification);
+	*event.notification = {message, durationMs};
+	EventMan->push(event);
+
 	if (addToLog)
 		GTextLog->push(message, TextLogType::Notification);
 }

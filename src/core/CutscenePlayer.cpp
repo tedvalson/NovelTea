@@ -5,11 +5,10 @@
 #include <NovelTea/CutsceneScriptSegment.hpp>
 #include <NovelTea/CutsceneTextSegment.hpp>
 #include <NovelTea/Context.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/ScriptManager.hpp>
-//#include <NovelTea/Err.hpp>
 #include <TweenEngine/Tween.h>
-//#include <algorithm>
 
 namespace NovelTea {
 
@@ -84,7 +83,7 @@ void CutscenePlayer::update(float delta)
 
 		timeDelta -= m_timeToNext;
 		m_timePassed += m_timeToNext;
-//		m_tweenManager.update(m_timeToNext.asSeconds());
+		m_tweenManager.update(m_timeToNext);
 //		for (auto& text : m_texts)
 //			text->update(m_timeToNext.asSeconds());
 	}
@@ -188,33 +187,27 @@ void CutscenePlayer::addSegmentToQueue(size_t segmentIndex)
 
 	if (type == CutsceneSegment::Text)
 	{
-		auto seg = static_cast<CutsceneTextSegment*>(segment.get());
-
-		beginCallback = [this, seg](TweenEngine::BaseTween*)
+		beginCallback = [this, segment](TweenEngine::BaseTween*)
 		{
 //			auto activeText = ActiveText::fromCutsceneTextSegment(seg);
 //			activeText->reset();
 //			activeText->setSkipWaitingForClick(m_skipWaitingForClick);
 //			activeText->setSkipWaitingForClick(true); // TODO: set this right
-			if (seg->getBeginWithNewLine()) {
-				std::cout << std::endl;
-			}
 
-			std::cout << seg->getText();
 
-			m_timeToNext = 0.001f * seg->getFullDelay();
+			m_timeToNext = 0.001f * segment->getFullDelay();
+			EventMan->push({StateEvent::CutsceneText, segment});
 //			startTransitionEffect(seg);
 		};
 	}
 	else if (type == CutsceneSegment::PageBreak)
 	{
-		auto seg = static_cast<CutscenePageBreakSegment*>(segment.get());
-
-		beginCallback = [this, seg](TweenEngine::BaseTween*)
+		beginCallback = [this, segment](TweenEngine::BaseTween*)
 		{
 //			m_textsOld = m_texts;
 //			m_texts.clear();
-			m_timeToNext = 0.001f * seg->getDelay();
+			m_timeToNext = 0.001f * segment->getDelay();
+			EventMan->push({StateEvent::CutscenePageBreak, segment});
 //			startTransitionEffect(seg);
 		};
 	}
@@ -259,7 +252,9 @@ void CutscenePlayer::addSegmentToQueue(size_t segmentIndex)
 	};
 
 	if (beginCallback)
-		beginCallback(nullptr);
+		TweenEngine::Tween::mark()
+			.setCallback(TweenEngine::TweenCallback::BEGIN, beginCallback)
+			.start(m_tweenManager);
 	if (endCallback)
 		TweenEngine::Tween::mark()
 			.delay(timeToNext)

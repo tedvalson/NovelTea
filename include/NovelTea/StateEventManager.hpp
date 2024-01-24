@@ -12,6 +12,9 @@ namespace NovelTea
 
 class Cutscene;
 class CutscenePlayer;
+class CutscenePageBreakSegment;
+class CutsceneTextSegment;
+class CutsceneSegment;
 class Dialogue;
 class DialoguePlayer;
 
@@ -26,12 +29,14 @@ namespace StateEvent
 {
 	enum Type {
 		ModeChanged = Event::EventCount + 1,
-		RoomTextChanged,
-		DialogueChanged,
 		Message,
-		ScriptExecuted,
+		CutscenePageBreak,
+		CutsceneText,
+		DialogueChanged,
+		RoomTextChanged,
 
 		// User response events
+		CutsceneContinue,
 		DialogueContinue,
 		DialogueChoice,
 		MessageContinue,

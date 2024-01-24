@@ -1,6 +1,8 @@
 #include <NovelTea/TextLog.hpp>
+#include <NovelTea/Context.hpp>
 #include <NovelTea/BBCodeParser.hpp>
 #include <NovelTea/Err.hpp>
+#include <NovelTea/Event.hpp>
 
 namespace NovelTea
 {
@@ -19,6 +21,9 @@ void TextLog::push(const std::string &text, TextLogType type)
 {
 	// TODO: prune old items
 		m_entries.push_back({BBCodeParser::stripTags(text), type});
+	Event event(Event::TextLogged);
+	*event.textlog = {text, type};
+	EventMan->push(event);
 }
 
 void TextLog::pushScript(const std::string &text)

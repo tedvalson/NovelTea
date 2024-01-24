@@ -56,7 +56,6 @@ private:
 	int m_currentSegmentIndex;
 	int m_nextForcedSegmentIndex;
 	bool m_isComplete;
-	bool m_isShowing;
 	bool m_logCurrentIndex;
 
 	int m_textLineIndex;

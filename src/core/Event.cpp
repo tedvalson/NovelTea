@@ -10,10 +10,6 @@ EventManager::EventManager(Context *context)
 {
 }
 
-EventManager::~EventManager()
-{
-}
-
 void EventManager::update(float delta)
 {
 	// Make copy since triggered events can queue more events
@@ -73,7 +69,7 @@ bool EventManager::trigger(int eventType)
 
 void EventManager::push(Event &&event)
 {
-	push<Event>(event);
+	push<Event>(std::move(event));
 }
 
 void EventManager::push(int eventType)
@@ -82,12 +78,19 @@ void EventManager::push(int eventType)
 }
 
 Event::Event(int type)
-: m_type(type)
+: object(nullptr)
+, m_type(type)
 {
-	if (type == Event::All)
-		err() << "Type 'Event::All' is invalid for Event instances." << std::endl;
-	if (type == Event::EventCount)
-		err() << "Type 'Event::EventCount' is invalid for Event instances." << std::endl;
+	switch(type) {
+	case All:
+		err() << "Type 'Event::All' is invalid for Event instances." << std::endl; break;
+	case EventCount:
+		err() << "Type 'Event::EventCount' is invalid for Event instances." << std::endl; break;
+	case TextLogged:
+		textlog = new TextLogEvent; break;
+	case Notification:
+		notification = new NotificationEvent; break;
+	}
 }
 
 Event::Event(int type, int num)
@@ -100,6 +103,32 @@ Event::Event(int type, const std::string &str)
 : Event(type)
 {
 	text = str;
+}
+
+Event::Event(int type, std::shared_ptr<ContextObject> obj)
+: Event(type)
+{
+	object = obj;
+}
+
+Event::Event(Event &&event)
+: number(event.number)
+, text(event.text)
+, object(event.object)
+, ptr(event.ptr)
+, m_type(event.m_type)
+{
+	event.m_type = -1; // Prevent deleting pointer on event's destructor
+}
+
+Event::~Event()
+{
+	switch(m_type) {
+	case TextLogged:
+		delete textlog; break;
+	case Notification:
+		delete notification; break;
+	}
 }
 
 } // namespace NovelTea

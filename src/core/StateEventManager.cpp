@@ -45,6 +45,11 @@ bool StateEventManager::initialize()
 		if (type == Event::TimerCompleted) {
 //			updateUI();
 		}
+		else if (type == StateEvent::CutsceneContinue) {
+			if (m_mode != ModeCutscene)
+				return false;
+			m_cutscenePlayer->click();
+		}
 		else if (type == StateEvent::DialogueChoice) {
 			auto choice = event->number;
 			return m_dialoguePlayer->processSelection(choice);
@@ -85,14 +90,14 @@ bool StateEventManager::initialize()
 			metaData.append(m_dialoguePlayer->saveState());
 		}
 
-//		GSaveData[ID::entrypointEntity] = sj::Array(
-//			static_cast<int>(entityType),
-//			entityId
-//		);
-//		auto& map = GGame->getMap();
-//		GSaveData[ID::entrypointMetadata] = metaData;
-//		GSaveData[ID::playTime] = m_playTime;
-//		GSaveData[ID::map] = map ? map->getId() : "";
+		GSaveData[ID::entrypointEntity] = sj::Array(
+			static_cast<int>(entityType),
+			entityId
+		);
+		auto& map = GGame->getMap();
+		GSaveData[ID::entrypointMetadata] = metaData;
+		GSaveData[ID::playTime] = m_playTime;
+		GSaveData[ID::map] = map ? map->getId() : "";
 		std::cout << "saving..." << std::endl;
 	});
 
@@ -142,17 +147,12 @@ bool StateEventManager::initialize()
 
 void StateEventManager::update(float delta)
 {
-//	float test = 99.5f;
-//	EventMan->trigger({StateEvent::Test, &test});
-
 	auto& map = GGame->getMap();
 //	auto& oldMap = m_mapRenderer.getMap();
 //	if (map && (!oldMap || oldMap->getId() != map->getId()))
 //		m_mapRenderer.setMap(map);
 
 	m_playTime += delta;
-
-	m_dialoguePlayer->update(delta);
 
 	if (m_mode == ModeCutscene)
 	{
@@ -165,6 +165,7 @@ void StateEventManager::update(float delta)
 	}
 	else if (m_mode == ModeDialogue)
 	{
+		m_dialoguePlayer->update(delta);
 		if (m_dialoguePlayer->isComplete())
 		{
 			std::cout << "Next: " << m_dialogue->getNextEntityJson() << std::endl;
