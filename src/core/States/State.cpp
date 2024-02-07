@@ -16,11 +16,6 @@ State::~State()
 {
 }
 
-void *State::processData(void *)
-{
-	return nullptr;
-}
-
 void State::requestStackPush(StateID stateID, bool renderAlone, StateCallback callback)
 {
 	m_stack->pushState(stateID, renderAlone, callback);

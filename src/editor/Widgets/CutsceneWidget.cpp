@@ -328,7 +328,8 @@ void CutsceneWidget::addItem(std::shared_ptr<NovelTea::CutsceneSegment> segment,
 	if (type == NovelTea::CutsceneSegment::Text)
 	{
 		auto seg = static_cast<NovelTea::CutsceneTextSegment*>(segment.get());
-		auto text = QString::fromStdString(NovelTea::ActiveText::fromCutsceneTextSegment(seg)->toPlainText(false, " | "));
+		auto activeText = NovelTea::ActiveText::fromCutsceneTextSegment(seg);
+		auto text = QString::fromStdString(activeText->toPlainText(false, " | "));
 		text.replace("\t", " ");
 		item = new QListWidgetItem(QIcon::fromTheme("format"), text);
 	}
@@ -594,9 +595,8 @@ void CutsceneWidget::timerEvent(QTimerEvent *event)
 	}
 
 	auto timeMs = NovelTea::Engine::getSystemTimeMs();
-	auto deltaMs = timeMs - m_lastTimeMs;
-	auto jdata = json({"event","update", "delta",deltaMs});
-	ui->preview->processData(jdata);
+	int deltaMs = timeMs - m_lastTimeMs;
+	ui->preview->events()->trigger({NovelTea::StateEditor::CutsceneUpdate, deltaMs});
 
 	ui->horizontalSlider->setValue(currentValue + deltaMs);
 	m_lastTimeMs = timeMs;
@@ -623,8 +623,7 @@ void CutsceneWidget::updateCutscene()
 	auto newValue = static_cast<float>(oldValue) / oldMax * newMax;
 	ui->horizontalSlider->setMaximum(newMax);
 
-	auto jdata = json({"event","cutscene", "cutscene",m_cutscene->toJson()});
-	ui->preview->processData(jdata);
+	ui->preview->events()->trigger({NovelTea::StateEditor::EntityChanged, m_cutscene->toJson()});
 
 	if (oldValue > 0)
 	{
@@ -635,8 +634,7 @@ void CutsceneWidget::updateCutscene()
 		}
 		else
 		{
-			jdata = json({"event","setPlaybackTime", "value",oldValue});
-			ui->preview->processData(jdata);
+			ui->preview->events()->trigger({NovelTea::StateEditor::CutsceneSeek, oldValue});
 		}
 	}
 
@@ -703,8 +701,7 @@ void CutsceneWidget::on_horizontalSlider_valueChanged(int value)
 	if (m_cutscenePlaying)
 		return;
 
-	json data = json({"event","setPlaybackTime", "value",value});
-	ui->preview->processData(data);
+	ui->preview->events()->trigger({NovelTea::StateEditor::CutsceneSeek, value});
 }
 
 void CutsceneWidget::on_actionPlayPause_toggled(bool checked)

@@ -38,8 +38,6 @@ public:
 	virtual void setAlpha(float alpha) override;
 	float getAlpha() const override;
 
-	virtual void *processData(void *data);
-
 	void requestStackPush(StateID stateID, bool renderAlone = false, StateCallback callback = nullptr);
 	void requestStackPop();
 	void requestStackClear();

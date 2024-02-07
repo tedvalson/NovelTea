@@ -14,7 +14,6 @@ namespace NovelTea
 {
 
 using MessageCallback = std::function<void(const std::vector<std::string> &messageArray, const DukValue &callback)>;
-using SaveCallback = std::function<void()>;
 
 class ObjectList;
 class Map;
@@ -76,7 +75,6 @@ public:
 	ADD_ACCESSOR(bool, SaveEnabled, m_saveEnabled)
 	ADD_ACCESSOR(std::shared_ptr<ObjectList>, ObjectList, m_objectList)
 	ADD_ACCESSOR(MessageCallback, MessageCallback, m_messageCallback)
-	ADD_ACCESSOR(SaveCallback, SaveCallback, m_saveCallback)
 
 	template <typename T>
 	std::shared_ptr<T> makeContextObject()
@@ -123,7 +121,6 @@ protected:
 	bool m_initialized;
 
 	MessageCallback m_messageCallback;
-	SaveCallback m_saveCallback;
 
 	std::shared_ptr<Settings> m_settings;
 	std::shared_ptr<ProjectData> m_projectData;

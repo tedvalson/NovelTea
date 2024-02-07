@@ -14,6 +14,8 @@
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <NovelTea/SFML/NotificationSFML.hpp>
+#include <NovelTea/States/StateEditor.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
 
@@ -22,7 +24,7 @@ namespace NovelTea
 
 StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback)
 : State(stack, context, callback)
-, m_mode(Mode::Nothing)
+, m_mode(ModeNothing)
 , m_testPlaybackMode(false)
 , m_testRecordMode(false)
 , m_quitting(false)
@@ -39,14 +41,65 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 , m_navigation(&context)
 , m_textOverlay(&context)
 , m_iconSave(&context)
-, m_playTime(0.f)
 , m_quickVerbPressed(false)
 , m_cutsceneRenderer(&context)
 , m_cutsceneSpeed(1.f)
 , m_dialogueRenderer(&context)
 , m_mapRenderer(&context)
 {
-	ScriptMan.reset();
+	m_eventListenerId = EventMan->listen([this](const EventPtr& event){
+		auto type = event->type();
+		if (type == Event::TimerCompleted) {
+			if (m_mode == ModeRoom)
+				updateUI();
+		}
+		else if (type == StateEvent::Message) {
+			auto data = std::static_pointer_cast<StateEvent::MessageEvent>(event);
+			if (!m_testPlaybackMode) {
+				m_textOverlay.setTextArray(data->messages);
+				m_textOverlay.show();
+				hideToolbar(0.4f);
+			}
+			else
+				callOverlayFunc();
+		}
+		else if (type == StateEvent::ModeChanged) {
+			setMode(static_cast<EntityMode>(event->intVal), "");
+		}
+		else if (type == StateEvent::CutsceneChanged) {
+			auto cutscene = std::static_pointer_cast<Cutscene>(event->object);
+			m_cutsceneRenderer.setCutscene(cutscene);
+		}
+		else if (type == StateEvent::RoomTextChanged) {
+			updateRoomText(event->text);
+		}
+		else if (type == Event::GameSaving) {
+			if (m_mode == ModeCutscene) {
+				auto metaData = sj::Array(GGame->getRoom()->getId());
+				metaData.append(m_cutsceneRenderer.saveState());
+				GSaveData[ID::entrypointMetadata] = metaData;
+			}
+		}
+		else if (type == Event::GameSaved) {
+			m_iconSave.show(0.4f, 3.f);
+		}
+		else if (type == Event::GameLoaded) {
+			if (m_mode == ModeCutscene) {
+				auto &entryMetadata = GSaveData[ID::entrypointMetadata];
+				if (entryMetadata.size() > 1)
+					m_cutsceneRenderer.restoreState(entryMetadata[1]);
+			}
+		}
+		else if (type == StateEditor::ModeChanged) {
+			requestStackClear();
+			requestStackPush(StateID::Editor);
+			EventMan->push(event);
+		}
+		else if (type == StateEditor::RunTest) {
+			auto& jsonData = event->json;
+		}
+		return true;
+	});
 
 	auto &text = m_iconSave.getText();
 	text.setString(L"\uf0c7");
@@ -159,95 +212,24 @@ StateMain::StateMain(StateStack& stack, Context& context, StateCallback callback
 	// Map setup
 	m_mapRenderer.setMiniMapMode(true);
 
-	// TextOverlay setup
 	m_textOverlay.hide(0.f);
-	GGame->setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
-		m_textOverlayFunc = callback;
-		if (!m_testPlaybackMode)
-		{
-			m_textOverlay.setTextArray(messageArray);
-			m_textOverlay.show();
-			hideToolbar(0.4f);
-		}
-		else
-			callOverlayFunc();
-	});
-
-	GGame->setSaveCallback([this](){
-		auto entityType = EntityType::Room;
-		auto entityId = GGame->getRoom()->getId();
-		auto metaData = sj::Array(entityId);
-
-		if (m_mode == Mode::Cutscene) {
-			entityType = EntityType::Cutscene;
-			entityId = m_cutsceneRenderer.getCutscene()->getId();
-			metaData.append(m_cutsceneRenderer.saveState());
-		} else if (m_mode == Mode::Dialogue) {
-			entityType = EntityType::Dialogue;
-			entityId = m_dialogueRenderer.getDialogue()->getId();
-			metaData.append(m_dialogueRenderer.saveState());
-		}
-
-		GSaveData[ID::entrypointEntity] = sj::Array(
-			static_cast<int>(entityType),
-			entityId
-		);
-		auto& map = GGame->getMap();
-		GSaveData[ID::entrypointMetadata] = metaData;
-		GSaveData[ID::playTime] = m_playTime;
-		GSaveData[ID::map] = map ? map->getId() : "";
-		m_iconSave.show(0.4f, 3.f);
-	});
-
-	m_playTime = GSaveData[ID::playTime].ToFloat();
 
 	hideToolbar(0.f);
 
-	auto &saveEntryPoint = GSaveData[ID::entrypointEntity];
-	auto &projEntryPoint = ProjData[ID::entrypointEntity];
-	auto &entryMetadata = GSaveData[ID::entrypointMetadata];
-	if (!saveEntryPoint.IsEmpty())
-	{
-		auto roomId = entryMetadata[0].ToString();
-		auto mapId = GSaveData[ID::map].ToString();
-		auto entryPointType = static_cast<EntityType>(saveEntryPoint[0].ToInt());
-		GGame->setMapId(mapId);
-		m_mapRenderer.setActiveRoomId(roomId);
-		m_mapRenderer.setMap(GGame->getMap());
+	SEM->reset();
+}
 
-		if (!roomId.empty())
-		{
-			GGame->pushNextEntity(GGame->get<Room>(roomId));
-			gotoNextEntity();
-		}
-		// Don't double-push room mode
-		if (entryPointType != EntityType::Room)
-		{
-			GGame->pushNextEntityJson(saveEntryPoint);
-			if (entryMetadata.size() > 1 && gotoNextEntity()) {
-				if (entryPointType == EntityType::Cutscene)
-					m_cutsceneRenderer.restoreState(entryMetadata[1]);
-				else if (entryPointType == EntityType::Dialogue)
-					m_dialogueRenderer.restoreState(entryMetadata[1]);
-			}
-		}
-	}
-	else if (!projEntryPoint.IsEmpty())
-		GGame->pushNextEntityJson(projEntryPoint);
-	else
-		std::cerr << "No entry point?" << std::endl;
-
-	processTest();
+StateMain::~StateMain()
+{
+	EventMan->remove(m_eventListenerId);
 }
 
 void StateMain::render(sf::RenderTarget &target)
 {
-	if (m_quitting)
-		target.clear(m_bg.getFillColor());
 	static auto shader = Asset->shader(ID::shaderBackground);
 	target.draw(m_bg, shader.get());
 
-	if (m_mode != Mode::Room && m_roomTextChanging)
+	if (m_mode != ModeRoom && m_roomTextChanging)
 	{
 		auto view = target.getView();
 		target.setView(m_roomTextView);
@@ -255,14 +237,14 @@ void StateMain::render(sf::RenderTarget &target)
 		target.setView(view);
 	}
 
-	if (m_mode == Mode::Cutscene)
+	if (m_mode == ModeCutscene)
 	{
 		target.draw(m_cutsceneRenderer);
 	}
-	else if (m_mode == Mode::Dialogue)
+	else if (m_mode == ModeDialogue)
 	{
 	}
-	else if (m_mode == Mode::Room)
+	else if (m_mode == ModeRoom)
 	{
 		auto view = target.getView();
 		target.setView(m_roomTextView);
@@ -368,6 +350,8 @@ void StateMain::resize(const sf::Vector2f &size)
 
 	m_textOverlay.setSize(size);
 
+	m_bg.setSize(size);
+
 	m_verbList.setScreenSize(size);
 	m_verbList.setFontSizeMultiplier(fontSizeMultiplier);
 	m_verbList.hide(0.f);
@@ -382,7 +366,7 @@ void StateMain::resize(const sf::Vector2f &size)
 	m_roomScrollbar.setScroll(0.f);
 }
 
-void StateMain::setMode(Mode mode, const std::string &idName)
+void StateMain::setMode(EntityMode mode, const std::string &idName)
 {
 	m_roomActiveText.setHighlightId("");
 	m_actionBuilder.hide(0.4f, ActionBuilder::ALPHA, [this](){
@@ -392,82 +376,33 @@ void StateMain::setMode(Mode mode, const std::string &idName)
 	});
 	m_verbList.hide();
 
-	if (mode != Mode::Room)
+	if (mode != ModeRoom)
 	{
 		updateRoomText("");
 		hideToolbar();
 	}
-	if (mode != Mode::Dialogue)
+	if (mode != ModeDialogue)
 		m_dialogueRenderer.hide();
 
-	if (mode == Mode::Cutscene)
+	if (mode == ModeCutscene)
 	{
-		m_cutscene = GGame->get<Cutscene>(idName);
-		m_cutsceneRenderer.setCutscene(m_cutscene);
 	}
-	else if (mode == Mode::Dialogue)
+	else if (mode == ModeDialogue)
 	{
-		m_dialogue = GGame->get<Dialogue>(idName);
-		m_dialogueRenderer.setDialogue(m_dialogue);
 		m_dialogueRenderer.show();
 	}
-	else if (mode == Mode::Room)
+	else if (mode == ModeRoom)
 	{
-		auto nextRoom = GGame->get<Room>(idName);
-		auto room = GGame->getRoom();
-		if (room->getId() != idName)
-		{
-			if (room->getId().empty()) {
-				GGame->setRoom(nextRoom);
-				if (GSaveData[NovelTea::ID::entityPreview].ToBool())
-					nextRoom->runScriptAfterEnter();
-			} else {
-				if (!room->runScriptBeforeLeave() || !nextRoom->runScriptBeforeEnter()) {
-					updateUI();
-					return;
-				}
-				room->setVisitCount(room->getVisitCount() + 1);
-				room->runScriptAfterLeave();
-				GGame->setRoom(nextRoom);
-				nextRoom->runScriptAfterEnter();
-			}
 			// Should be set after Game room is changed, for map script eval purposes
-			m_mapRenderer.setActiveRoomId(nextRoom->getId());
-		}
 		m_mode = mode;
 		showToolbar();
 		updateUI();
 		m_roomScrollbar.setScroll(0.f);
-		m_navigation.setPaths(nextRoom->getPaths());
 	}
 
 	m_mode = mode;
 }
 
-void StateMain::setMode(const json &jEntity)
-{
-	auto mode = Mode::Nothing;
-	auto type = static_cast<EntityType>(jEntity[ID::selectEntityType].ToInt());
-	auto idName = jEntity[ID::selectEntityId].ToString();
-
-	if (type == EntityType::Cutscene)
-		mode = Mode::Cutscene;
-	else if (type == EntityType::Room)
-		mode = Mode::Room;
-	else if (type == EntityType::Dialogue)
-		mode = Mode::Dialogue;
-	else if (type == EntityType::Script)
-		ScriptMan->runScriptId(idName);
-	else if (type == EntityType::CustomScript)
-		ScriptMan->runInClosure(idName);
-
-	if (type == EntityType::Script || type == EntityType::CustomScript) {
-		mode = Mode::Room;
-		idName = GGame->getRoom()->getId();
-	}
-
-	setMode(mode, idName);
-}
 
 void StateMain::showToolbar(float duration)
 {
@@ -562,170 +497,6 @@ void StateMain::setValues(int tweenType, float *newValues)
 		State::setValues(tweenType, newValues);
 }
 
-void StateMain::processTest()
-{
-	if (!getContext()->getData().hasKey("test"))
-		return;
-
-	auto &jtest = getContext()->getData()["test"];
-	m_testRecordMode = getContext()->getData()["record"].ToBool();
-
-	GGame->reset();
-	GGame->getObjectList()->clear();
-	for (auto &jobject : jtest[ID::startingInventory].ArrayRange())
-		GGame->getObjectList()->addId(jobject.ToString());
-
-	if (jtest[ID::entrypointEntity][ID::selectEntityType].ToInt() == -1)
-		GGame->pushNextEntityJson(ProjData[ID::entrypointEntity]);
-	else
-		GGame->pushNextEntityJson(jtest[ID::entrypointEntity]);
-
-	if (processTestInit() && processTestSteps() && !m_testRecordMode)
-		processTestCheck();
-}
-
-bool StateMain::processTestSteps()
-{
-	m_testPlaybackMode = true;
-	if (m_testRecordMode)
-		m_dialogueRenderer.setDialogueCallback([this](int index){
-			json jtestItem({
-				"type", "dialogue",
-				"index", index
-			});
-			if (!m_testPlaybackMode)
-				runCallback(&jtestItem);
-		});
-
-	auto success = true;
-	auto stopIndex = getContext()->getData()["stopIndex"].ToInt();
-	auto &jtest = getContext()->getData()["test"];
-	auto &jsteps = jtest[ID::testSteps];
-
-	if (stopIndex < 0)
-		stopIndex = jsteps.size();
-
-	m_cutsceneRenderer.setSkipWaitingForClick(true);
-	for (int i = 0; i < stopIndex; ++i)
-	{
-		auto &jstep = jsteps[i];
-		auto type = jstep["type"].ToString();
-
-		auto waiting = (type == "wait");
-		auto waitTimeLeft = 0.f;
-		if (waiting)
-			waitTimeLeft = 0.001f * jstep["duration"].ToInt();
-
-		do {
-			if (m_mode == Mode::Cutscene) {
-				m_cutsceneRenderer.update(0.001f * m_cutscene->getDelayMs());
-				if (m_cutsceneRenderer.isComplete())
-					GGame->pushNextEntityJson(m_cutscene->getNextEntityJson());
-			}
-			else if (m_mode == Mode::Dialogue) {
-				m_dialogueRenderer.processLines();
-				if (m_dialogueRenderer.isComplete())
-					GGame->pushNextEntityJson(m_dialogue->getNextEntityJson());
-				else
-					break;
-			}
-
-			if (waiting && waitTimeLeft > 0.f) {
-				if (TimerMan->update(0.01f))
-					updateUI();
-				waitTimeLeft -= 0.01f;
-			}
-		}
-		while (gotoNextEntity() || (waitTimeLeft > 0.f));
-
-
-		if (type == "action")
-		{
-			std::vector<std::string> objectIds;
-			for (auto jobjectId : jstep["objects"].ArrayRange())
-				objectIds.push_back(jobjectId.ToString());
-			if (!processAction(jstep["verb"].ToString(), objectIds))
-				success = false;
-		}
-		else if (type == "dialogue")
-		{
-			if (!m_dialogueRenderer.processSelection(jstep["index"].ToInt()))
-				success = false;
-			m_dialogueRenderer.processLines();
-		}
-		else if (type == "move")
-		{
-			success = GGame->getNavigationEnabled();
-			if (success) {
-				auto direction = jstep["direction"].ToInt();
-				auto &paths = m_navigation.getPaths();
-				auto &jentity = paths[direction][1];
-				success = (paths[direction][0].ToBool() && jentity[0].ToInt() != -1);
-				if (success)
-					GGame->pushNextEntityJson(jentity);
-			}
-		}
-
-		if (!success)
-		{
-			json j({
-				"success", false,
-				"index", i,
-			});
-			runCallback(&j);
-			std::cout << "FAILED" << std::endl;
-			break;
-		}
-	}
-
-	m_cutsceneRenderer.setSkipWaitingForClick(false);
-	m_testPlaybackMode = false;
-	return success;
-}
-
-bool StateMain::processTestInit()
-{
-	auto &jtest = getContext()->getData()["test"];
-	std::string error;
-
-	try {
-		ScriptMan->runInClosure(jtest[ID::testScriptInit].ToString());
-	} catch (std::exception &e) {
-		error = e.what();
-	}
-
-	if (!error.empty()) {
-		json j({"success", false, "error", error});
-		runCallback(&j);
-	}
-
-	return error.empty();
-}
-
-bool StateMain::processTestCheck()
-{
-	// Just return true if the test is only being partially run
-	if (getContext()->getData()["stopIndex"].ToInt() >= 0)
-		return true;
-	auto &jtest = getContext()->getData()["test"];
-	auto script = jtest[ID::testScriptCheck].ToString() + "\nreturn true;";
-	auto success = false;
-	std::string error;
-
-	try {
-		success = ScriptMan->runInClosure<bool>(script);
-	} catch (std::exception &e) {
-		error = e.what();
-	}
-
-	if (!success) {
-		json j({"success", false, "error", error});
-		runCallback(&j);
-	}
-
-	return success;
-}
-
 bool StateMain::processAction(const std::string &verbId, const std::vector<std::string> &objectIds)
 {
 	for (auto &objectId : objectIds)
@@ -764,45 +535,6 @@ bool StateMain::processAction(const std::string &verbId, const std::vector<std::
 		updateUI();
 	}
 	return success;
-}
-
-// Returns true if active entity is switched
-bool StateMain::gotoNextEntity()
-{
-	if (m_quitting)
-		return false;
-
-	auto nextEntity = GGame->popNextEntity();
-	if (!nextEntity)
-	{
-		if (m_mode != Mode::Room)
-			nextEntity = GGame->getRoom();
-		if (!nextEntity || nextEntity->getId().empty())
-			return false;
-	}
-
-	auto mode = Mode::Nothing;
-	if (nextEntity->entityId() == Action::id) {
-		auto action = std::static_pointer_cast<Action>(nextEntity);
-		action->runScript();
-		return true;
-	} else if (nextEntity->entityId() == Cutscene::id)
-		mode = Mode::Cutscene;
-	else if (nextEntity->entityId() == Room::id)
-		mode = Mode::Room;
-	else if (nextEntity->entityId() == Dialogue::id)
-		mode = Mode::Dialogue;
-	else if (nextEntity->entityId() == Script::id) {
-		auto roomId = GGame->getRoom()->getId();
-		auto script = std::static_pointer_cast<Script>(nextEntity);
-		ScriptMan->runScript(script);
-		if (!roomId.empty())
-			setMode(Mode::Room, roomId);
-		return true;
-	}
-
-	setMode(mode, nextEntity->getId());
-	return true;
 }
 
 void StateMain::updateUI()
@@ -878,10 +610,8 @@ void StateMain::setActionBuilderShowPos(float position)
 
 void StateMain::callOverlayFunc()
 {
-	if (m_textOverlayFunc.type() != DukValue::UNDEFINED){
-		ScriptMan->call<void>(m_textOverlayFunc);
+	EventMan->trigger(StateEvent::MessageContinue);
 		updateUI();
-	}
 }
 
 void StateMain::repositionText()
@@ -955,7 +685,7 @@ bool StateMain::processEvent(const sf::Event &event)
 			m_textOverlay.hide(0.5f, TextOverlay::ALPHA, [this](){
 				callOverlayFunc();
 			});
-		if (m_mode == Mode::Room)
+		if (m_mode == ModeRoom)
 			showToolbar(0.5f);
 		return true;
 	}
@@ -963,7 +693,7 @@ bool StateMain::processEvent(const sf::Event &event)
 	if (m_roomTextChanging)
 		return true;
 
-	if (m_mode == Mode::Cutscene)
+	if (m_mode == ModeCutscene)
 	{
 		if ((m_cutsceneRenderer.isComplete() || m_cutsceneRenderer.isWaitingForClick()) && m_cutsceneRenderer.processEvent(event))
 			return true;
@@ -976,11 +706,11 @@ bool StateMain::processEvent(const sf::Event &event)
 		{
 		}
 	}
-	else if (m_mode == Mode::Dialogue)
+	else if (m_mode == ModeDialogue)
 	{
 		m_dialogueRenderer.processEvent(event);
 	}
-	else if (m_mode == Mode::Room)
+	else if (m_mode == ModeRoom)
 	{
 		if (m_verbList.processEvent(event)) {
 			return false;
@@ -1060,10 +790,9 @@ bool StateMain::update(float delta)
 	if (map && (!oldMap || oldMap->getId() != map->getId()))
 		m_mapRenderer.setMap(map);
 
-	m_playTime += delta;
 
 	m_dialogueRenderer.update(delta);
-	if (m_mode == Mode::Room)
+	if (m_mode == ModeRoom)
 	{
 		m_roomActiveText.update(delta);
 		m_roomActiveTextFadeOut.update(delta);
@@ -1085,26 +814,14 @@ bool StateMain::update(float delta)
 			m_mapRenderer.hide();
 	}
 
-	if (m_mode == Mode::Cutscene)
+	if (m_mode == ModeCutscene)
 	{
 		m_cutsceneRenderer.update(delta * m_cutsceneSpeed);
 		if (m_cutsceneRenderer.isComplete())
 		{
-			GGame->pushNextEntityJson(m_cutscene->getNextEntityJson());
-			gotoNextEntity();
+			EventMan->push(StateEvent::CutsceneComplete);
 		}
 	}
-	else if (m_mode == Mode::Dialogue)
-	{
-		if (m_dialogueRenderer.isComplete())
-		{
-			GGame->pushNextEntityJson(m_dialogue->getNextEntityJson());
-			gotoNextEntity();
-		}
-	}
-	else // if Mode::Nothing
-		if (!m_roomTextChanging)
-			gotoNextEntity();
 
 	m_roomScrollbar.update(delta);
 	m_verbList.update(delta);
@@ -1115,12 +832,6 @@ bool StateMain::update(float delta)
 	m_textOverlay.update(delta);
 	m_iconSave.update(delta);
 
-	GSys(NotificationManagerSFML)->update(delta);
-	if (TimerMan->update(delta)) {
-		if (m_mode == Mode::Room) {
-			updateUI();
-		}
-	}
 
 	m_tweenManager.update(delta);
 	m_tweenManagerHighlights.update(delta);

@@ -20,11 +20,13 @@ struct Event
 		All,             // Special type used for event listener
 		TimerCompleted,  // Timer executed its callback
 		GameLoaded,
+		GameSaving,      // Game save prep, load SaveData with whatever you want
 		GameSaved,
 		Notification,
 		TextLogged,
 
-		EventCount,      // Special type
+		EventCount,
+		CustomEvent = 1000, // For users to extend with new event types
 	};
 
 	struct NotificationEvent {
@@ -37,9 +39,11 @@ struct Event
 		TextLogType type;
 	};
 
-	int number;
+	int intVal;
+	float floatVal;
 	std::string text;
 	std::shared_ptr<ContextObject> object;
+	sj::JSON json;
 
 	union {
 		NotificationEvent *notification;
@@ -48,10 +52,12 @@ struct Event
 	};
 
 	Event(int type);
-	Event(int type, int number);
+	Event(int type, int value);
+	Event(int type, float value);
 	Event(int type, const std::string &text);
+	Event(int type, const sj::JSON &json);
 	Event(int type, std::shared_ptr<ContextObject> object);
-	Event(const Event&) = delete;
+	Event(int type, void *pointer);
 	Event(Event&& event);
 	virtual ~Event();
 
@@ -84,6 +90,7 @@ public:
 	bool trigger(const EventPtr &event);
 	bool trigger(Event &&event);
 	bool trigger(int eventType);
+	void push(const EventPtr &event);
 	void push(Event &&event);
 	void push(int eventType);
 

@@ -2,7 +2,6 @@
 #include <NovelTea/Context.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
-#include <NovelTea/CutscenePlayer.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/DialoguePlayer.hpp>
 #include <NovelTea/Game.hpp>
@@ -23,7 +22,6 @@ StateEventManager::StateEventManager(Context *context)
 , m_quitting(false)
 , m_playTime(0)
 , m_cutscene(nullptr)
-, m_cutsceneSpeed(1.f)
 , m_dialogue(nullptr)
 {
 }
@@ -34,10 +32,6 @@ StateEventManager::~StateEventManager()
 
 bool StateEventManager::initialize()
 {
-	GGame->reset();
-	GGame->loadLast();
-
-	m_cutscenePlayer = std::make_shared<CutscenePlayer>(getContext());
 	m_dialoguePlayer = std::make_shared<DialoguePlayer>(getContext());
 
 	EventMan->listen([this](const EventPtr& event){
@@ -45,13 +39,14 @@ bool StateEventManager::initialize()
 		if (type == Event::TimerCompleted) {
 //			updateUI();
 		}
-		else if (type == StateEvent::CutsceneContinue) {
+		else if (type == StateEvent::CutsceneComplete) {
 			if (m_mode != ModeCutscene)
 				return false;
-			m_cutscenePlayer->click();
+			GGame->pushNextEntityJson(m_cutscene->getNextEntityJson());
+			gotoNextEntity();
 		}
 		else if (type == StateEvent::DialogueChoice) {
-			auto choice = event->number;
+			auto choice = event->intVal;
 			return m_dialoguePlayer->processSelection(choice);
 		}
 		else if (type == StateEvent::DialogueContinue) {
@@ -62,11 +57,30 @@ bool StateEventManager::initialize()
 		else if (type == StateEvent::MessageContinue) {
 			callOverlayFunc();
 		}
+		else if (type == Event::GameSaving) {
+			auto entityType = EntityType::Room;
+			auto entityId = GGame->getRoom()->getId();
+			auto metaData = sj::Array(entityId);
+
+			if (m_mode == ModeDialogue) {
+				entityType = EntityType::Dialogue;
+				entityId = m_dialoguePlayer->getDialogue()->getId();
+				metaData.append(m_dialoguePlayer->saveState());
+			}
+
+			GSaveData[ID::entrypointEntity] = sj::Array(
+				static_cast<int>(entityType),
+				entityId
+			);
+			auto& map = GGame->getMap();
+			GSaveData[ID::entrypointMetadata] = metaData;
+			GSaveData[ID::playTime] = m_playTime;
+			GSaveData[ID::map] = map ? map->getId() : "";
+		}
 
 		return true;
 	});
 
-	ScriptMan->reset();
 	GGame->setMessageCallback([this](const std::vector<std::string> &messageArray, const DukValue &callback){
 		m_textOverlayFunc = callback;
 		if (!m_testPlaybackMode)
@@ -74,71 +88,6 @@ bool StateEventManager::initialize()
 		else
 			callOverlayFunc();
 	});
-
-	GGame->setSaveCallback([this](){
-		auto entityType = EntityType::Room;
-		auto entityId = GGame->getRoom()->getId();
-		auto metaData = sj::Array(entityId);
-
-		if (m_mode == ModeCutscene) {
-			entityType = EntityType::Cutscene;
-			entityId = m_cutscenePlayer->getCutscene()->getId();
-			metaData.append(m_cutscenePlayer->saveState());
-		} else if (m_mode == ModeDialogue) {
-			entityType = EntityType::Dialogue;
-			entityId = m_dialoguePlayer->getDialogue()->getId();
-			metaData.append(m_dialoguePlayer->saveState());
-		}
-
-		GSaveData[ID::entrypointEntity] = sj::Array(
-			static_cast<int>(entityType),
-			entityId
-		);
-		auto& map = GGame->getMap();
-		GSaveData[ID::entrypointMetadata] = metaData;
-		GSaveData[ID::playTime] = m_playTime;
-		GSaveData[ID::map] = map ? map->getId() : "";
-		std::cout << "saving..." << std::endl;
-	});
-
-	m_playTime = GSaveData[ID::playTime].ToFloat();
-
-	auto &saveEntryPoint = GSaveData[ID::entrypointEntity];
-	auto &projEntryPoint = ProjData[ID::entrypointEntity];
-	auto &entryMetadata = GSaveData[ID::entrypointMetadata];
-	if (!saveEntryPoint.IsEmpty())
-	{
-		std::cout << "save entry point: " << saveEntryPoint << std::endl;
-		std::cout << "save entry meta: " << entryMetadata << std::endl;
-		auto roomId = entryMetadata[0].ToString();
-		std::cout << "roomId: " << roomId << std::endl;
-		auto mapId = GSaveData[ID::map].ToString();
-		auto entryPointType = static_cast<EntityType>(saveEntryPoint[0].ToInt());
-		GGame->setMapId(mapId);
-//		m_mapRenderer.setActiveRoomId(roomId);
-//		m_mapRenderer.setMap(GGame->getMap());
-
-		if (!roomId.empty())
-		{
-			GGame->pushNextEntity(GGame->get<Room>(roomId));
-			gotoNextEntity();
-		}
-		// Don't double-push room mode
-		if (entryPointType != EntityType::Room)
-		{
-			GGame->pushNextEntityJson(saveEntryPoint);
-			if (entryMetadata.size() > 1 && gotoNextEntity()) {
-				if (entryPointType == EntityType::Cutscene)
-					m_cutscenePlayer->restoreState(entryMetadata[1]);
-				else if (entryPointType == EntityType::Dialogue)
-					m_dialoguePlayer->restoreState(entryMetadata[1]);
-			}
-		}
-	}
-	else if (!projEntryPoint.IsEmpty())
-		GGame->pushNextEntityJson(projEntryPoint);
-	else
-		err() << "No entry point?" << std::endl;
 
 //	processTest();
 	std::cout << "StateEventManager inititalized" << std::endl;
@@ -156,12 +105,6 @@ void StateEventManager::update(float delta)
 
 	if (m_mode == ModeCutscene)
 	{
-		m_cutscenePlayer->update(delta * m_cutsceneSpeed);
-		if (m_cutscenePlayer->isComplete())
-		{
-			GGame->pushNextEntityJson(m_cutscene->getNextEntityJson());
-			gotoNextEntity();
-		}
 	}
 	else if (m_mode == ModeDialogue)
 	{
@@ -181,12 +124,7 @@ void StateEventManager::setMode(EntityMode mode, const std::string &idName)
 {
 	std::cout << "---------- setMode: " << (int)mode << " \"" << idName << "\"" << std::endl;
 
-	if (mode == ModeCutscene)
-	{
-		m_cutscene = GGame->get<Cutscene>(idName);
-		m_cutscenePlayer->setCutscene(m_cutscene);
-	}
-	else if (mode == ModeDialogue)
+	if (mode == ModeDialogue)
 	{
 		m_dialogue = GGame->get<Dialogue>(idName);
 		m_dialoguePlayer->setDialogue(m_dialogue);
@@ -219,6 +157,12 @@ void StateEventManager::setMode(EntityMode mode, const std::string &idName)
 	}
 
 	EventMan->push({StateEvent::ModeChanged, mode});
+
+	if (mode == ModeCutscene)
+	{
+		m_cutscene = GGame->get<Cutscene>(idName);
+		EventMan->push({StateEvent::CutsceneChanged, m_cutscene});
+	}
 
 	m_mode = mode;
 
@@ -310,6 +254,42 @@ void StateEventManager::move(int direction, const sj::JSON &jentity)
 //		runCallback(&jtestItem);
 	}
 	GGame->pushNextEntityJson(jentity);
+}
+
+void StateEventManager::reset()
+{
+	m_playTime = GSaveData[ID::playTime].ToFloat();
+
+	auto &saveEntryPoint = GSaveData[ID::entrypointEntity];
+	auto &projEntryPoint = ProjData[ID::entrypointEntity];
+	auto &entryMetadata = GSaveData[ID::entrypointMetadata];
+	if (!saveEntryPoint.IsEmpty())
+	{
+		auto roomId = entryMetadata[0].ToString();
+		auto mapId = GSaveData[ID::map].ToString();
+		auto entryPointType = static_cast<EntityType>(saveEntryPoint[0].ToInt());
+		GGame->setMapId(mapId);
+
+		if (!roomId.empty())
+		{
+			GGame->pushNextEntity(GGame->get<Room>(roomId));
+			gotoNextEntity();
+		}
+		// Don't double-push room mode
+		if (entryPointType != EntityType::Room)
+		{
+			GGame->pushNextEntityJson(saveEntryPoint);
+			if (entryMetadata.size() > 1 && gotoNextEntity()) {
+				if (entryPointType == EntityType::Dialogue)
+					m_dialoguePlayer->restoreState(entryMetadata[1]);
+				EventMan->push({Event::GameLoaded, entryMetadata[1]});
+			}
+		}
+	}
+	else if (!projEntryPoint.IsEmpty())
+		GGame->pushNextEntityJson(projEntryPoint);
+	else
+		err() << "No entry point?" << std::endl;
 }
 
 void StateEventManager::callOverlayFunc()

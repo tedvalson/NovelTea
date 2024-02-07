@@ -30,7 +30,6 @@ Game::Game(Context* context)
 	, m_saveEnabled(true)
 	, m_initialized(false)
 	, m_messageCallback(nullptr)
-	, m_saveCallback(nullptr)
 	, m_settings(new Settings(context))
 	, m_projectData(new ProjectData)
 	, m_saveData(new SaveData)
@@ -170,12 +169,12 @@ void Game::save(int slot)
 	if (m_saveData->getProfileIndex() < 0)
 		m_settings->ensureProfileExists();
 	ScriptMan->runInClosure(ProjData[ID::scriptBeforeSave].ToString());
-	if (m_saveCallback)
-		m_saveCallback();
+	EventMan->trigger(Event::GameSaving); // Trigger so listeners can set SaveData
 	m_saveData->data()[ID::mapEnabled] = m_minimapEnabled;
 	m_saveData->data()[ID::navigationEnabled] = m_navigationEnabled;
 	m_saveData->data()[ID::log] = GTextLog->toJson();
 	m_saveData->save(slot);
+	EventMan->push({Event::GameSaved, slot});
 }
 
 bool Game::load(int slot)
@@ -184,6 +183,7 @@ bool Game::load(int slot)
 		return false;
 	syncToSave();
 	ScriptMan->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
+	EventMan->push({Event::GameLoaded, slot});
 	return true;
 }
 
@@ -193,6 +193,7 @@ bool Game::loadLast()
 		return false;
 	syncToSave();
 	ScriptMan->runInClosure(ProjData[ID::scriptAfterLoad].ToString());
+	EventMan->push({Event::GameLoaded, -1});
 	return true;
 }
 

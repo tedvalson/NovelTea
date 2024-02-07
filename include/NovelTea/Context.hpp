@@ -45,6 +45,7 @@ struct ContextConfig
 	sj::JSON entryEntity;
 	sj::JSON entryMeta;
 	bool entityPreview;
+	bool useStateEventManager;
 };
 
 class Context
@@ -85,7 +86,6 @@ public:
 	bool hasSubsystem(const std::string &name);
 
 	ContextConfig &getConfig() { return m_config; }
-	sj::JSON &getData() { return m_data; }
 
 private:
 	// For compatibility with above defined macros
@@ -94,7 +94,6 @@ private:
 private:
 	bool m_initialized;
 	ContextConfig m_config;
-	sj::JSON m_data;
 	std::map<std::string, std::function<std::shared_ptr<Subsystem>()>> m_subsystemFactories;
 	std::map<std::string, std::shared_ptr<Subsystem>> m_subsystems;
 };

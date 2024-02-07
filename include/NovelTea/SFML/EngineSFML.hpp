@@ -22,13 +22,14 @@ public:
 	bool initialize();
 	void resize(size_t width, size_t height);
 	void render(sf::RenderTarget &target);
+	void update() override;
 	void update(float deltaSeconds) override;
 	void processEvent(const sf::Event &event);
-	void *processData(void *data);
 
 	sf::Vector2f mapPixelToCoords(const sf::Vector2i& point) const;
 
 private:
+	bool m_initialized;
 	std::unique_ptr<StateStack> m_stateStack;
 
 	sf::View m_view;

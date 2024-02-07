@@ -8,7 +8,10 @@
 #include <NovelTea/Map.hpp>
 #include <NovelTea/Room.hpp>
 #include <NovelTea/Verb.hpp>
+#include <NovelTea/Engine.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/SFML/Utils.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
 #include <TweenEngine/Tween.h>
 #include <iostream>
@@ -21,6 +24,7 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 , m_cutsceneRenderer(&context)
 , m_mapRenderer(&context)
 , m_previewText(&context)
+, m_shader(nullptr)
 , m_roomActiveText(&context)
 , m_scrollPos(0.f)
 , m_mode(StateEditorMode::Nothing)
@@ -40,6 +44,84 @@ StateEditor::StateEditor(StateStack& stack, Context& context, StateCallback call
 
 	m_textProps.color = fromColorSFML(sf::Color::Black);
 	m_previewText.setSkipWaitingForClick(true);
+
+	m_shaderText.setString("Text");
+	m_shaderText.setFillColor(sf::Color::Black);
+	m_shaderText.setFont(*Asset->font());
+
+	m_eventListenerId = EventMan->listen([this](const EventPtr &event){
+		auto type = event->type();
+		if (type == ModeChanged) {
+			m_mode = static_cast<StateEditorMode>(event->intVal);
+			if (m_mode == StateEditorMode::Test) {
+				auto callback = *reinterpret_cast<TestCallback*>(event->ptr);
+				StateCallback stateCallback = [callback](void* data){
+					auto& j = *reinterpret_cast<json*>(data);
+					return callback(j);
+				};
+				requestStackClear();
+				requestStackPush(StateID::Main, false, stateCallback);
+			}
+		}
+		else if (type == EntityChanged) {
+			if (m_mode == StateEditorMode::Cutscene) {
+				auto cutscene = std::make_shared<Cutscene>(getContext());
+				cutscene->fromJson(event->json);
+				m_cutsceneRenderer.setCutscene(cutscene);
+			}
+			else if (m_mode == StateEditorMode::Map) {
+				auto map = std::make_shared<Map>(getContext());
+				map->fromJson(event->json);
+				m_mapRenderer.setMap(map);
+			}
+			else if (m_mode == StateEditorMode::Room) {
+				try {
+					auto& jsonData = event->json;
+					auto room = std::make_shared<Room>(getContext());
+					room->fromJson(jsonData["room"]);
+
+					GSaveData[NovelTea::ID::properties][NovelTea::Room::id][room->getId()] = jsonData["props"];
+					GGame->setRoomId(room->getId());
+
+					ScriptMan.reset();
+					auto r = room->getDescription();
+					m_roomActiveText.setText(r);
+				} catch (std::exception &e) {
+					m_roomActiveText.setText(e.what());
+				}
+
+				m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
+				updateScrollbar();
+				m_roomScrollbar.setScroll(m_scrollPos);
+			}
+			else if (m_mode == StateEditorMode::Shader) {
+				m_startTime = Engine::getSystemTimeMs();
+				m_shader = static_cast<sf::Shader*>(event->ptr);
+				m_shader->setUniform("resolution", sf::Glsl::Vec2(m_size.x, m_size.y));
+			}
+		}
+		else if (type == CutsceneSeek) {
+			m_cutsceneRenderer.reset();
+			m_cutsceneRenderer.update(0.001f * event->intVal);
+		}
+		else if (type == CutsceneUpdate) {
+			m_cutsceneRenderer.update(0.001f * event->intVal);
+		}
+		else if (type == PreviewTextChanged) {
+			m_previewText.setText(event->text, m_textProps);
+		}
+		else if (type == PreviewFontChanged) {
+			m_textProps.fontAlias = event->text;
+			m_previewText.updateProps(m_textProps);
+			m_previewText.reset();
+		}
+		return true;
+	});
+}
+
+StateEditor::~StateEditor()
+{
+	EventMan->remove(m_eventListenerId);
 }
 
 void StateEditor::render(sf::RenderTarget &target)
@@ -55,11 +137,20 @@ void StateEditor::render(sf::RenderTarget &target)
 	}
 	else if (m_mode == StateEditorMode::Text)
 		target.draw(m_previewText);
+	else if (m_mode == StateEditorMode::Shader)
+	{
+		if (m_shader)
+			target.draw(m_shaderText, m_shader);
+	}
 }
 
 void StateEditor::resize(const sf::Vector2f &size)
 {
 	m_size = size;
+
+	if (m_shader) {
+		m_shader->setUniform("resolution", sf::Glsl::Vec2(size.x, size.y));
+	}
 
 	auto fontSizeMultiplier = GConfig.fontSizeMultiplier;
 	m_roomTextPadding = round(1.f / 16.f * std::min(size.x, size.y));
@@ -71,6 +162,10 @@ void StateEditor::resize(const sf::Vector2f &size)
 	m_previewText.setSize(size);
 	m_previewText.setFontSizeMultiplier(fontSizeMultiplier);
 	m_previewText.updateProps(m_textProps);
+
+	m_shaderText.setCharacterSize(size.y / 4);
+	m_shaderText.setOrigin(m_shaderText.getLocalBounds().width / 2, m_shaderText.getLocalBounds().height / 2);
+	m_shaderText.setPosition(size.x / 2, size.y / 2);
 
 	m_cutsceneRenderer.setMargin(m_roomTextPadding);
 	m_cutsceneRenderer.setFontSizeMultiplier(fontSizeMultiplier);
@@ -110,107 +205,6 @@ const sf::Vector2f &StateEditor::getScrollSize()
 	return m_scrollAreaSize;
 }
 
-void *StateEditor::processData(void *data)
-{
-	auto &jsonData = *static_cast<json*>(data);
-	auto resp = new json;
-	auto event = jsonData["event"].ToString();
-
-	if (event == "mode")
-	{
-		m_mode = static_cast<StateEditorMode>(jsonData["mode"].ToInt());
-	}
-	else if (event == "test")
-	{
-		// TODO: Need safer callback passing
-		auto strCallbackPtr = jsonData["callback"].ToString();
-		auto intCallbackPtr = strtoll(strCallbackPtr.c_str(), nullptr, 16);
-		auto callback = *reinterpret_cast<TestCallback*>(intCallbackPtr);
-
-		StateCallback stateCallback = [callback](void* data){
-			auto j = *reinterpret_cast<json*>(data);
-			return callback(j);
-		};
-
-		getContext()->getData()["test"] = jsonData["test"];
-		getContext()->getData()["record"] = jsonData["record"];
-		getContext()->getData()["stopIndex"] = jsonData["stopIndex"];
-
-		requestStackPop();
-		requestStackPush(StateID::Main, false, stateCallback);
-	}
-	else if (m_mode == StateEditorMode::Cutscene)
-	{
-		if (event == "cutscene")
-		{
-			auto cutscene = std::make_shared<Cutscene>(getContext());
-			cutscene->fromJson(jsonData["cutscene"]);
-			m_cutsceneRenderer.setCutscene(cutscene);
-		}
-		else if (event == "setPlaybackTime")
-		{
-			auto ms = jsonData["value"].ToInt();
-			m_cutsceneRenderer.reset();
-			m_cutsceneRenderer.update(0.001f * ms);
-		}
-		else if (event == "update")
-		{
-			auto deltaMs = jsonData["delta"].ToInt();
-			auto delta = 0.001f * deltaMs;
-			m_cutsceneRenderer.update(delta);
-		}
-	}
-	else if (m_mode == StateEditorMode::Map)
-	{
-		if (event == "map")
-		{
-			auto map = std::make_shared<Map>(getContext());
-			map->fromJson(jsonData["map"]);
-			m_mapRenderer.setMap(map);
-		}
-	}
-	else if (m_mode == StateEditorMode::Room)
-	{
-		if (event == "room")
-		{
-			try {
-				auto room = std::make_shared<Room>(getContext());
-				room->fromJson(jsonData["room"]);
-
-				GSaveData[NovelTea::ID::properties][NovelTea::Room::id][room->getId()] = jsonData["props"];
-				GGame->setRoomId(room->getId());
-
-				ScriptMan.reset();
-				auto r = room->getDescription();
-				m_roomActiveText.setText(r);
-			} catch (std::exception &e) {
-				m_roomActiveText.setText(e.what());
-			}
-
-			m_scrollAreaSize.y = m_roomTextPadding*2 + m_roomActiveText.getLocalBounds().height;
-			updateScrollbar();
-			m_roomScrollbar.setScroll(m_scrollPos);
-		}
-	}
-	else if (m_mode == StateEditorMode::Text)
-	{
-		if (event == "text")
-		{
-			m_previewText.setText(jsonData["text"].ToString(), m_textProps);
-		}
-		else if (event == "fontAlias")
-		{
-			m_textProps.fontAlias = jsonData["fontAlias"].ToString();
-			m_previewText.updateProps(m_textProps);
-			m_previewText.reset();
-		}
-	}
-
-	(*resp)["test"] = "pass";
-
-	return resp;
-}
-
 bool StateEditor::processEvent(const sf::Event &event)
 {
 	if (m_mode == StateEditorMode::Room)
@@ -230,6 +224,9 @@ bool StateEditor::update(float delta)
 {
 	if (m_mode == StateEditorMode::Map)
 		m_mapRenderer.update(delta);
+	else if (m_mode == StateEditorMode::Shader && m_shader) {
+		m_shader->setUniform("time", 0.001f * (Engine::getSystemTimeMs() - m_startTime));
+	}
 	if (!m_previewText.isAnimating())
 		m_previewText.reset();
 	m_previewText.update(delta);

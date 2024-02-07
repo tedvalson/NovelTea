@@ -24,24 +24,21 @@ NovelTeaWidget::~NovelTeaWidget()
 	delete m_context;
 }
 
-json NovelTeaWidget::processData(json jsonData)
-{
-	json resp;
-	auto ptr = static_cast<json*>(m_engine->processData(&jsonData));
-	if (ptr)
-	{
-		resp = *ptr;
-		delete ptr;
-	}
-	return resp;
-}
-
 void NovelTeaWidget::setMode(NovelTea::StateEditorMode mode)
 {
-	json jdata;
-	jdata["event"] = "mode";
-	jdata["mode"] = static_cast<int>(mode);
-	processData(jdata);
+	events()->trigger({NovelTea::StateEditor::ModeChanged, static_cast<int>(mode)});
+}
+
+void NovelTeaWidget::setTestMode(void *ptrCallback)
+{
+	NovelTea::Event event(NovelTea::StateEditor::ModeChanged, ptrCallback);
+	event.intVal = static_cast<int>(NovelTea::StateEditorMode::Test);
+	events()->trigger(std::move(event));
+}
+
+std::shared_ptr<NovelTea::EventManager> NovelTeaWidget::events()
+{
+	return m_engine->events();
 }
 
 void NovelTeaWidget::reset()
@@ -61,6 +58,7 @@ void NovelTeaWidget::reset()
 	auto dir = QCoreApplication::applicationDirPath().toStdString();
 	config.settingsDir = dir;
 	config.saveDir = dir;
+	config.useStateEventManager = false;
 
 	m_context = new NovelTea::Context(config);
 	m_engine = new NovelTea::EngineSFML(m_context);

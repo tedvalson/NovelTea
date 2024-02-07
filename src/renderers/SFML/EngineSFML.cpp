@@ -3,6 +3,7 @@
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/TextInput.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/States/StateEditor.hpp>
 #include <NovelTea/States/StateIntro.hpp>
 #include <NovelTea/States/StateMain.hpp>
@@ -20,6 +21,7 @@ namespace NovelTea
 
 EngineSFML::EngineSFML(Context* context)
 	: Engine(context)
+	, m_initialized(false)
 	, m_stateStack(new StateStack(context))
 	, m_shader(nullptr)
 {
@@ -41,6 +43,12 @@ EngineSFML::~EngineSFML()
 
 }
 
+#ifdef ANDROID
+int EngineSFML::run()
+{
+	return 0;
+}
+#else
 int EngineSFML::run()
 {
 	if (!initialize()) {
@@ -86,21 +94,25 @@ int EngineSFML::run()
 		}
 
 		m_shader->setUniform("time", 0.001f * (getSystemTimeMs() - startTime));
-		Engine::update();
+		update();
 		render(window);
 		window.display();
 	}
 	return 0;
 }
+#endif
 
 bool EngineSFML::initialize()
 {
+	if (m_initialized)
+		return true;
 	if (!Engine::initialize())
 		return false;
 
 	resize(GConfig.width, GConfig.height);
 
 	m_stateStack->pushState(GConfig.initialState);
+	m_initialized = true;
 	return true;
 }
 
@@ -161,11 +173,17 @@ void EngineSFML::render(sf::RenderTarget &target)
 	target.draw(m_sprite, sf::BlendNone);
 }
 
+void EngineSFML::update()
+{
+	Engine::update();
+}
+
 void EngineSFML::update(float deltaSeconds)
 {
-	m_lastTime = getSystemTimeMs();
-	if (deltaSeconds > 0.f)
+	if (deltaSeconds > 0.f) {
 		m_stateStack->update(deltaSeconds);
+	}
+	Engine::update(deltaSeconds);
 }
 
 void EngineSFML::processEvent(const sf::Event &event)
@@ -214,11 +232,6 @@ void EngineSFML::processEvent(const sf::Event &event)
 	}
 
 	m_stateStack->processEvent(e);
-}
-
-void *EngineSFML::processData(void *data)
-{
-	return m_stateStack->processData(data);
 }
 
 sf::Vector2f EngineSFML::mapPixelToCoords(const sf::Vector2i &point) const

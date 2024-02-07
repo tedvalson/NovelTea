@@ -167,7 +167,7 @@ void RoomWidget::updatePreview()
 		jdata["room"] = m_room->toJson();
 		jdata["props"] = ui->propertyEditor->getValue();
 
-		ui->preview->processData(jdata);
+		ui->preview->events()->trigger({NovelTea::StateEditor::EntityChanged, jdata});
 	}
 
 	ui->preview->repaint();

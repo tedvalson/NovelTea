@@ -197,8 +197,7 @@ void MapWidget::on_tabWidget_currentChanged(int index)
 	{
 		updateSelectedObject();
 		updateMap();
-		auto jdata = json({"event","map", "map",m_map->toJson()});
-		ui->preview->processData(jdata);
+		ui->preview->events()->trigger({NovelTea::StateEditor::EntityChanged, m_map->toJson()});
 	}
 }
 

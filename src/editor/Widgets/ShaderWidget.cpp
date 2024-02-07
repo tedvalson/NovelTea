@@ -1,9 +1,12 @@
 #include "ShaderWidget.hpp"
 #include "ui_ShaderWidget.h"
 #include "EditorUtils.hpp"
+#include <NovelTea/Event.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Script.hpp>
 #include <NovelTea/RegexUtils.hpp>
+#include <NovelTea/States/StateEditor.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <QMessageBox>
 #include <QBuffer>
 #include <QInputDialog>
@@ -31,9 +34,10 @@ ShaderWidget::ShaderWidget(QWidget *parent)
 		{ui->comboShaderPostProcess, ID::shaderPostProcess},
 	};
 
-	load();
-
+	ui->preview->setMode(NovelTea::StateEditorMode::Shader);
 	ui->preview->setFPS(30.f);
+
+	load();
 
 	ui->propertyBrowser->setFactoryForManager(m_variantManager, m_variantFactory);
 	ui->propertyBrowser->setPropertiesWithoutValueMarked(true);
@@ -82,7 +86,8 @@ void ShaderWidget::loadShaderId(const std::string &shaderId)
 	ui->scriptEdit->setPlainText(QString::fromStdString(m_shaders[shaderId][0].ToString()));
 
 	updatePropertyList(&m_shaders[shaderId][1]);
-	updateErrorLog();
+	if (updateErrorLog())
+		updatePreview();
 
 	ui->scriptEdit->blockSignals(false);
 	m_variantManager->blockSignals(false);
@@ -93,8 +98,8 @@ void ShaderWidget::timerEvent(QTimerEvent *event)
 	if (!m_shaderChanged)
 		return;
 	updatePropertyList();
-	updateErrorLog();
-	updatePreview();
+	if (updateErrorLog())
+		updatePreview();
 	m_shaderChanged = false;
 }
 
@@ -281,7 +286,8 @@ void ShaderWidget::updatePropertyList(const sj::JSON *uniformArray)
 
 void ShaderWidget::updatePreview()
 {
-
+	Asset->loadUniforms(&m_shader, getUniforms());
+	ui->preview->events()->trigger({NovelTea::StateEditor::EntityChanged, &m_shader});
 }
 
 void ShaderWidget::on_scriptEdit_textChanged()
@@ -295,16 +301,21 @@ bool ShaderWidget::isVertexShader(const std::string &script)
 	return 	std::regex_search(script.begin(), script.end(), re);
 }
 
-void ShaderWidget::updateErrorLog()
+bool ShaderWidget::updateErrorLog()
 {
-	sf::Shader shader;
 	auto script = ui->scriptEdit->toPlainText().toStdString();
-	if (shader.loadFromMemory(script, isVertexShader(script) ? sf::Shader::Vertex : sf::Shader::Fragment))
+	auto isVertex = isVertexShader(script);
+	auto fragShader = isVertex ? m_shaders["defaultFrag"][0].ToString() : script;
+	auto vertShader = isVertex ? script : m_shaders["defaultVert"][0].ToString();
+	if (m_shader.loadFromMemory(vertShader, fragShader))
 	{
+		m_shader.setUniform("texture", sf::Shader::CurrentTexture);
 		ui->textErrorLog->setPlainText("Compiled Successfully");
+		return true;
 	} else {
-		auto errorLog = shader.getErrorLog();
+		auto errorLog = m_shader.getErrorLog();
 		ui->textErrorLog->setPlainText(QString::fromStdString(errorLog));
+		return false;
 	}
 }
 

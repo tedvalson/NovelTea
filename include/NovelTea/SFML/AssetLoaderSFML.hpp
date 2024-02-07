@@ -2,6 +2,7 @@
 #define NOVELTEA_ASSETLOADER_SFML_HPP
 
 #include <NovelTea/AssetLoader.hpp>
+#include <NovelTea/json.hpp>
 #include <memory>
 #include <map>
 
@@ -27,6 +28,8 @@ public:
 
 	std::shared_ptr<sf::Shader> shader(const std::string &fragShaderId, const std::string &vertShaderId = std::string()) const;
 	std::shared_ptr<sf::Shader> shader(int systemShaderIndex) const;
+
+	bool loadUniforms(sf::Shader *shader, const sj::JSON &uniforms) const;
 
 private:
 	std::map<std::string, std::shared_ptr<sf::Font>> m_fonts;

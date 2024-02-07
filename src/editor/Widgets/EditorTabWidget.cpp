@@ -2,6 +2,8 @@
 #include "EditorUtils.hpp"
 #include "MainWindow.hpp"
 #include <NovelTea/Game.hpp>
+#include <NovelTea/StateEventManager.hpp>
+#include <NovelTea/SFML/AssetLoaderSFML.hpp>
 #include <QCoreApplication>
 #include <QIcon>
 
@@ -17,6 +19,8 @@ EditorTabWidget::EditorTabWidget(QWidget *parent)
 	config.saveDir = dir;
 	config.projectData = MainWindow::instance().getProjectBackup();
 	m_context = new NovelTea::Context(config);
+	m_context->registerSubsystem<NovelTea::AssetLoaderSFML>();
+	m_context->registerSubsystem<NovelTea::StateEventManager>();
 	m_context->initialize();
 }
 

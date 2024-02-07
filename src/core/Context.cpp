@@ -5,6 +5,7 @@
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Timer.hpp>
 #include <NovelTea/Notification.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/Settings.hpp>
 #include <NovelTea/ScriptManager.hpp>
@@ -28,6 +29,7 @@ ContextConfig::ContextConfig()
 	, entryEntity(sj::Array())
 	, entryMeta(sj::Array())
 	, entityPreview(false)
+	, useStateEventManager(true)
 {
 
 }
@@ -43,6 +45,8 @@ Context::Context(const ContextConfig &config)
 	registerSubsystem<NotificationManager>();
 	registerSubsystem<ScriptManager>();
 	registerSubsystem<TextLog>();
+	if (config.useStateEventManager)
+		registerSubsystem<StateEventManager>();
 }
 
 bool Context::initialize()

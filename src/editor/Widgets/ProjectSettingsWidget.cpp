@@ -241,8 +241,7 @@ void ProjectSettingsWidget::refreshVerbs()
 
 void ProjectSettingsWidget::on_lineEditFontPreview_textChanged(const QString &arg1)
 {
-	auto jdata = json({"event","text", "text",arg1.toStdString()});
-	ui->preview->processData(jdata);
+	ui->preview->events()->trigger({NovelTea::StateEditor::PreviewTextChanged, arg1.toStdString()});
 }
 
 void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
@@ -253,8 +252,7 @@ void ProjectSettingsWidget::on_listFonts_currentRowChanged(int currentRow)
 	ui->buttonFontRename->setEnabled(!builtIn);
 	ui->buttonFontDelete->setEnabled(!builtIn);
 
-	auto jdata = json({"event","fontAlias", "fontAlias",alias.toStdString()});
-	ui->preview->processData(jdata);
+	ui->preview->events()->trigger({NovelTea::StateEditor::PreviewFontChanged, alias.toStdString()});
 }
 
 void ProjectSettingsWidget::on_buttonImportFont_clicked()

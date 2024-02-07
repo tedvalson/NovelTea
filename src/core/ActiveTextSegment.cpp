@@ -796,7 +796,7 @@ void ActiveTextSegment::ensureUpdate() const
 	m_shader = nullptr;
 	if (!style.fragShaderId.empty() || !style.vertexShaderId.empty()) {
 		std::cout << "shaderIds: '" << style.vertexShaderId << "' '" << style.fragShaderId << "'" << std::endl;
-		m_shader = Proj->getShader(style.fragShaderId, style.vertexShaderId);
+		m_shader = Asset->shader(style.fragShaderId, style.vertexShaderId);
 		if (m_shader->getErrorLog().empty()) {
 			sf::Glsl::Vec2 res(GConfig.width, GConfig.height);
 			m_shader->setUniform("resolution", res);

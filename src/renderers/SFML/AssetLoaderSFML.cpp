@@ -77,27 +77,11 @@ std::shared_ptr<sf::Shader> AssetLoaderSFML::shader(const std::string &fragShade
 	auto vertShader = shaders[shaders.hasKey(vertShaderId) ? vertShaderId : "defaultVert"];
 	if (shader->loadFromMemory(vertShader[0].ToString(), fragShader[0].ToString()))
 	{
-		auto loadUniforms = [this, &shader](json &jshader) {
-			for (auto& j : jshader.ObjectRange()) {
-				// Uniforms is either a float or a string (with texture id)
-				bool ok;
-				float value = j.second.ToFloat(ok);
-				if (ok)
-					shader->setUniform(j.first, value);
-				else {
-					auto tex = texture(j.second.ToString());
-					if (tex) {
-						shader->setUniform(j.first, *tex);
-						tex->setRepeated(true);
-						shader->setUniform(j.first + "Matrix", tex->getMatrix(sf::Texture::Normalized));
-					}
-				}
-			}
-		};
-
 		shader->setUniform("texture", sf::Shader::CurrentTexture);
-		loadUniforms(fragShader[1]);
-		loadUniforms(vertShader[1]);
+		loadUniforms(shader.get(), fragShader[1]);
+		loadUniforms(shader.get(), vertShader[1]);
+	} else {
+		err() << "Failed to load shader. FragId:" << fragShaderId << " VertId:" << vertShaderId << std::endl;
 	}
 	return shader;
 }
@@ -105,6 +89,26 @@ std::shared_ptr<sf::Shader> AssetLoaderSFML::shader(const std::string &fragShade
 std::shared_ptr<sf::Shader> AssetLoaderSFML::shader(int systemShaderIndex) const
 {
 	return shader(ProjData[ID::systemShaders][systemShaderIndex].ToString());
+}
+
+bool AssetLoaderSFML::loadUniforms(sf::Shader *shader, const sj::JSON &uniforms) const
+{
+	for (auto& j : uniforms.ObjectRange()) {
+		// Uniforms is either a float or a string (with texture id)
+		bool ok;
+		float value = j.second.ToFloat(ok);
+		if (ok)
+			shader->setUniform(j.first, value);
+		else {
+			auto tex = texture(j.second.ToString());
+			if (tex) {
+				shader->setUniform(j.first, *tex);
+				tex->setRepeated(true);
+				shader->setUniform(j.first + "Matrix", tex->getMatrix(sf::Texture::Normalized));
+			}
+		}
+	}
+	return true;
 }
 
 } // namespace NovelTea

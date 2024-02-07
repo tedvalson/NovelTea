@@ -17,6 +17,8 @@ TestsWidget::TestsWidget(QWidget *parent)
 	, m_stepRecordingIndex(-1)
 {
 	ui->setupUi(this);
+	m_callback = [this](const json &j){ return processCallbackData(j); };
+	ui->preview->setTestMode(&m_callback);
 	load();
 
 	m_menuAdd->addAction(ui->actionAddStepAction);
@@ -25,8 +27,6 @@ TestsWidget::TestsWidget(QWidget *parent)
 	m_menuList->addAction(ui->actionRunHere);
 	m_menuList->addAction(ui->actionRecordHere);
 	ui->tabWidget->setEnabled(false);
-
-	m_callback = [this](const json &j){ return processCallbackData(j); };
 
 	// Attach the menu to the Add toolbutton
 	ui->actionAddStep->setMenu(m_menuAdd);
@@ -209,18 +209,15 @@ void TestsWidget::processSteps(bool startRecording, int stopIndex)
 	m_stepRecordingIndex = stopIndex;
 	auto &jtest = m_json[m_selectedTestId];
 	auto j = json({
-		"event", "test",
-		"type", "playback",
 		"test", jtest,
 		"record", startRecording,
 		"stopIndex", stopIndex,
-		"callback", std::to_string(&m_callback),
 	});
 	if (stopIndex >= 0) {
 		auto item = ui->listWidgetSteps->item(stopIndex);
 		item->setBackground(QBrush(Qt::green));
 	}
-	ui->preview->processData(j);
+	ui->preview->events()->trigger({NovelTea::StateEditor::RunTest, j});
 }
 
 void TestsWidget::saveSettings() const

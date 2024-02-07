@@ -6,6 +6,7 @@
 #include <NovelTea/GUI/Icon/IconContinue.hpp>
 #include <TweenEngine/Tween.h>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/TextTypes.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Window/Event.hpp>
@@ -26,9 +27,8 @@ class DialogueRenderer : public ContextObject, public sf::Drawable, public Scrol
 {
 public:
 	DialogueRenderer(Context *context);
+	~DialogueRenderer();
 
-	void setDialogue(const std::shared_ptr<Dialogue> &dialogue);
-	const std::shared_ptr<Dialogue> &getDialogue() const;
 	void reset();
 	void update(float delta);
 	bool processEvent(const sf::Event &event);
@@ -37,14 +37,10 @@ public:
 	bool processSelection(int buttonIndex);
 	void setDialogueCallback(DialogueCallback callback);
 
-	void changeSegment(int newSegmentIndex, bool run = true, int buttonSubindex = -1);
-	void changeLine(int newLineIndex);
 	bool continueToNext();
 
-	sj::JSON saveState() const;
-	void restoreState(const sj::JSON &jstate);
+	void changeLine();
 
-	bool isComplete() const;
 	void show(float duration = 1.f, int startSegmentIndex = -1);
 	void hide(float duration = 1.f);
 
@@ -61,19 +57,16 @@ public:
 
 protected:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
-	void genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot);
 
 	void repositionButtons(float fontSize);
 	void applyChanges();
 
 private:
-	std::shared_ptr<Dialogue> m_dialogue;
+	std::shared_ptr<StateEvent::DialogueEvent> m_current;
 	DialogueCallback m_callback;
-	int m_currentSegmentIndex;
-	int m_nextForcedSegmentIndex;
-	bool m_isComplete;
 	bool m_isShowing;
 	bool m_logCurrentIndex;
+	int m_eventListenerId;
 
 	int m_textLineIndex;
 	std::vector<std::pair<std::string,std::string>> m_textLines;

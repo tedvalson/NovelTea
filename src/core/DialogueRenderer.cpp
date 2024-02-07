@@ -7,6 +7,7 @@
 #include <NovelTea/TextLog.hpp>
 #include <NovelTea/PropertyList.hpp>
 #include <NovelTea/AssetManager.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/GUI/Button.hpp>
 #include <NovelTea/SFML/Utils.hpp>
 #include <TweenEngine/Tween.h>
@@ -53,18 +54,17 @@ DialogueRenderer::DialogueRenderer(Context *context)
 	m_animNameProps.delay = 0;
 
 	m_size = sf::Vector2f(400.f, 400.f);
-	setDialogue(std::make_shared<Dialogue>(context));
+
+	m_eventListenerId = EventMan->listen(StateEvent::DialogueChanged, [this](const NovelTea::EventPtr &event){
+		m_current = std::static_pointer_cast<StateEvent::DialogueEvent>(event);
+		changeLine();
+		return true;
+	});
 }
 
-void DialogueRenderer::setDialogue(const std::shared_ptr<Dialogue> &dialogue)
+DialogueRenderer::~DialogueRenderer()
 {
-	m_dialogue = dialogue;
-	reset();
-}
-
-const std::shared_ptr<Dialogue> &DialogueRenderer::getDialogue() const
-{
-	return m_dialogue;
+	EventMan->remove(m_eventListenerId);
 }
 
 void DialogueRenderer::reset()
@@ -72,13 +72,11 @@ void DialogueRenderer::reset()
 	hide(0.f);
 	m_tweenManager.update(0.1f);
 
-	m_isComplete = false;
 	m_text.setText("");
 	m_text.show(0.f);
 	m_text.onComplete(nullptr);
 	m_textName.setText("");
 	m_textName.show(0.f);
-	m_nextForcedSegmentIndex = m_dialogue->getRootIndex();
 	applyChanges();
 }
 
@@ -135,17 +133,11 @@ bool DialogueRenderer::processEvent(const sf::Event &event)
 
 void DialogueRenderer::processLines()
 {
-	while (m_buttons.empty() && !isComplete())
-		changeSegment(m_nextForcedSegmentIndex);
-	if (!m_textLines.empty())
-		changeLine(m_textLines.size() - 1);
 }
 
 bool DialogueRenderer::processSelection(int buttonIndex)
 {
 	processLines();
-	if (m_isComplete)
-		return false;
 	if (buttonIndex < 0 || buttonIndex >= m_buttons.size())
 		return false;
 	m_buttons[buttonIndex]->click();
@@ -227,6 +219,7 @@ void DialogueRenderer::applyChanges()
 	repositionButtons(m_fontSize);
 }
 
+/*
 // Segment arg is a choice segment (or root/link)
 void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSubindex)
 {
@@ -237,7 +230,6 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 		return;
 	}
 
-	m_dialogue->getPropertyList()->sync();
 	m_tweenManager.killAll();
 	m_buttonsOld = m_buttons;
 	m_buttons.clear();
@@ -316,44 +308,95 @@ void DialogueRenderer::changeSegment(int newSegmentIndex, bool run, int buttonSu
 
 	changeLine(0);
 }
+*/
 
-void DialogueRenderer::changeLine(int newLineIndex)
+void DialogueRenderer::changeLine()
 {
-	if (newLineIndex + 1 > m_textLines.size())
-		return;
-	auto &line = m_textLines[newLineIndex];
+	m_bg.setColor(sf::Color(0, 0, 0, 30));
+
+	m_tweenManager.killAll();
+	m_buttonsOld = m_buttons;
+	m_buttons.clear();
+	m_buttonTextsOld = m_buttonTexts;
+	m_buttonTexts.clear();
+	m_isShowing = false;
+
+	// gen buttons
+	int i = 0;
+	for (auto& option : m_current->options) {
+		auto btn = new Button(getContext());
+		btn->setCentered(false);
+		btn->setTexture(m_buttonTexture);
+
+		if (option.clickable || option.enabled) {
+			btn->setColor(sf::Color(180, 180, 180, 180));
+			btn->setActiveColor(sf::Color(140, 140, 140));
+			if (option.enabled)
+				btn->setTextColor(sf::Color::Black);
+			else
+				btn->setTextColor(sf::Color(100, 100, 100));
+			btn->onClick([this, i](){
+				EventMan->trigger({StateEvent::DialogueChoice, i});
+			});
+		} else {
+			auto bgColor = sf::Color(180, 180, 180, 100);
+			auto textColor = sf::Color(100, 100, 100);
+			btn->setColor(bgColor);
+			btn->setActiveColor(bgColor);
+			btn->setTextColor(textColor);
+		}
+
+		m_buttons.emplace_back(btn);
+
+		TextProperties buttonTextProps;
+		buttonTextProps.fontSize = m_fontSize / 2;
+		m_buttonTexts.emplace_back(new ActiveText(getContext(), option.text, buttonTextProps));
+
+		++i;
+	}
+
+	for (auto &button : m_buttons) {
+		TweenEngine::Tween::set(*button, Button::ALPHA)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
+	for (auto &button : m_buttonsOld) {
+		TweenEngine::Tween::to(*button, Button::ALPHA, 0.4f)
+			.target(0.f)
+			.start(m_tweenManager);
+	}
+	for (auto &text : m_buttonTexts)
+		text->hide(0.f);
+	for (auto &text : m_buttonTextsOld)
+		text->hide(0.4f);
+	m_tweenManager.update(0.0001f);
+
+	// change line
+
 	TextProperties textProps;
 	textProps.fontSize = m_fontSize / 2;
-	m_textLineIndex = newLineIndex;
 	while (!m_text.isComplete())
 	{
 		m_text.skipToNext();
 	}
 
 	m_textOld = m_text;
-	m_text.setText(line.second, textProps, m_animProps);
+	m_text.setText(m_current->text, textProps, m_animProps);
 
 	m_scrollAreaSize.y = m_text.getCursorEnd().y + m_fontSize * 2;
 	updateScrollbar();
 	m_scrollBar.setScroll(0.f);
 
-	if (m_logCurrentIndex) {
-		GTextLog->push(line.first, TextLogType::DialogueTextName);
-		GTextLog->push(line.second, TextLogType::DialogueText);
-	}
+	auto noWait = !m_current->waitForClick;
 
-	// Check last segment to see if it expects to wait for click
-	const auto& segs = m_text.getSegments();
-	auto noWait = !segs.empty() && !segs.back()->getAnimProps().waitForClick;
-
-	m_text.onComplete([this, newLineIndex, noWait](){
+	m_text.onComplete([this, noWait](){
 		if (noWait && continueToNext())
 			return;
 
-		if (m_textLineIndex + 1 == m_textLines.size()) {
+		if (m_current->options.empty()) {
+			m_iconContinue.show();
+		} else {
 			repositionButtons(m_fontSize);
-			if (m_buttons.empty())
-				m_iconContinue.show();
 			for (auto &button : m_buttons) {
 				TweenEngine::Tween::to(*button, Button::ALPHA, 1.f)
 					.target(255.f)
@@ -363,8 +406,6 @@ void DialogueRenderer::changeLine(int newLineIndex)
 				text->hide(0.f);
 				text->show(1.f);
 			}
-		} else {
-			m_iconContinue.show();
 		}
 	});
 
@@ -375,7 +416,7 @@ void DialogueRenderer::changeLine(int newLineIndex)
 	m_text.show(0.f);
 	m_textName.show(0.f);
 	m_textNameOld = m_textName;
-	m_textName.setText(line.first, textProps, m_animNameProps);
+	m_textName.setText(m_current->name, textProps, m_animNameProps);
 	m_textName.hide(0.f);
 	m_textName.show(duration);
 	m_textNameOld.hide(duration);
@@ -383,19 +424,13 @@ void DialogueRenderer::changeLine(int newLineIndex)
 
 bool DialogueRenderer::continueToNext()
 {
-	if (m_textLineIndex + 1 == m_textLines.size()) {
-		// Cannot continue if waiting for option to be selected
-		if (m_buttons.empty()) {
-			changeSegment(m_nextForcedSegmentIndex);
-			return true;
-		}
-	} else {
-		changeLine(m_textLineIndex + 1);
-		return true;
-	}
-	return false;
+	if (!m_current->options.empty())
+		return false;
+	EventMan->push(StateEvent::DialogueContinue);
+	return true;
 }
 
+/*
 sj::JSON DialogueRenderer::saveState() const
 {
 	auto index = m_nextForcedSegmentIndex;
@@ -417,13 +452,12 @@ bool DialogueRenderer::isComplete() const
 {
 	return m_isComplete;
 }
+*/
 
 void DialogueRenderer::show(float duration, int startSegmentIndex)
 {
 	m_isShowing = true;
 	m_tweenManager.killAll();
-	if (startSegmentIndex < 0)
-		startSegmentIndex = m_dialogue->getRootIndex();
 	m_scrollBar.setAutoHide(false);
 	m_scrollAreaSize.y = 0.f;
 	updateScrollbar();
@@ -432,7 +466,6 @@ void DialogueRenderer::show(float duration, int startSegmentIndex)
 		.target(30.f)
 		.setCallback(TweenEngine::TweenCallback::COMPLETE, [this, startSegmentIndex](TweenEngine::BaseTween*){
 			m_isShowing = false;
-			changeSegment(startSegmentIndex, false);
 		})
 		.start(m_tweenManager);
 }
@@ -534,6 +567,7 @@ void DialogueRenderer::draw(sf::RenderTarget &target, sf::RenderStates states) c
 	target.draw(m_iconContinue);
 }
 
+/*
 void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parentNode, bool isRoot)
 {
 	auto optionNext = parentNode->isOptionNext();
@@ -631,5 +665,6 @@ void DialogueRenderer::genOptions(const std::shared_ptr<DialogueSegment> &parent
 		m_buttonTexts.clear();
 	}
 }
+*/
 
 } // namespace NovelTea

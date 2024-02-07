@@ -28,6 +28,7 @@ public:
 	ADD_ACCESSOR(bool, FramerateLocked, m_framerateLocked)
 
 protected:
+	bool m_initialized;
 	bool m_framerateLocked;
 	float m_deltaPerFrame;
 	int64_t m_lastTime;

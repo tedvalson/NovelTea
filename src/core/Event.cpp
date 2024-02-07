@@ -64,7 +64,12 @@ bool EventManager::trigger(Event &&event)
 
 bool EventManager::trigger(int eventType)
 {
-	return trigger({eventType});
+	return trigger(Event{eventType});
+}
+
+void EventManager::push(const EventPtr &event)
+{
+	m_eventQueue.push_back(event);
 }
 
 void EventManager::push(Event &&event)
@@ -93,10 +98,16 @@ Event::Event(int type)
 	}
 }
 
-Event::Event(int type, int num)
+Event::Event(int type, int value)
 : Event(type)
 {
-	number = num;
+	intVal = value;
+}
+
+Event::Event(int type, float value)
+: Event(type)
+{
+	floatVal = value;
 }
 
 Event::Event(int type, const std::string &str)
@@ -105,16 +116,30 @@ Event::Event(int type, const std::string &str)
 	text = str;
 }
 
+Event::Event(int type, const sj::JSON &j)
+: Event(type)
+{
+	json = j;
+}
+
 Event::Event(int type, std::shared_ptr<ContextObject> obj)
 : Event(type)
 {
 	object = obj;
 }
 
+Event::Event(int type, void *pointer)
+: Event(type)
+{
+	ptr = pointer;
+}
+
 Event::Event(Event &&event)
-: number(event.number)
+: intVal(event.intVal)
+, floatVal(event.floatVal)
 , text(event.text)
 , object(event.object)
+, json(event.json)
 , ptr(event.ptr)
 , m_type(event.m_type)
 {

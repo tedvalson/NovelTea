@@ -14,6 +14,7 @@ namespace NovelTea
 
 Engine::Engine(Context* context)
 : ContextObject(context)
+, m_initialized(false)
 , m_framerateLocked(false)
 {
 }
@@ -49,6 +50,8 @@ int Engine::run()
 
 bool Engine::initialize()
 {
+	if (m_initialized)
+		return true;
 	if (!getContext()->initialize())
 		return false;
 
@@ -58,6 +61,7 @@ bool Engine::initialize()
 	m_lastTime = getSystemTimeMs();
 	m_deltaPerFrame = 1.f / GConfig.maxFps;
 
+	m_initialized = true;
 	return true;
 }
 

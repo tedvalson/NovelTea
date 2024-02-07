@@ -51,17 +51,6 @@ void StateStack::processEvent(const sf::Event& event)
 	applyPendingChanges();
 }
 
-void *StateStack::processData(void *data)
-{
-	void *ret;
-	for (auto itr = m_stack.rbegin(); itr != m_stack.rend(); ++itr)
-	{
-		if ((ret = itr->pointer->processData(data)))
-			return ret;
-	}
-	return nullptr;
-}
-
 void StateStack::pushState(StateID stateID, bool renderAlone, StateCallback callback)
 {
 	m_pendingList.push_back(PendingChange(Push, stateID, renderAlone, callback));

@@ -308,7 +308,6 @@ void CutsceneRenderer::startTransitionEffect(const CutsceneTextSegment *segment)
 			m_texts.push_back(activeText);
 		}).start(m_tweenManager);
 
-	activeText->setPosition((m_size.x < m_size.y ? 0.f : 0.2f * m_size.x), 0.f);
 /*
 	if (effect == CutsceneSegment::TextEffectFade) {
 		activeText->setAlpha(0.f);
@@ -403,7 +402,12 @@ void CutsceneRenderer::addSegmentToQueue(size_t segmentIndex)
 			activeText->setCursorStart(m_cursorPos);
 			m_cursorPos = activeText->getCursorEnd();
 			m_timeToNext = sf::milliseconds(seg->getFullDelay());
-			startTransitionEffect(seg);
+
+			// Push activeText in callback so it doesn't show before update()
+			TweenEngine::Tween::mark()
+				.setCallback(TweenEngine::TweenCallback::BEGIN, [this, activeText](TweenEngine::BaseTween*){
+					m_texts.push_back(activeText);
+				}).start(m_tweenManager);
 
 			m_scrollAreaSize.y = activeText->getLocalBounds().height + scrollAreaMargin;
 			updateScrollbar();

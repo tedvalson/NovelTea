@@ -10,6 +10,7 @@ using json = sj::JSON;
 
 namespace NovelTea {
 class EngineSFML;
+class EventManager;
 enum class StateEditorMode;
 }
 
@@ -20,8 +21,10 @@ public:
 	explicit NovelTeaWidget(QWidget *parent = 0);
 	virtual ~NovelTeaWidget();
 
-	json processData(json jsonData);
 	void setMode(NovelTea::StateEditorMode mode);
+	void setTestMode(void *ptrCallback);
+
+	std::shared_ptr<NovelTea::EventManager> events();
 
 	void reset();
 
@@ -47,6 +50,7 @@ private:
 //	QBasicTimer timer;
 	sf::Vector2f m_internalSize;
 	float m_internalRatio;
+	bool m_useStateEventManager;
 };
 
 #endif // NOVELTEAWIDGET_H

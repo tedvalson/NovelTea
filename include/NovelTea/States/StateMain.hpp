@@ -9,6 +9,7 @@
 #include <NovelTea/DialogueRenderer.hpp>
 #include <NovelTea/MapRenderer.hpp>
 #include <NovelTea/ActiveText.hpp>
+#include <NovelTea/StateEventManager.hpp>
 #include <NovelTea/GUI/VerbList.hpp>
 #include <NovelTea/GUI/ActionBuilder.hpp>
 #include <NovelTea/GUI/Inventory.hpp>
@@ -22,26 +23,19 @@ using json = sj::JSON;
 namespace NovelTea
 {
 
-enum class Mode {
-	Nothing,
-	Cutscene,
-	Dialogue,
-	Room,
-};
-
 class StateMain : public State, public Scrollable
 {
 public:
 	static const int ACTION_BUILDER = 2;
 
 	StateMain(StateStack& stack, Context& context, StateCallback callback);
+	~StateMain();
 	bool processEvent(const sf::Event &event) override;
 	bool update(float delta) override;
 	void render(sf::RenderTarget &target) override;
 	void resize(const sf::Vector2f &size) override;
 
-	void setMode(Mode mode, const std::string &idName = std::string());
-	void setMode(const json &jEntity);
+	void setMode(EntityMode mode, const std::string &idName = std::string());
 
 	void showToolbar(float duration = 0.5f);
 	void hideToolbar(float duration = 0.5f);
@@ -53,13 +47,8 @@ public:
 	int getValues(int tweenType, float *returnValues) override;
 	void setValues(int tweenType, float *newValues) override;
 
-	void processTest();
-	bool processTestSteps();
-	bool processTestInit();
-	bool processTestCheck();
 	bool processAction(const std::string &verbId, const std::vector<std::string> &objectIds);
 
-	bool gotoNextEntity();
 
 	void updateUI();
 	void updateRoomText(const std::string &newText = " ", float duration = 1.f);
@@ -71,7 +60,7 @@ protected:
 	void quit();
 
 private:
-	Mode m_mode;
+	EntityMode m_mode;
 	bool m_testPlaybackMode;
 	bool m_testRecordMode;
 	bool m_quitting;
@@ -104,16 +93,15 @@ private:
 	IconGlow m_iconSave;
 
 	sf::Clock m_clock;
-	double m_playTime;
 	bool m_quickVerbPressed;
 
+	int m_eventListenerId;
+
 	// Cutscene
-	std::shared_ptr<Cutscene> m_cutscene;
 	CutsceneRenderer m_cutsceneRenderer;
 	float m_cutsceneSpeed;
 
 	// Dialogue
-	std::shared_ptr<Dialogue> m_dialogue;
 	DialogueRenderer m_dialogueRenderer;
 
 	// Map

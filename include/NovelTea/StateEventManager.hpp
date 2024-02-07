@@ -30,16 +30,17 @@ namespace StateEvent
 	enum Type {
 		ModeChanged = Event::EventCount + 1,
 		Message,
-		CutscenePageBreak,
-		CutsceneText,
+		CutsceneChanged,
 		DialogueChanged,
 		RoomTextChanged,
 
 		// User response events
-		CutsceneContinue,
+		CutsceneComplete,
 		DialogueContinue,
 		DialogueChoice,
 		MessageContinue,
+
+		EventCount,
 	};
 
 	struct RoomEvent {
@@ -89,6 +90,8 @@ public:
 
 	void move(int direction, const sj::JSON &jentity);
 
+	void reset();
+
 protected:
 	void callOverlayFunc();
 
@@ -105,8 +108,6 @@ private:
 
 	// Cutscene
 	std::shared_ptr<Cutscene> m_cutscene;
-	std::shared_ptr<CutscenePlayer> m_cutscenePlayer;
-	float m_cutsceneSpeed;
 
 	// Dialogue
 	std::shared_ptr<Dialogue> m_dialogue;

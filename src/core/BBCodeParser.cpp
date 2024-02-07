@@ -283,8 +283,8 @@ std::vector<std::shared_ptr<StyledSegment>> BBCodeParser::makeSegments(const std
 		if (newGroup && !lastSegment->anim.waitForClick)
 			pushSeg(true);
 	}
-	// Push remaining content.
-	pushSeg();
+	// Push remaining content. And if text was empty, force it to make at least one segment.
+	pushSeg(text.empty());
 
 	return result;
 }
