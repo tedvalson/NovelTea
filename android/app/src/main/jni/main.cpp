@@ -1,5 +1,5 @@
+#include <NovelTea/SFML/EngineSFML.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/Engine.hpp>
 #include <NovelTea/SaveData.hpp>
 #include <NovelTea/Settings.hpp>
 #include <NovelTea/TextInput.hpp>
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 		config.initialState = NovelTea::StateID::TitleScreen;
 
 	auto context = new NovelTea::Context(config);
-	auto engine = new NovelTea::Engine(context);
+	auto engine = new NovelTea::EngineSFML(context);
 	engine->initialize();
 	engine->setFramerateLocked(true);
 	
