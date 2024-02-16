@@ -1,7 +1,6 @@
 #include <NovelTea/ScriptManager.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/Context.hpp>
-#include <NovelTea/ActiveText.hpp>
 #include <NovelTea/Action.hpp>
 #include <NovelTea/Cutscene.hpp>
 #include <NovelTea/Dialogue.hpp>
@@ -219,8 +218,6 @@ void ScriptManager::registerFunctions()
 
 void ScriptManager::registerClasses()
 {
-	// ActiveText
-
 	// ObjectList
 	dukglue_register_method(m_context, &ObjectList::add, "add");
 	dukglue_register_method(m_context, &ObjectList::addId, "addId");

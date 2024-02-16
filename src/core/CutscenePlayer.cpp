@@ -47,6 +47,7 @@ void CutscenePlayer::reset(bool preservePosition)
 	m_segmentSaveIndex = -1;
 	m_timePassed = 0;
 	m_timeToNext = 0;
+	m_tweenManager.killAll();
 
 	m_cutscene->setSkipConditionChecks(m_skipConditionChecks);
 	ScriptMan->setActiveEntity(m_cutscene);
@@ -196,8 +197,6 @@ void CutscenePlayer::addSegmentToQueue(size_t segmentIndex)
 
 
 			m_timeToNext = 0.001f * segment->getFullDelay();
-			EventMan->push({StateEvent::CutsceneText, segment});
-//			startTransitionEffect(seg);
 		};
 	}
 	else if (type == CutsceneSegment::PageBreak)
@@ -207,13 +206,11 @@ void CutscenePlayer::addSegmentToQueue(size_t segmentIndex)
 //			m_textsOld = m_texts;
 //			m_texts.clear();
 			m_timeToNext = 0.001f * segment->getDelay();
-			EventMan->push({StateEvent::CutscenePageBreak, segment});
-//			startTransitionEffect(seg);
 		};
 	}
 	else if (type == CutsceneSegment::Script)
 	{
-		auto seg = static_cast<CutsceneScriptSegment*>(segment.get());
+		auto seg = std::static_pointer_cast<CutsceneScriptSegment>(segment);
 		beginCallback = [this, seg](TweenEngine::BaseTween*)
 		{
 			m_timeToNext = 0.001f * seg->getDelay();
@@ -252,9 +249,7 @@ void CutscenePlayer::addSegmentToQueue(size_t segmentIndex)
 	};
 
 	if (beginCallback)
-		TweenEngine::Tween::mark()
-			.setCallback(TweenEngine::TweenCallback::BEGIN, beginCallback)
-			.start(m_tweenManager);
+		beginCallback(nullptr);
 	if (endCallback)
 		TweenEngine::Tween::mark()
 			.delay(timeToNext)

@@ -1,8 +1,7 @@
 include(FetchContent)
 FetchContent_Declare(
   gtest
-  URL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
-  URL_HASH MD5=ecd1fa65e7de707cd5c00bdac56022cd
+  URL https://github.com/google/googletest/archive/release-1.11.0.tar.gz
 )
 
 # For Windows: Prevent overriding the parent project's compiler/linker settings

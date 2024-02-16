@@ -18,7 +18,6 @@ set(SOURCE_FILES
 	${SRCROOT}/GUI/VerbList.cpp
 	${SRCROOT}/GUI/Icon/IconContinue.cpp
 	${SRCROOT}/GUI/Icon/IconGlow.cpp
-	${SRCROOT}/GUI/Icon/IconTouch.cpp
 	${SRCROOT}/GUI/TextLog/TextLogDialogueOptionItem.cpp
 	${SRCROOT}/GUI/TextLog/TextLogDialogueTextItem.cpp
 	${SRCROOT}/GUI/TextLog/TextLogGenericItem.cpp
@@ -42,4 +41,11 @@ set(SOURCE_FILES
 )
 
 add_library(NovelTea-SFML ${SOURCE_FILES})
-target_link_libraries(NovelTea-SFML NovelTea sfml-graphics GLESv2)
+target_link_libraries(NovelTea-SFML NovelTea sfml-graphics)
+
+install(TARGETS NovelTea-SFML)
+
+if (NOT ANDROID)
+	add_executable(NovelTeaLauncher ${SRCROOT}/launcher.cpp)
+	target_link_libraries(NovelTeaLauncher NovelTea-SFML)
+endif()

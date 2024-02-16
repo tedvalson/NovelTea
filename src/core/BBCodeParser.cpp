@@ -84,9 +84,11 @@ TweenEngine::TweenEquation* getTweenEquation(const std::string &funcName)
 	return nullptr;
 }
 
-std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags, bool closeTags)
+std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSegment>> &segments, bool shortTags, bool closeTags, bool escapeTags)
 {
 	std::string result;
+	std::string tagOpener = escapeTags ? "[!" : "[";
+	std::string tagCloser = escapeTags ? "[!/" : "[/";
 	std::vector<TextStyle> prevStyles;
 	for (auto &s : segments) {
 		auto diff = getStylesDiff(prevStyles, s->styles);
@@ -97,7 +99,7 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 			// Handle PBreak specially, ignoring "opening" tag
 			if (style.tagName == "p") {
 				if (!p.second) {
-					result += "[p";
+					result += tagOpener + "p";
 					if (!style.params.empty())
 						result += "=" + style.params["delay"];
 					result += "]";
@@ -106,7 +108,7 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 			}
 			// If style is new (ie. opening tag)
 			if (p.second) {
-				result += "["+style.tagName;
+				result += tagOpener + style.tagName;
 				if (!style.params.empty()) {
 					if (style.tagName[0] == 'o') {
 						result += "=" + style.params["id"];
@@ -124,10 +126,20 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 				}
 				result += "]";
 			} else {
-				result += "[/"+style.tagName+"]";
+				result += tagCloser + style.tagName+"]";
 			}
 		}
-		result += s->text;
+
+		// Parse again to find tags, meaning they need to be escaped.
+		// Space is appended as a hack to handle escaped closing tags, eg. "te[!i]st[!/i]"
+		auto segs = makeSegments(s->text + " ");
+		if (segs.size() > 1) {
+			auto s = makeString(segs, shortTags, false, true);
+			s.erase(s.size()-1);
+			result += s;
+		} else
+			result += s->text;
+
 		prevStyles = s->styles;
 	}
 	if (closeTags) {
@@ -136,7 +148,7 @@ std::string BBCodeParser::makeString(const std::vector<std::shared_ptr<StyledSeg
 			auto& tag = style.tagName;
 			if (std::find(closedTags.begin(), closedTags.end(), tag) == closedTags.end()) {
 				closedTags.push_back(tag);
-				result += "[/"+tag+"]";
+				result += tagCloser + tag + "]";
 			}
 		}
 	}

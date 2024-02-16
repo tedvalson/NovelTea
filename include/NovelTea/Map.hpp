@@ -1,25 +1,44 @@
 #ifndef NOVELTEA_MAP_HPP
 #define NOVELTEA_MAP_HPP
 
-#include <SFML/Graphics/Rect.hpp>
 #include <NovelTea/Entity.hpp>
 
 namespace NovelTea
 {
 
+struct IntRect {
+	IntRect(int left, int top, int width, int height)
+		: left(left), top(top), width(width), height(height)
+		{}
+	int left, top, width, height;
+};
+
+struct FloatRect {
+	FloatRect(){}
+	FloatRect(float left, float top, float width, float height)
+		: left(left), top(top), width(width), height(height)
+		{}
+	float left, top, width, height;
+};
+
+struct Vector2i {
+	Vector2i(int x, int y) : x(x), y(y) {}
+	int x, y;
+};
+
 enum class RoomStyle : int {
-	Borderless  = 0,
+	Borderless = 0,
 	SolidBorder = 1,
 	DashedBorder,
 };
 
 enum class ConnectionStyle : int {
-	SolidLine,
+	None = 0,
 };
 
 struct MapRoom {
 	std::string name;
-	sf::IntRect rect;
+	IntRect rect;
 	std::vector<std::string> roomIds;
 	std::string script;
 	RoomStyle style;
@@ -28,8 +47,8 @@ struct MapRoom {
 struct MapConnection {
 	int roomStart;
 	int roomEnd;
-	sf::Vector2i portStart;
-	sf::Vector2i portEnd;
+	Vector2i portStart;
+	Vector2i portEnd;
 	std::string script;
 	ConnectionStyle style;
 };
@@ -46,12 +65,12 @@ public:
 	static constexpr auto id = ID::Map;
 	const std::string entityId() const override { return id; }
 
-	int addRoom(const std::string &name, const sf::IntRect &rect,
+	int addRoom(const std::string &name, const IntRect &rect,
 				const std::vector<std::string> &roomIds,
 				const std::string &script, RoomStyle style);
 	void addConnection(int roomStart, int roomEnd,
-					   const sf::Vector2i &portStart,
-					   const sf::Vector2i &portEnd, const std::string &script,
+					   const Vector2i &portStart,
+					   const Vector2i &portEnd, const std::string &script,
 					   ConnectionStyle style);
 
 	/// Binding for ScriptManager
@@ -69,7 +88,7 @@ public:
 	const SharedVector<MapConnection> &getConnections() const { return m_connections; }
 
 	bool checkForDoor(const MapConnection &connection,
-					  sf::FloatRect &doorRect) const;
+					  FloatRect &doorRect) const;
 
 	ADD_ACCESSOR(std::string, DefaultRoomScript, m_defaultRoomScript)
 	ADD_ACCESSOR(std::string, DefaultPathScript, m_defaultPathScript)

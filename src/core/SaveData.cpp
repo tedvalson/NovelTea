@@ -10,7 +10,6 @@
 #include <NovelTea/Verb.hpp>
 #include <NovelTea/FileUtils.hpp>
 #include <NovelTea/Settings.hpp>
-#include <SFML/System/FileInputStream.hpp>
 #include <fstream>
 #include <iostream>
 

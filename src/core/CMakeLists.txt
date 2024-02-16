@@ -54,12 +54,4 @@ set(SOURCE_FILES
 
 add_library(NovelTea ${SOURCE_FILES})
 
-install(TARGETS NovelTea
-	RUNTIME DESTINATION bin COMPONENT bin
-	LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT bin
-	ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel)
-
-if (NOT ANDROID)
-	add_executable(NovelTeaLauncher ${SRCROOT}/launcher.cpp)
-	target_link_libraries(NovelTeaLauncher NovelTea-SFML)
-endif()
+install(TARGETS NovelTea)

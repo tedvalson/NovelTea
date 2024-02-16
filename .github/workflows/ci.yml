@@ -2,6 +2,10 @@ name: NovelTea CI
 
 on: [push, pull_request]
 
+concurrency:
+  group: "builds"
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -13,11 +17,11 @@ jobs:
         shell: bash
 
     steps:
-    
+
     - name: Checkout
         ls -l ${{ steps.setup-ndk.outputs.ndk-path }}
       uses: actions/checkout@v2
-      
+
     - name: Cache Qt and SFML
       id: cache
       uses: actions/cache@v2
@@ -26,7 +30,7 @@ jobs:
           ${{ github.workspace }}/Qt
           SFML/install
         key: ${{ runner.os }}-NovelTea1
-        
+
     - name: Setup MacOS Environment
       if: ${{ runner.os == 'macOS' }}
       run: |
@@ -41,14 +45,14 @@ jobs:
         unzip hunspell.zip
         echo ::set-output name=include::$(pwd)/hunspell
         echo ::set-output name=library::$(pwd)/hunspell
-        
+
     - name: Setup Linux Environment
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt-get update
         sudo apt-get install libxrandr-dev libudev-dev libxcursor-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libhunspell-dev
         sudo apt-get install doxygen libgtest-dev
-        
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
@@ -72,7 +76,7 @@ jobs:
         cp -r extlibs/libs-osx/Frameworks install/ || true
         cmake -S . -B build -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_INSTALL_FRAMEWORK_PREFIX=./install -DSFML_BUILD_FRAMEWORKS=FALSE -DBUILD_SHARED_LIBS=TRUE -DCMAKE_SKIP_INSTALL_RPATH=FALSE -DCMAKE_INSTALL_RPATH=\$ORIGIN
         cmake --build build --config Release --target install
-        
+
     - name: Compile NovelTea
       run: |
         export CMAKE_LIBRARY_PATH=${{ steps.setup.outputs.include }}
@@ -105,7 +109,7 @@ jobs:
         path: |
           bin/
           res/assets/
-          
+
     - name: Deploy Docs
       uses: JamesIves/github-pages-deploy-action@4.1.7
       if: ${{ runner.os == 'Linux' && github.ref == 'refs/heads/master' }}
@@ -123,10 +127,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Setup JDK 1.8
+    - name: Setup JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: 11
     - name: Setup Android NDK
       uses: nttld/setup-ndk@v1.0.6
       id: setup-ndk

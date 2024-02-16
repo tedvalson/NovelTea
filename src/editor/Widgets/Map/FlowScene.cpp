@@ -46,7 +46,7 @@ std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity(NovelTea::Context *context
 		auto name = node->name().toStdString();
 		auto pos = node->nodeGraphicsObject().pos() - diff;
 		pos /= Node::snapValue;
-		auto rect = sf::IntRect(pos.x(), pos.y(),
+		auto rect = NovelTea::IntRect(pos.x(), pos.y(),
 					node->width() / Node::snapValue,
 					node->height() / Node::snapValue);
 		n[node->id()] = map->addRoom(name, rect, node->getRoomIds(), node->getScript(), node->getStyle());
@@ -60,8 +60,8 @@ std::shared_ptr<NovelTea::Map> FlowScene::toMapEntity(NovelTea::Context *context
 		int endNodeIndex = n[c->getNode(false)->id()];
 		QPoint pStart = c->getPortPoint(true);
 		QPoint pEnd = c->getPortPoint(false);
-		sf::Vector2i startPort(pStart.x(), pStart.y());
-		sf::Vector2i endPort(pEnd.x(), pEnd.y());
+		NovelTea::Vector2i startPort(pStart.x(), pStart.y());
+		NovelTea::Vector2i endPort(pEnd.x(), pEnd.y());
 		map->addConnection(startNodeIndex, endNodeIndex, startPort, endPort, c->getScript(), c->getStyle());
 	}
 	return map;

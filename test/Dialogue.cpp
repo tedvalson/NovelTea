@@ -1,5 +1,5 @@
 #include "Engine.hpp"
-#include <NovelTea/DialogueRenderer.hpp>
+#include <NovelTea/DialoguePlayer.hpp>
 #include <NovelTea/Dialogue.hpp>
 #include <NovelTea/Game.hpp>
 #include <NovelTea/SaveData.hpp>
@@ -10,16 +10,16 @@ using namespace NovelTea;
 class DialogueTest : public EngineTest {
 public:
 	DialogueTest()
-	: dr(getContext())
+	: player(getContext())
 	{
-		
+
 	}
 protected:
 	void loadDialogue(const std::string &idName) {
 		auto dialogue = Proj->get<Dialogue>(idName, getContext());
-		dr.setDialogue(dialogue);
+		player.setDialogue(dialogue);
 	}
-	DialogueRenderer dr;
+	DialoguePlayer player;
 };
 
 TEST_F(DialogueTest, Empty) {

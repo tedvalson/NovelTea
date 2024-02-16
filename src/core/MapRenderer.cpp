@@ -179,7 +179,7 @@ void MapRenderer::setMap(const std::shared_ptr<Map> &map)
 	{
 		auto& rectStart = rooms[conn->roomStart]->rect;
 		auto& rectEnd = rooms[conn->roomEnd]->rect;
-		sf::FloatRect doorRect;
+		FloatRect doorRect;
 
 		if (map->checkForDoor(*conn, doorRect)) {
 			auto shape = new TweenRectangleShape;

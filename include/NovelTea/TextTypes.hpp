@@ -3,6 +3,7 @@
 
 #include <TweenEngine/TweenEquations.h>
 #include <cstdint>
+#include <string>
 #include <map>
 
 namespace NovelTea

@@ -4,6 +4,7 @@
 #include "EditorTabWidget.hpp"
 #include <QWidget>
 #include <NovelTea/json.hpp>
+#include <SFML/Graphics/Shader.hpp>
 
 namespace Ui {
 class ShaderWidget;
@@ -48,7 +49,7 @@ private:
 	std::string makeTextureName(const std::string &textureName);
 	bool addTextureToList(const std::string &textureData, const std::string &textureName);
 	bool isVertexShader(const std::string &script);
-	void updateErrorLog();
+	bool updateErrorLog();
 	void updatePropertyList(const sj::JSON *uniformArray = nullptr);
 	void updatePreview();
 	void saveCurrentShaderId() const;
@@ -65,6 +66,7 @@ private:
 	std::map<std::string, std::string> m_texturesData;
 	QString m_lastSelectedTextureName;
 
+	sf::Shader m_shader;
 	mutable sj::JSON m_shaders;
 	std::string m_currentShaderId;
 	bool m_shaderChanged;

@@ -5,6 +5,7 @@
 #include <NovelTea/Err.hpp>
 #include <NovelTea/json.hpp>
 #include <memory>
+#include <functional>
 
 #define CTX        getContext()
 #define GSys(x)    CTX->getSubsystem<x>()

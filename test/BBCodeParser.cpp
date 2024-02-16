@@ -24,6 +24,7 @@ TEST(BBCodeParser, Conversion) {
 	testConversion("[i]te[i]st[/i]1", "[i]test1");
 	testConversion("[i]te[p]st");
 	testConversion("[i]te[p=1]st");
+	testConversion("te[!i]st");
 	testConversion("te[!i]st[!/i]");
 }
 
